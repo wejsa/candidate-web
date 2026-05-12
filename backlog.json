@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 14,
+    "version": 15,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T20:43:09+09:00"
+    "updatedAt": "2026-05-12T20:44:00+09:00"
   },
   "summary": {
     "total": 29,
@@ -226,13 +226,72 @@
       "priority": "critical",
       "phase": 1,
       "assignee": "wejsa-u@hoji-20260512-204309",
-      "assignedAt": "2026-05-12T20:43:09+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-12T20:44:00+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "lib/crypto/aes-gcm.ts",
+        "lib/pii/mask.ts",
+        "lib/env.ts",
+        ".env.example",
+        "vitest.config.ts",
+        "package.json",
+        "tests/lib/crypto/aes-gcm.test.ts",
+        "tests/lib/pii/mask.test.ts",
+        "prisma/schema.prisma",
+        "lib/prisma/extends.ts",
+        "lib/prisma.ts",
+        "tests/lib/prisma/extends.test.ts",
+        "README.md"
+      ],
       "dependencies": [
         "CANDID-002"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-12T20:44:00+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "AES-256-GCM 모듈 + 마스킹 헬퍼 + Vitest 셋업 + 단위 테스트",
+          "description": "lib/crypto/aes-gcm.ts (encrypt/decrypt), lib/pii/mask.ts (maskPhone, maskBirthDate), lib/env.ts에서 PII_ENCRYPTION_KEY를 required로 격상, Vitest 설정 + 단위 테스트. DB/Prisma 변경 없음.",
+          "status": "pending",
+          "files": [
+            "lib/crypto/aes-gcm.ts",
+            "lib/pii/mask.ts",
+            "lib/env.ts",
+            ".env.example",
+            "vitest.config.ts",
+            "package.json",
+            "tests/lib/crypto/aes-gcm.test.ts",
+            "tests/lib/pii/mask.test.ts"
+          ],
+          "estimatedLines": 270
+        },
+        {
+          "number": 2,
+          "title": "Prisma $extends 후크 + 스키마(Bytes + key_version) + 마이그레이션 + 통합 테스트",
+          "description": "User.phone/birthDate를 Bytes로 변경 + phone_key_version/birth_date_key_version SMALLINT 추가. lib/prisma/extends.ts에서 $extends client extension으로 자동 암복호화. dev-only 단일 마이그레이션 (운영 데이터 없음). README에 PII handling 섹션 추가.",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations/{ts}_candid_008_pii_encryption/migration.sql",
+            "lib/prisma/extends.ts",
+            "lib/prisma.ts",
+            "tests/lib/prisma/extends.test.ts",
+            "README.md"
+          ],
+          "estimatedLines": 230
+        }
+      ],
+      "currentStep": 1,
+      "specFile": "docs/sample-requirement.md",
+      "updatedAt": "2026-05-12T20:44:00+09:00"
     },
     "CANDID-009": {
       "id": "CANDID-009",
