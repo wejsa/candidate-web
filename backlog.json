@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 11,
+    "version": 12,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T20:12:00+09:00"
+    "updatedAt": "2026-05-12T20:20:00+09:00"
   },
   "summary": {
     "total": 29,
@@ -138,32 +138,36 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260512-200625",
-      "assignedAt": "2026-05-12T20:12:00+09:00",
+      "assignedAt": "2026-05-12T20:20:00+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "prisma/schema.prisma",
-        "prisma/migrations/"
+        "prisma/migrations/",
+        ".prettierignore"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 3,
         "fixLoopCount": null,
-        "updatedAt": "2026-05-12T20:12:00+09:00"
+        "updatedAt": "2026-05-12T20:20:00+09:00"
       },
-      "updatedAt": "2026-05-12T20:12:00+09:00",
+      "updatedAt": "2026-05-12T20:20:00+09:00",
       "steps": [
         {
           "number": 1,
           "title": "인증 도메인 4 모델 + 첫 Prisma migration",
           "description": "users + auth_providers + email_verifications + password_reset_tokens 4 모델 정의 + PostgreSQL enum(UserStatus/AuthProviderType) + 첫 실제 migration. prisma format/validate/typecheck/lint/format/build 모두 통과. docker compose up + migrate dev는 사용자 검증.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "prisma/schema.prisma",
-            "prisma/migrations/{timestamp}_candid-003-auth-domain/migration.sql"
+            "prisma/migrations/20260512201200_candid_003_auth_domain/migration.sql",
+            "prisma/migrations/migration_lock.toml",
+            ".prettierignore"
           ],
           "estimatedLines": 85,
-          "prLineLimit": 150
+          "prLineLimit": 150,
+          "prNumber": 3
         }
       ],
       "currentStep": 1,
