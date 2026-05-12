@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 1,
+    "version": 2,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T18:22:05+09:00"
+    "updatedAt": "2026-05-12T18:48:34+09:00"
   },
   "summary": {
     "total": 29,
     "done": 0,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 29
+    "todo": 28
   },
   "phases": {
     "1": {
@@ -40,12 +40,24 @@
       "id": "CANDID-001",
       "title": "Next.js 14 App Router 프로젝트 셋업 + TS/ESLint/Prettier",
       "description": "Next.js 14 App Router 기반 풀스택 프로젝트 골격 생성. TypeScript strict, ESLint, Prettier, tsconfig path alias, 환경 변수 로딩(zod 권장).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 1,
+      "assignee": "jaese@hoji-20260512-184834",
+      "assignedAt": "2026-05-12T18:48:34+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "dependencies": [],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": null,
+        "updatedAt": "2026-05-12T18:48:34+09:00"
+      },
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "updatedAt": "2026-05-12T18:48:34+09:00"
     },
     "CANDID-002": {
       "id": "CANDID-002",
