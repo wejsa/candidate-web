@@ -17,7 +17,11 @@ CLAUDE.md
 README.md
 project.json
 backlog.json
+completed.json
 VERSION
+
+# Prisma migration SQL — Prisma가 자동 생성, 수동 포맷 금지
+prisma/migrations
 
 # 원본 PRD/요구사항 — 원문 보존
 docs
