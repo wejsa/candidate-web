@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 18,
+    "version": 19,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T21:08:30+09:00"
+    "updatedAt": "2026-05-12T21:18:00+09:00"
   },
   "summary": {
     "total": 29,
@@ -226,13 +226,18 @@
       "priority": "critical",
       "phase": 1,
       "assignee": "wejsa-u@hoji-20260512-204309",
-      "assignedAt": "2026-05-12T21:08:30+09:00",
+      "assignedAt": "2026-05-12T21:18:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
+        "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",
         "lib/prisma/extends.ts",
         "lib/prisma.ts",
+        "lib/crypto/aes-gcm.ts",
+        "lib/pii/mask.ts",
         "tests/lib/prisma/extends.test.ts",
+        "tests/lib/crypto/aes-gcm.test.ts",
+        "tests/setup.ts",
         "README.md"
       ],
       "dependencies": [
@@ -240,13 +245,14 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 5,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "step1ReviewFollowups": ["H001-env-ssot", "H002-key-version", "H003-pii-mask-fallback-policy", "H004-invalid-date", "H005-toThrow-message", "H007-prod-key-leak", "H008-cache-reset"],
-        "updatedAt": "2026-05-12T21:08:30+09:00"
+        "autoChainArgs": "5 --auto-fix",
+        "step1ReviewFollowupsAddressed": ["H001-env-ssot", "H002-key-version", "H004-invalid-date", "H005-toThrow-message", "H007-prod-key-leak", "H008-cache-reset", "M001-key-length-leak"],
+        "step1ReviewFollowupsDeferred": ["H003-pii-mask-fallback-policy"],
+        "updatedAt": "2026-05-12T21:18:00+09:00"
       },
       "steps": [
         {
@@ -274,23 +280,30 @@
         },
         {
           "number": 2,
-          "title": "Prisma $extends 후크 + 스키마(Bytes + key_version) + 마이그레이션 + 통합 테스트",
-          "description": "User.phone/birthDate를 Bytes로 변경 + phone_key_version/birth_date_key_version SMALLINT 추가. lib/prisma/extends.ts에서 $extends client extension으로 자동 암복호화. dev-only 단일 마이그레이션 (운영 데이터 없음). README에 PII handling 섹션 추가.",
-          "status": "pending",
+          "title": "Prisma $extends 후크 + 스키마(Bytes + key_version) + 마이그레이션 + Step 1 리뷰 보강",
+          "description": "User.phone/birthDate를 Bytes로 변경 + phone_key_version/birth_date_key_version SMALLINT 추가. lib/prisma/extends.ts에서 $extends client extension으로 자동 암복호화. encryptUserPiiInput 명시 헬퍼. dev-only 단일 마이그레이션 (운영 데이터 없음). README에 PII handling 섹션 추가. + review MAJOR 7건 fix 커밋 포함 (H001/H002/H004/H005/H007/H008 + M001).",
+          "status": "pr_created",
+          "prNumber": 5,
+          "branch": "feature/CANDID-008-step2",
           "files": [
             "prisma/schema.prisma",
-            "prisma/migrations/{ts}_candid_008_pii_encryption/migration.sql",
+            "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",
             "lib/prisma/extends.ts",
             "lib/prisma.ts",
+            "lib/crypto/aes-gcm.ts",
+            "lib/pii/mask.ts",
             "tests/lib/prisma/extends.test.ts",
+            "tests/lib/crypto/aes-gcm.test.ts",
+            "tests/setup.ts",
             "README.md"
           ],
-          "estimatedLines": 230
+          "estimatedLines": 230,
+          "actualLines": 395
         }
       ],
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
-      "updatedAt": "2026-05-12T21:08:30+09:00"
+      "updatedAt": "2026-05-12T21:18:00+09:00"
     },
     "CANDID-009": {
       "id": "CANDID-009",
