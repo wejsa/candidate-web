@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 8,
+    "version": 9,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T19:45:00+09:00"
+    "updatedAt": "2026-05-12T20:00:00+09:00"
   },
   "summary": {
     "total": 29,
-    "done": 1,
-    "inProgress": 1,
+    "done": 2,
+    "inProgress": 0,
     "review": 0,
     "todo": 27
   },
@@ -86,31 +86,22 @@
       "id": "CANDID-002",
       "title": "PostgreSQL + Prisma ORM 셋업 + 마이그레이션 골격",
       "description": "PostgreSQL 연결 + Prisma 또는 Drizzle ORM 도입. docker-compose db 서비스, 마이그레이션 명령(prisma migrate dev) 골격, seed 스크립트 셋업.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260512-192026",
-      "assignedAt": "2026-05-12T19:45:00+09:00",
-      "lockTTL": 10800,
-      "lockedFiles": [
-        "prisma/schema.prisma",
-        "prisma/seed.ts",
-        "lib/prisma.ts",
-        "lib/env.ts",
-        ".env.example",
-        "package.json",
-        "docker-compose.yml",
-        ".dockerignore",
-        "README.md"
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
+      "dependencies": [
+        "CANDID-001"
       ],
-      "dependencies": ["CANDID-001"],
       "steps": [
         {
           "number": 1,
           "title": "Prisma 6 + PG16 + singleton + docker-compose + DATABASE_URL 격상",
-          "description": "단일 PR: schema.prisma 빈 model 골격 + lib/prisma.ts singleton(server-only) + docker-compose db + seed 골격 + DATABASE_URL required 격상 + Prisma scripts. pnpm install/build/typecheck/lint/format 모두 통과. docker compose up은 환경 의존(머지 후 사용자 검증).",
-          "status": "pr_created",
+          "description": "단일 PR: schema.prisma 빈 model 골격 + lib/prisma.ts singleton(server-only) + docker-compose db + seed 골격 + DATABASE_URL required 격상 + Prisma scripts. + review MAJOR 6건 fix 커밋 포함 (H001/H002/H003/H004/H007 + M005).",
+          "status": "merged",
           "files": [
             "prisma/schema.prisma",
             "prisma/seed.ts",
@@ -123,20 +114,16 @@
             "README.md"
           ],
           "estimatedLines": 170,
-          "prNumber": 2
+          "prNumber": 2,
+          "mergedAt": "2026-05-12T20:00:10+09:00"
         }
       ],
       "currentStep": 1,
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 2,
-        "fixLoopCount": null,
-        "updatedAt": "2026-05-12T19:45:00+09:00"
-      },
+      "workflowState": null,
       "specFile": "docs/sample-requirement.md",
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-12T19:30:00+09:00"
+      "updatedAt": "2026-05-12T20:00:00+09:00",
+      "completedAt": "2026-05-12T20:00:00+09:00"
     },
     "CANDID-003": {
       "id": "CANDID-003",
@@ -146,7 +133,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "dependencies": ["CANDID-002"],
+      "dependencies": [
+        "CANDID-002"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-004": {
@@ -157,7 +146,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "dependencies": ["CANDID-002"],
+      "dependencies": [
+        "CANDID-002"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-005": {
@@ -168,7 +159,10 @@
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "dependencies": ["CANDID-003", "CANDID-004"],
+      "dependencies": [
+        "CANDID-003",
+        "CANDID-004"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-006": {
@@ -179,7 +173,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "dependencies": ["CANDID-003"],
+      "dependencies": [
+        "CANDID-003"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-007": {
@@ -190,7 +186,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "dependencies": ["CANDID-001"],
+      "dependencies": [
+        "CANDID-001"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-008": {
@@ -201,7 +199,9 @@
       "type": "feature",
       "priority": "critical",
       "phase": 1,
-      "dependencies": ["CANDID-002"],
+      "dependencies": [
+        "CANDID-002"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-009": {
@@ -212,7 +212,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "dependencies": ["CANDID-006"],
+      "dependencies": [
+        "CANDID-006"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-010": {
@@ -223,7 +225,11 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-003", "CANDID-007", "CANDID-009"],
+      "dependencies": [
+        "CANDID-003",
+        "CANDID-007",
+        "CANDID-009"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-011": {
@@ -234,7 +240,10 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-006", "CANDID-009"],
+      "dependencies": [
+        "CANDID-006",
+        "CANDID-009"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-012": {
@@ -245,7 +254,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-006"],
+      "dependencies": [
+        "CANDID-006"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-013": {
@@ -256,7 +267,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-004"],
+      "dependencies": [
+        "CANDID-004"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-014": {
@@ -267,7 +280,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-013"],
+      "dependencies": [
+        "CANDID-013"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-015": {
@@ -278,7 +293,11 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-005", "CANDID-008", "CANDID-014"],
+      "dependencies": [
+        "CANDID-005",
+        "CANDID-008",
+        "CANDID-014"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-016": {
@@ -289,7 +308,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-015"],
+      "dependencies": [
+        "CANDID-015"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-017": {
@@ -300,7 +321,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-015"],
+      "dependencies": [
+        "CANDID-015"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-018": {
@@ -311,7 +334,11 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-015", "CANDID-016", "CANDID-017"],
+      "dependencies": [
+        "CANDID-015",
+        "CANDID-016",
+        "CANDID-017"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-019": {
@@ -322,7 +349,9 @@
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "dependencies": ["CANDID-018"],
+      "dependencies": [
+        "CANDID-018"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-020": {
@@ -333,7 +362,9 @@
       "type": "feature",
       "priority": "medium",
       "phase": 3,
-      "dependencies": ["CANDID-010"],
+      "dependencies": [
+        "CANDID-010"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-021": {
@@ -344,7 +375,9 @@
       "type": "feature",
       "priority": "medium",
       "phase": 3,
-      "dependencies": ["CANDID-011"],
+      "dependencies": [
+        "CANDID-011"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-022": {
@@ -355,7 +388,10 @@
       "type": "feature",
       "priority": "critical",
       "phase": 3,
-      "dependencies": ["CANDID-008", "CANDID-018"],
+      "dependencies": [
+        "CANDID-008",
+        "CANDID-018"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-023": {
@@ -366,7 +402,9 @@
       "type": "feature",
       "priority": "medium",
       "phase": 3,
-      "dependencies": ["CANDID-019"],
+      "dependencies": [
+        "CANDID-019"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-024": {
@@ -377,7 +415,9 @@
       "type": "feature",
       "priority": "medium",
       "phase": 3,
-      "dependencies": ["CANDID-008"],
+      "dependencies": [
+        "CANDID-008"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-025": {
@@ -388,7 +428,9 @@
       "type": "feature",
       "priority": "medium",
       "phase": 3,
-      "dependencies": ["CANDID-014"],
+      "dependencies": [
+        "CANDID-014"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-026": {
@@ -399,7 +441,10 @@
       "type": "feature",
       "priority": "low",
       "phase": 4,
-      "dependencies": ["CANDID-005", "CANDID-018"],
+      "dependencies": [
+        "CANDID-005",
+        "CANDID-018"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-027": {
@@ -410,7 +455,9 @@
       "type": "feature",
       "priority": "low",
       "phase": 4,
-      "dependencies": ["CANDID-007"],
+      "dependencies": [
+        "CANDID-007"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-028": {
@@ -421,7 +468,9 @@
       "type": "feature",
       "priority": "low",
       "phase": 4,
-      "dependencies": ["CANDID-019"],
+      "dependencies": [
+        "CANDID-019"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
     "CANDID-029": {
@@ -432,7 +481,9 @@
       "type": "feature",
       "priority": "low",
       "phase": 4,
-      "dependencies": ["CANDID-016"],
+      "dependencies": [
+        "CANDID-016"
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     }
   }

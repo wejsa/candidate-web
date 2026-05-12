@@ -1,11 +1,40 @@
 {
   "metadata": {
-    "version": 1,
+    "version": 2,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-12T19:10:00+09:00"
+    "updatedAt": "2026-05-12T20:00:00+09:00"
   },
   "tasks": {
+    "CANDID-002": {
+      "id": "CANDID-002",
+      "title": "PostgreSQL + Prisma ORM 셋업 + 마이그레이션 골격",
+      "phase": 1,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-12T20:00:00+09:00",
+      "assignee": "jaese@hoji-20260512-192026",
+      "prs": [
+        {
+          "number": 2,
+          "title": "feat: CANDID-002 Step 1 - Prisma 6 + PostgreSQL 16 + singleton + docker-compose + DATABASE_URL required",
+          "mergedAt": "2026-05-12T20:00:10+09:00",
+          "additions": 169,
+          "deletions": 15,
+          "note": "pnpm-lock.yaml 581줄 자동 생성 제외. 본 PR 중 fix 커밋 1건 (5f0fc72) 포함 — review MAJOR H001/H002/H003/H004/H007 + M005 즉시 반영"
+        }
+      ],
+      "stepCount": 1,
+      "reviewSummary": {
+        "mode": "full",
+        "critical": 0,
+        "major": 7,
+        "minor": 9,
+        "decision": "COMMENT (self-PR) + 본 PR fix 6건",
+        "fixedInPR": ["H001 query log opt-in", "H002 127.0.0.1 바인딩", "H003 CHANGE_ME placeholder", "H004 server-only 0.0.1 핀", "H007 seed.ts server-only 제거", "M005 zod refine"],
+        "deferred": ["H005 테스트 인프라 (CANDID-001b 신설 권장)", "H006 seed main() export (CANDID-004 시점)", "MINOR 8건 후속 정정"]
+      }
+    },
     "CANDID-001": {
       "id": "CANDID-001",
       "title": "Next.js 14 App Router 프로젝트 셋업 + TS/ESLint/Prettier",
