@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 3,
+    "version": 4,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-12T20:25:00+09:00"
+    "updatedAt": "2026-05-12T21:26:00+09:00"
   },
   "tasks": {
     "CANDID-002": {
@@ -72,6 +72,68 @@
         "minor": 10,
         "decision": "COMMENT (self-PR)",
         "note": "MAJOR 6건은 후속 task로 이관 (H001 server-only, H002 next CVE, H003 eager validate, H004 cache reset, H005 CI 자동화, H006 .gitignore 확인됨)"
+      }
+    },
+    "CANDID-008": {
+      "id": "CANDID-008",
+      "title": "PII 컬럼 암호화 (AES-256-GCM: phone, birth_date) + 응답 마스킹",
+      "phase": 1,
+      "priority": "critical",
+      "type": "feature",
+      "completedAt": "2026-05-12T21:26:00+09:00",
+      "assignee": "wejsa-u@hoji-20260512-204309",
+      "prs": [
+        {
+          "number": 4,
+          "title": "feat: CANDID-008 Step 1 - PII 암호화 코어 모듈 + 마스킹 헬퍼 + Vitest 셋업",
+          "mergedAt": "2026-05-12T21:07:09+09:00",
+          "additions": 1378,
+          "deletions": 15,
+          "note": "pnpm-lock.yaml 1056줄(vitest devDep) 제외. Step 1은 lib/crypto + lib/pii + Vitest 인프라 + 35 테스트 케이스 도입."
+        },
+        {
+          "number": 5,
+          "title": "feat: CANDID-008 Step 2 - Prisma $extends + 스키마(Bytes + key_version) + 마이그레이션 + Step 1 리뷰 보강",
+          "mergedAt": "2026-05-12T21:25:54+09:00",
+          "additions": 394,
+          "deletions": 52,
+          "note": "Prisma 통합 + Step 1 review MAJOR 7건 fix 커밋 포함 (H001/H002/H004/H005/H007/H008 + M001). 56/56 테스트 통과, 커버리지 100%."
+        }
+      ],
+      "stepCount": 2,
+      "reviewSummary": {
+        "step1": {
+          "mode": "full",
+          "critical": 0,
+          "major": 8,
+          "minor": 6,
+          "decision": "COMMENT (self-PR)",
+          "fixedInStep2": [
+            "H001 env SSOT 우회 → getEnv()",
+            "H002 키 버전 컬럼 추가 (storage 결합은 follow-up)",
+            "H004 maskBirthDate Date.UTC normalize",
+            "H005 toThrow 메시지 정규식 매칭",
+            "H007 tests/setup.ts ??= → =",
+            "H008 __resetCachedKeyForTesting export",
+            "M001 키 길이 정보 노출 제거"
+          ],
+          "deferred": [
+            "H003 PRD 미정의 마스킹 fallback 정책 (정책 결정 필요)"
+          ]
+        },
+        "step2": {
+          "mode": "full",
+          "critical": 0,
+          "major": 10,
+          "minor": 7,
+          "decision": "COMMENT (self-PR) — follow-up task로 이관",
+          "deferred": [
+            "FU1: migration COUNT(*) 가드 + 키 버전-payload 결합 + env reset 헬퍼 + 입력 정규화 + mask H004 회귀 테스트",
+            "FU2: $queryRaw 가드 (ESLint + CLAUDE.md) + 응답 마스킹 강제 (branded type 또는 zod transform) + write 런타임 가드",
+            "FU3: piiExtension 통합 테스트 (testcontainer/sqlite) + plan.md 시나리오 0/5 보강",
+            "FU4: docs/security/pii-encryption.md 작성 (README/migration.sql이 참조 중)"
+          ]
+        }
       }
     },
     "CANDID-003": {

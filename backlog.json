@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 20,
+    "version": 21,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T21:25:00+09:00"
+    "updatedAt": "2026-05-12T21:26:00+09:00"
   },
   "summary": {
     "total": 29,
-    "done": 3,
-    "inProgress": 1,
+    "done": 4,
+    "inProgress": 0,
     "review": 0,
     "todo": 25
   },
@@ -221,47 +221,19 @@
       "id": "CANDID-008",
       "title": "PII 컬럼 암호화 (AES-256-GCM: phone, birth_date) + 응답 마스킹",
       "description": "AES-256-GCM 컬럼 암호화 모듈. phone/birth_date 저장 시 암호화, 응답 시 마스킹(010-****-1234). 키는 환경 변수/KMS 주입. 로깅 마스킹 필터 적용.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "critical",
       "phase": 1,
-      "assignee": "wejsa-u@hoji-20260512-204309",
-      "assignedAt": "2026-05-12T21:18:00+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "prisma/schema.prisma",
-        "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",
-        "lib/prisma/extends.ts",
-        "lib/prisma.ts",
-        "lib/crypto/aes-gcm.ts",
-        "lib/pii/mask.ts",
-        "tests/lib/prisma/extends.test.ts",
-        "tests/lib/crypto/aes-gcm.test.ts",
-        "tests/setup.ts",
-        "README.md"
-      ],
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-002"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 5,
-        "fixLoopCount": 0,
-        "autoChainArgs": "5",
-        "step1ReviewFollowupsAddressed": ["H001-env-ssot", "H002-key-version", "H004-invalid-date", "H005-toThrow-message", "H007-prod-key-leak", "H008-cache-reset", "M001-key-length-leak"],
-        "step1ReviewFollowupsDeferred": ["H003-pii-mask-fallback-policy"],
-        "step2ReviewDecision": "APPROVED_WITH_FOLLOWUP",
-        "step2ReviewCounts": { "critical": 0, "major": 10, "minor": 7, "info": 5 },
-        "step2ReviewFollowups": {
-          "FU1-priority": ["migration-guard", "key-version-binding", "env-reset-helper", "input-normalization", "mask-regression-tests"],
-          "FU2-defense-in-depth": ["queryRaw-guard", "response-masking-enforcement", "write-runtime-guard"],
-          "FU3-tests": ["piiExtension-integration", "mask-h004-regression"],
-          "FU4-docs": ["pii-encryption-runbook"]
-        },
-        "updatedAt": "2026-05-12T21:25:00+09:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
@@ -290,8 +262,9 @@
           "number": 2,
           "title": "Prisma $extends 후크 + 스키마(Bytes + key_version) + 마이그레이션 + Step 1 리뷰 보강",
           "description": "User.phone/birthDate를 Bytes로 변경 + phone_key_version/birth_date_key_version SMALLINT 추가. lib/prisma/extends.ts에서 $extends client extension으로 자동 암복호화. encryptUserPiiInput 명시 헬퍼. dev-only 단일 마이그레이션 (운영 데이터 없음). README에 PII handling 섹션 추가. + review MAJOR 7건 fix 커밋 포함 (H001/H002/H004/H005/H007/H008 + M001).",
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 5,
+          "mergedAt": "2026-05-12T21:25:54+09:00",
           "branch": "feature/CANDID-008-step2",
           "files": [
             "prisma/schema.prisma",
@@ -311,7 +284,8 @@
       ],
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
-      "updatedAt": "2026-05-12T21:18:00+09:00"
+      "updatedAt": "2026-05-12T21:26:00+09:00",
+      "completedAt": "2026-05-12T21:26:00+09:00"
     },
     "CANDID-009": {
       "id": "CANDID-009",
