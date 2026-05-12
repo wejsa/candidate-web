@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 9,
+    "version": 10,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T20:00:00+09:00"
+    "updatedAt": "2026-05-12T20:06:25+09:00"
   },
   "summary": {
     "total": 29,
     "done": 2,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 27
+    "todo": 26
   },
   "phases": {
     "1": {
@@ -129,14 +129,26 @@
       "id": "CANDID-003",
       "title": "DB 스키마: users + auth_providers + email_verification + password_reset_token",
       "description": "인증 도메인 4개 테이블 + 인덱스(idx_users_email, idx_users_status, UNIQUE(provider, provider_user_id)). status/locked_until/failed_login_count 필드 포함.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 1,
       "dependencies": [
         "CANDID-002"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "jaese@hoji-20260512-200625",
+      "assignedAt": "2026-05-12T20:06:25+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": null,
+        "updatedAt": "2026-05-12T20:06:25+09:00"
+      },
+      "updatedAt": "2026-05-12T20:06:25+09:00"
     },
     "CANDID-004": {
       "id": "CANDID-004",
