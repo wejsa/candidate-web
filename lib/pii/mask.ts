@@ -34,7 +34,28 @@ export function maskBirthDate(birthDate: string | Date | null | undefined): stri
     isoString = birthDate;
   }
 
-  const match = isoString.match(/^(\d{4})-\d{2}-\d{2}/);
-  if (!match) return null;
-  return `${match[1]}-**-**`;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoString);
+  if (m === null) return null;
+  const yearStr = m[1];
+  const monthStr = m[2];
+  const dayStr = m[3];
+  if (yearStr === undefined || monthStr === undefined || dayStr === undefined) {
+    return null;
+  }
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+
+  // CANDID-030 D5/H004: 무효 날짜(예: 1995-13-99, 2026-02-30) 차단 —
+  // Date.UTC가 normalize한 결과가 입력과 일치해야 통과.
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() + 1 !== month ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+  return `${yearStr}-**-**`;
 }

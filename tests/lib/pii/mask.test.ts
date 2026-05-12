@@ -80,3 +80,25 @@ describe('maskBirthDate', () => {
     expect(maskBirthDate(new Date('invalid'))).toBeNull();
   });
 });
+
+// CANDID-030 D5: H004 회귀 케이스 — Date.UTC normalize 로직 검증.
+// 정규식만 매칭하던 이전 로직이라면 통과되었을 무효 날짜들이 모두 null이 되어야 함.
+describe('maskBirthDate — 무효 날짜 회귀 (H004 fix)', () => {
+  it.each([
+    ['invalid month 1995-13-99', '1995-13-99'],
+    ['invalid day 2026-02-30', '2026-02-30'],
+    ['non-leap year 2023-02-29', '2023-02-29'],
+    ['invalid day 31 in April 2026-04-31', '2026-04-31'],
+    ['invalid month 00 in 2026-00-15', '2026-00-15'],
+  ])('returns null for normalize-invalid: %s', (_label, input) => {
+    expect(maskBirthDate(input)).toBeNull();
+  });
+
+  it('accepts leap year 2000-02-29', () => {
+    expect(maskBirthDate('2000-02-29')).toBe('2000-**-**');
+  });
+
+  it('accepts last day of month 2026-01-31', () => {
+    expect(maskBirthDate('2026-01-31')).toBe('2026-**-**');
+  });
+});

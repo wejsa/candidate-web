@@ -64,3 +64,16 @@ export function requireEnv<K extends keyof Env>(key: K): NonNullable<Env[K]> {
   }
   return value as NonNullable<Env[K]>;
 }
+
+/**
+ * 테스트 전용 — env 캐시 초기화 (CANDID-030 D3).
+ * 키 회전 또는 process.env 변경 후 재로드가 필요한 테스트에서 사용.
+ * production에서 호출되면 throw — 운영 안전 가드.
+ * @internal
+ */
+export function __resetCachedEnvForTesting(): void {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('__resetCachedEnvForTesting must not be called in production');
+  }
+  cached = null;
+}

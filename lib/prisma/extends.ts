@@ -2,14 +2,13 @@ import 'server-only';
 import { Prisma } from '@prisma/client';
 import { decryptPii, encryptPii } from '@/lib/crypto/aes-gcm';
 
-// CANDID-008 — Prisma client extension.
+// CANDID-008 — Prisma client extension. CANDID-030 (FU1)에서 보강.
 // 읽기: result extension이 User.phone / User.birthDate를 자동 복호화 (Bytes → string).
-// 쓰기: encryptUserPiiInput 헬퍼를 명시 호출하여 string → Bytes 변환 후 prisma에 전달.
-//       (query extension은 args 타입을 Bytes로 고정하므로 string 입력은 타입 충돌.
-//        명시 헬퍼가 더 안전한 패턴.)
+//       phone_key_version / birth_date_key_version 컬럼도 needs에 포함 — 향후 v2 키 분기 준비.
+// 쓰기: encryptUserPiiInput 헬퍼를 명시 호출. 내부에서 입력 정규화(D4) + 키 버전 atomic 결합(D2).
 
 /**
- * 현재 운영 중인 PII 암호화 키 버전. 키 회전 도입 시 마이그레이션을 거쳐 증가.
+ * 현재 운영 중인 PII 암호화 키 버전. v2 도입 시 별도 key-provider 모듈로 분기.
  * v1: env PII_ENCRYPTION_KEY 단일 키.
  */
 export const PII_KEY_VERSION = 1;
@@ -18,20 +17,44 @@ function toBuffer(value: Uint8Array): Buffer {
   return Buffer.isBuffer(value) ? value : Buffer.from(value);
 }
 
-// 명시적으로 export하여 단위 테스트가 piiExtension의 내부 구조에 의존하지 않도록 함.
-// (Prisma.defineExtension의 반환 형태는 버전에 따라 wrap될 수 있음.)
-export function computeDecryptedPhone(user: { phone: Uint8Array | null }): string | null {
+/**
+ * D2: ciphertext와 keyVersion을 atomic 반환 — 키 회전 race 차단.
+ * 호출자가 두 값을 별도 set하는 경로(키 swap 시점 차이)를 원천 차단한다.
+ * 본 wrapper는 encryptUserPiiInput 내부에서 사용하지만, raw query 등 우회 경로에서도 활용 가능.
+ */
+export function encryptPiiWithVersion(plaintext: string): {
+  ciphertext: Buffer;
+  keyVersion: number;
+} {
+  return {
+    ciphertext: encryptPii(plaintext),
+    keyVersion: PII_KEY_VERSION,
+  };
+}
+
+// 명시 export하여 단위 테스트가 piiExtension의 내부 구조에 의존하지 않도록 함.
+// CANDID-030 (D2): keyVersion 컬럼을 needs에 추가했으므로 compute 시그니처도 함께 확장.
+// v1은 단일 키 — v1이 아닌 row를 만나면 GCM auth 실패로 자연 차단.
+export function computeDecryptedPhone(user: {
+  phone: Uint8Array | null;
+  phoneKeyVersion: number | null;
+}): string | null {
   if (user.phone === null) return null;
+  // 향후 v2 도입 시 user.phoneKeyVersion 기반 keyResolver로 분기.
   return decryptPii(toBuffer(user.phone));
 }
 
-export function computeDecryptedBirthDate(user: { birthDate: Uint8Array | null }): string | null {
+export function computeDecryptedBirthDate(user: {
+  birthDate: Uint8Array | null;
+  birthDateKeyVersion: number | null;
+}): string | null {
   if (user.birthDate === null) return null;
   return decryptPii(toBuffer(user.birthDate));
 }
 
 /**
  * Prisma User 모델의 phone/birthDate 컬럼을 자동 복호화하는 result extension.
+ * needs에 *_key_version 컬럼을 포함하여 키 회전 분기 시 시그니처 안정성 보장.
  *
  * 사용 예:
  *   const user = await prisma.user.findUnique({ where: { id } });
@@ -42,16 +65,58 @@ export const piiExtension = Prisma.defineExtension({
   result: {
     user: {
       phone: {
-        needs: { phone: true },
+        needs: { phone: true, phoneKeyVersion: true },
         compute: computeDecryptedPhone,
       },
       birthDate: {
-        needs: { birthDate: true },
+        needs: { birthDate: true, birthDateKeyVersion: true },
         compute: computeDecryptedBirthDate,
       },
     },
   },
 });
+
+/**
+ * D4: 전화번호 정규화 — 숫자만 추출하여 9~11자리 검증. 잘못된 입력은 throw.
+ * `'010-1234-5678'` → `'01012345678'`, `'+82-10-1234-5678'` → `'821012345678'` (X, 12자리 throw).
+ */
+export function normalizePhone(input: string): string {
+  const digits = input.replace(/[^0-9]/g, '');
+  if (digits.length < 9 || digits.length > 11) {
+    throw new Error(`phone must contain 9~11 digits after normalization (got ${digits.length})`);
+  }
+  return digits;
+}
+
+/**
+ * D4: 생년월일 정규화 — YYYY-MM-DD 형식 + Date.UTC normalize 검증. 잘못된 입력은 throw.
+ * `'1995-13-99'` → throw, `'2000-02-29'` (윤년) → `'2000-02-29'`, `'2023-02-29'` (비윤년) → throw.
+ */
+export function normalizeBirthDate(input: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);
+  if (m === null) {
+    throw new Error('birthDate must match YYYY-MM-DD');
+  }
+  const yearStr = m[1];
+  const monthStr = m[2];
+  const dayStr = m[3];
+  if (yearStr === undefined || monthStr === undefined || dayStr === undefined) {
+    throw new Error('birthDate regex match invalid');
+  }
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() + 1 !== month ||
+    date.getUTCDate() !== day
+  ) {
+    throw new Error(`birthDate is not a valid calendar date: ${input}`);
+  }
+  return `${yearStr}-${monthStr}-${dayStr}`;
+}
 
 export type UserPiiPlaintextInput = {
   phone?: string | null;
@@ -72,12 +137,13 @@ export type UserPiiEncryptedInput = {
  *     data: {
  *       email: 'foo@bar.com',
  *       name: 'foo',
- *       ...encryptUserPiiInput({ phone: '01012345678', birthDate: '1995-03-15' }),
+ *       ...encryptUserPiiInput({ phone: '010-1234-5678', birthDate: '1995-03-15' }),
  *     },
  *   });
  *
- * 입력 필드가 명시되지 않으면 결과에도 포함하지 않아 partial update를 지원한다.
- * null을 전달하면 컬럼을 NULL로 설정.
+ * D4: 입력 정규화 — 잘못된 phone/birthDate는 throw (API serializer 레이어 zod 검증으로 가로채는 패턴 권장).
+ * D2: ciphertext + key_version atomic set — 키 회전 race 차단.
+ * 필드 미명시 시 결과에도 포함되지 않아 partial update 지원. null 전달 시 컬럼 NULL.
  */
 export function encryptUserPiiInput(input: UserPiiPlaintextInput): UserPiiEncryptedInput {
   const result: UserPiiEncryptedInput = {};
@@ -86,8 +152,10 @@ export function encryptUserPiiInput(input: UserPiiPlaintextInput): UserPiiEncryp
     if (input.phone === null || input.phone === undefined) {
       result.phone = null;
     } else {
-      result.phone = encryptPii(input.phone);
-      result.phoneKeyVersion = PII_KEY_VERSION;
+      const normalized = normalizePhone(input.phone);
+      const { ciphertext, keyVersion } = encryptPiiWithVersion(normalized);
+      result.phone = ciphertext;
+      result.phoneKeyVersion = keyVersion;
     }
   }
 
@@ -95,8 +163,10 @@ export function encryptUserPiiInput(input: UserPiiPlaintextInput): UserPiiEncryp
     if (input.birthDate === null || input.birthDate === undefined) {
       result.birthDate = null;
     } else {
-      result.birthDate = encryptPii(input.birthDate);
-      result.birthDateKeyVersion = PII_KEY_VERSION;
+      const normalized = normalizeBirthDate(input.birthDate);
+      const { ciphertext, keyVersion } = encryptPiiWithVersion(normalized);
+      result.birthDate = ciphertext;
+      result.birthDateKeyVersion = keyVersion;
     }
   }
 
