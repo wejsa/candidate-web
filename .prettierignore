@@ -1,0 +1,23 @@
+node_modules
+.next
+out
+build
+coverage
+next-env.d.ts
+
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# AI Crew Kit 프레임워크 자산 — 손대지 않음
+.claude
+
+# 프로젝트 메타 (별도 컨벤션 task에서 일괄 정리)
+CLAUDE.md
+README.md
+project.json
+backlog.json
+VERSION
+
+# 원본 PRD/요구사항 — 원문 보존
+docs

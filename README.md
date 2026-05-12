@@ -46,6 +46,34 @@
 
 ## 시작하기
 
+### 개발 환경 셋업
+
+```bash
+# Node 버전 (.nvmrc 기준)
+nvm use   # 또는 nvm install $(cat .nvmrc)
+
+# 패키지 매니저 (pnpm)
+corepack enable           # Node 16.10+ 권장
+corepack prepare pnpm@9.15.0 --activate
+
+# 의존성 설치
+pnpm install
+
+# 환경 변수 (본 task에서는 모두 optional)
+cp .env.example .env.local
+
+# 개발 서버 (http://localhost:3000)
+pnpm dev
+
+# 빌드 / 테스트 / 린트
+pnpm build
+pnpm typecheck
+pnpm lint
+pnpm format:check
+```
+
+### Claude Code 워크플로우
+
 ```bash
 # Claude Code 실행
 claude
