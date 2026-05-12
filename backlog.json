@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 25,
+    "version": 26,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T23:20:00+09:00"
+    "updatedAt": "2026-05-12T23:30:00+09:00"
   },
   "summary": {
     "total": 33,
@@ -595,13 +595,21 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 6,
         "fixLoopCount": 0,
-        "autoChainArgs": "6 --auto-fix",
+        "autoChainArgs": "6",
+        "reviewDecision": "APPROVED_WITH_FOLLOWUP",
+        "reviewCounts": { "critical": 0, "major": 12, "minor": 8, "info": 3 },
+        "reviewFollowups": {
+          "high-priority": ["S1-plaintext-pii-throw-message", "T1-production-guard-tests", "T2-cross-module-consistency", "D4-calendar-helper-extract"],
+          "defense-in-depth": ["A1-basePrisma-bypass", "A2-encryptPii-bypass", "D3-br-pii-05-contract"],
+          "documentation": ["A3-migration-hash-table", "A4-rollback-contract"],
+          "future-v2": ["A5-unsupported-keyversion", "D1-mask-normalize-asymmetry", "D2-country-code-policy"]
+        },
         "note": "Step 2에서 누락되었던 mask.ts H004 fix도 본 PR에서 함께 적용 (lib/pii/mask.ts에 Date.UTC normalize 추가).",
-        "updatedAt": "2026-05-12T23:20:00+09:00"
+        "updatedAt": "2026-05-12T23:30:00+09:00"
       },
       "steps": [
         {
