@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 22,
+    "version": 23,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T21:35:00+09:00"
+    "updatedAt": "2026-05-12T23:06:35+09:00"
   },
   "summary": {
     "total": 33,
     "done": 4,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 29
+    "todo": 28
   },
   "phases": {
     "1": {
@@ -573,10 +573,14 @@
       "id": "CANDID-030",
       "title": "CANDID-008 FU1: 마이그레이션 운영 가드 + 키 버전 결합 + env reset + 입력 정규화 + mask 회귀 테스트",
       "description": "CANDID-008 Step 2 review MAJOR 5건 묶음 (D1+D2+D3+D4+D5). (1) prisma/migrations/.../migration.sql에 `COUNT(*) > 0 RAISE EXCEPTION` guard 추가 — 운영 destructive 마이그레이션 차단. (2) lib/prisma/extends.ts에 `encryptPiiWithVersion()` 도입 — 키와 keyVersion atomic 반환으로 race 차단. compute 함수가 phoneKeyVersion 컬럼 참조하도록 needs 확장. (3) lib/env.ts에 `__resetCachedEnvForTesting()` 추가 + tests afterEach에 호출. (4) encryptUserPiiInput에 normalizePhone/normalizeBirthDate (Date.UTC normalize) 통합 — 잘못된 평문 저장 차단. (5) tests/lib/pii/mask.test.ts에 H004 회귀 케이스 추가 (1995-13-99, 2026-02-30, 윤년 2000-02-29). 자세한 내용 docs/retro/CANDID-008-retro.md 참조.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "bug",
       "priority": "high",
       "phase": 1,
+      "assignee": "wejsa-u@hoji-20260512-230635",
+      "assignedAt": "2026-05-12T23:06:35+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-008"
       ],
