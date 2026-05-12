@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 13,
+    "version": 14,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T20:25:00+09:00"
+    "updatedAt": "2026-05-12T20:43:09+09:00"
   },
   "summary": {
     "total": 29,
     "done": 3,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 26
+    "todo": 25
   },
   "phases": {
     "1": {
@@ -221,10 +221,14 @@
       "id": "CANDID-008",
       "title": "PII 컬럼 암호화 (AES-256-GCM: phone, birth_date) + 응답 마스킹",
       "description": "AES-256-GCM 컬럼 암호화 모듈. phone/birth_date 저장 시 암호화, 응답 시 마스킹(010-****-1234). 키는 환경 변수/KMS 주입. 로깅 마스킹 필터 적용.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "critical",
       "phase": 1,
+      "assignee": "wejsa-u@hoji-20260512-204309",
+      "assignedAt": "2026-05-12T20:43:09+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-002"
       ],
