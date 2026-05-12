@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: candidate-web-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: candidate_web
+      POSTGRES_USER: candidate
+      POSTGRES_PASSWORD: candidate
+    ports:
+      # localhost 전용 바인딩 — 동일 LAN(공용 Wi-Fi 등)에서 dev DB 접근 차단.
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U candidate -d candidate_web']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
