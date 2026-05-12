@@ -18,10 +18,9 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32).optional(),
   JWT_REFRESH_SECRET: z.string().min(32).optional(),
 
-  PII_ENCRYPTION_KEY: z
-    .string()
-    .regex(/^[0-9a-fA-F]{64}$/, 'must be 64-char hex (32 bytes)')
-    .optional(),
+  // CANDID-008에서 required로 격상 — 부팅 시 키 없으면 차단 (BR-PII-01).
+  // `openssl rand -hex 32`로 생성. AES-256-GCM 키 (32 bytes).
+  PII_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, 'must be 64-char hex (32 bytes)'),
 
   GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
