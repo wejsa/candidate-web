@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "lastTaskNumber": 29,
+    "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 21,
+    "version": 22,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T21:26:00+09:00"
+    "updatedAt": "2026-05-12T21:35:00+09:00"
   },
   "summary": {
-    "total": 29,
+    "total": 33,
     "done": 4,
     "inProgress": 0,
     "review": 0,
-    "todo": 25
+    "todo": 29
   },
   "phases": {
     "1": {
@@ -568,6 +568,62 @@
         "CANDID-016"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-030": {
+      "id": "CANDID-030",
+      "title": "CANDID-008 FU1: 마이그레이션 운영 가드 + 키 버전 결합 + env reset + 입력 정규화 + mask 회귀 테스트",
+      "description": "CANDID-008 Step 2 review MAJOR 5건 묶음 (D1+D2+D3+D4+D5). (1) prisma/migrations/.../migration.sql에 `COUNT(*) > 0 RAISE EXCEPTION` guard 추가 — 운영 destructive 마이그레이션 차단. (2) lib/prisma/extends.ts에 `encryptPiiWithVersion()` 도입 — 키와 keyVersion atomic 반환으로 race 차단. compute 함수가 phoneKeyVersion 컬럼 참조하도록 needs 확장. (3) lib/env.ts에 `__resetCachedEnvForTesting()` 추가 + tests afterEach에 호출. (4) encryptUserPiiInput에 normalizePhone/normalizeBirthDate (Date.UTC normalize) 통합 — 잘못된 평문 저장 차단. (5) tests/lib/pii/mask.test.ts에 H004 회귀 케이스 추가 (1995-13-99, 2026-02-30, 윤년 2000-02-29). 자세한 내용 docs/retro/CANDID-008-retro.md 참조.",
+      "status": "todo",
+      "type": "bug",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": [
+        "CANDID-008"
+      ],
+      "createdAt": "2026-05-12T21:35:00+09:00",
+      "specFile": "docs/retro/CANDID-008-retro.md"
+    },
+    "CANDID-031": {
+      "id": "CANDID-031",
+      "title": "CANDID-008 FU2: PII 방어 깊이 강화 ($queryRaw 가드 + 응답 마스킹 강제 + write 런타임 가드)",
+      "description": "CANDID-008 Step 2 review MAJOR 3건 묶음 (D6+D7+D8). (1) ESLint custom rule `no-restricted-syntax`로 `$queryRaw`/`$executeRaw` 사용 시 경고 + CLAUDE.md 보안 강제 사항에 'encryptUserPiiInput 의무 / raw 시 decryptUserPiiField 직접 호출' 1줄 추가. (2) lib/pii/serializer.ts에 zod transform 기반 userPublicSchema 도입 — `Response.json(user)` 직접 호출 차단을 위한 branded type 또는 DTO mapper. (3) lib/prisma/extends.ts에 query.user.$allOperations 런타임 가드 추가 — string phone/birthDate 입력 시 throw (방어 깊이). + 통합 테스트 1건: string 평문 입력 시 throw 검증.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": [
+        "CANDID-008"
+      ],
+      "createdAt": "2026-05-12T21:35:00+09:00",
+      "specFile": "docs/retro/CANDID-008-retro.md"
+    },
+    "CANDID-032": {
+      "id": "CANDID-032",
+      "title": "CANDID-008 FU3: piiExtension 실제 PrismaClient 통합 테스트 + plan 시나리오 보강",
+      "description": "CANDID-008 Step 2 review MAJOR D9. CANDID-008 plan.md의 통합 테스트 시나리오 0/5 반영률 보강. testcontainer (PostgreSQL) 또는 SQLite + Prisma 메모리 모드로 실제 prisma.user.create({ data: { ...encryptUserPiiInput(...) } }) → findUnique roundtrip 검증. needs 누락 / 컬럼명 오타 같은 result extension 등록 회귀를 차단. updateMany 시나리오 + raw query 우회 경로 negative test 포함. vitest.config.ts coverage exclude를 좁히거나 lib/prisma.ts smoke test 추가하여 100% 커버리지 통계의 안전성 보강 (L-005).",
+      "status": "todo",
+      "type": "chore",
+      "priority": "medium",
+      "phase": 1,
+      "dependencies": [
+        "CANDID-008"
+      ],
+      "createdAt": "2026-05-12T21:35:00+09:00",
+      "specFile": "docs/retro/CANDID-008-retro.md"
+    },
+    "CANDID-033": {
+      "id": "CANDID-033",
+      "title": "CANDID-008 FU4: docs/security/pii-encryption.md SSOT 문서 작성",
+      "description": "CANDID-008 Step 2 review MAJOR D10. README + migration.sql이 참조 중인 `docs/security/pii-encryption.md` 파일이 존재하지 않음 → broken reference 해소. 포함 내용: AES-256-GCM 알고리즘 사양, [iv 12B][tag 16B][ciphertext] 포맷, encryptPii/decryptPii API, *_key_version 컬럼 의미, 키 회전 SOP (4단계 무중단 M1~M4), 사고 대응 (키 유출 시 즉시 회전 절차), 컴플라이언스 매핑 (개인정보보호법 / GDPR Art. 32). docs/architecture/pii-data-flow.md (시퀀스 다이어그램)도 함께 검토.",
+      "status": "todo",
+      "type": "chore",
+      "priority": "medium",
+      "phase": 1,
+      "dependencies": [
+        "CANDID-008"
+      ],
+      "createdAt": "2026-05-12T21:35:00+09:00",
+      "specFile": "docs/retro/CANDID-008-retro.md"
     }
   }
 }
