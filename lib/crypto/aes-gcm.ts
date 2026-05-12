@@ -56,10 +56,15 @@ export function decryptPii(packed: Buffer, key?: Buffer): string {
 }
 
 /**
- * 테스트 전용 — `getEnv()` 캐시와 본 모듈의 키 캐시를 무효화.
+ * 테스트 전용 — 본 모듈의 키 캐시를 무효화.
  * 키 회전 또는 env 변경 테스트에서 사용 (H008 fix).
+ * env 캐시까지 함께 초기화하려면 lib/env.ts의 __resetCachedEnvForTesting()도 호출 필요.
+ * production에서 호출되면 throw — 운영 안전 가드 (CANDID-030).
  * @internal
  */
 export function __resetCachedKeyForTesting(): void {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('__resetCachedKeyForTesting must not be called in production');
+  }
   cachedKey = undefined;
 }

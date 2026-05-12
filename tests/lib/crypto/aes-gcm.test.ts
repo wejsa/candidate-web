@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { __resetCachedEnvForTesting } from '@/lib/env';
 import {
   __resetCachedKeyForTesting,
   decryptPii,
@@ -12,8 +13,10 @@ const KEY_A = Buffer.alloc(KEY_LENGTH, 0xaa);
 const KEY_B = Buffer.alloc(KEY_LENGTH, 0xbb);
 
 // H008 fix: 키 회전 테스트 케이스를 위해 매 테스트 후 캐시 초기화.
+// CANDID-030 D3: env 캐시도 함께 초기화 — 키 회전 회귀 false-positive 차단.
 afterEach(() => {
   __resetCachedKeyForTesting();
+  __resetCachedEnvForTesting();
 });
 
 describe('encryptPii / decryptPii — roundtrip', () => {
