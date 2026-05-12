@@ -68,3 +68,35 @@
 [^1]: PostgreSQL: `CREATE INDEX CONCURRENTLY` · MySQL 8.0+: 온라인 DDL 디폴트(`ALGORITHM=INPLACE, LOCK=NONE`) · MongoDB: `db.collection.createIndex({...}, {background: true})` (4.0+ 기본 동작).
 
 > 위험한 DDL(대용량 테이블 ALTER, DROP, RENAME, FK 추가)은 영향 분석 + 롤백 계획 필수.
+
+### Destructive migration guard (PostgreSQL)
+
+Dev-only destructive 마이그레이션(`DROP COLUMN`, `TYPE` 변경 등)은 SQL 본문 상단에 **운영 데이터 존재 시 fail-safe로 차단하는 guard**를 동반해야 한다. 단순 주석(`-- dev-only`)만으로는 `prisma migrate deploy` / `flyway migrate` 등이 환경 구분 없이 적용해 운영 데이터가 영구 소실될 수 있다.
+
+```sql
+-- Guard: <table>에 데이터가 1건이라도 있으면 마이그레이션 차단 (운영 적용 방지).
+DO $$
+BEGIN
+  IF (SELECT COUNT(*) FROM "users") > 0 THEN
+    RAISE EXCEPTION 'destructive migration aborted: users 테이블에 % rows 존재. 무중단 절차(M1~M4)로 전환하세요.',
+      (SELECT COUNT(*) FROM "users");
+  END IF;
+END $$;
+
+ALTER TABLE "users"
+  DROP COLUMN "old_col",
+  ADD COLUMN "new_col" BYTEA;
+```
+
+| 대상 변경 | guard 필요 여부 |
+|----------|:--------------:|
+| `DROP COLUMN` | ✅ |
+| 컬럼 `TYPE` 변경 (호환 불가) | ✅ |
+| `DROP TABLE` | ✅ |
+| `RENAME COLUMN` / `RENAME TABLE` | ⚠ 권장 |
+| 컬럼 추가 (NULL 허용) | ❌ |
+| 인덱스 추가/삭제 | ❌ |
+
+**MySQL/MariaDB**에서는 `SIGNAL SQLSTATE` + procedural block 또는 별도 사전 검증 스크립트를 사용한다. MongoDB는 destructive migration 개념이 다르므로 적용 안 함.
+
+> **출처**: CANDID-008 회고 (docs/retro/CANDID-008-retro.md, A5).

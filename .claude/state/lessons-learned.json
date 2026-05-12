@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "version": 1,
+    "updatedAt": "2026-05-12T21:30:00+09:00",
+    "schemaVersion": "1.0.0"
+  },
+  "lessons": [
+    {
+      "id": "L-001",
+      "taskId": "CANDID-008",
+      "category": "security",
+      "title": "Destructive 마이그레이션 SQL에 COUNT(*) > 0 guard 동반",
+      "description": "DROP COLUMN / TYPE 변경 등 destructive ALTER 마이그레이션은 SQL 본문 상단에 `DO $$ BEGIN IF (SELECT COUNT(*) FROM <table>) > 0 THEN RAISE EXCEPTION '...' END $$;` guard를 동반해야 한다. `prisma migrate deploy`는 환경을 구분하지 않으므로 dev 주석만으로는 운영 적용 차단에 부족하다. _base/conventions/database.md에 패턴 반영됨.",
+      "impact": "high",
+      "tags": ["migration", "postgres", "destructive", "guard", "operational-safety"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-12T21:30:00+09:00",
+      "updatedAt": "2026-05-12T21:30:00+09:00"
+    },
+    {
+      "id": "L-002",
+      "taskId": "CANDID-008",
+      "category": "architecture",
+      "title": "모듈 스코프 캐시는 __resetCachedXForTesting helper 동반 export",
+      "description": "`getEnv()`, `getDefaultKey()`처럼 module-level 변수에 캐싱하는 함수는 처음부터 testing-only reset helper를 export해야 한다. CANDID-008에서 aes-gcm.ts는 `__resetCachedKeyForTesting()`을 가졌으나 env.ts의 cached 변수는 reset 없음 → 키 회전 회귀 테스트 false-positive 위험. 캐시 도입 시점에 함께 추가가 비용이 가장 낮다.",
+      "impact": "medium",
+      "tags": ["testing", "cache", "module-state", "regression"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-12T21:30:00+09:00",
+      "updatedAt": "2026-05-12T21:30:00+09:00"
+    },
+    {
+      "id": "L-003",
+      "taskId": "CANDID-008",
+      "category": "quality",
+      "title": "Prisma $extends result.compute는 명시 export하여 단위 테스트",
+      "description": "`Prisma.defineExtension`의 반환 구조는 Prisma 버전에 따라 wrap될 수 있어 `(piiExtension as any).result?.user?.phone?.compute` 같은 접근은 깨질 수 있다. result extension의 compute 로직은 별도 named function으로 추출 후 export하고, 단위 테스트는 명시 함수를 직접 호출한다. extension 등록 자체는 별도 통합 테스트(testcontainer/sqlite)로 검증한다.",
+      "impact": "medium",
+      "tags": ["prisma", "extends", "testing", "unit-test-design"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-12T21:30:00+09:00",
+      "updatedAt": "2026-05-12T21:30:00+09:00"
+    },
+    {
+      "id": "L-004",
+      "taskId": "CANDID-008",
+      "category": "process",
+      "title": "Self-PR + CRITICAL=0 + MAJOR 다수 → 다음 Step PR에 fix 번들",
+      "description": "Self-PR이면 framework가 자동 APPROVE 처리하므로 MAJORs는 deferred된다. 다음 step PR commit message에 'review MAJOR N건 fix 포함 (H001/.../M001)' 명시로 follow-up 추적 가능. 마지막 step에서 발견된 MAJORs는 별도 follow-up task(FU1~FUN)로 backlog 등록 필요. CANDID-002에서 검증된 precedent, CANDID-008에서 재확인.",
+      "impact": "high",
+      "tags": ["workflow", "review", "follow-up", "self-pr"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-12T21:30:00+09:00",
+      "updatedAt": "2026-05-12T21:30:00+09:00"
+    },
+    {
+      "id": "L-005",
+      "taskId": "CANDID-008",
+      "category": "quality",
+      "title": "Coverage exclude는 wiring 코드를 숨겨 100% 통계 안전성 오인",
+      "description": "`vitest.config.ts` `coverage.exclude`에서 boot/wiring 모듈(`lib/env.ts`, `lib/prisma.ts`)을 제외하면 100% 커버리지 통계가 실제 통합 안전성을 보장하지 않는다. CANDID-008에서 `prisma.$extends(piiExtension)` 라인이 100% 통계에서 빠진 채 단위 테스트만 100% 도달. exclude 사유를 주석화하고 별도 smoke test(예: `prisma + basePrisma export 검증` 1라인 테스트)를 동반한다.",
+      "impact": "medium",
+      "tags": ["coverage", "testing", "vitest", "integration-test"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-12T21:30:00+09:00",
+      "updatedAt": "2026-05-12T21:30:00+09:00"
+    }
+  ]
+}
