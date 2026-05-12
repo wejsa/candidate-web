@@ -1,4 +1,6 @@
-import 'server-only';
+// 'server-only' import는 의도적으로 제외: 본 파일은 Node CLI(`tsx prisma/seed.ts`)
+// 컨텍스트에서 실행되며, 'server-only'는 Next.js RSC client bundle 감지용 가드라
+// CLI에서 적용 시 향후 빌드 환경 변화에 따라 throw 가능성. RSC 가드는 lib/prisma.ts만 유지.
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
