@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 19,
+    "version": 20,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T21:18:00+09:00"
+    "updatedAt": "2026-05-12T21:25:00+09:00"
   },
   "summary": {
     "total": 29,
@@ -245,14 +245,22 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 5,
         "fixLoopCount": 0,
-        "autoChainArgs": "5 --auto-fix",
+        "autoChainArgs": "5",
         "step1ReviewFollowupsAddressed": ["H001-env-ssot", "H002-key-version", "H004-invalid-date", "H005-toThrow-message", "H007-prod-key-leak", "H008-cache-reset", "M001-key-length-leak"],
         "step1ReviewFollowupsDeferred": ["H003-pii-mask-fallback-policy"],
-        "updatedAt": "2026-05-12T21:18:00+09:00"
+        "step2ReviewDecision": "APPROVED_WITH_FOLLOWUP",
+        "step2ReviewCounts": { "critical": 0, "major": 10, "minor": 7, "info": 5 },
+        "step2ReviewFollowups": {
+          "FU1-priority": ["migration-guard", "key-version-binding", "env-reset-helper", "input-normalization", "mask-regression-tests"],
+          "FU2-defense-in-depth": ["queryRaw-guard", "response-masking-enforcement", "write-runtime-guard"],
+          "FU3-tests": ["piiExtension-integration", "mask-h004-regression"],
+          "FU4-docs": ["pii-encryption-runbook"]
+        },
+        "updatedAt": "2026-05-12T21:25:00+09:00"
       },
       "steps": [
         {
