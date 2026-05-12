@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 3,
+    "version": 4,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T18:53:00+09:00"
+    "updatedAt": "2026-05-12T19:10:00+09:00"
   },
   "summary": {
     "total": 29,
@@ -45,7 +45,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260512-184834",
-      "assignedAt": "2026-05-12T18:53:00+09:00",
+      "assignedAt": "2026-05-12T19:10:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "package.json",
@@ -69,7 +69,7 @@
           "number": 1,
           "title": "Next.js 14 골격 + TS strict + ESLint/Prettier + zod 환경 변수",
           "description": "단일 PR에 골격 + 진입점 + smoke 검증 통합. typecheck/lint/build 통과 + curl http://localhost:3000 200 확인.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "package.json",
             "tsconfig.json",
@@ -86,20 +86,21 @@
             ".env.example",
             "README.md"
           ],
-          "estimatedLines": 250
+          "estimatedLines": 250,
+          "prNumber": 1
         }
       ],
       "currentStep": 1,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 1,
         "fixLoopCount": null,
-        "updatedAt": "2026-05-12T18:53:00+09:00"
+        "updatedAt": "2026-05-12T19:10:00+09:00"
       },
       "specFile": "docs/sample-requirement.md",
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-12T18:53:00+09:00"
+      "updatedAt": "2026-05-12T19:10:00+09:00"
     },
     "CANDID-002": {
       "id": "CANDID-002",
