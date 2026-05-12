@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 4,
+    "version": 5,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-05-12T19:10:00+09:00"
   },
   "summary": {
     "total": 29,
-    "done": 0,
-    "inProgress": 1,
+    "done": 1,
+    "inProgress": 0,
     "review": 0,
     "todo": 28
   },
@@ -17,7 +17,7 @@
     "1": {
       "name": "기반/인프라",
       "description": "Next.js + PostgreSQL/Prisma 셋업, DB 스키마, 인증 미들웨어, PII 암호화, 보안 가드(Rate Limit/CSRF/CORS/XSS)",
-      "status": "todo"
+      "status": "in_progress"
     },
     "2": {
       "name": "핵심 도메인",
@@ -40,36 +40,20 @@
       "id": "CANDID-001",
       "title": "Next.js 14 App Router 프로젝트 셋업 + TS/ESLint/Prettier",
       "description": "Next.js 14 App Router 기반 풀스택 프로젝트 골격 생성. TypeScript strict, ESLint, Prettier, tsconfig path alias, 환경 변수 로딩(zod 권장).",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260512-184834",
-      "assignedAt": "2026-05-12T19:10:00+09:00",
-      "lockTTL": 10800,
-      "lockedFiles": [
-        "package.json",
-        "tsconfig.json",
-        "next.config.mjs",
-        ".eslintrc.json",
-        ".prettierrc.json",
-        ".prettierignore",
-        ".editorconfig",
-        ".nvmrc",
-        "app/layout.tsx",
-        "app/page.tsx",
-        "app/globals.css",
-        "lib/env.ts",
-        ".env.example",
-        "README.md"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [],
       "steps": [
         {
           "number": 1,
           "title": "Next.js 14 골격 + TS strict + ESLint/Prettier + zod 환경 변수",
           "description": "단일 PR에 골격 + 진입점 + smoke 검증 통합. typecheck/lint/build 통과 + curl http://localhost:3000 200 확인.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "package.json",
             "tsconfig.json",
@@ -87,20 +71,16 @@
             "README.md"
           ],
           "estimatedLines": 250,
-          "prNumber": 1
+          "prNumber": 1,
+          "mergedAt": "2026-05-12T19:08:24+09:00"
         }
       ],
       "currentStep": 1,
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 1,
-        "fixLoopCount": null,
-        "updatedAt": "2026-05-12T19:10:00+09:00"
-      },
+      "workflowState": null,
       "specFile": "docs/sample-requirement.md",
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-12T19:10:00+09:00"
+      "updatedAt": "2026-05-12T19:10:00+09:00",
+      "completedAt": "2026-05-12T19:10:00+09:00"
     },
     "CANDID-002": {
       "id": "CANDID-002",

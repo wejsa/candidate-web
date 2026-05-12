@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "version": 1,
+    "projectPrefix": "CANDID",
+    "createdAt": "2026-05-12T19:10:00+09:00",
+    "updatedAt": "2026-05-12T19:10:00+09:00"
+  },
+  "tasks": {
+    "CANDID-001": {
+      "id": "CANDID-001",
+      "title": "Next.js 14 App Router 프로젝트 셋업 + TS/ESLint/Prettier",
+      "phase": 1,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-12T19:10:00+09:00",
+      "assignee": "jaese@hoji-20260512-184834",
+      "prs": [
+        {
+          "number": 1,
+          "title": "feat: CANDID-001 Step 1 - Next.js 14 셋업 + TS strict + ESLint/Prettier + zod 환경 변수",
+          "mergedAt": "2026-05-12T19:08:24+09:00",
+          "additions": 358,
+          "deletions": 12,
+          "note": "pnpm-lock.yaml 3364줄 자동 생성 제외"
+        }
+      ],
+      "stepCount": 1,
+      "reviewSummary": {
+        "mode": "full",
+        "critical": 0,
+        "major": 6,
+        "minor": 10,
+        "decision": "COMMENT (self-PR)",
+        "note": "MAJOR 6건은 후속 task로 이관 (H001 server-only, H002 next CVE, H003 eager validate, H004 cache reset, H005 CI 자동화, H006 .gitignore 확인됨)"
+      }
+    }
+  }
+}
