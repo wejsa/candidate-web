@@ -21,7 +21,87 @@ generator client {
 }
 
 // === CANDID-003: 인증 도메인 ===
-// 작성 위치 자리
+// PRD §3.3.1, §3.3.2 + US-AUTH-001~004 기반.
+// 주의: phone, birth_date는 CANDID-008에서 $extends 후크로 AES-256-GCM 암호화 예정.
+//       본 task 머지 후 CANDID-008 머지 전까지는 PII 평문 저장 — PHASE-1 완료 전 운영 진입 금지.
+
+enum UserStatus {
+  ACTIVE
+  LOCKED
+  WITHDRAWN
+}
+
+enum AuthProviderType {
+  GOOGLE
+  GITHUB
+}
+
+model User {
+  id               Int        @id @default(autoincrement())
+  email            String     @unique @db.VarChar(255)
+  passwordHash     String?    @map("password_hash") @db.VarChar(255)
+  name             String     @db.VarChar(100)
+  phone            String?    @db.VarChar(20)
+  birthDate        DateTime?  @map("birth_date") @db.Date
+  emailVerifiedAt  DateTime?  @map("email_verified_at")
+  status           UserStatus @default(ACTIVE)
+  failedLoginCount Int        @default(0) @map("failed_login_count")
+  lockedUntil      DateTime?  @map("locked_until")
+  withdrawnAt      DateTime?  @map("withdrawn_at")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  authProviders       AuthProvider[]
+  emailVerifications  EmailVerification[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([status], map: "idx_users_status")
+  @@map("users")
+}
+
+model AuthProvider {
+  id              Int              @id @default(autoincrement())
+  userId          Int              @map("user_id")
+  provider        AuthProviderType
+  providerUserId  String           @map("provider_user_id") @db.VarChar(255)
+  profileImageUrl String?          @map("profile_image_url") @db.VarChar(500)
+  linkedAt        DateTime         @default(now()) @map("linked_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId], map: "uk_auth_providers_provider_pid")
+  @@unique([userId, provider], map: "uk_auth_providers_user_provider")
+  @@map("auth_providers")
+}
+
+model EmailVerification {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @map("user_id")
+  token      String    @unique @db.VarChar(255)
+  expiresAt  DateTime  @map("expires_at") // 24h 후 (US-AUTH-001)
+  consumedAt DateTime? @map("consumed_at")
+  lastSentAt DateTime  @default(now()) @map("last_sent_at") // 60s 재발송 쿨다운 enforcement (PRD 외 추가)
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_email_verifications_user")
+  @@map("email_verifications")
+}
+
+model PasswordResetToken {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @map("user_id")
+  token      String    @unique @db.VarChar(255)
+  expiresAt  DateTime  @map("expires_at") // 30분 후, 일회용 (US-AUTH-004)
+  consumedAt DateTime? @map("consumed_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_password_reset_tokens_user")
+  @@map("password_reset_tokens")
+}
 
 // === CANDID-004: 공고 조회 ===
 // 작성 위치 자리
