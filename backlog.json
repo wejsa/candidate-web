@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 26,
+    "version": 27,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T23:30:00+09:00"
+    "updatedAt": "2026-05-12T23:27:00+09:00"
   },
   "summary": {
     "total": 33,
-    "done": 4,
-    "inProgress": 1,
+    "done": 5,
+    "inProgress": 0,
     "review": 0,
     "todo": 28
   },
@@ -573,51 +573,29 @@
       "id": "CANDID-030",
       "title": "CANDID-008 FU1: 마이그레이션 운영 가드 + 키 버전 결합 + env reset + 입력 정규화 + mask 회귀 테스트",
       "description": "CANDID-008 Step 2 review MAJOR 5건 묶음 (D1+D2+D3+D4+D5). (1) prisma/migrations/.../migration.sql에 `COUNT(*) > 0 RAISE EXCEPTION` guard 추가 — 운영 destructive 마이그레이션 차단. (2) lib/prisma/extends.ts에 `encryptPiiWithVersion()` 도입 — 키와 keyVersion atomic 반환으로 race 차단. compute 함수가 phoneKeyVersion 컬럼 참조하도록 needs 확장. (3) lib/env.ts에 `__resetCachedEnvForTesting()` 추가 + tests afterEach에 호출. (4) encryptUserPiiInput에 normalizePhone/normalizeBirthDate (Date.UTC normalize) 통합 — 잘못된 평문 저장 차단. (5) tests/lib/pii/mask.test.ts에 H004 회귀 케이스 추가 (1995-13-99, 2026-02-30, 윤년 2000-02-29). 자세한 내용 docs/retro/CANDID-008-retro.md 참조.",
-      "status": "in_progress",
+      "status": "done",
       "type": "bug",
       "priority": "high",
       "phase": 1,
-      "assignee": "wejsa-u@hoji-20260512-230635",
-      "assignedAt": "2026-05-12T23:08:00+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 7200,
-      "lockedFiles": [
-        "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",
-        "lib/env.ts",
-        "lib/prisma/extends.ts",
-        "tests/lib/crypto/aes-gcm.test.ts",
-        "tests/lib/pii/mask.test.ts",
-        "tests/lib/prisma/extends.test.ts",
-        "README.md"
-      ],
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T21:35:00+09:00",
+      "completedAt": "2026-05-12T23:27:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 6,
-        "fixLoopCount": 0,
-        "autoChainArgs": "6",
-        "reviewDecision": "APPROVED_WITH_FOLLOWUP",
-        "reviewCounts": { "critical": 0, "major": 12, "minor": 8, "info": 3 },
-        "reviewFollowups": {
-          "high-priority": ["S1-plaintext-pii-throw-message", "T1-production-guard-tests", "T2-cross-module-consistency", "D4-calendar-helper-extract"],
-          "defense-in-depth": ["A1-basePrisma-bypass", "A2-encryptPii-bypass", "D3-br-pii-05-contract"],
-          "documentation": ["A3-migration-hash-table", "A4-rollback-contract"],
-          "future-v2": ["A5-unsupported-keyversion", "D1-mask-normalize-asymmetry", "D2-country-code-policy"]
-        },
-        "note": "Step 2에서 누락되었던 mask.ts H004 fix도 본 PR에서 함께 적용 (lib/pii/mask.ts에 Date.UTC normalize 추가).",
-        "updatedAt": "2026-05-12T23:30:00+09:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
           "title": "D1+D2+D3+D4+D5 통합 fix",
           "description": "CANDID-008 Step 2 review MAJOR 5건 통합 처리. D1: migration.sql DO 블록 guard. D2: encryptPiiWithVersion + compute needs 확장. D3: lib/env.ts __resetCachedEnvForTesting + production 가드. D4: encryptUserPiiInput에 normalizePhone/normalizeBirthDate 통합 (throw on invalid). D5: lib/pii/mask.ts에 Date.UTC normalize 적용 + 회귀 케이스 7건 추가.",
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 6,
+          "mergedAt": "2026-05-12T23:26:56+09:00",
           "branch": "feature/CANDID-030-step1",
           "files": [
             "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",

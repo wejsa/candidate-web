@@ -1,11 +1,63 @@
 {
   "metadata": {
-    "version": 4,
+    "version": 5,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-12T21:26:00+09:00"
+    "updatedAt": "2026-05-12T23:27:00+09:00"
   },
   "tasks": {
+    "CANDID-030": {
+      "id": "CANDID-030",
+      "title": "CANDID-008 FU1: 마이그레이션 운영 가드 + 키 버전 결합 + env reset + 입력 정규화 + mask 회귀 테스트",
+      "phase": 1,
+      "priority": "high",
+      "type": "bug",
+      "completedAt": "2026-05-12T23:27:00+09:00",
+      "assignee": "wejsa-u@hoji-20260512-230635",
+      "prs": [
+        {
+          "number": 6,
+          "title": "fix: CANDID-030 Step 1 - CANDID-008 FU1 review fix 5건 (D1+D2+D3+D4+D5)",
+          "mergedAt": "2026-05-12T23:26:56+09:00",
+          "additions": 277,
+          "deletions": 33,
+          "note": "CANDID-008 Step 2 review MAJOR 5건 통합 fix (D1 migration guard + D2 키 버전 atomic + D3 env reset + production guard + D4 입력 정규화 + D5 mask Date.UTC normalize). 81/81 테스트 통과, 커버리지 96.82% stmts."
+        }
+      ],
+      "stepCount": 1,
+      "reviewSummary": {
+        "mode": "full",
+        "critical": 0,
+        "major": 12,
+        "minor": 8,
+        "info": 3,
+        "decision": "COMMENT (self-PR) — follow-up task로 이관",
+        "followups": {
+          "high-priority-pending": [
+            "S1: normalizeBirthDate throw 메시지에 평문 birthDate 노출 (1줄 수정, 보안 직접 영향) — CANDID-034 신규 task 권장",
+            "T1: __reset 함수 production guard throw 경로 테스트 0건",
+            "T2: mask ↔ normalizeBirthDate cross-module consistency 테스트 부재",
+            "D4: lib/pii/calendar.ts 공통 헬퍼 추출 (DRY)"
+          ],
+          "defense-in-depth": [
+            "A1: basePrisma raw query 우회 → keyVersion 누락 가능 (DB CHECK 제약 또는 export 제한)",
+            "A2: encryptPii 직접 호출 우회 가능 (@internal 표시 또는 ESLint rule)",
+            "D3: BR-PII-05 (만 14세 미만) 호출자 계약 JSDoc"
+          ],
+          "documentation": [
+            "A3: README migration hash CI/staging 환경 분기 표 보강",
+            "A4: encryptUserPiiInput trans rollback 호출자 계약 JSDoc"
+          ],
+          "future-v2": [
+            "A5: compute 함수 unsupported keyVersion 명시 처리 (v2 도입 시점)",
+            "D1: mask vs normalize 정책 비대칭 (write 엄격 vs read 관용)",
+            "D2: 12자리 국가코드 입력 정책 결정 (BR-PII 명문화 + CANDID-031에서 zod 통합)"
+          ]
+        }
+      },
+      "fixesAppliedFromCANDID_008": ["D1", "D2", "D3", "D4", "D5"],
+      "note": "Step 2에서 누락된 lib/pii/mask.ts Date.UTC normalize도 본 PR에서 함께 적용 (CANDID-008 회고 검증). 5 fix 모두 의도대로 반영됨."
+    },
     "CANDID-002": {
       "id": "CANDID-002",
       "title": "PostgreSQL + Prisma ORM 셋업 + 마이그레이션 골격",
