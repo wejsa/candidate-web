@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 2,
+    "version": 3,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-12T20:00:00+09:00"
+    "updatedAt": "2026-05-12T20:25:00+09:00"
   },
   "tasks": {
     "CANDID-002": {
@@ -31,8 +31,19 @@
         "major": 7,
         "minor": 9,
         "decision": "COMMENT (self-PR) + 본 PR fix 6건",
-        "fixedInPR": ["H001 query log opt-in", "H002 127.0.0.1 바인딩", "H003 CHANGE_ME placeholder", "H004 server-only 0.0.1 핀", "H007 seed.ts server-only 제거", "M005 zod refine"],
-        "deferred": ["H005 테스트 인프라 (CANDID-001b 신설 권장)", "H006 seed main() export (CANDID-004 시점)", "MINOR 8건 후속 정정"]
+        "fixedInPR": [
+          "H001 query log opt-in",
+          "H002 127.0.0.1 바인딩",
+          "H003 CHANGE_ME placeholder",
+          "H004 server-only 0.0.1 핀",
+          "H007 seed.ts server-only 제거",
+          "M005 zod refine"
+        ],
+        "deferred": [
+          "H005 테스트 인프라 (CANDID-001b 신설 권장)",
+          "H006 seed main() export (CANDID-004 시점)",
+          "MINOR 8건 후속 정정"
+        ]
       }
     },
     "CANDID-001": {
@@ -61,6 +72,42 @@
         "minor": 10,
         "decision": "COMMENT (self-PR)",
         "note": "MAJOR 6건은 후속 task로 이관 (H001 server-only, H002 next CVE, H003 eager validate, H004 cache reset, H005 CI 자동화, H006 .gitignore 확인됨)"
+      }
+    },
+    "CANDID-003": {
+      "id": "CANDID-003",
+      "title": "DB 스키마: users + auth_providers + email_verification + password_reset_token",
+      "phase": 1,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-12T20:25:00+09:00",
+      "assignee": "jaese@hoji-20260512-200625",
+      "prs": [
+        {
+          "number": 3,
+          "title": "feat: CANDID-003 Step 1 - 인증 도메인 4 모델 (users + auth_providers + email_verifications + password_reset_tokens)",
+          "mergedAt": "2026-05-12T20:22:26+09:00",
+          "additions": 117,
+          "deletions": 13,
+          "note": "migration.sql 98줄(자동 생성, prisma migrate diff --from-empty) + migration_lock.toml 3줄 제외. 본 PR로 인증 도메인 4 모델 + 2 enum 정의."
+        }
+      ],
+      "stepCount": 1,
+      "reviewSummary": {
+        "mode": "full",
+        "critical": 0,
+        "major": 7,
+        "minor": 9,
+        "decision": "COMMENT (self-PR) — 이대로 머지 결정 (사용자 B)",
+        "deferred": [
+          "H001 email lowercase (citext or LOWER unique index)",
+          "H002 PK Int ADR (schema 주석)",
+          "H003 CASCADE 정책 (schema 주석)",
+          "H004 migration drift 검증 (사용자 검증 + CI)",
+          "H005 token → tokenHash (CANDID-010/020 진입 시 마이그레이션 발생 — 비용 증가)",
+          "H006 테스트 인프라 (CANDID-001b 신설 — CANDID-005 진입 전 필수)",
+          "H007 통합 검증 부재 (사용자 검증)"
+        ]
       }
     }
   }

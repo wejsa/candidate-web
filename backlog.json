@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 12,
+    "version": 13,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T20:20:00+09:00"
+    "updatedAt": "2026-05-12T20:25:00+09:00"
   },
   "summary": {
     "total": 29,
-    "done": 2,
-    "inProgress": 1,
+    "done": 3,
+    "inProgress": 0,
     "review": 0,
     "todo": 26
   },
@@ -129,7 +129,7 @@
       "id": "CANDID-003",
       "title": "DB 스키마: users + auth_providers + email_verification + password_reset_token",
       "description": "인증 도메인 4개 테이블 + 인덱스(idx_users_email, idx_users_status, UNIQUE(provider, provider_user_id)). status/locked_until/failed_login_count 필드 포함.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
@@ -137,28 +137,17 @@
         "CANDID-002"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260512-200625",
-      "assignedAt": "2026-05-12T20:20:00+09:00",
-      "lockTTL": 7200,
-      "lockedFiles": [
-        "prisma/schema.prisma",
-        "prisma/migrations/",
-        ".prettierignore"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 3,
-        "fixLoopCount": null,
-        "updatedAt": "2026-05-12T20:20:00+09:00"
-      },
-      "updatedAt": "2026-05-12T20:20:00+09:00",
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
+      "workflowState": null,
+      "updatedAt": "2026-05-12T20:25:00+09:00",
       "steps": [
         {
           "number": 1,
           "title": "인증 도메인 4 모델 + 첫 Prisma migration",
           "description": "users + auth_providers + email_verifications + password_reset_tokens 4 모델 정의 + PostgreSQL enum(UserStatus/AuthProviderType) + 첫 실제 migration. prisma format/validate/typecheck/lint/format/build 모두 통과. docker compose up + migrate dev는 사용자 검증.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "prisma/schema.prisma",
             "prisma/migrations/20260512201200_candid_003_auth_domain/migration.sql",
@@ -167,11 +156,13 @@
           ],
           "estimatedLines": 85,
           "prLineLimit": 150,
-          "prNumber": 3
+          "prNumber": 3,
+          "mergedAt": "2026-05-12T20:22:26+09:00"
         }
       ],
       "currentStep": 1,
-      "specFile": "docs/sample-requirement.md"
+      "specFile": "docs/sample-requirement.md",
+      "completedAt": "2026-05-12T20:25:00+09:00"
     },
     "CANDID-004": {
       "id": "CANDID-004",
