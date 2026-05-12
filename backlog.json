@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 23,
+    "version": 24,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T23:06:35+09:00"
+    "updatedAt": "2026-05-12T23:08:00+09:00"
   },
   "summary": {
     "total": 33,
@@ -578,14 +578,49 @@
       "priority": "high",
       "phase": 1,
       "assignee": "wejsa-u@hoji-20260512-230635",
-      "assignedAt": "2026-05-12T23:06:35+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-12T23:08:00+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",
+        "lib/env.ts",
+        "lib/prisma/extends.ts",
+        "tests/lib/crypto/aes-gcm.test.ts",
+        "tests/lib/pii/mask.test.ts",
+        "tests/lib/prisma/extends.test.ts",
+        "README.md"
+      ],
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T21:35:00+09:00",
-      "specFile": "docs/retro/CANDID-008-retro.md"
+      "specFile": "docs/retro/CANDID-008-retro.md",
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-12T23:08:00+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "D1+D2+D3+D4+D5 통합 fix",
+          "description": "CANDID-008 Step 2 review MAJOR 5건 통합 처리. D1: migration.sql DO 블록 guard. D2: encryptPiiWithVersion + compute needs 확장. D3: lib/env.ts __resetCachedEnvForTesting. D4: encryptUserPiiInput에 normalizePhone/normalizeBirthDate 통합 (throw on invalid). D5: mask H004 회귀 케이스 5건 추가.",
+          "status": "pending",
+          "files": [
+            "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",
+            "lib/env.ts",
+            "lib/prisma/extends.ts",
+            "tests/lib/crypto/aes-gcm.test.ts",
+            "tests/lib/pii/mask.test.ts",
+            "tests/lib/prisma/extends.test.ts",
+            "README.md"
+          ],
+          "estimatedLines": 250
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-031": {
       "id": "CANDID-031",
