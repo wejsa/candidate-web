@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 29,
     "projectPrefix": "CANDID",
-    "version": 7,
+    "version": 8,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T19:30:00+09:00"
+    "updatedAt": "2026-05-12T19:45:00+09:00"
   },
   "summary": {
     "total": 29,
@@ -91,7 +91,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260512-192026",
-      "assignedAt": "2026-05-12T19:30:00+09:00",
+      "assignedAt": "2026-05-12T19:45:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
@@ -109,8 +109,8 @@
         {
           "number": 1,
           "title": "Prisma 6 + PG16 + singleton + docker-compose + DATABASE_URL 격상",
-          "description": "단일 PR: schema.prisma 빈 model 골격 + lib/prisma.ts singleton(server-only) + docker-compose db + seed 골격 + DATABASE_URL required 격상 + Prisma scripts. pnpm install/build/typecheck/lint/format 모두 통과 + docker compose up healthcheck 통과 + prisma migrate dev baseline 생성.",
-          "status": "pending",
+          "description": "단일 PR: schema.prisma 빈 model 골격 + lib/prisma.ts singleton(server-only) + docker-compose db + seed 골격 + DATABASE_URL required 격상 + Prisma scripts. pnpm install/build/typecheck/lint/format 모두 통과. docker compose up은 환경 의존(머지 후 사용자 검증).",
+          "status": "pr_created",
           "files": [
             "prisma/schema.prisma",
             "prisma/seed.ts",
@@ -122,16 +122,17 @@
             ".dockerignore",
             "README.md"
           ],
-          "estimatedLines": 170
+          "estimatedLines": 170,
+          "prNumber": 2
         }
       ],
       "currentStep": 1,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 2,
         "fixLoopCount": null,
-        "updatedAt": "2026-05-12T19:30:00+09:00"
+        "updatedAt": "2026-05-12T19:45:00+09:00"
       },
       "specFile": "docs/sample-requirement.md",
       "createdAt": "2026-05-12T18:22:05+09:00",
