@@ -1,8 +1,20 @@
-import { describe, expect, it } from 'vitest';
-import { decryptPii, encryptPii, IV_LENGTH, KEY_LENGTH, TAG_LENGTH } from '@/lib/crypto/aes-gcm';
+import { afterEach, describe, expect, it } from 'vitest';
+import {
+  __resetCachedKeyForTesting,
+  decryptPii,
+  encryptPii,
+  IV_LENGTH,
+  KEY_LENGTH,
+  TAG_LENGTH,
+} from '@/lib/crypto/aes-gcm';
 
 const KEY_A = Buffer.alloc(KEY_LENGTH, 0xaa);
 const KEY_B = Buffer.alloc(KEY_LENGTH, 0xbb);
+
+// H008 fix: 키 회전 테스트 케이스를 위해 매 테스트 후 캐시 초기화.
+afterEach(() => {
+  __resetCachedKeyForTesting();
+});
 
 describe('encryptPii / decryptPii — roundtrip', () => {
   it.each([
@@ -29,51 +41,67 @@ describe('encryptPii / decryptPii — roundtrip', () => {
   });
 
   it('output length = iv (12B) + tag (16B) + plaintext bytes', () => {
-    const ct = encryptPii('hello', KEY_A);
-    expect(ct.length).toBe(IV_LENGTH + TAG_LENGTH + 5);
+    const plaintext = 'hello';
+    const ct = encryptPii(plaintext, KEY_A);
+    expect(ct.length).toBe(IV_LENGTH + TAG_LENGTH + Buffer.byteLength(plaintext, 'utf8'));
   });
 });
 
 describe('decryptPii — tamper detection', () => {
-  it('throws when auth tag is tampered', () => {
+  // H005 fix: 광범위한 toThrow() 대신 메시지 정규식 매칭으로 length-guard vs GCM-auth 실패 구분.
+  it('throws auth failure when auth tag is tampered', () => {
     const ct = encryptPii('hello', KEY_A);
     ct.writeUInt8(ct.readUInt8(IV_LENGTH) ^ 0xff, IV_LENGTH);
-    expect(() => decryptPii(ct, KEY_A)).toThrow();
+    expect(() => decryptPii(ct, KEY_A)).toThrow(/authenticate|auth/i);
   });
 
-  it('throws when iv is tampered', () => {
+  it('throws auth failure when iv is tampered', () => {
     const ct = encryptPii('hello', KEY_A);
     ct.writeUInt8(ct.readUInt8(0) ^ 0xff, 0);
-    expect(() => decryptPii(ct, KEY_A)).toThrow();
+    expect(() => decryptPii(ct, KEY_A)).toThrow(/authenticate|auth/i);
   });
 
-  it('throws when ciphertext byte is tampered', () => {
+  it('throws auth failure when ciphertext byte is tampered', () => {
     const ct = encryptPii('hello-world-12345', KEY_A);
     const offset = IV_LENGTH + TAG_LENGTH;
     ct.writeUInt8(ct.readUInt8(offset) ^ 0xff, offset);
-    expect(() => decryptPii(ct, KEY_A)).toThrow();
+    expect(() => decryptPii(ct, KEY_A)).toThrow(/authenticate|auth/i);
   });
 
-  it('throws when ciphertext shorter than header', () => {
-    expect(() => decryptPii(Buffer.alloc(IV_LENGTH + TAG_LENGTH - 1), KEY_A)).toThrow();
+  it('throws "too short" when ciphertext shorter than header', () => {
+    expect(() => decryptPii(Buffer.alloc(IV_LENGTH + TAG_LENGTH - 1), KEY_A)).toThrow(/too short/);
+  });
+
+  it('accepts ciphertext exactly at header boundary (empty plaintext case)', () => {
+    // header+0B 케이스: empty string 암호화의 정확한 출력. roundtrip로 검증.
+    const ct = encryptPii('', KEY_A);
+    expect(ct.length).toBe(IV_LENGTH + TAG_LENGTH);
+    expect(decryptPii(ct, KEY_A)).toBe('');
   });
 });
 
 describe('decryptPii — wrong key', () => {
-  it('throws when decrypting with a different key', () => {
+  it('throws auth failure when decrypting with a different key', () => {
     const ct = encryptPii('secret', KEY_A);
-    expect(() => decryptPii(ct, KEY_B)).toThrow();
+    expect(() => decryptPii(ct, KEY_B)).toThrow(/authenticate|auth/i);
   });
 });
 
 describe('key validation', () => {
-  it('rejects key shorter than 32 bytes (encrypt)', () => {
-    expect(() => encryptPii('x', Buffer.alloc(16))).toThrow(/32 bytes/);
+  // M001 fix: 에러 메시지에서 실제 키 길이 제거 → "AES key length invalid" 고정.
+  it.each([
+    ['empty key (0B)', Buffer.alloc(0)],
+    ['short key (16B)', Buffer.alloc(16)],
+    ['off-by-one short (31B)', Buffer.alloc(31)],
+    ['off-by-one long (33B)', Buffer.alloc(33)],
+    ['double-length (64B)', Buffer.alloc(64)],
+  ])('rejects %s on encrypt', (_label, badKey) => {
+    expect(() => encryptPii('x', badKey)).toThrow(/AES key length invalid/);
   });
 
-  it('rejects key shorter than 32 bytes (decrypt)', () => {
+  it('rejects bad key on decrypt', () => {
     const ct = encryptPii('x', KEY_A);
-    expect(() => decryptPii(ct, Buffer.alloc(16))).toThrow(/32 bytes/);
+    expect(() => decryptPii(ct, Buffer.alloc(16))).toThrow(/AES key length invalid/);
   });
 });
 

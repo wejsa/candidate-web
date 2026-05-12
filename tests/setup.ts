@@ -5,6 +5,7 @@
 
 process.env.DATABASE_URL ??= 'postgresql://test:test@localhost:5432/test_db';
 
-// 32 bytes hex — 테스트 전용 고정 키. 실제 운영 키와 절대 동일하면 안 됨.
-process.env.PII_ENCRYPTION_KEY ??=
-  '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+// 32 bytes hex — 테스트 전용 고정 키.
+// H007 fix: ??= 가 아닌 = 사용 — 외부 env에 운영 키가 export되어 있더라도
+// 테스트는 항상 고정 키 사용 (운영 키 누수 방지).
+process.env.PII_ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
