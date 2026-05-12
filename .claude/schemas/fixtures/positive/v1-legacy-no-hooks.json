@@ -1,0 +1,9 @@
+{
+  "name": "legacy-v1-project",
+  "domain": "fintech",
+  "version": "1.45.0",
+  "techStack": {
+    "backend": "spring-boot-kotlin",
+    "database": "mysql"
+  }
+}

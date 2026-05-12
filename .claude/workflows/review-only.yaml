@@ -1,0 +1,88 @@
+# Review Only Workflow
+# 코드 리뷰 전용 워크플로우
+
+name: review-only
+displayName: "코드 리뷰"
+description: "기존 코드나 PR에 대한 리뷰만 수행하는 워크플로우"
+
+triggers:
+  keywords:
+    - "리뷰해줘"
+    - "검토해줘"
+    - "코드 리뷰"
+    - "review"
+    - "봐줘"
+  explicit: "/workflow review-only"
+
+steps:
+  - id: review
+    name: "코드 리뷰"
+    agent: agent-code-reviewer
+    skill: skill-review
+    input: "{{request}}"
+    output: "리뷰 결과"
+    description: |
+      5관점 통합 코드 리뷰를 수행합니다.
+
+      ## 관점별 체크
+      1. **컴플라이언스**: 규정 준수, 감사 로그
+      2. **도메인 로직**: 비즈니스 규칙, 상태 관리
+      3. **아키텍처**: 설계 패턴, 의존성
+      4. **보안**: 취약점, 인증/인가
+      5. **테스트 품질**: 커버리지, 케이스 충분성
+
+  - id: qa_review
+    name: "품질 검토"
+    agent: agent-qa
+    input: "{{steps.review.output}}"
+    output: "품질 리포트"
+    condition: "agents.qa.enabled"
+    description: |
+      테스트 관점에서 추가 검토를 수행합니다.
+      - 테스트 케이스 충분성
+      - 엣지 케이스 누락 확인
+      - 회귀 테스트 필요성
+
+  - id: report
+    name: "리뷰 리포트 작성"
+    input:
+      - "{{steps.review.output}}"
+      - "{{steps.qa_review.output}}"
+    output: "최종 리뷰 리포트"
+    description: |
+      리뷰 결과를 종합하여 리포트를 작성합니다.
+
+      ## 리포트 형식
+      - 요약: 전체 평가
+      - CRITICAL 이슈 목록
+      - HIGH 이슈 목록
+      - 개선 권장 사항
+      - 칭찬할 점
+
+outputFormat: |
+  ## 코드 리뷰 결과
+
+  ### 요약
+  - 전체 평가: {{rating}} (A/B/C/D/F)
+  - CRITICAL: {{critical_count}}개
+  - HIGH: {{high_count}}개
+  - MEDIUM: {{medium_count}}개
+
+  ### CRITICAL 이슈
+  {{#each critical_issues}}
+  - [ ] {{this.description}} ({{this.file}}:{{this.line}})
+  {{/each}}
+
+  ### HIGH 이슈
+  {{#each high_issues}}
+  - [ ] {{this.description}} ({{this.file}}:{{this.line}})
+  {{/each}}
+
+  ### 권장 사항
+  {{recommendations}}
+
+  ### 긍정적 평가
+  {{positives}}
+
+estimatedDuration: "15분 ~ 1시간"
+priority: medium

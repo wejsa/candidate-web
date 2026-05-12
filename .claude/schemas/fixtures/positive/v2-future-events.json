@@ -1,0 +1,31 @@
+{
+  "name": "v2-future-events-project",
+  "domain": "general",
+  "version": "2.1.0",
+  "hooks": {
+    "SessionStart": [],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre-bash.sh",
+            "description": "v2.1+ 공식 이벤트 확장 경로 검증",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/on-submit.sh",
+            "description": "프롬프트 제출 직전 컨텍스트 주입 (v2.1+ 예시)",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

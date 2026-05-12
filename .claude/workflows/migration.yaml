@@ -1,0 +1,125 @@
+# Migration Workflow
+# 레거시 마이그레이션 워크플로우
+
+name: migration
+displayName: "마이그레이션"
+description: "레거시 시스템 마이그레이션을 위한 워크플로우"
+
+triggers:
+  keywords:
+    - "마이그레이션"
+    - "이전"
+    - "마이그레이트"
+    - "migrate"
+    - "포팅"
+    - "migration"
+  explicit: "/workflow migration"
+
+steps:
+  - id: analyze
+    name: "마이그레이션 분석"
+    agent: agent-planner
+    input: "{{request}}"
+    output: "docs/migration/{{taskId}}-analysis.md"
+    gate: user_approval
+    description: |
+      마이그레이션 대상을 분석합니다.
+      - 원본 소스 분석
+      - 의존성 파악
+      - 마이그레이션 전략 수립
+      - 리스크 평가
+
+  - id: plan
+    name: "마이그레이션 계획"
+    agent: agent-planner
+    skill: skill-plan
+    input: "{{steps.analyze.output}}"
+    output: ".claude/temp/{{taskId}}-migration-plan.md"
+    gate: user_approval
+    description: |
+      단계별 마이그레이션 계획을 수립합니다.
+      - 스텝 분리 (500라인 미만)
+      - 순서 및 의존성 정의
+      - 롤백 전략
+
+  - id: migrate_db
+    name: "DB 마이그레이션"
+    agent: agent-db-designer
+    input: "{{steps.plan.output}}"
+    output: "DB 마이그레이션 스크립트"
+    gate: user_approval
+    condition: "agents.db-designer.enabled"
+    description: |
+      데이터베이스 마이그레이션을 수행합니다.
+      - 스키마 변경 스크립트
+      - 데이터 마이그레이션
+      - 롤백 스크립트
+
+  - id: implement
+    name: "코드 마이그레이션"
+    agent: agent-backend
+    skill: skill-impl
+    input: "{{steps.plan.output}}"
+    output: "PR"
+    gate: build_success
+    loop: per_step
+    description: |
+      코드 마이그레이션을 수행합니다.
+      - 원본 코드 참조
+      - 새 아키텍처에 맞게 변환
+      - 테스트 코드 작성
+
+  - id: review
+    name: "코드 리뷰"
+    agent: agent-code-reviewer
+    skill: skill-review-pr
+    input: "{{steps.implement.output}}"
+    output: "리뷰 결과"
+    gate: critical_zero
+    description: |
+      마이그레이션 코드를 리뷰합니다.
+      - 원본과 동등성 확인
+      - 누락 기능 확인
+      - 새 아키텍처 적합성
+
+  - id: merge
+    name: "PR 머지"
+    skill: skill-merge-pr
+    input: "{{steps.review.output}}"
+    gate: review_approved
+
+gates:
+  user_approval:
+    description: "사용자 승인 대기"
+    type: manual
+    prompt: "진행하시겠습니까? (Y/N)"
+
+  build_success:
+    description: "빌드 성공"
+    type: automatic
+    condition: "build.exitCode === 0"
+
+  critical_zero:
+    description: "CRITICAL 이슈 0개"
+    type: automatic
+    condition: "review.critical === 0"
+
+  review_approved:
+    description: "리뷰 승인 완료"
+    type: manual
+    prompt: "리뷰가 승인되었습니다. 머지하시겠습니까? (Y/N)"
+
+errorHandling:
+  buildFailure:
+    action: "retry"
+    maxRetries: 3
+
+  migrationFailure:
+    action: "rollback"
+    prompt: "마이그레이션 실패. 롤백하시겠습니까?"
+
+references:
+  - "docs/migration-plan.md"
+  - "원본 소스 경로 (project.json에서 설정)"
+
+estimatedDuration: "1일 ~ 1주"

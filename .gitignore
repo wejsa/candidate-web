@@ -1,0 +1,57 @@
+# Node / Next.js
+node_modules/
+.next/
+out/
+.turbo/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# Coverage / Tests
+coverage/
+*.lcov
+test-results/
+.nyc_output/
+
+# Docker
+docker-compose.override.yml
+
+# Claude Code framework
+.claude/temp/
+.claude/plans/
+.claude/skills/**/CLAUDE.md
+.claude/scheduled_tasks.lock
+.claude/state/hook-errors.log
+.claude/state/hook-disabled.flag
+.claude/state/hook-trigger-count
+.claude/worktrees/
+
+# Uploaded files (local dev)
+uploads/

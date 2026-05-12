@@ -1,0 +1,288 @@
+/**
+ * 감사 로그 (Audit Log)
+ *
+ * 금융 서비스의 모든 중요 작업에 대한 감사 추적
+ * PCI-DSS, 전자금융감독규정 준수
+ *
+ * 생성일: {{CREATED_AT}}
+ * Task: {{TASK_ID}}
+ */
+package {{PACKAGE_NAME}}.infrastructure.audit
+
+import org.springframework.stereotype.Component
+import java.time.Instant
+
+/**
+ * 감사 이벤트 유형
+ */
+enum class AuditEventType(val code: String, val description: String) {
+    // 인증/인가
+    LOGIN_SUCCESS("AUTH_001", "로그인 성공"),
+    LOGIN_FAILURE("AUTH_002", "로그인 실패"),
+    LOGOUT("AUTH_003", "로그아웃"),
+    TOKEN_ISSUED("AUTH_004", "토큰 발급"),
+    TOKEN_REFRESH("AUTH_005", "토큰 갱신"),
+    TOKEN_REVOKED("AUTH_006", "토큰 폐기"),
+
+    // 결제
+    PAYMENT_REQUESTED("PAY_001", "결제 요청"),
+    PAYMENT_APPROVED("PAY_002", "결제 승인"),
+    PAYMENT_FAILED("PAY_003", "결제 실패"),
+    PAYMENT_CANCELLED("PAY_004", "결제 취소"),
+    PAYMENT_REFUNDED("PAY_005", "결제 환불"),
+
+    // 정산
+    SETTLEMENT_INITIATED("SET_001", "정산 시작"),
+    SETTLEMENT_COMPLETED("SET_002", "정산 완료"),
+    SETTLEMENT_FAILED("SET_003", "정산 실패"),
+
+    // 데이터 접근
+    SENSITIVE_DATA_ACCESS("DATA_001", "민감 데이터 조회"),
+    SENSITIVE_DATA_EXPORT("DATA_002", "민감 데이터 내보내기"),
+
+    // 설정 변경
+    CONFIG_CHANGED("CFG_001", "설정 변경"),
+    PERMISSION_CHANGED("CFG_002", "권한 변경"),
+
+    // 시스템
+    SYSTEM_ERROR("SYS_001", "시스템 오류"),
+    SECURITY_ALERT("SYS_002", "보안 경고")
+}
+
+/**
+ * 감사 로그 엔티티
+ */
+data class AuditLog(
+    val id: Long? = null,
+    val eventType: AuditEventType,
+    val eventTime: Instant = Instant.now(),
+
+    // 주체 정보
+    val userId: String?,
+    val userEmail: String?,
+    val userRoles: List<String>?,
+    val merchantId: String?,
+
+    // 요청 정보
+    val requestId: String,
+    val traceId: String?,
+    val clientIp: String,
+    val userAgent: String?,
+    val httpMethod: String?,
+    val requestUri: String?,
+
+    // 이벤트 상세
+    val resourceType: String?,
+    val resourceId: String?,
+    val action: String,
+    val description: String?,
+
+    // 변경 내용 (민감 정보 마스킹 필수)
+    val previousValue: String?,
+    val newValue: String?,
+
+    // 결과
+    val success: Boolean,
+    val errorCode: String?,
+    val errorMessage: String?,
+
+    // 메타데이터
+    val metadata: Map<String, Any>? = null
+)
+
+/**
+ * 감사 로그 저장소 인터페이스
+ */
+interface AuditLogRepository {
+    fun save(auditLog: AuditLog): AuditLog
+    fun findByTraceId(traceId: String): List<AuditLog>
+    fun findByUserId(userId: String, from: Instant, to: Instant): List<AuditLog>
+    fun findByResourceId(resourceType: String, resourceId: String): List<AuditLog>
+}
+
+/**
+ * 감사 로거
+ */
+@Component
+class AuditLogger(
+    private val auditLogRepository: AuditLogRepository,
+    private val sensitiveDataMasker: SensitiveDataMasker
+) {
+
+    /**
+     * 감사 로그 기록
+     */
+    fun log(
+        eventType: AuditEventType,
+        action: String,
+        context: AuditContext,
+        resourceType: String? = null,
+        resourceId: String? = null,
+        previousValue: Any? = null,
+        newValue: Any? = null,
+        success: Boolean = true,
+        errorCode: String? = null,
+        errorMessage: String? = null,
+        description: String? = null,
+        metadata: Map<String, Any>? = null
+    ) {
+        val auditLog = AuditLog(
+            eventType = eventType,
+            userId = context.userId,
+            userEmail = context.userEmail?.let { sensitiveDataMasker.maskEmail(it) },
+            userRoles = context.userRoles,
+            merchantId = context.merchantId,
+            requestId = context.requestId,
+            traceId = context.traceId,
+            clientIp = context.clientIp,
+            userAgent = context.userAgent,
+            httpMethod = context.httpMethod,
+            requestUri = context.requestUri,
+            resourceType = resourceType,
+            resourceId = resourceId,
+            action = action,
+            description = description,
+            previousValue = previousValue?.let { sensitiveDataMasker.maskSensitiveFields(it) },
+            newValue = newValue?.let { sensitiveDataMasker.maskSensitiveFields(it) },
+            success = success,
+            errorCode = errorCode,
+            errorMessage = errorMessage,
+            metadata = metadata
+        )
+
+        auditLogRepository.save(auditLog)
+    }
+
+    /**
+     * 인증 이벤트 로깅 헬퍼
+     */
+    fun logAuthEvent(
+        eventType: AuditEventType,
+        context: AuditContext,
+        success: Boolean,
+        errorMessage: String? = null
+    ) {
+        log(
+            eventType = eventType,
+            action = eventType.description,
+            context = context,
+            success = success,
+            errorMessage = errorMessage
+        )
+    }
+
+    /**
+     * 결제 이벤트 로깅 헬퍼
+     */
+    fun logPaymentEvent(
+        eventType: AuditEventType,
+        context: AuditContext,
+        paymentId: String,
+        amount: java.math.BigDecimal,
+        success: Boolean,
+        errorCode: String? = null,
+        errorMessage: String? = null
+    ) {
+        log(
+            eventType = eventType,
+            action = eventType.description,
+            context = context,
+            resourceType = "PAYMENT",
+            resourceId = paymentId,
+            success = success,
+            errorCode = errorCode,
+            errorMessage = errorMessage,
+            metadata = mapOf("amount" to amount.toString())
+        )
+    }
+}
+
+/**
+ * 감사 컨텍스트 (요청 정보)
+ */
+data class AuditContext(
+    val requestId: String,
+    val traceId: String?,
+    val userId: String?,
+    val userEmail: String?,
+    val userRoles: List<String>?,
+    val merchantId: String?,
+    val clientIp: String,
+    val userAgent: String?,
+    val httpMethod: String?,
+    val requestUri: String?
+)
+
+/**
+ * 민감 데이터 마스커
+ */
+@Component
+class SensitiveDataMasker {
+
+    private val sensitiveFields = setOf(
+        "cardNumber", "cvv", "password", "pin", "secretKey",
+        "accessToken", "refreshToken", "apiKey"
+    )
+
+    fun maskEmail(email: String): String {
+        val parts = email.split("@")
+        if (parts.size != 2) return "***"
+        val local = parts[0]
+        val domain = parts[1]
+        val maskedLocal = if (local.length > 2) {
+            "${local.take(2)}${"*".repeat(local.length - 2)}"
+        } else {
+            "*".repeat(local.length)
+        }
+        return "$maskedLocal@$domain"
+    }
+
+    fun maskCardNumber(cardNumber: String): String {
+        val cleaned = cardNumber.replace(" ", "").replace("-", "")
+        return if (cleaned.length >= 12) {
+            "${cleaned.take(6)}${"*".repeat(cleaned.length - 10)}${cleaned.takeLast(4)}"
+        } else {
+            "*".repeat(cleaned.length)
+        }
+    }
+
+    fun maskSensitiveFields(value: Any): String {
+        // JSON 변환 후 민감 필드 마스킹
+        val json = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+            .writeValueAsString(value)
+
+        var masked = json
+        sensitiveFields.forEach { field ->
+            masked = masked.replace(
+                Regex("\"$field\"\\s*:\\s*\"[^\"]*\""),
+                "\"$field\":\"***MASKED***\""
+            )
+        }
+        return masked
+    }
+}
+
+/*
+ * 사용 예시:
+ *
+ * // 결제 승인 시
+ * auditLogger.logPaymentEvent(
+ *     eventType = AuditEventType.PAYMENT_APPROVED,
+ *     context = auditContext,
+ *     paymentId = payment.id,
+ *     amount = payment.amount,
+ *     success = true
+ * )
+ *
+ * // 설정 변경 시
+ * auditLogger.log(
+ *     eventType = AuditEventType.CONFIG_CHANGED,
+ *     action = "Rate Limit 설정 변경",
+ *     context = auditContext,
+ *     resourceType = "CONFIG",
+ *     resourceId = "rate-limit",
+ *     previousValue = oldConfig,
+ *     newValue = newConfig,
+ *     success = true
+ * )
+ */

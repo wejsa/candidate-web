@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "lastTaskNumber": 8,
+    "version": 1,
+    "projectPrefix": "PAY",
+    "createdAt": "2026-05-11T00:00:00+00:00",
+    "updatedAt": "2026-05-11T00:00:00+00:00"
+  },
+  "summary": {
+    "total": 8,
+    "done": 0,
+    "inProgress": 0,
+    "review": 0,
+    "todo": 8
+  },
+  "phases": {
+    "1": {
+      "name": "기반/인프라",
+      "description": "PCI-DSS 환경 + 인증",
+      "status": "todo"
+    },
+    "2": {
+      "name": "핵심 도메인",
+      "description": "결제/이체 핵심 흐름",
+      "status": "todo"
+    },
+    "4": {
+      "name": "운영/품질",
+      "description": "감사 로그/모니터링",
+      "status": "todo"
+    }
+  },
+  "tasks": {
+    "PAY-001": {
+      "id": "PAY-001",
+      "title": "PCI-DSS 환경 격리",
+      "description": "카드 데이터 처리 영역 네트워크 분리",
+      "status": "todo",
+      "type": "feature",
+      "priority": "critical",
+      "phase": 1,
+      "dependencies": [],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "PAY-002": {
+      "id": "PAY-002",
+      "title": "JWT 인증",
+      "description": "JWT 발급/검증 + MFA",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": [],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "PAY-003": {
+      "id": "PAY-003",
+      "title": "결제 API",
+      "description": "카드 결제 승인/취소",
+      "status": "todo",
+      "type": "feature",
+      "priority": "critical",
+      "phase": 2,
+      "dependencies": ["PAY-001", "PAY-002"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "PAY-004": {
+      "id": "PAY-004",
+      "title": "이체 API",
+      "description": "계좌간 자금 이체",
+      "status": "todo",
+      "type": "feature",
+      "priority": "critical",
+      "phase": 2,
+      "dependencies": ["PAY-002"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "PAY-005": {
+      "id": "PAY-005",
+      "title": "송금 한도 관리",
+      "description": "일별/회당 한도 + 위반 차단",
+      "status": "todo",
+      "type": "feature",
+      "priority": "critical",
+      "phase": 2,
+      "dependencies": ["PAY-004"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "PAY-006": {
+      "id": "PAY-006",
+      "title": "거래 내역 조회 UI",
+      "description": "사용자별 거래 이력 조회 페이지 (UI/조회만 — 심사 그룹 high)",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["PAY-003"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "PAY-007": {
+      "id": "PAY-007",
+      "title": "감사 로그",
+      "description": "모든 자금 이동 영구 기록 (전자금융감독규정)",
+      "status": "todo",
+      "type": "feature",
+      "priority": "critical",
+      "phase": 4,
+      "dependencies": ["PAY-003", "PAY-004"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "PAY-008": {
+      "id": "PAY-008",
+      "title": "이상거래 모니터링",
+      "description": "FDS 룰 기반 알람 + 자동 차단",
+      "status": "todo",
+      "type": "feature",
+      "priority": "low",
+      "phase": 4,
+      "dependencies": ["PAY-007"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    }
+  }
+}

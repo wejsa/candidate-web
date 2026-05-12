@@ -1,0 +1,104 @@
+/**
+ * 주문 상태 머신
+ *
+ * 전자상거래법 기반 주문 상태 전이 관리.
+ * 취소: 배송 전까지 가능
+ * 반품/환불: 수령 후 7일(단순변심), 30일(하자)
+ *
+ * Task: {{TASK_ID}}
+ * Created: {{CREATED_AT}}
+ */
+
+// --- 주문 상태 ---
+
+export const OrderStatus = {
+  CHECKOUT: 'CHECKOUT',
+  PAID: 'PAID',
+  PREPARING: 'PREPARING',
+  READY_TO_SHIP: 'READY_TO_SHIP',
+  SHIPPING: 'SHIPPING',
+  DELIVERED: 'DELIVERED',
+  CONFIRMED: 'CONFIRMED',
+  CANCEL_REQUESTED: 'CANCEL_REQUESTED',
+  CANCELLED: 'CANCELLED',
+  RETURN_REQUESTED: 'RETURN_REQUESTED',
+  RETURNING: 'RETURNING',
+  RETURNED: 'RETURNED',
+  REFUNDED: 'REFUNDED',
+} as const;
+
+export type OrderStatusType = typeof OrderStatus[keyof typeof OrderStatus];
+
+// --- 전이 규칙 ---
+
+const transitions: Record<string, string[]> = {
+  [OrderStatus.CHECKOUT]: [OrderStatus.PAID, OrderStatus.CANCELLED],
+  [OrderStatus.PAID]: [OrderStatus.PREPARING, OrderStatus.CANCEL_REQUESTED],
+  [OrderStatus.PREPARING]: [OrderStatus.READY_TO_SHIP, OrderStatus.CANCEL_REQUESTED],
+  [OrderStatus.READY_TO_SHIP]: [OrderStatus.SHIPPING, OrderStatus.CANCEL_REQUESTED],
+  [OrderStatus.SHIPPING]: [OrderStatus.DELIVERED],
+  [OrderStatus.DELIVERED]: [OrderStatus.CONFIRMED, OrderStatus.RETURN_REQUESTED],
+  [OrderStatus.CONFIRMED]: [],
+  [OrderStatus.CANCEL_REQUESTED]: [OrderStatus.CANCELLED],
+  [OrderStatus.CANCELLED]: [],
+  [OrderStatus.RETURN_REQUESTED]: [OrderStatus.RETURNING],
+  [OrderStatus.RETURNING]: [OrderStatus.RETURNED],
+  [OrderStatus.RETURNED]: [OrderStatus.REFUNDED],
+  [OrderStatus.REFUNDED]: [],
+};
+
+export function canTransition(from: OrderStatusType, to: OrderStatusType): boolean {
+  return (transitions[from] || []).includes(to);
+}
+
+export function validateTransition(from: OrderStatusType, to: OrderStatusType): void {
+  if (!canTransition(from, to)) {
+    throw new Error(
+      `주문 상태 전이 불가: ${from} → ${to}. ` +
+      `허용: [${(transitions[from] || []).join(', ')}]`
+    );
+  }
+}
+
+// --- 취소 가능 여부 ---
+
+const cancellableStatuses: Set<string> = new Set([
+  OrderStatus.PAID,
+  OrderStatus.PREPARING,
+  OrderStatus.READY_TO_SHIP,
+]);
+
+export function isCancellable(status: OrderStatusType): boolean {
+  return cancellableStatuses.has(status);
+}
+
+// --- 반품 가능 여부 ---
+
+const SIMPLE_RETURN_DAYS = 7;
+const DEFECT_RETURN_DAYS = 30;
+
+export function isReturnable(
+  status: OrderStatusType,
+  deliveredAt: Date,
+  reason: 'simple' | 'defect',
+): boolean {
+  if (status !== OrderStatus.DELIVERED) return false;
+
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - deliveredAt.getTime()) / (1000 * 60 * 60 * 24));
+  const maxDays = reason === 'simple' ? SIMPLE_RETURN_DAYS : DEFECT_RETURN_DAYS;
+
+  return diffDays <= maxDays;
+}
+
+// --- 상태 이력 ---
+
+export interface OrderStatusHistory {
+  id: string;
+  orderId: string;
+  fromStatus: OrderStatusType | null;
+  toStatus: OrderStatusType;
+  reason?: string;
+  changedBy: string;
+  changedAt: Date;
+}

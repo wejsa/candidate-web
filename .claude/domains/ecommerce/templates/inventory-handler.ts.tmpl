@@ -1,0 +1,143 @@
+/**
+ * 재고 관리 핸들러
+ *
+ * 예약/확정 패턴으로 동시성 안전한 재고 관리.
+ * 예약 → 확정/해제 2단계 방식.
+ *
+ * Task: {{TASK_ID}}
+ * Created: {{CREATED_AT}}
+ */
+
+// --- 재고 엔티티 ---
+
+export interface Inventory {
+  productId: string;
+  totalQuantity: number;
+  reservedQuantity: number;
+  version: number; // Optimistic locking
+}
+
+export interface InventoryReservation {
+  id: string;
+  productId: string;
+  orderId: string;
+  quantity: number;
+  status: 'RESERVED' | 'CONFIRMED' | 'RELEASED' | 'EXPIRED';
+  reservedAt: Date;
+  expiresAt: Date;
+}
+
+// --- 결과 타입 ---
+
+export type InventoryResult =
+  | { success: true; reservation: InventoryReservation }
+  | { success: false; reason: string; availableQuantity: number };
+
+// --- 재고 저장소 인터페이스 ---
+
+export interface InventoryRepository {
+  findByProductId(productId: string): Promise<Inventory | null>;
+  save(inventory: Inventory): Promise<Inventory>;
+}
+
+export interface ReservationRepository {
+  findById(id: string): Promise<InventoryReservation | null>;
+  findByOrderId(orderId: string): Promise<InventoryReservation[]>;
+  save(reservation: InventoryReservation): Promise<InventoryReservation>;
+}
+
+// --- 재고 핸들러 ---
+
+const RESERVATION_TTL_MINUTES = 30;
+
+export class InventoryHandler {
+  constructor(
+    private readonly inventoryRepo: InventoryRepository,
+    private readonly reservationRepo: ReservationRepository,
+  ) {}
+
+  /**
+   * 재고 예약 (주문 시)
+   */
+  async reserve(productId: string, orderId: string, quantity: number): Promise<InventoryResult> {
+    const inventory = await this.inventoryRepo.findByProductId(productId);
+    if (!inventory) {
+      return { success: false, reason: '상품을 찾을 수 없습니다', availableQuantity: 0 };
+    }
+
+    const available = inventory.totalQuantity - inventory.reservedQuantity;
+    if (available < quantity) {
+      return { success: false, reason: '재고 부족', availableQuantity: available };
+    }
+
+    inventory.reservedQuantity += quantity;
+    inventory.version += 1;
+    await this.inventoryRepo.save(inventory);
+
+    const reservation: InventoryReservation = {
+      id: crypto.randomUUID(),
+      productId,
+      orderId,
+      quantity,
+      status: 'RESERVED',
+      reservedAt: new Date(),
+      expiresAt: new Date(Date.now() + RESERVATION_TTL_MINUTES * 60 * 1000),
+    };
+    await this.reservationRepo.save(reservation);
+
+    return { success: true, reservation };
+  }
+
+  /**
+   * 예약 확정 (결제 완료 시)
+   */
+  async confirm(reservationId: string): Promise<void> {
+    const reservation = await this.reservationRepo.findById(reservationId);
+    if (!reservation || reservation.status !== 'RESERVED') {
+      throw new Error(`예약을 확정할 수 없습니다: ${reservationId}`);
+    }
+
+    const inventory = await this.inventoryRepo.findByProductId(reservation.productId);
+    if (!inventory) throw new Error('상품을 찾을 수 없습니다');
+
+    inventory.totalQuantity -= reservation.quantity;
+    inventory.reservedQuantity -= reservation.quantity;
+    inventory.version += 1;
+    await this.inventoryRepo.save(inventory);
+
+    reservation.status = 'CONFIRMED';
+    await this.reservationRepo.save(reservation);
+  }
+
+  /**
+   * 예약 해제 (주문 취소 시)
+   */
+  async release(reservationId: string): Promise<void> {
+    const reservation = await this.reservationRepo.findById(reservationId);
+    if (!reservation || reservation.status !== 'RESERVED') {
+      throw new Error(`예약을 해제할 수 없습니다: ${reservationId}`);
+    }
+
+    const inventory = await this.inventoryRepo.findByProductId(reservation.productId);
+    if (!inventory) throw new Error('상품을 찾을 수 없습니다');
+
+    inventory.reservedQuantity -= reservation.quantity;
+    inventory.version += 1;
+    await this.inventoryRepo.save(inventory);
+
+    reservation.status = 'RELEASED';
+    await this.reservationRepo.save(reservation);
+  }
+
+  /**
+   * 재고 복원 (반품 완료 시)
+   */
+  async restore(productId: string, quantity: number): Promise<void> {
+    const inventory = await this.inventoryRepo.findByProductId(productId);
+    if (!inventory) throw new Error('상품을 찾을 수 없습니다');
+
+    inventory.totalQuantity += quantity;
+    inventory.version += 1;
+    await this.inventoryRepo.save(inventory);
+  }
+}

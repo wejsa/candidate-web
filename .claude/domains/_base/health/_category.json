@@ -1,0 +1,50 @@
+{
+  "description": "코드베이스 건강 검진 카테고리 정의 (_base)",
+  "categories": [
+    {
+      "id": "doc-sync",
+      "name": "문서 ↔ 코드 동기화",
+      "description": "에이전트가 참조하는 문서와 실제 코드의 일치 여부",
+      "weight": 32,
+      "failCap": 50
+    },
+    {
+      "id": "state-integrity",
+      "name": "상태 파일 정합성",
+      "description": "backlog.json 등 상태 파일과 Git 현실의 일치 여부",
+      "weight": 23,
+      "failCap": 50
+    },
+    {
+      "id": "security",
+      "name": "기본 보안",
+      "description": "민감정보 노출, SQL Injection, CORS, 인증 등 기본 보안 검사",
+      "weight": 23,
+      "failCap": 40
+    },
+    {
+      "id": "agent-config",
+      "name": "에이전트 설정 유효성",
+      "description": "에이전트 정의, 스킬 파일의 구성 유효성",
+      "weight": 12,
+      "failCap": 70
+    },
+    {
+      "id": "hook-safety",
+      "name": "훅 안전성 (Hook Integrity Audit)",
+      "description": "settings.json hooks와 .claude/hooks/ 스크립트의 위험 패턴/외부 참조/비블로킹 규칙 검사",
+      "weight": 10,
+      "failCap": 40
+    }
+  ],
+  "scoring": {
+    "gradeThresholds": {
+      "HEALTHY": 90,
+      "NEEDS_ATTENTION": 70,
+      "AT_RISK": 50,
+      "CRITICAL": 0
+    },
+    "severityWeights": { "CRITICAL": 3, "MAJOR": 2, "MINOR": 1 },
+    "criticalFailCap": true
+  }
+}

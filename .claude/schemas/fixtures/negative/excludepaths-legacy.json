@@ -1,0 +1,14 @@
+{
+  "name": "bad-legacy-excludepaths",
+  "domain": "general",
+  "version": "2.0.0",
+  "hooks": {
+    "SessionStart": [],
+    "PostToolUse": [],
+    "Stop": [],
+    "excludePaths": [
+      ".claude/state/",
+      ".claude/temp/"
+    ]
+  }
+}

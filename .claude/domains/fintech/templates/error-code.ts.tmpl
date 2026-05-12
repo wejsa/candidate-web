@@ -1,0 +1,87 @@
+/**
+ * {{SERVICE_NAME}} 에러 코드 체계
+ *
+ * 코드 범위:
+ *   001-099: 인증/인가
+ *   100-199: 유효성 검증
+ *   200-299: 비즈니스 로직
+ *   300-399: 외부 서비스
+ *   900-999: 시스템
+ *
+ * Task: {{TASK_ID}}
+ * Created: {{CREATED_AT}}
+ */
+
+// --- 에러 코드 정의 ---
+
+export interface ErrorCodeDef {
+  code: string;
+  httpStatus: number;
+  message: string;
+  retryable: boolean;
+}
+
+export const {{SERVICE_NAME}}ErrorCode = {
+  // 인증/인가 (001-099)
+  UNAUTHORIZED: { code: '{{ERROR_PREFIX}}-001', httpStatus: 401, message: '인증이 필요합니다', retryable: false },
+  FORBIDDEN: { code: '{{ERROR_PREFIX}}-002', httpStatus: 403, message: '권한이 없습니다', retryable: false },
+  TOKEN_EXPIRED: { code: '{{ERROR_PREFIX}}-003', httpStatus: 401, message: '토큰이 만료되었습니다', retryable: true },
+
+  // 유효성 검증 (100-199)
+  INVALID_REQUEST: { code: '{{ERROR_PREFIX}}-100', httpStatus: 400, message: '잘못된 요청입니다', retryable: false },
+  MISSING_FIELD: { code: '{{ERROR_PREFIX}}-101', httpStatus: 400, message: '필수 필드가 누락되었습니다', retryable: false },
+
+  // 비즈니스 로직 (200-299)
+  DUPLICATE_REQUEST: { code: '{{ERROR_PREFIX}}-200', httpStatus: 409, message: '중복 요청입니다', retryable: false },
+  INVALID_STATUS: { code: '{{ERROR_PREFIX}}-201', httpStatus: 422, message: '처리할 수 없는 상태입니다', retryable: false },
+
+  // 외부 서비스 (300-399)
+  EXTERNAL_SERVICE_ERROR: { code: '{{ERROR_PREFIX}}-300', httpStatus: 502, message: '외부 서비스 오류', retryable: true },
+  EXTERNAL_TIMEOUT: { code: '{{ERROR_PREFIX}}-301', httpStatus: 504, message: '외부 서비스 타임아웃', retryable: true },
+
+  // 시스템 (900-999)
+  INTERNAL_ERROR: { code: '{{ERROR_PREFIX}}-900', httpStatus: 500, message: '내부 서버 오류', retryable: false },
+  DATABASE_ERROR: { code: '{{ERROR_PREFIX}}-901', httpStatus: 500, message: '데이터베이스 오류', retryable: true },
+} as const satisfies Record<string, ErrorCodeDef>;
+
+export type {{SERVICE_NAME}}ErrorCodeKey = keyof typeof {{SERVICE_NAME}}ErrorCode;
+
+// --- 에러 응답 ---
+
+export interface ErrorResponse {
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+    timestamp: string;
+  };
+}
+
+// --- 커스텀 에러 클래스 ---
+
+export class {{SERVICE_NAME}}Error extends Error {
+  public readonly code: string;
+  public readonly httpStatus: number;
+  public readonly retryable: boolean;
+  public readonly details?: Record<string, unknown>;
+
+  constructor(errorCode: ErrorCodeDef, details?: Record<string, unknown>) {
+    super(errorCode.message);
+    this.name = '{{SERVICE_NAME}}Error';
+    this.code = errorCode.code;
+    this.httpStatus = errorCode.httpStatus;
+    this.retryable = errorCode.retryable;
+    this.details = details;
+  }
+
+  toResponse(): ErrorResponse {
+    return {
+      error: {
+        code: this.code,
+        message: this.message,
+        details: this.details,
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+}

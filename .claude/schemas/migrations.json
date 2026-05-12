@@ -1,0 +1,107 @@
+{
+  "description": "project.json 스키마 마이그레이션 + 신규 기능 안내 정의",
+  "migrations": [
+    {
+      "from": "*",
+      "to": "1.7.0",
+      "changes": [
+        {
+          "type": "add_field",
+          "path": "kitVersion",
+          "default": "${KIT_VERSION}",
+          "required": false
+        },
+        {
+          "type": "add_field",
+          "path": "kitSource",
+          "default": "${KIT_SOURCE}",
+          "required": false
+        }
+      ]
+    },
+    {
+      "from": "*",
+      "to": "1.39.0",
+      "changes": [
+        {
+          "type": "add_field",
+          "path": "backlog.step.prLineLimit",
+          "default": null,
+          "required": false
+        }
+      ]
+    },
+    {
+      "from": "*",
+      "to": "1.45.1",
+      "changes": [
+        {
+          "type": "add_gitignore_entry",
+          "entry": ".claude/worktrees/",
+          "comment": "Claude Code native worktrees (claude --worktree <name>, v2.1.49+)",
+          "trackedWarning": "이미 .claude/worktrees/를 추적 중이라면 `git rm --cached -r .claude/worktrees/` 실행 후 커밋 권장 (상태 파일 경합 방지)"
+        }
+      ]
+    },
+    {
+      "from": "*",
+      "to": "2.0.0",
+      "changes": [
+        {
+          "type": "add_field",
+          "path": "hooks",
+          "default": {},
+          "required": false
+        },
+        {
+          "type": "add_field",
+          "path": "conventions.skillProfile",
+          "default": "default",
+          "required": false
+        },
+        {
+          "type": "add_field",
+          "path": "conventions.overridePriority",
+          "default": "domain-first",
+          "required": false
+        },
+        {
+          "type": "add_field",
+          "path": "tokenHints",
+          "default": {},
+          "required": false
+        }
+      ]
+    }
+  ],
+  "features": [
+    {
+      "version": "1.39.0",
+      "items": [
+        {
+          "title": "스텝별 PR 라인 제한 자동 조정",
+          "description": "/skill-plan이 스텝 특성(마이그레이션, 서비스 구현, 테스트 등)에 따라 prLineLimit을 자동 설정합니다.",
+          "action": "none",
+          "detail": "별도 설정 불필요. 다음 /skill-plan 실행 시 자동 적용됩니다."
+        }
+      ]
+    },
+    {
+      "version": "2.0.0",
+      "items": [
+        {
+          "title": "스킬 프로파일",
+          "description": "프로젝트에 맞는 스킬 세트를 선택하여 CLAUDE.md에 필요한 스킬만 노출합니다.",
+          "action": "recommend",
+          "detail": "project.json의 conventions.skillProfile을 설정하세요. 기본값 'default'는 전체(full)와 동일합니다. developer, docs-only, custom 중 선택 가능."
+        },
+        {
+          "title": "스킬 복잡도 힌트 (complexity-hint)",
+          "description": "23개 SKILL.md에 complexity-hint (heavy/medium/light) 필드가 추가되어 토큰 예산 계획에 활용할 수 있습니다.",
+          "action": "optional",
+          "detail": "project.json의 tokenHints로 프로젝트별 오버라이드 가능. docs/token-optimization.md 참조. complexity-hint는 문서 안내용이며 모델 자동 전환은 하지 않습니다."
+        }
+      ]
+    }
+  ]
+}

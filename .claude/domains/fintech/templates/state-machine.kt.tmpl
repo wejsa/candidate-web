@@ -1,0 +1,108 @@
+/**
+ * {{ENTITY_NAME}} 상태 머신
+ *
+ * 생성일: {{CREATED_AT}}
+ * Task: {{TASK_ID}}
+ */
+package {{PACKAGE_NAME}}.domain.model
+
+import {{PACKAGE_NAME}}.domain.exception.InvalidStateTransitionException
+
+/**
+ * {{ENTITY_NAME}} 상태 정의
+ */
+enum class {{ENTITY_NAME}}Status(
+    val code: String,
+    val description: String,
+    val isFinal: Boolean = false
+) {
+    {{#each STATES}}
+    {{NAME}}("{{CODE}}", "{{DESCRIPTION}}", {{IS_FINAL}}){{#unless @last}},{{/unless}}
+    {{/each}};
+
+    companion object {
+        fun fromCode(code: String): {{ENTITY_NAME}}Status =
+            entries.find { it.code == code }
+                ?: throw IllegalArgumentException("Unknown status code: $code")
+    }
+}
+
+/**
+ * 상태 전이 규칙 정의
+ */
+object {{ENTITY_NAME}}StateTransitions {
+
+    private val allowedTransitions: Map<{{ENTITY_NAME}}Status, Set<{{ENTITY_NAME}}Status>> = mapOf(
+        {{#each TRANSITIONS}}
+        {{ENTITY_NAME}}Status.{{FROM}} to setOf(
+            {{#each TO}}
+            {{ENTITY_NAME}}Status.{{this}}{{#unless @last}},{{/unless}}
+            {{/each}}
+        ){{#unless @last}},{{/unless}}
+        {{/each}}
+    )
+
+    /**
+     * 상태 전이 가능 여부 확인
+     */
+    fun canTransition(from: {{ENTITY_NAME}}Status, to: {{ENTITY_NAME}}Status): Boolean {
+        return allowedTransitions[from]?.contains(to) ?: false
+    }
+
+    /**
+     * 상태 전이 실행 (검증 포함)
+     */
+    fun transition(from: {{ENTITY_NAME}}Status, to: {{ENTITY_NAME}}Status): {{ENTITY_NAME}}Status {
+        if (!canTransition(from, to)) {
+            throw InvalidStateTransitionException(
+                entityType = "{{ENTITY_NAME}}",
+                fromStatus = from.code,
+                toStatus = to.code
+            )
+        }
+        return to
+    }
+
+    /**
+     * 특정 상태에서 전이 가능한 상태 목록 조회
+     */
+    fun getAvailableTransitions(from: {{ENTITY_NAME}}Status): Set<{{ENTITY_NAME}}Status> {
+        return allowedTransitions[from] ?: emptySet()
+    }
+}
+
+/**
+ * 상태 전이 예외
+ */
+class InvalidStateTransitionException(
+    val entityType: String,
+    val fromStatus: String,
+    val toStatus: String
+) : RuntimeException(
+    "Invalid state transition for $entityType: $fromStatus -> $toStatus is not allowed"
+)
+
+/**
+ * 상태 이력 기록용 Entity
+ */
+data class {{ENTITY_NAME}}StatusHistory(
+    val id: Long? = null,
+    val {{ENTITY_NAME_LOWER}}Id: Long,
+    val fromStatus: {{ENTITY_NAME}}Status?,
+    val toStatus: {{ENTITY_NAME}}Status,
+    val reason: String? = null,
+    val changedBy: String,
+    val changedAt: java.time.Instant = java.time.Instant.now()
+)
+
+/*
+ * 사용 예시:
+ *
+ * // 상태 전이 검증
+ * if (PaymentStateTransitions.canTransition(payment.status, PaymentStatus.APPROVED)) {
+ *     payment.status = PaymentStateTransitions.transition(payment.status, PaymentStatus.APPROVED)
+ * }
+ *
+ * // 전이 가능한 상태 조회
+ * val availableStatuses = PaymentStateTransitions.getAvailableTransitions(payment.status)
+ */

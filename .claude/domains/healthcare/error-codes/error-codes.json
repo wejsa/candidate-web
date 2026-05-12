@@ -1,0 +1,219 @@
+{
+  "version": "1.0.0",
+  "prefix": "HC",
+  "description": "헬스케어 도메인 에러 코드 정의",
+  "categories": {
+    "phi-access": {
+      "range": "001-010",
+      "description": "PHI 접근 관련 오류"
+    },
+    "prescription": {
+      "range": "011-020",
+      "description": "처방 관련 오류"
+    },
+    "consent": {
+      "range": "021-030",
+      "description": "동의 관련 오류"
+    },
+    "appointment": {
+      "range": "031-040",
+      "description": "예약/진료 관련 오류"
+    },
+    "billing": {
+      "range": "041-050",
+      "description": "청구/수가 관련 오류"
+    },
+    "audit": {
+      "range": "051-060",
+      "description": "감사 로그 관련 오류"
+    },
+    "system": {
+      "range": "099",
+      "description": "시스템 오류"
+    }
+  },
+  "codes": [
+    {
+      "code": "HC-001",
+      "httpStatus": 403,
+      "name": "UNAUTHORIZED_PHI_ACCESS",
+      "message": "PHI 접근 권한이 없습니다",
+      "description": "환자 보호건강정보에 대한 접근 권한 없음"
+    },
+    {
+      "code": "HC-002",
+      "httpStatus": 403,
+      "name": "BTG_SESSION_EXPIRED",
+      "message": "Break-the-Glass 세션이 만료되었습니다",
+      "description": "긴급 접근 세션 시간 초과"
+    },
+    {
+      "code": "HC-003",
+      "httpStatus": 403,
+      "name": "PATIENT_PROVIDER_RELATIONSHIP_MISSING",
+      "message": "환자-의료진 관계가 설정되지 않았습니다",
+      "description": "담당 의료진 관계 미등록 상태에서 PHI 접근"
+    },
+    {
+      "code": "HC-004",
+      "httpStatus": 422,
+      "name": "PHI_DEIDENTIFICATION_FAILED",
+      "message": "PHI 비식별화 처리에 실패했습니다",
+      "description": "마스킹/익명화 처리 중 오류"
+    },
+    {
+      "code": "HC-005",
+      "httpStatus": 403,
+      "name": "PHI_EXPORT_DENIED",
+      "message": "PHI 외부 반출이 거부되었습니다",
+      "description": "승인 없이 PHI 데이터 외부 전송 시도"
+    },
+    {
+      "code": "HC-011",
+      "httpStatus": 422,
+      "name": "DUR_CRITICAL_BLOCK",
+      "message": "약물 안전성 검사에서 금기가 발견되었습니다",
+      "description": "DUR 검사 결과 심각한 약물 상호작용/금기"
+    },
+    {
+      "code": "HC-012",
+      "httpStatus": 422,
+      "name": "INVALID_PRESCRIPTION_TRANSITION",
+      "message": "허용되지 않는 처방 상태 전이입니다",
+      "description": "현재 처방 상태에서 요청 상태로 전이 불가"
+    },
+    {
+      "code": "HC-013",
+      "httpStatus": 410,
+      "name": "PRESCRIPTION_EXPIRED",
+      "message": "처방전 유효기간이 만료되었습니다",
+      "description": "조제 가능 기간 초과"
+    },
+    {
+      "code": "HC-014",
+      "httpStatus": 422,
+      "name": "NARCOTICS_VIOLATION",
+      "message": "마약류 처방 규정 위반입니다",
+      "description": "마약류 관리법 기준 초과 또는 필수 절차 미준수"
+    },
+    {
+      "code": "HC-015",
+      "httpStatus": 409,
+      "name": "DUPLICATE_PRESCRIPTION",
+      "message": "중복 처방입니다",
+      "description": "동일 환자에 동일 약물 중복 처방"
+    },
+    {
+      "code": "HC-016",
+      "httpStatus": 422,
+      "name": "DOSAGE_OUT_OF_RANGE",
+      "message": "투여량이 허용 범위를 벗어났습니다",
+      "description": "최대/최소 투여량 기준 초과"
+    },
+    {
+      "code": "HC-021",
+      "httpStatus": 403,
+      "name": "CONSENT_NOT_ACTIVE",
+      "message": "유효한 동의가 없습니다",
+      "description": "필요한 동의가 활성 상태가 아님"
+    },
+    {
+      "code": "HC-022",
+      "httpStatus": 403,
+      "name": "CONSENT_REVOKED",
+      "message": "동의가 철회되었습니다",
+      "description": "환자가 이전에 부여한 동의를 철회한 상태"
+    },
+    {
+      "code": "HC-023",
+      "httpStatus": 422,
+      "name": "MINOR_CONSENT_REQUIRED",
+      "message": "미성년자 법정대리인 동의가 필요합니다",
+      "description": "14세 미만 등 법정대리인 동의 필수"
+    },
+    {
+      "code": "HC-024",
+      "httpStatus": 422,
+      "name": "CONSENT_SCOPE_INSUFFICIENT",
+      "message": "동의 범위가 요청된 작업에 부족합니다",
+      "description": "부여된 동의 범위보다 넓은 데이터 접근 시도"
+    },
+    {
+      "code": "HC-031",
+      "httpStatus": 409,
+      "name": "APPOINTMENT_DOUBLE_BOOKING",
+      "message": "해당 시간에 이미 예약이 있습니다",
+      "description": "동일 의료진/시간대 중복 예약"
+    },
+    {
+      "code": "HC-032",
+      "httpStatus": 422,
+      "name": "APPOINTMENT_NO_SHOW",
+      "message": "예약 부도 처리되었습니다",
+      "description": "예약 시간 경과 후 미내원 자동 처리"
+    },
+    {
+      "code": "HC-033",
+      "httpStatus": 422,
+      "name": "INVALID_APPOINTMENT_TRANSITION",
+      "message": "허용되지 않는 예약 상태 전이입니다",
+      "description": "현재 예약 상태에서 요청 상태로 전이 불가"
+    },
+    {
+      "code": "HC-034",
+      "httpStatus": 422,
+      "name": "APPOINTMENT_CANCELLATION_TOO_LATE",
+      "message": "예약 취소 가능 시간이 지났습니다",
+      "description": "예약 시간 임박으로 취소 불가"
+    },
+    {
+      "code": "HC-041",
+      "httpStatus": 409,
+      "name": "DUPLICATE_CLAIM",
+      "message": "중복 청구입니다",
+      "description": "동일 진료 건에 대한 중복 보험 청구"
+    },
+    {
+      "code": "HC-042",
+      "httpStatus": 400,
+      "name": "INVALID_PROCEDURE_CODE",
+      "message": "유효하지 않은 수가 코드입니다",
+      "description": "존재하지 않거나 폐지된 진료행위 코드"
+    },
+    {
+      "code": "HC-043",
+      "httpStatus": 422,
+      "name": "CLAIM_ADJUDICATION_REJECTED",
+      "message": "청구 심사가 거부되었습니다",
+      "description": "건강보험심사평가원 심사 기준 미충족"
+    },
+    {
+      "code": "HC-051",
+      "httpStatus": 500,
+      "name": "AUDIT_LOG_WRITE_FAILURE",
+      "message": "감사 로그 기록에 실패했습니다",
+      "description": "감사 로그 저장소 쓰기 오류 - 원본 작업도 롤백"
+    },
+    {
+      "code": "HC-052",
+      "httpStatus": 500,
+      "name": "AUDIT_TAMPER_DETECTED",
+      "message": "감사 로그 위변조가 감지되었습니다",
+      "description": "해시 체인 검증 실패로 위변조 의심"
+    },
+    {
+      "code": "HC-053",
+      "httpStatus": 422,
+      "name": "AUDIT_RETENTION_VIOLATION",
+      "message": "감사 로그 보존 기간 위반입니다",
+      "description": "법적 보존 기간 이내 감사 로그 삭제 시도"
+    },
+    {
+      "code": "HC-099",
+      "httpStatus": 500,
+      "name": "INTERNAL_ERROR",
+      "message": "내부 서버 오류가 발생했습니다",
+      "description": "예상치 못한 시스템 오류"
+    }
+  ]
+}

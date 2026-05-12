@@ -1,0 +1,104 @@
+# Documentation Only Workflow
+# 문서화 전용 워크플로우
+
+name: docs-only
+displayName: "문서 작성/업데이트"
+description: "문서 작성 및 업데이트만 수행하는 워크플로우"
+
+triggers:
+  keywords:
+    - "문서"
+    - "README"
+    - "API 문서"
+    - "문서화"
+    - "document"
+    - "docs"
+    - "변경이력"
+    - "CHANGELOG"
+  explicit: "/workflow docs-only"
+
+steps:
+  - id: analyze
+    name: "문서 분석"
+    agent: agent-docs
+    input: "{{request}}"
+    output: "문서 분석 결과"
+    description: |
+      요청된 문서 작업을 분석합니다.
+      - 문서 유형 파악
+      - 대상 범위 결정
+      - 기존 문서 확인
+
+  - id: generate
+    name: "문서 생성/업데이트"
+    agent: agent-docs
+    input: "{{steps.analyze.output}}"
+    output: "생성된 문서"
+    description: |
+      문서를 생성하거나 업데이트합니다.
+
+      ## 지원 문서 유형
+      - **API 문서**: OpenAPI/Swagger 명세
+      - **README**: 프로젝트 소개 및 사용법
+      - **CHANGELOG**: 버전별 변경 이력
+      - **아키텍처 문서**: 시스템 구조 설명
+      - **가이드 문서**: 사용자/개발자 가이드
+
+  - id: review
+    name: "문서 검토"
+    input: "{{steps.generate.output}}"
+    output: "검토 결과"
+    gate: user_approval
+    description: |
+      생성된 문서를 검토합니다.
+      - 정확성 확인
+      - 완성도 확인
+      - 가독성 확인
+
+gates:
+  user_approval:
+    description: "문서 검토 및 승인"
+    type: manual
+    prompt: "문서 내용을 확인하시겠습니까? (Y/N)"
+
+documentTypes:
+  api:
+    name: "API 문서"
+    template: "templates/api-spec.yaml"
+    output: "docs/api-specs/"
+    triggers: ["API", "OpenAPI", "Swagger", "엔드포인트"]
+
+  readme:
+    name: "README"
+    template: "templates/README.md.tmpl"
+    output: "README.md"
+    triggers: ["README", "리드미", "프로젝트 소개"]
+
+  changelog:
+    name: "CHANGELOG"
+    template: "templates/CHANGELOG.md.tmpl"
+    output: "CHANGELOG.md"
+    triggers: ["CHANGELOG", "변경이력", "릴리스 노트"]
+
+  architecture:
+    name: "아키텍처 문서"
+    template: "templates/architecture.md.tmpl"
+    output: "docs/architecture/"
+    triggers: ["아키텍처", "구조", "설계"]
+
+  guide:
+    name: "가이드 문서"
+    template: "templates/guide.md.tmpl"
+    output: "docs/guides/"
+    triggers: ["가이드", "튜토리얼", "사용법"]
+
+autoUpdate:
+  onMerge:
+    - "CHANGELOG.md"
+  onApiChange:
+    - "docs/api-specs/"
+  onConfigChange:
+    - "README.md"
+
+estimatedDuration: "15분 ~ 2시간"
+priority: low

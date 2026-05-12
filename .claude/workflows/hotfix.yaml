@@ -1,0 +1,67 @@
+# Hotfix Workflow
+# 긴급 핫픽스 + 롤백 워크플로우
+
+name: hotfix
+displayName: "긴급 핫픽스"
+description: "main 브랜치 긴급 수정 또는 릴리스 롤백"
+
+triggers:
+  keywords:
+    - "긴급"
+    - "핫픽스"
+    - "hotfix"
+    - "장애"
+    - "rollback"
+    - "롤백"
+    - "긴급 수정"
+    - "긴급 패치"
+  explicit: "/workflow hotfix"
+
+steps:
+  - id: hotfix
+    name: "긴급 수정"
+    skill: skill-hotfix
+    input: "{{request}}"
+    output: "PR + 패치 릴리스"
+    gate: build_success
+    condition: "!request.includes('롤백') && !request.includes('rollback')"
+    description: |
+      main 브랜치에서 긴급 수정을 수행합니다.
+      - hotfix 브랜치 생성 (main 기반)
+      - 코드 수정 + 빌드/테스트
+      - 보안 리뷰 (pr-reviewer-security)
+      - PR 머지 → 패치 버전 범프 → 태그
+      - develop 백머지
+
+  - id: rollback
+    name: "릴리스 롤백"
+    skill: skill-rollback
+    input: "{{request}}"
+    output: "Revert PR + 패치 릴리스"
+    gate: build_success
+    condition: "request.includes('롤백') || request.includes('rollback')"
+    description: |
+      기존 릴리스 또는 PR을 안전하게 롤백합니다.
+      - git revert로 안전한 히스토리 보존
+      - Revert PR 생성 → 머지
+      - 패치 버전 범프 → 태그
+      - develop 백머지
+
+gates:
+  build_success:
+    description: "빌드 성공"
+    type: automatic
+    condition: "build.exitCode === 0"
+
+errorHandling:
+  buildFailure:
+    action: "retry"
+    maxRetries: 3
+    prompt: "빌드 실패. 수정 후 재시도하시겠습니까?"
+
+  revertConflict:
+    action: "manual"
+    prompt: "Revert 충돌이 발생했습니다. 수동으로 해결해주세요."
+
+estimatedDuration: "15분 ~ 1시간"
+priority: critical

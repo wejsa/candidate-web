@@ -1,0 +1,33 @@
+{
+  "description": "스킬 프로파일 정의 — CLAUDE.md에 노출할 스킬 세트를 프로파일별로 관리",
+  "internal": ["skill-fix", "skill-validate"],
+  "profiles": {
+    "developer": {
+      "description": "일상 개발 (계획 → 구현 → 리뷰 → 머지)",
+      "skills": [
+        "skill-status",
+        "skill-backlog",
+        "skill-feature",
+        "skill-plan",
+        "skill-impl",
+        "skill-review-pr",
+        "skill-merge-pr",
+        "skill-hotfix",
+        "skill-retro"
+      ]
+    },
+    "full": {
+      "description": "전체 스킬",
+      "skills": "*"
+    },
+    "docs-only": {
+      "description": "문서 작업 전용",
+      "skills": [
+        "skill-status",
+        "skill-docs",
+        "skill-create"
+      ]
+    }
+  },
+  "default": "full"
+}

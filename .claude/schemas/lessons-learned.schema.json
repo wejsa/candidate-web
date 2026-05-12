@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/wejsa/ai-crew-kit/.claude/schemas/lessons-learned.schema.json",
+  "title": "Lessons Learned (skill-retro)",
+  "description": "skill-retro가 누적하는 학습 항목 SSOT. impact 권장 임계값: appliedCount>=5 → high, >=3 → medium, <3 → low (skill-retro 출력에 정량 표시 — schema는 강제하지 않고 권장만). SSOT: .claude/skills/skill-retro/SKILL.md §5.3",
+  "type": "object",
+  "required": ["metadata", "lessons"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["version", "updatedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Monotonic increment on each write (skill-retro 동시성 가드)"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "lessons-learned.schema.json 호환 버전 (선택). 미설정 시 1.0.0 가정"
+        }
+      }
+    },
+    "lessons": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/lessonEntry" }
+    }
+  },
+  "definitions": {
+    "lessonEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "taskId",
+        "category",
+        "title",
+        "description",
+        "impact",
+        "tags",
+        "appliedCount",
+        "createdAt",
+        "updatedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^L-\\d{3,}$",
+          "description": "L-001 부터 시작. 자릿수는 3 이상으로 확장 가능"
+        },
+        "taskId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "completed.json 또는 backlog.json의 Task ID. cross-ref 검증 대상"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["quality", "performance", "architecture", "process", "security"]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "secrets 필터 대상 — SEC-S01~S05 매칭 시 CI FAIL"
+        },
+        "impact": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "appliedCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "domain": {
+          "type": "string",
+          "description": "선택 — 도메인 식별자. 미설정 시 tags 기반 추론"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,141 @@
+/**
+ * 감사 로그 (Audit Log)
+ *
+ * PCI-DSS / 전자금융감독규정 준수를 위한 감사 추적.
+ * 민감 데이터 자동 마스킹 포함.
+ *
+ * Task: {{TASK_ID}}
+ * Created: {{CREATED_AT}}
+ */
+
+// --- 이벤트 타입 ---
+
+export const AuditEventType = {
+  // 인증
+  LOGIN: 'LOGIN',
+  LOGOUT: 'LOGOUT',
+  LOGIN_FAILED: 'LOGIN_FAILED',
+
+  // 결제
+  PAYMENT_INITIATED: 'PAYMENT_INITIATED',
+  PAYMENT_APPROVED: 'PAYMENT_APPROVED',
+  PAYMENT_FAILED: 'PAYMENT_FAILED',
+
+  // 정산
+  SETTLEMENT_CREATED: 'SETTLEMENT_CREATED',
+  SETTLEMENT_COMPLETED: 'SETTLEMENT_COMPLETED',
+
+  // 데이터 접근
+  DATA_READ: 'DATA_READ',
+  DATA_CREATED: 'DATA_CREATED',
+  DATA_UPDATED: 'DATA_UPDATED',
+  DATA_DELETED: 'DATA_DELETED',
+
+  // 설정 변경
+  CONFIG_CHANGED: 'CONFIG_CHANGED',
+  PERMISSION_CHANGED: 'PERMISSION_CHANGED',
+
+  // 시스템
+  SYSTEM_ERROR: 'SYSTEM_ERROR',
+  SYSTEM_STARTUP: 'SYSTEM_STARTUP',
+} as const;
+
+export type AuditEventTypeValue = typeof AuditEventType[keyof typeof AuditEventType];
+
+// --- 감사 로그 엔티티 ---
+
+export interface AuditLog {
+  id: string;
+  eventType: AuditEventTypeValue;
+  userId?: string;
+  userIp?: string;
+  userAgent?: string;
+  resource: string;
+  action: string;
+  before?: Record<string, unknown>;
+  after?: Record<string, unknown>;
+  errorMessage?: string;
+  metadata?: Record<string, unknown>;
+  timestamp: Date;
+}
+
+// --- 민감 데이터 마스킹 ---
+
+export function maskSensitiveData(data: Record<string, unknown>): Record<string, unknown> {
+  const masked = { ...data };
+
+  for (const [key, value] of Object.entries(masked)) {
+    if (typeof value !== 'string') continue;
+
+    const lowerKey = key.toLowerCase();
+
+    if (lowerKey.includes('email')) {
+      masked[key] = maskEmail(value);
+    } else if (lowerKey.includes('card') || lowerKey.includes('pan')) {
+      masked[key] = maskCardNumber(value);
+    } else if (lowerKey.includes('token') || lowerKey.includes('secret') || lowerKey.includes('password')) {
+      masked[key] = '********';
+    } else if (lowerKey.includes('phone') || lowerKey.includes('mobile')) {
+      masked[key] = maskPhone(value);
+    }
+  }
+
+  return masked;
+}
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***@***';
+  const maskedLocal = local.length <= 2 ? '*'.repeat(local.length) : local[0] + '*'.repeat(local.length - 2) + local[local.length - 1];
+  return `${maskedLocal}@${domain}`;
+}
+
+function maskCardNumber(card: string): string {
+  const digits = card.replace(/\D/g, '');
+  if (digits.length < 8) return '****';
+  return digits.slice(0, 6) + '*'.repeat(digits.length - 10) + digits.slice(-4);
+}
+
+function maskPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 7) return '***-****';
+  return digits.slice(0, 3) + '-****-' + digits.slice(-4);
+}
+
+// --- 감사 로거 ---
+
+export interface AuditLogRepository {
+  save(log: AuditLog): Promise<void>;
+}
+
+export class AuditLogger {
+  constructor(private readonly repository: AuditLogRepository) {}
+
+  async log(params: {
+    eventType: AuditEventTypeValue;
+    resource: string;
+    action: string;
+    userId?: string;
+    userIp?: string;
+    before?: Record<string, unknown>;
+    after?: Record<string, unknown>;
+    errorMessage?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<void> {
+    const log: AuditLog = {
+      id: crypto.randomUUID(),
+      eventType: params.eventType,
+      userId: params.userId,
+      userIp: params.userIp,
+      resource: params.resource,
+      action: params.action,
+      before: params.before ? maskSensitiveData(params.before) : undefined,
+      after: params.after ? maskSensitiveData(params.after) : undefined,
+      errorMessage: params.errorMessage,
+      metadata: params.metadata,
+      timestamp: new Date(),
+    };
+
+    await this.repository.save(log);
+  }
+}

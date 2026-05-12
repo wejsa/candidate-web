@@ -1,0 +1,177 @@
+# Full Feature Development Workflow
+# 기획부터 배포까지 전체 기능 개발 워크플로우
+
+name: full-feature
+displayName: "전체 기능 개발"
+description: "기획부터 배포까지 전체 기능 개발 워크플로우"
+
+triggers:
+  keywords:
+    - "새 기능"
+    - "기능 추가"
+    - "구현해줘"
+    - "만들어줘"
+    - "개발해줘"
+  explicit: "/workflow full-feature"
+
+steps:
+  - id: plan
+    name: "요구사항 정의"
+    agent: agent-planner
+    skill: skill-feature
+    input: "{{request}}"
+    output: "docs/requirements/{{taskId}}-spec.md"
+    gate: user_approval
+    description: |
+      사용자 요청을 분석하여 구조화된 요구사항 문서를 작성합니다.
+      - 기능 개요 및 목적
+      - 상세 요구사항
+      - 비기능 요구사항
+      - 수용 기준
+
+  - id: design_db
+    name: "DB 설계"
+    agent: agent-db-designer
+    skill: skill-plan
+    input: "{{steps.plan.output}}"
+    output: "docs/architecture/{{taskId}}-erd.md"
+    gate: user_approval
+    condition: "agents.db-designer.enabled"
+    description: |
+      요구사항을 기반으로 데이터베이스를 설계합니다.
+      - ERD 다이어그램
+      - 테이블 스키마
+      - 인덱스 전략
+      - 마이그레이션 스크립트
+
+  - id: design_code
+    name: "코드 설계"
+    agent: agent-backend
+    skill: skill-plan
+    input:
+      - "{{steps.plan.output}}"
+      - "{{steps.design_db.output}}"
+    output: ".claude/temp/{{taskId}}-plan.md"
+    gate: user_approval
+    description: |
+      구현을 위한 상세 설계와 스텝 계획을 수립합니다.
+      - 아키텍처 설계
+      - API 인터페이스 정의
+      - 스텝별 구현 계획 (500라인 미만)
+
+  - id: implement
+    name: "코드 구현"
+    agent: agent-backend
+    skill: skill-impl
+    input: "{{steps.design_code.output}}"
+    output: "PR"
+    gate: build_success
+    loop: per_step
+    description: |
+      설계에 따라 코드를 구현합니다.
+      - 스텝별 PR 생성
+      - 빌드 및 테스트 검증
+      - 라인 수 제한 준수
+
+  - id: implement_frontend
+    name: "프론트엔드 구현"
+    agent: agent-frontend
+    skill: skill-impl
+    input: "{{steps.design_code.output}}"
+    output: "PR"
+    gate: build_success
+    loop: per_step
+    condition: "agents.frontend.enabled"
+    description: |
+      프론트엔드 코드를 구현합니다.
+      - UI 컴포넌트 구현
+      - 상태 관리
+      - API 연동
+
+  - id: review
+    name: "코드 리뷰"
+    agent: agent-code-reviewer
+    skill: skill-review-pr
+    input: "{{steps.implement.output}}"
+    output: "리뷰 결과"
+    gate: critical_zero
+    description: |
+      5관점 통합 리뷰를 수행합니다.
+      - 컴플라이언스
+      - 도메인 로직
+      - 아키텍처
+      - 보안
+      - 테스트 품질
+
+  - id: test
+    name: "품질 검증"
+    agent: agent-qa
+    input: "{{steps.implement.output}}"
+    output: "테스트 리포트"
+    gate: test_pass
+    condition: "agents.qa.enabled"
+    description: |
+      테스트 케이스를 설계하고 품질을 검증합니다.
+      - 테스트 시나리오 설계
+      - 자동화 테스트 실행
+      - 커버리지 검증
+
+  - id: merge
+    name: "PR 머지"
+    skill: skill-merge-pr
+    input: "{{steps.review.output}}"
+    gate: review_approved
+    description: |
+      리뷰 승인된 PR을 머지합니다.
+
+  - id: document
+    name: "문서 업데이트"
+    agent: agent-docs
+    input: "{{steps.implement.output}}"
+    output: "API 문서 업데이트"
+    condition: "agents.docs.enabled"
+    description: |
+      관련 문서를 자동으로 업데이트합니다.
+      - API 문서 (OpenAPI)
+      - README 업데이트
+      - 변경 이력 기록
+
+gates:
+  user_approval:
+    description: "사용자 승인 대기"
+    type: manual
+    prompt: "진행하시겠습니까? (Y/N)"
+
+  build_success:
+    description: "빌드 성공"
+    type: automatic
+    condition: "build.exitCode === 0"
+
+  critical_zero:
+    description: "CRITICAL 이슈 0개"
+    type: automatic
+    condition: "review.critical === 0"
+
+  test_pass:
+    description: "테스트 통과"
+    type: automatic
+    condition: "test.passed && test.coverage >= 80"
+
+  review_approved:
+    description: "리뷰 승인 완료"
+    type: manual
+    prompt: "리뷰가 승인되었습니다. 머지하시겠습니까? (Y/N)"
+
+errorHandling:
+  buildFailure:
+    action: "retry"
+    maxRetries: 3
+    prompt: "빌드 실패. 수정 후 재시도하시겠습니까?"
+
+  reviewRejected:
+    action: "fix"
+    prompt: "리뷰 이슈가 있습니다. 수정하시겠습니까?"
+
+  timeout:
+    action: "save_and_prompt"
+    prompt: "타임아웃. 중간 결과를 저장하고 재시도하시겠습니까?"

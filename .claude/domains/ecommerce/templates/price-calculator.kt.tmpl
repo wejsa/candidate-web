@@ -1,0 +1,362 @@
+/**
+ * 가격 계산기
+ *
+ * 이커머스 주문의 가격, 할인, 배송비를 계산합니다.
+ * 쿠폰 중복 사용 방지, 할인 한도, 부분취소 시 환불 금액 계산을 포함합니다.
+ *
+ * 생성일: {{CREATED_AT}}
+ * Task: {{TASK_ID}}
+ */
+package {{PACKAGE_NAME}}.domain.pricing
+
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.time.Instant
+
+/**
+ * 가격 계산 결과
+ */
+data class PriceCalculation(
+    val itemsTotal: BigDecimal,           // 상품 합계
+    val discountTotal: BigDecimal,        // 총 할인액
+    val shippingFee: BigDecimal,          // 배송비
+    val finalAmount: BigDecimal,          // 최종 결제 금액
+    val appliedDiscounts: List<AppliedDiscount>,  // 적용된 할인 내역
+    val breakdown: List<ItemPriceBreakdown>       // 상품별 가격 분배 (환불 계산용)
+)
+
+/**
+ * 적용된 할인 내역
+ */
+data class AppliedDiscount(
+    val type: DiscountType,
+    val code: String?,           // 쿠폰 코드 등
+    val name: String,
+    val amount: BigDecimal,
+    val appliedTo: List<Long>    // 적용된 상품 ID 목록
+)
+
+enum class DiscountType {
+    COUPON,           // 쿠폰 할인
+    PROMOTION,        // 프로모션 할인
+    GRADE_DISCOUNT,   // 회원 등급 할인
+    CART_DISCOUNT,    // 장바구니 할인 (N만원 이상 X% 할인 등)
+    SHIPPING_FREE     // 무료 배송
+}
+
+/**
+ * 상품별 가격 분배 (부분취소 시 환불 계산용)
+ */
+data class ItemPriceBreakdown(
+    val productId: Long,
+    val quantity: Int,
+    val unitPrice: BigDecimal,
+    val originalAmount: BigDecimal,      // 할인 전 금액
+    val discountAmount: BigDecimal,      // 해당 상품에 배분된 할인
+    val finalAmount: BigDecimal,         // 실제 결제 금액
+    val shippingAmount: BigDecimal       // 배분된 배송비
+)
+
+/**
+ * 쿠폰 정보
+ */
+data class Coupon(
+    val id: Long,
+    val code: String,
+    val name: String,
+    val discountType: CouponDiscountType,
+    val discountValue: BigDecimal,       // 금액 또는 비율
+    val maxDiscount: BigDecimal?,        // 최대 할인 한도
+    val minOrderAmount: BigDecimal?,     // 최소 주문 금액
+    val applicableProducts: Set<Long>?,  // 적용 가능 상품 (null = 전체)
+    val validFrom: Instant,
+    val validUntil: Instant,
+    val isUsed: Boolean = false
+)
+
+enum class CouponDiscountType {
+    FIXED_AMOUNT,    // 고정 금액 할인
+    PERCENTAGE       // 비율 할인
+}
+
+/**
+ * 가격 계산기
+ */
+class PriceCalculator {
+
+    companion object {
+        val ZERO = BigDecimal.ZERO.setScale(0, RoundingMode.DOWN)
+        const val DEFAULT_SCALE = 0  // 원 단위
+        val ROUNDING_MODE = RoundingMode.DOWN  // 절사
+
+        // 배송비 정책
+        val FREE_SHIPPING_THRESHOLD = BigDecimal("50000")  // 5만원 이상 무료 배송
+        val DEFAULT_SHIPPING_FEE = BigDecimal("3000")
+        val REMOTE_AREA_FEE = BigDecimal("3000")  // 도서산간 추가 배송비
+    }
+
+    /**
+     * 주문 가격 계산
+     */
+    fun calculate(
+        items: List<OrderItemInput>,
+        coupons: List<Coupon> = emptyList(),
+        memberGrade: MemberGrade = MemberGrade.NORMAL,
+        isRemoteArea: Boolean = false
+    ): PriceCalculation {
+        // 1. 상품 합계 계산
+        val itemsTotal = items.sumOf { it.unitPrice * BigDecimal(it.quantity) }
+            .setScale(DEFAULT_SCALE, ROUNDING_MODE)
+
+        // 2. 할인 계산
+        val appliedDiscounts = mutableListOf<AppliedDiscount>()
+        var discountTotal = ZERO
+
+        // 2-1. 쿠폰 할인
+        coupons.filter { isValidCoupon(it, itemsTotal, items) }.forEach { coupon ->
+            val couponDiscount = calculateCouponDiscount(coupon, items)
+            if (couponDiscount > ZERO) {
+                appliedDiscounts.add(
+                    AppliedDiscount(
+                        type = DiscountType.COUPON,
+                        code = coupon.code,
+                        name = coupon.name,
+                        amount = couponDiscount,
+                        appliedTo = getApplicableProductIds(coupon, items)
+                    )
+                )
+                discountTotal += couponDiscount
+            }
+        }
+
+        // 2-2. 회원 등급 할인
+        val gradeDiscount = calculateGradeDiscount(itemsTotal, memberGrade)
+        if (gradeDiscount > ZERO) {
+            appliedDiscounts.add(
+                AppliedDiscount(
+                    type = DiscountType.GRADE_DISCOUNT,
+                    code = null,
+                    name = "${memberGrade.displayName} 등급 할인",
+                    amount = gradeDiscount,
+                    appliedTo = items.map { it.productId }
+                )
+            )
+            discountTotal += gradeDiscount
+        }
+
+        // 3. 배송비 계산
+        val subtotal = itemsTotal - discountTotal
+        var shippingFee = if (subtotal >= FREE_SHIPPING_THRESHOLD) ZERO else DEFAULT_SHIPPING_FEE
+
+        // 무료 배송 쿠폰 적용
+        if (coupons.any { it.discountType == CouponDiscountType.FIXED_AMOUNT && it.discountValue == ZERO }) {
+            shippingFee = ZERO
+            appliedDiscounts.add(
+                AppliedDiscount(
+                    type = DiscountType.SHIPPING_FREE,
+                    code = null,
+                    name = "무료 배송",
+                    amount = DEFAULT_SHIPPING_FEE,
+                    appliedTo = emptyList()
+                )
+            )
+        }
+
+        // 도서산간 추가 배송비
+        if (isRemoteArea) {
+            shippingFee += REMOTE_AREA_FEE
+        }
+
+        // 4. 최종 금액 계산 (음수 방지)
+        val finalAmount = maxOf(subtotal + shippingFee, ZERO)
+
+        // 5. 상품별 가격 분배 (부분취소/환불 계산용)
+        val breakdown = distributeDiscount(items, discountTotal, shippingFee)
+
+        return PriceCalculation(
+            itemsTotal = itemsTotal,
+            discountTotal = discountTotal,
+            shippingFee = shippingFee,
+            finalAmount = finalAmount,
+            appliedDiscounts = appliedDiscounts,
+            breakdown = breakdown
+        )
+    }
+
+    /**
+     * 부분 취소 시 환불 금액 계산
+     */
+    fun calculatePartialRefund(
+        originalCalculation: PriceCalculation,
+        cancelProductIds: Set<Long>
+    ): BigDecimal {
+        return originalCalculation.breakdown
+            .filter { it.productId in cancelProductIds }
+            .sumOf { it.finalAmount }
+            .setScale(DEFAULT_SCALE, ROUNDING_MODE)
+    }
+
+    private fun isValidCoupon(
+        coupon: Coupon,
+        orderAmount: BigDecimal,
+        items: List<OrderItemInput>
+    ): Boolean {
+        val now = Instant.now()
+
+        // 유효 기간 확인
+        if (now.isBefore(coupon.validFrom) || now.isAfter(coupon.validUntil)) {
+            return false
+        }
+
+        // 사용 여부 확인
+        if (coupon.isUsed) {
+            return false
+        }
+
+        // 최소 주문 금액 확인
+        coupon.minOrderAmount?.let {
+            if (orderAmount < it) return false
+        }
+
+        // 적용 가능 상품 확인
+        coupon.applicableProducts?.let { applicableIds ->
+            if (items.none { it.productId in applicableIds }) return false
+        }
+
+        return true
+    }
+
+    private fun calculateCouponDiscount(
+        coupon: Coupon,
+        items: List<OrderItemInput>
+    ): BigDecimal {
+        val applicableItems = coupon.applicableProducts?.let { applicableIds ->
+            items.filter { it.productId in applicableIds }
+        } ?: items
+
+        val applicableAmount = applicableItems.sumOf { it.unitPrice * BigDecimal(it.quantity) }
+
+        var discount = when (coupon.discountType) {
+            CouponDiscountType.FIXED_AMOUNT -> coupon.discountValue
+            CouponDiscountType.PERCENTAGE -> applicableAmount * coupon.discountValue / BigDecimal(100)
+        }
+
+        // 최대 할인 한도 적용
+        coupon.maxDiscount?.let {
+            discount = minOf(discount, it)
+        }
+
+        return discount.setScale(DEFAULT_SCALE, ROUNDING_MODE)
+    }
+
+    private fun calculateGradeDiscount(
+        amount: BigDecimal,
+        grade: MemberGrade
+    ): BigDecimal {
+        if (grade.discountRate == BigDecimal.ZERO) return ZERO
+
+        return (amount * grade.discountRate / BigDecimal(100))
+            .setScale(DEFAULT_SCALE, ROUNDING_MODE)
+    }
+
+    private fun getApplicableProductIds(
+        coupon: Coupon,
+        items: List<OrderItemInput>
+    ): List<Long> {
+        return coupon.applicableProducts?.let { applicableIds ->
+            items.filter { it.productId in applicableIds }.map { it.productId }
+        } ?: items.map { it.productId }
+    }
+
+    /**
+     * 할인 금액을 상품별로 비례 분배
+     */
+    private fun distributeDiscount(
+        items: List<OrderItemInput>,
+        totalDiscount: BigDecimal,
+        shippingFee: BigDecimal
+    ): List<ItemPriceBreakdown> {
+        val itemsTotal = items.sumOf { it.unitPrice * BigDecimal(it.quantity) }
+
+        return items.map { item ->
+            val originalAmount = item.unitPrice * BigDecimal(item.quantity)
+
+            // 할인 비례 분배
+            val discountRatio = if (itemsTotal > ZERO) {
+                originalAmount.divide(itemsTotal, 10, RoundingMode.HALF_UP)
+            } else BigDecimal.ZERO
+
+            val discountAmount = (totalDiscount * discountRatio)
+                .setScale(DEFAULT_SCALE, ROUNDING_MODE)
+
+            // 배송비 비례 분배
+            val shippingAmount = (shippingFee * discountRatio)
+                .setScale(DEFAULT_SCALE, ROUNDING_MODE)
+
+            ItemPriceBreakdown(
+                productId = item.productId,
+                quantity = item.quantity,
+                unitPrice = item.unitPrice,
+                originalAmount = originalAmount,
+                discountAmount = discountAmount,
+                finalAmount = originalAmount - discountAmount + shippingAmount,
+                shippingAmount = shippingAmount
+            )
+        }
+    }
+}
+
+data class OrderItemInput(
+    val productId: Long,
+    val quantity: Int,
+    val unitPrice: BigDecimal
+)
+
+enum class MemberGrade(
+    val displayName: String,
+    val discountRate: BigDecimal
+) {
+    NORMAL("일반", BigDecimal.ZERO),
+    SILVER("실버", BigDecimal("1")),
+    GOLD("골드", BigDecimal("3")),
+    VIP("VIP", BigDecimal("5")),
+    VVIP("VVIP", BigDecimal("7"))
+}
+
+/*
+ * 사용 예시:
+ *
+ * val calculator = PriceCalculator()
+ *
+ * val items = listOf(
+ *     OrderItemInput(productId = 1L, quantity = 2, unitPrice = BigDecimal("15000")),
+ *     OrderItemInput(productId = 2L, quantity = 1, unitPrice = BigDecimal("25000"))
+ * )
+ *
+ * val coupon = Coupon(
+ *     id = 1L,
+ *     code = "WELCOME10",
+ *     name = "신규회원 10% 할인",
+ *     discountType = CouponDiscountType.PERCENTAGE,
+ *     discountValue = BigDecimal("10"),
+ *     maxDiscount = BigDecimal("5000"),
+ *     minOrderAmount = BigDecimal("30000"),
+ *     applicableProducts = null,
+ *     validFrom = Instant.now().minusDays(1),
+ *     validUntil = Instant.now().plusDays(30)
+ * )
+ *
+ * val result = calculator.calculate(
+ *     items = items,
+ *     coupons = listOf(coupon),
+ *     memberGrade = MemberGrade.GOLD
+ * )
+ *
+ * println("상품 합계: ${result.itemsTotal}")     // 55,000
+ * println("할인 합계: ${result.discountTotal}")  // 5,000 (쿠폰 최대) + 1,650 (골드 3%)
+ * println("배송비: ${result.shippingFee}")       // 0 (5만원 이상)
+ * println("최종 금액: ${result.finalAmount}")    // 48,350
+ *
+ * // 부분 취소 환불 금액 계산
+ * val refund = calculator.calculatePartialRefund(result, setOf(1L))
+ */

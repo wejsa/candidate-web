@@ -1,0 +1,92 @@
+# Quick Fix Workflow
+# 빠른 버그 수정 워크플로우
+
+name: quick-fix
+displayName: "빠른 버그 수정"
+description: "긴급 버그 수정을 위한 간소화된 워크플로우"
+
+triggers:
+  keywords:
+    - "버그"
+    - "수정해줘"
+    - "고쳐줘"
+    - "오류"
+    - "에러"
+    - "fix"
+    - "hotfix"
+  explicit: "/workflow quick-fix"
+
+steps:
+  - id: analyze
+    name: "버그 분석"
+    agent: agent-backend
+    input: "{{request}}"
+    output: "버그 분석 결과"
+    description: |
+      버그를 분석하고 원인을 파악합니다.
+      - 재현 단계 확인
+      - 영향 범위 분석
+      - 근본 원인 파악
+
+  - id: fix
+    name: "버그 수정"
+    agent: agent-backend
+    skill: skill-impl
+    input: "{{steps.analyze.output}}"
+    output: "PR"
+    gate: build_success
+    description: |
+      버그를 수정하고 PR을 생성합니다.
+      - 수정 코드 작성
+      - 회귀 테스트 추가
+      - 빌드 검증
+
+  - id: review
+    name: "코드 리뷰"
+    agent: agent-code-reviewer
+    skill: skill-review-pr
+    input: "{{steps.fix.output}}"
+    output: "리뷰 결과"
+    gate: critical_zero
+    description: |
+      버그 수정 코드를 리뷰합니다.
+      - 수정 적절성 확인
+      - 부작용 검토
+      - 테스트 충분성 확인
+
+  - id: merge
+    name: "PR 머지"
+    skill: skill-merge-pr
+    input: "{{steps.review.output}}"
+    gate: review_approved
+    description: |
+      리뷰 승인된 PR을 머지합니다.
+
+gates:
+  build_success:
+    description: "빌드 성공"
+    type: automatic
+    condition: "build.exitCode === 0"
+
+  critical_zero:
+    description: "CRITICAL 이슈 0개"
+    type: automatic
+    condition: "review.critical === 0"
+
+  review_approved:
+    description: "리뷰 승인 완료"
+    type: manual
+    prompt: "리뷰가 승인되었습니다. 머지하시겠습니까? (Y/N)"
+
+errorHandling:
+  buildFailure:
+    action: "retry"
+    maxRetries: 3
+    prompt: "빌드 실패. 수정 후 재시도하시겠습니까?"
+
+  reviewRejected:
+    action: "fix"
+    prompt: "리뷰 이슈가 있습니다. 수정하시겠습니까?"
+
+estimatedDuration: "30분 ~ 2시간"
+priority: high

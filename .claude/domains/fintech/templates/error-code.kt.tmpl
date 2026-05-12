@@ -1,0 +1,120 @@
+/**
+ * {{SERVICE_NAME}} 에러 코드 정의
+ *
+ * 에러 코드 체계: {{ERROR_PREFIX}}-XXX
+ *
+ * 생성일: {{CREATED_AT}}
+ * Task: {{TASK_ID}}
+ */
+package {{PACKAGE_NAME}}.domain.exception
+
+import org.springframework.http.HttpStatus
+
+/**
+ * 에러 코드 enum
+ *
+ * 코드 범위:
+ * - 001-099: 인증/인가 오류
+ * - 100-199: 입력 검증 오류
+ * - 200-299: 비즈니스 로직 오류
+ * - 300-399: 외부 연동 오류
+ * - 900-999: 시스템 오류
+ */
+enum class {{SERVICE_NAME}}ErrorCode(
+    val code: String,
+    val httpStatus: HttpStatus,
+    val message: String,
+    val retryable: Boolean = false
+) {
+    // ========== 인증/인가 (001-099) ==========
+    TOKEN_MISSING("{{ERROR_PREFIX}}-001", HttpStatus.UNAUTHORIZED, "인증 토큰이 없습니다"),
+    TOKEN_INVALID_FORMAT("{{ERROR_PREFIX}}-002", HttpStatus.UNAUTHORIZED, "토큰 형식이 올바르지 않습니다"),
+    TOKEN_EXPIRED("{{ERROR_PREFIX}}-003", HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다"),
+    TOKEN_INVALID_SIGNATURE("{{ERROR_PREFIX}}-004", HttpStatus.UNAUTHORIZED, "토큰 서명이 유효하지 않습니다"),
+    ACCESS_DENIED("{{ERROR_PREFIX}}-005", HttpStatus.FORBIDDEN, "접근 권한이 없습니다"),
+    RATE_LIMIT_EXCEEDED("{{ERROR_PREFIX}}-006", HttpStatus.TOO_MANY_REQUESTS, "요청 한도를 초과했습니다", retryable = true),
+
+    // ========== 입력 검증 (100-199) ==========
+    INVALID_REQUEST("{{ERROR_PREFIX}}-100", HttpStatus.BAD_REQUEST, "잘못된 요청입니다"),
+    INVALID_PARAMETER("{{ERROR_PREFIX}}-101", HttpStatus.BAD_REQUEST, "잘못된 파라미터입니다"),
+    MISSING_REQUIRED_FIELD("{{ERROR_PREFIX}}-102", HttpStatus.BAD_REQUEST, "필수 필드가 누락되었습니다"),
+    INVALID_FORMAT("{{ERROR_PREFIX}}-103", HttpStatus.BAD_REQUEST, "형식이 올바르지 않습니다"),
+    PAYLOAD_TOO_LARGE("{{ERROR_PREFIX}}-104", HttpStatus.PAYLOAD_TOO_LARGE, "요청 본문이 너무 큽니다"),
+
+    // ========== 비즈니스 로직 (200-299) ==========
+    RESOURCE_NOT_FOUND("{{ERROR_PREFIX}}-200", HttpStatus.NOT_FOUND, "리소스를 찾을 수 없습니다"),
+    DUPLICATE_REQUEST("{{ERROR_PREFIX}}-201", HttpStatus.CONFLICT, "중복된 요청입니다"),
+    INVALID_STATE_TRANSITION("{{ERROR_PREFIX}}-202", HttpStatus.CONFLICT, "상태 전이가 허용되지 않습니다"),
+    INSUFFICIENT_BALANCE("{{ERROR_PREFIX}}-203", HttpStatus.UNPROCESSABLE_ENTITY, "잔액이 부족합니다"),
+    OPERATION_NOT_ALLOWED("{{ERROR_PREFIX}}-204", HttpStatus.FORBIDDEN, "허용되지 않은 작업입니다"),
+
+    // ========== 외부 연동 (300-399) ==========
+    EXTERNAL_SERVICE_ERROR("{{ERROR_PREFIX}}-300", HttpStatus.BAD_GATEWAY, "외부 서비스 오류", retryable = true),
+    EXTERNAL_SERVICE_TIMEOUT("{{ERROR_PREFIX}}-301", HttpStatus.GATEWAY_TIMEOUT, "외부 서비스 응답 시간 초과", retryable = true),
+    EXTERNAL_SERVICE_UNAVAILABLE("{{ERROR_PREFIX}}-302", HttpStatus.SERVICE_UNAVAILABLE, "외부 서비스 이용 불가", retryable = true),
+
+    // ========== 시스템 (900-999) ==========
+    INTERNAL_ERROR("{{ERROR_PREFIX}}-900", HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류"),
+    DATABASE_ERROR("{{ERROR_PREFIX}}-901", HttpStatus.INTERNAL_SERVER_ERROR, "데이터베이스 오류"),
+    CACHE_ERROR("{{ERROR_PREFIX}}-902", HttpStatus.INTERNAL_SERVER_ERROR, "캐시 오류", retryable = true),
+    CONFIGURATION_ERROR("{{ERROR_PREFIX}}-903", HttpStatus.INTERNAL_SERVER_ERROR, "설정 오류");
+
+    companion object {
+        fun fromCode(code: String): {{SERVICE_NAME}}ErrorCode? =
+            entries.find { it.code == code }
+    }
+}
+
+/**
+ * 도메인 예외 기본 클래스
+ */
+open class {{SERVICE_NAME}}Exception(
+    val errorCode: {{SERVICE_NAME}}ErrorCode,
+    override val message: String = errorCode.message,
+    override val cause: Throwable? = null,
+    val details: Map<String, Any>? = null
+) : RuntimeException(message, cause) {
+
+    val code: String get() = errorCode.code
+    val httpStatus: HttpStatus get() = errorCode.httpStatus
+    val retryable: Boolean get() = errorCode.retryable
+}
+
+/**
+ * 에러 응답 DTO
+ */
+data class ErrorResponse(
+    val code: String,
+    val message: String,
+    val details: Map<String, Any>? = null,
+    val traceId: String? = null,
+    val timestamp: java.time.Instant = java.time.Instant.now()
+) {
+    companion object {
+        fun from(exception: {{SERVICE_NAME}}Exception, traceId: String? = null): ErrorResponse {
+            return ErrorResponse(
+                code = exception.code,
+                message = exception.message,
+                details = exception.details,
+                traceId = traceId
+            )
+        }
+    }
+}
+
+/*
+ * 사용 예시:
+ *
+ * // 예외 발생
+ * throw GatewayException(
+ *     errorCode = GatewayErrorCode.TOKEN_EXPIRED,
+ *     details = mapOf("expiredAt" to expiration)
+ * )
+ *
+ * // 에러 응답 생성
+ * @ExceptionHandler(GatewayException::class)
+ * fun handleGatewayException(ex: GatewayException): ResponseEntity<ErrorResponse> {
+ *     val response = ErrorResponse.from(ex, MDC.get("traceId"))
+ *     return ResponseEntity.status(ex.httpStatus).body(response)
+ * }
+ */

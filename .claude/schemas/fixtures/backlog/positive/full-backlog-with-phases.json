@@ -1,0 +1,172 @@
+{
+  "metadata": {
+    "lastTaskNumber": 12,
+    "version": 1,
+    "projectPrefix": "TASK",
+    "createdAt": "2026-05-11T00:00:00+00:00",
+    "updatedAt": "2026-05-11T00:00:00+00:00"
+  },
+  "summary": {
+    "total": 12,
+    "done": 0,
+    "inProgress": 0,
+    "review": 0,
+    "todo": 12
+  },
+  "phases": {
+    "1": {
+      "name": "기반/인프라",
+      "description": "인증/스키마/공통 모듈",
+      "status": "todo"
+    },
+    "2": {
+      "name": "핵심 도메인",
+      "description": "보드/카드 핵심 흐름",
+      "status": "todo"
+    },
+    "3": {
+      "name": "부가 기능",
+      "description": "검색/알림/통계",
+      "status": "todo"
+    },
+    "4": {
+      "name": "운영/품질",
+      "description": "감사 로그/모니터링/회귀 테스트",
+      "status": "todo"
+    }
+  },
+  "tasks": {
+    "TASK-001": {
+      "id": "TASK-001",
+      "title": "JWT 인증 미들웨어",
+      "description": "JWT 발급/검증 + 토큰 회전",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": [],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-002": {
+      "id": "TASK-002",
+      "title": "사용자 스키마 + 회원가입",
+      "description": "User 엔티티 + 가입/탈퇴 API",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": [],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-003": {
+      "id": "TASK-003",
+      "title": "RBAC 정책 모델",
+      "description": "Role/Permission 매핑 + 권한 검사 미들웨어",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": ["TASK-002"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-004": {
+      "id": "TASK-004",
+      "title": "보드 CRUD",
+      "description": "보드 생성/조회/수정/삭제 + 공유 권한",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["TASK-003"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-005": {
+      "id": "TASK-005",
+      "title": "카드 CRUD",
+      "description": "카드 생성/이동/완료/삭제",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["TASK-004"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-006": {
+      "id": "TASK-006",
+      "title": "카드 코멘트",
+      "description": "카드별 코멘트 추가/수정/삭제",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["TASK-005"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-007": {
+      "id": "TASK-007",
+      "title": "검색 기능",
+      "description": "카드 제목/내용 풀텍스트 검색",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "dependencies": ["TASK-005"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-008": {
+      "id": "TASK-008",
+      "title": "실시간 알림",
+      "description": "카드 변경 이벤트 → WebSocket 푸시",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "dependencies": ["TASK-005"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-009": {
+      "id": "TASK-009",
+      "title": "팀 통계 대시보드",
+      "description": "주간 카드 처리량/지연 현황",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "dependencies": ["TASK-006"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-010": {
+      "id": "TASK-010",
+      "title": "감사 로그",
+      "description": "사용자 액션 영구 기록 (GDPR 대응)",
+      "status": "todo",
+      "type": "feature",
+      "priority": "low",
+      "phase": 4,
+      "dependencies": ["TASK-003"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-011": {
+      "id": "TASK-011",
+      "title": "모니터링 알람",
+      "description": "에러율/지연 알람 → PagerDuty",
+      "status": "todo",
+      "type": "feature",
+      "priority": "low",
+      "phase": 4,
+      "dependencies": [],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    },
+    "TASK-012": {
+      "id": "TASK-012",
+      "title": "회귀 테스트 스위트",
+      "description": "핵심 흐름 e2e 테스트",
+      "status": "todo",
+      "type": "feature",
+      "priority": "low",
+      "phase": 4,
+      "dependencies": ["TASK-005"],
+      "createdAt": "2026-05-11T00:00:00+00:00"
+    }
+  }
+}

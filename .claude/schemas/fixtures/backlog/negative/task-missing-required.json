@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "lastTaskNumber": 1,
+    "version": 1,
+    "projectPrefix": "TASK",
+    "createdAt": "2026-05-11T00:00:00+00:00",
+    "updatedAt": "2026-05-11T00:00:00+00:00"
+  },
+  "summary": {"total": 1, "done": 0, "inProgress": 0, "review": 0, "todo": 1},
+  "phases": {"1": {"name": "기반/인프라", "status": "todo"}},
+  "tasks": {
+    "TASK-001": {
+      "id": "TASK-001",
+      "title": "x",
+      "status": "todo",
+      "priority": "high",
+      "phase": 1
+    }
+  }
+}

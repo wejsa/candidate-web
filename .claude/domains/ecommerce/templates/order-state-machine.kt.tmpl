@@ -1,0 +1,203 @@
+/**
+ * 주문 상태 머신
+ *
+ * 이커머스 주문 처리의 상태 전이를 관리합니다.
+ * 청약철회, 부분취소 등 한국 전자상거래법 요구사항을 반영합니다.
+ *
+ * 생성일: {{CREATED_AT}}
+ * Task: {{TASK_ID}}
+ */
+package {{PACKAGE_NAME}}.domain.model
+
+import {{PACKAGE_NAME}}.domain.exception.InvalidStateTransitionException
+
+/**
+ * 주문 상태 정의
+ */
+enum class OrderStatus(
+    val code: String,
+    val description: String,
+    val isFinal: Boolean = false,
+    val allowsCancel: Boolean = false,
+    val allowsRefund: Boolean = false
+) {
+    // 주문 생성 단계
+    CHECKOUT("CHECKOUT", "결제 대기", allowsCancel = true),
+    PAID("PAID", "결제 완료", allowsCancel = true),
+
+    // 배송 준비 단계
+    PREPARING("PREPARING", "상품 준비중", allowsCancel = true),
+    READY_TO_SHIP("READY_TO_SHIP", "출고 준비완료", allowsCancel = true),
+
+    // 배송 단계
+    SHIPPING("SHIPPING", "배송중"),
+    DELIVERED("DELIVERED", "배송 완료", allowsRefund = true),
+
+    // 구매 확정
+    CONFIRMED("CONFIRMED", "구매 확정", isFinal = true),
+
+    // 취소/반품 단계
+    CANCEL_REQUESTED("CANCEL_REQUESTED", "취소 요청"),
+    CANCELLED("CANCELLED", "취소 완료", isFinal = true),
+
+    // 반품/환불 단계
+    RETURN_REQUESTED("RETURN_REQUESTED", "반품 요청"),
+    RETURNING("RETURNING", "반품 진행중"),
+    RETURNED("RETURNED", "반품 완료"),
+    REFUNDED("REFUNDED", "환불 완료", isFinal = true);
+
+    companion object {
+        fun fromCode(code: String): OrderStatus =
+            entries.find { it.code == code }
+                ?: throw IllegalArgumentException("Unknown order status code: $code")
+    }
+}
+
+/**
+ * 주문 상태 전이 규칙
+ *
+ * 전자상거래법 준수:
+ * - 배송 전: 청약철회(취소) 가능
+ * - 배송 후 7일 이내: 단순변심 반품 가능
+ * - 배송 후 30일 이내: 품질 하자 반품 가능
+ */
+object OrderStateTransitions {
+
+    private val allowedTransitions: Map<OrderStatus, Set<OrderStatus>> = mapOf(
+        // 결제 대기 → 결제완료 또는 취소
+        OrderStatus.CHECKOUT to setOf(
+            OrderStatus.PAID,
+            OrderStatus.CANCELLED
+        ),
+
+        // 결제 완료 → 상품준비 또는 취소요청
+        OrderStatus.PAID to setOf(
+            OrderStatus.PREPARING,
+            OrderStatus.CANCEL_REQUESTED
+        ),
+
+        // 상품 준비중 → 출고준비 또는 취소요청
+        OrderStatus.PREPARING to setOf(
+            OrderStatus.READY_TO_SHIP,
+            OrderStatus.CANCEL_REQUESTED
+        ),
+
+        // 출고 준비완료 → 배송중 또는 취소요청
+        OrderStatus.READY_TO_SHIP to setOf(
+            OrderStatus.SHIPPING,
+            OrderStatus.CANCEL_REQUESTED
+        ),
+
+        // 배송중 → 배송완료
+        OrderStatus.SHIPPING to setOf(
+            OrderStatus.DELIVERED
+        ),
+
+        // 배송 완료 → 구매확정 또는 반품요청
+        OrderStatus.DELIVERED to setOf(
+            OrderStatus.CONFIRMED,
+            OrderStatus.RETURN_REQUESTED
+        ),
+
+        // 취소 요청 → 취소완료
+        OrderStatus.CANCEL_REQUESTED to setOf(
+            OrderStatus.CANCELLED,
+            OrderStatus.PREPARING  // 취소 거부 시 원상복귀
+        ),
+
+        // 반품 요청 → 반품진행 또는 거부(배송완료로 복귀)
+        OrderStatus.RETURN_REQUESTED to setOf(
+            OrderStatus.RETURNING,
+            OrderStatus.DELIVERED  // 반품 거부 시
+        ),
+
+        // 반품 진행중 → 반품완료
+        OrderStatus.RETURNING to setOf(
+            OrderStatus.RETURNED
+        ),
+
+        // 반품 완료 → 환불완료
+        OrderStatus.RETURNED to setOf(
+            OrderStatus.REFUNDED
+        )
+    )
+
+    /**
+     * 상태 전이 가능 여부 확인
+     */
+    fun canTransition(from: OrderStatus, to: OrderStatus): Boolean {
+        return allowedTransitions[from]?.contains(to) ?: false
+    }
+
+    /**
+     * 상태 전이 실행 (검증 포함)
+     */
+    fun transition(from: OrderStatus, to: OrderStatus): OrderStatus {
+        if (!canTransition(from, to)) {
+            throw InvalidStateTransitionException(
+                entityType = "Order",
+                fromStatus = from.code,
+                toStatus = to.code
+            )
+        }
+        return to
+    }
+
+    /**
+     * 취소 가능 여부 확인
+     */
+    fun canCancel(status: OrderStatus): Boolean {
+        return status.allowsCancel
+    }
+
+    /**
+     * 반품/환불 가능 여부 확인
+     */
+    fun canRefund(status: OrderStatus): Boolean {
+        return status.allowsRefund
+    }
+
+    /**
+     * 특정 상태에서 전이 가능한 상태 목록 조회
+     */
+    fun getAvailableTransitions(from: OrderStatus): Set<OrderStatus> {
+        return allowedTransitions[from] ?: emptySet()
+    }
+}
+
+/**
+ * 주문 상태 이력
+ */
+data class OrderStatusHistory(
+    val id: Long? = null,
+    val orderId: Long,
+    val fromStatus: OrderStatus?,
+    val toStatus: OrderStatus,
+    val reason: String? = null,
+    val reasonCode: String? = null,  // CUSTOMER_REQUEST, ADMIN_ACTION, SYSTEM_AUTO 등
+    val changedBy: String,
+    val changedAt: java.time.Instant = java.time.Instant.now(),
+    val metadata: Map<String, Any>? = null  // 추가 정보 (취소 사유 상세 등)
+)
+
+/*
+ * 사용 예시:
+ *
+ * // 상태 전이 검증
+ * if (OrderStateTransitions.canTransition(order.status, OrderStatus.SHIPPING)) {
+ *     order.status = OrderStateTransitions.transition(order.status, OrderStatus.SHIPPING)
+ *     orderStatusHistoryRepository.save(
+ *         OrderStatusHistory(
+ *             orderId = order.id,
+ *             fromStatus = OrderStatus.READY_TO_SHIP,
+ *             toStatus = OrderStatus.SHIPPING,
+ *             changedBy = "SYSTEM"
+ *         )
+ *     )
+ * }
+ *
+ * // 취소 가능 여부 확인
+ * if (OrderStateTransitions.canCancel(order.status)) {
+ *     // 취소 처리 로직
+ * }
+ */

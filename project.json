@@ -1,0 +1,49 @@
+{
+  "version": "1.0.0",
+  "name": "candidate-web",
+  "description": "자사 채용 사이트 지원자 프론트엔드(Candidate Web). 이메일/소셜 회원가입, 채용 공고 조회, 지원서 작성·임시저장·제출, 마이페이지(전형 진행/철회). PII 암호화·OAuth2·멱등성 제출·SEO 최적화.",
+  "domain": "general",
+  "techStack": {
+    "backend": "nodejs-typescript",
+    "frontend": "nextjs",
+    "database": "postgresql",
+    "cache": "none",
+    "messageQueue": "none",
+    "infrastructure": "docker-compose"
+  },
+  "agents": {
+    "enabled": [
+      "pm",
+      "backend",
+      "frontend",
+      "code-reviewer",
+      "planner",
+      "db-designer",
+      "qa",
+      "docs"
+    ],
+    "disabled": [
+      "devops"
+    ]
+  },
+  "conventions": {
+    "taskPrefix": "CANDID",
+    "branchStrategy": "git-flow",
+    "commitFormat": "conventional",
+    "prLineLimit": 500,
+    "testCoverage": 80,
+    "language": "ko",
+    "workflowProfile": "standard",
+    "skillProfile": "full",
+    "overridePriority": "domain-first"
+  },
+  "hooks": {},
+  "tokenHints": {},
+  "metadata": {
+    "version": 1,
+    "updatedAt": "2026-05-12T18:22:05+09:00"
+  },
+  "createdAt": "2026-05-12T18:22:05+09:00",
+  "kitVersion": "2.0.0",
+  "kitSource": "https://github.com/wejsa/ai-crew-kit.git"
+}

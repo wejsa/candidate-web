@@ -1,0 +1,10 @@
+{
+  "name": "v2-step1-project",
+  "domain": "general",
+  "version": "2.0.0",
+  "hooks": {
+    "SessionStart": [],
+    "PostToolUse": [],
+    "Stop": []
+  }
+}

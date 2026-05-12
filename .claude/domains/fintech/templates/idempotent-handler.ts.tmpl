@@ -1,0 +1,109 @@
+/**
+ * 멱등성 핸들러
+ *
+ * 중복 요청 방지를 위한 멱등성 키 관리.
+ * Redis 기반 저장소로 TTL(기본 24시간) 관리.
+ *
+ * Task: {{TASK_ID}}
+ * Created: {{CREATED_AT}}
+ */
+
+import type { Redis } from 'ioredis';
+
+// --- 멱등성 결과 타입 ---
+
+export type IdempotencyResult<T> =
+  | { type: 'new' }
+  | { type: 'duplicate'; result: T }
+  | { type: 'processing' };
+
+// --- 멱등성 키 저장소 인터페이스 ---
+
+export interface IdempotencyKeyStore {
+  checkAndStart(key: string, ttlSeconds: number): Promise<IdempotencyResult<string>>;
+  complete(key: string, result: string): Promise<void>;
+  rollback(key: string): Promise<void>;
+}
+
+// --- Redis 구현 ---
+
+const PROCESSING_VALUE = '__PROCESSING__';
+
+export class RedisIdempotencyKeyStore implements IdempotencyKeyStore {
+  constructor(
+    private readonly redis: Redis,
+    private readonly prefix: string = 'idempotency:',
+  ) {}
+
+  async checkAndStart(key: string, ttlSeconds: number = 86400): Promise<IdempotencyResult<string>> {
+    const fullKey = `${this.prefix}${key}`;
+    const existing = await this.redis.get(fullKey);
+
+    if (existing === null) {
+      // 새 요청: PROCESSING 마킹
+      const set = await this.redis.set(fullKey, PROCESSING_VALUE, 'EX', ttlSeconds, 'NX');
+      if (set === 'OK') {
+        return { type: 'new' };
+      }
+      // 동시 요청으로 이미 설정됨
+      return { type: 'processing' };
+    }
+
+    if (existing === PROCESSING_VALUE) {
+      return { type: 'processing' };
+    }
+
+    // 이전 결과 존재
+    return { type: 'duplicate', result: existing };
+  }
+
+  async complete(key: string, result: string): Promise<void> {
+    const fullKey = `${this.prefix}${key}`;
+    const ttl = await this.redis.ttl(fullKey);
+    if (ttl > 0) {
+      await this.redis.set(fullKey, result, 'EX', ttl);
+    }
+  }
+
+  async rollback(key: string): Promise<void> {
+    const fullKey = `${this.prefix}${key}`;
+    await this.redis.del(fullKey);
+  }
+}
+
+// --- 멱등성 핸들러 ---
+
+export class IdempotencyHandler<T> {
+  constructor(
+    private readonly store: IdempotencyKeyStore,
+    private readonly ttlSeconds: number = 86400,
+  ) {}
+
+  async execute(
+    key: string,
+    operation: () => Promise<T>,
+    serialize: (result: T) => string,
+    deserialize: (data: string) => T,
+  ): Promise<T> {
+    const check = await this.store.checkAndStart(key, this.ttlSeconds);
+
+    switch (check.type) {
+      case 'duplicate':
+        return deserialize(check.result);
+
+      case 'processing':
+        throw new Error(`Request ${key} is already being processed`);
+
+      case 'new': {
+        try {
+          const result = await operation();
+          await this.store.complete(key, serialize(result));
+          return result;
+        } catch (error) {
+          await this.store.rollback(key);
+          throw error;
+        }
+      }
+    }
+  }
+}

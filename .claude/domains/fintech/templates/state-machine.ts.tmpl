@@ -1,0 +1,66 @@
+/**
+ * {{ENTITY_NAME}} 상태 머신
+ *
+ * Task: {{TASK_ID}}
+ * Created: {{CREATED_AT}}
+ */
+
+// --- 상태 정의 ---
+
+export const {{ENTITY_NAME}}Status = {
+  {{STATES}}
+} as const;
+
+export type {{ENTITY_NAME}}StatusType = typeof {{ENTITY_NAME}}Status[keyof typeof {{ENTITY_NAME}}Status];
+
+// --- 전이 규칙 ---
+
+type TransitionMap = Record<string, string[]>;
+
+const transitions: TransitionMap = {
+  {{TRANSITIONS}}
+};
+
+export function canTransition(from: {{ENTITY_NAME}}StatusType, to: {{ENTITY_NAME}}StatusType): boolean {
+  const allowed = transitions[from];
+  return allowed ? allowed.includes(to) : false;
+}
+
+export function validateTransition(from: {{ENTITY_NAME}}StatusType, to: {{ENTITY_NAME}}StatusType): void {
+  if (!canTransition(from, to)) {
+    throw new Error(
+      `Invalid status transition: ${from} → ${to}. ` +
+      `Allowed: [${(transitions[from] || []).join(', ')}]`
+    );
+  }
+}
+
+// --- 상태 이력 ---
+
+export interface {{ENTITY_NAME}}StatusHistory {
+  id: string;
+  entityId: string;
+  fromStatus: {{ENTITY_NAME}}StatusType | null;
+  toStatus: {{ENTITY_NAME}}StatusType;
+  reason?: string;
+  changedBy: string;
+  changedAt: Date;
+}
+
+export function createStatusHistory(
+  entityId: string,
+  fromStatus: {{ENTITY_NAME}}StatusType | null,
+  toStatus: {{ENTITY_NAME}}StatusType,
+  changedBy: string,
+  reason?: string,
+): {{ENTITY_NAME}}StatusHistory {
+  return {
+    id: crypto.randomUUID(),
+    entityId,
+    fromStatus,
+    toStatus,
+    reason,
+    changedBy,
+    changedAt: new Date(),
+  };
+}

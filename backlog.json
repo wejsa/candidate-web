@@ -1,0 +1,359 @@
+{
+  "metadata": {
+    "lastTaskNumber": 29,
+    "projectPrefix": "CANDID",
+    "version": 1,
+    "createdAt": "2026-05-12T18:22:05+09:00",
+    "updatedAt": "2026-05-12T18:22:05+09:00"
+  },
+  "summary": {
+    "total": 29,
+    "done": 0,
+    "inProgress": 0,
+    "review": 0,
+    "todo": 29
+  },
+  "phases": {
+    "1": {
+      "name": "기반/인프라",
+      "description": "Next.js + PostgreSQL/Prisma 셋업, DB 스키마, 인증 미들웨어, PII 암호화, 보안 가드(Rate Limit/CSRF/CORS/XSS)",
+      "status": "todo"
+    },
+    "2": {
+      "name": "핵심 도메인",
+      "description": "회원가입/로그인/OAuth, 공고 조회, 지원서 3단계 작성 + 임시저장 + 파일 첨부 + 포트폴리오 + 최종 제출, 마이페이지 진행 타임라인",
+      "status": "todo"
+    },
+    "3": {
+      "name": "부가 기능",
+      "description": "비밀번호 재설정, 로그아웃, 회원 탈퇴/익명화(GDPR), 지원 철회, 프로필 수정, SEO/structured data",
+      "status": "todo"
+    },
+    "4": {
+      "name": "운영/품질",
+      "description": "감사 로그 AOP, 분산 추적, Prometheus 메트릭, 접근성 WCAG 2.1 AA, 야간 정리 배치",
+      "status": "todo"
+    }
+  },
+  "tasks": {
+    "CANDID-001": {
+      "id": "CANDID-001",
+      "title": "Next.js 14 App Router 프로젝트 셋업 + TS/ESLint/Prettier",
+      "description": "Next.js 14 App Router 기반 풀스택 프로젝트 골격 생성. TypeScript strict, ESLint, Prettier, tsconfig path alias, 환경 변수 로딩(zod 권장).",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": [],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-002": {
+      "id": "CANDID-002",
+      "title": "PostgreSQL + Prisma ORM 셋업 + 마이그레이션 골격",
+      "description": "PostgreSQL 연결 + Prisma 또는 Drizzle ORM 도입. docker-compose db 서비스, 마이그레이션 명령(prisma migrate dev) 골격, seed 스크립트 셋업.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": ["CANDID-001"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-003": {
+      "id": "CANDID-003",
+      "title": "DB 스키마: users + auth_providers + email_verification + password_reset_token",
+      "description": "인증 도메인 4개 테이블 + 인덱스(idx_users_email, idx_users_status, UNIQUE(provider, provider_user_id)). status/locked_until/failed_login_count 필드 포함.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": ["CANDID-002"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-004": {
+      "id": "CANDID-004",
+      "title": "DB 스키마: job_postings + job_categories + job_posting_questions",
+      "description": "공고 조회 전용 3개 테이블 + 인덱스(idx_job_postings_status_closes_at). content_html은 어드민 측 sanitize 결과 저장 가정.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": ["CANDID-002"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-005": {
+      "id": "CANDID-005",
+      "title": "DB 스키마: applications + drafts + answers + resume_files + portfolio_links + status_history + interview_schedules + audit_logs",
+      "description": "지원서 도메인 8개 테이블. UNIQUE(user_id, job_posting_id) 활성 지원서 제약, application_drafts payload_json + version 낙관적 락, application_number 형식 A-YYYYMM-NNNNN.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": ["CANDID-003", "CANDID-004"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-006": {
+      "id": "CANDID-006",
+      "title": "JWT(Access 30분) + Refresh Token(HttpOnly Cookie) 인증 미들웨어",
+      "description": "Next.js Route Handler 인증 미들웨어. Access 30분 / Refresh 14일(상태유지 미체크 시 1일), HttpOnly Secure SameSite Cookie. 자동 갱신 + 만료 시 401.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": ["CANDID-003"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-007": {
+      "id": "CANDID-007",
+      "title": "전역 에러 핸들러 + 에러 코드 체계 (AUTH_/USER_/JOB_/APP_/FILE_/SYS_)",
+      "description": "표준 에러 응답 포맷(timestamp/status/code/message/path/traceId/details). HTTP 코드 매핑(401/403/404/409/422/429). 운영 환경 스택 트레이스 미노출.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": ["CANDID-001"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-008": {
+      "id": "CANDID-008",
+      "title": "PII 컬럼 암호화 (AES-256-GCM: phone, birth_date) + 응답 마스킹",
+      "description": "AES-256-GCM 컬럼 암호화 모듈. phone/birth_date 저장 시 암호화, 응답 시 마스킹(010-****-1234). 키는 환경 변수/KMS 주입. 로깅 마스킹 필터 적용.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "critical",
+      "phase": 1,
+      "dependencies": ["CANDID-002"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-009": {
+      "id": "CANDID-009",
+      "title": "Rate Limit + Security 헤더 (CSRF/CORS/XSS sanitizer)",
+      "description": "Rate Limit(로그인 10/분/IP, 회원가입 5/시간/IP, 파일 30/시간/사용자). CSRF(SameSite+Origin), CORS 화이트리스트, XSS sanitizer(DOMPurify). HTTPS 강제 308.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": ["CANDID-006"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-010": {
+      "id": "CANDID-010",
+      "title": "이메일 회원가입 API + 이메일 인증 메일 발송 (US-AUTH-001)",
+      "description": "이메일/비밀번호/이름/약관 동의 입력 → BCrypt(strength 12) 해시 저장 → 인증 메일 발송(24h 토큰, 60초 재발송 쿨다운). 중복 가입 409.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-003", "CANDID-007", "CANDID-009"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-011": {
+      "id": "CANDID-011",
+      "title": "이메일 로그인 + 5회 실패 잠금/15분 (US-AUTH-002)",
+      "description": "이메일/비밀번호 검증 + 5회 실패 시 15분 잠금(429). 계정 열거 방지(어느 쪽이 틀렸는지 비노출). 로그인 직전 URL 복귀.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-006", "CANDID-009"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-012": {
+      "id": "CANDID-012",
+      "title": "OAuth2 소셜 로그인 Google/GitHub + 계정 연결 정책 (US-AUTH-003)",
+      "description": "OAuth2 Authorization Code + PKCE. Google(profile,email)/GitHub(read:user,user:email). 동일 이메일 자동 연결 차단(명시적 연결 안내). 미인증 이메일 별도 인증.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-006"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-013": {
+      "id": "CANDID-013",
+      "title": "공고 목록 조회 + 필터/정렬/페이징 + URL 쿼리 상태 (US-JOB-001)",
+      "description": "직군/고용형태/경력 필터, 최신순/마감임박순 정렬, 페이지네이션(20건). URL 쿼리 상태 유지. 메타 태그(title/description/OG) 동적 생성.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-004"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-014": {
+      "id": "CANDID-014",
+      "title": "공고 상세 + sanitized HTML 렌더링 + 공유 기능 (US-JOB-002)",
+      "description": "공고 상세 페이지. content_html은 DOMPurify 화이트리스트 sanitize. 지원하기 CTA(비로그인/로그인/이미 지원/임시저장/마감 분기). URL 복사/공유.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-013"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-015": {
+      "id": "CANDID-015",
+      "title": "지원서 3단계 작성 폼 + 인적사항 + 자동 임시저장 (US-APP-001/002/005)",
+      "description": "3단계 스텝 UI(인적사항/이력서·포트폴리오/자기소개·커스텀 질문). 진행률 33/66/100. 자동 임시저장(3초 debounce or 30초 주기). 스텝 이동 시 강제 저장. beforeunload 경고. 만 14세 검증.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-005", "CANDID-008", "CANDID-014"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-016": {
+      "id": "CANDID-016",
+      "title": "이력서 파일 첨부 (Pre-signed URL, MIME 화이트리스트, UUID 재명명) (US-APP-003)",
+      "description": "S3 Pre-signed URL 업로드(유효 5분, 단일 PUT). 확장자/MIME 이중 검증, UUID 재명명, 최대 10MB. 진행률 표시, 중단/재시도. 비동기 바이러스 스캔 큐 등록.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-015"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-017": {
+      "id": "CANDID-017",
+      "title": "외부 포트폴리오 링크 5개 + URL 검증 + SSRF 차단 (US-APP-004)",
+      "description": "타입(GITHUB/NOTION/BLOG/LINKEDIN/FIGMA/ETC) + URL + 메모. 최대 5개. https 검증, 도메인 화이트리스트. OG fetch는 P1(SSRF 차단: 내부망 IP, 3초 타임아웃, 1MB 본문 제한).",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-015"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-018": {
+      "id": "CANDID-018",
+      "title": "지원서 최종 제출 (Idempotency-Key, 마감 검증, 트랜잭션, application_number) (US-APP-006)",
+      "description": "제출 직전 검증(필수 필드/이력서/이메일 인증/동의). Idempotency-Key 24h 멱등 처리. closes_at < now 시 422. 단일 트랜잭션: Application 생성 + Draft 삭제 + 이력 생성. application_number(A-YYYYMM-NNNNN) 발급. 확인 이메일 발송.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-015", "CANDID-016", "CANDID-017"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-019": {
+      "id": "CANDID-019",
+      "title": "마이페이지: 지원 내역 리스트 + 전형 진행 타임라인 (US-MY-001/002)",
+      "description": "작성 중/진행 중/종료 섹션 + 카드 UI. 상태 변경일 최신순. 타임라인 UI(서류→면접→처우협의). 면접 일정 일시/장소·URL 표시, .ics 다운로드. 점수/평가 코멘트 절대 비노출.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": ["CANDID-018"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-020": {
+      "id": "CANDID-020",
+      "title": "비밀번호 재설정 (US-AUTH-004)",
+      "description": "이메일 입력 → 재설정 메일 발송(존재 여부 무관 동일 응답, 계정 열거 방지). 토큰 30분 일회용. 완료 시 모든 Refresh Token 무효화.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "dependencies": ["CANDID-010"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-021": {
+      "id": "CANDID-021",
+      "title": "로그아웃 + Refresh Token DB 블랙리스트",
+      "description": "클라이언트 Access 제거 + 서버 Refresh Token DB 블랙리스트 처리(Redis 미사용 → DB 테이블 TTL 컬럼). 만료된 토큰 야간 배치 정리.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "dependencies": ["CANDID-011"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-022": {
+      "id": "CANDID-022",
+      "title": "회원 탈퇴 + 익명화/철회 정책 (GDPR 잊혀질 권리)",
+      "description": "비밀번호 재확인(소셜은 재인증). 진행 중 지원 있으면 PII 익명화·보존, 없으면 즉시 삭제. 채용 종료 후 1년 자동 파기 배치. audit_log 기록.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "critical",
+      "phase": 3,
+      "dependencies": ["CANDID-008", "CANDID-018"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-023": {
+      "id": "CANDID-023",
+      "title": "지원 철회 (US-MY-003)",
+      "description": "철회 사유(선택) 수집. result=WITHDRAWN 갱신, withdrawn_at 기록. 동일 공고 재지원 정책(모집 기간 내 1회 허용 또는 불가).",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "dependencies": ["CANDID-019"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-024": {
+      "id": "CANDID-024",
+      "title": "프로필 수정 (US-MY-004)",
+      "description": "수정 가능: 이름/연락처/비밀번호. 소셜 계정 연결 추가/해제. 이메일 변경은 P2(별도 인증).",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "dependencies": ["CANDID-008"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-025": {
+      "id": "CANDID-025",
+      "title": "SEO 최적화 + JobPosting structured data + OG/메타",
+      "description": "공고 페이지 SSR/SSG. JobPosting schema.org structured data. OG 태그(title/description/image). 마감 공고도 SEO 자산으로 유지(흐림 처리).",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "dependencies": ["CANDID-014"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-026": {
+      "id": "CANDID-026",
+      "title": "감사 로그 AOP (로그인/제출/PII 조회) + traceId 전파",
+      "description": "audit_logs 테이블 + Next.js middleware/decorator 패턴으로 일괄 기록. 분산 추적 traceId 전 구간 전파(OpenTelemetry).",
+      "status": "todo",
+      "type": "feature",
+      "priority": "low",
+      "phase": 4,
+      "dependencies": ["CANDID-005", "CANDID-018"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-027": {
+      "id": "CANDID-027",
+      "title": "Prometheus 메트릭 + 헬스체크",
+      "description": "주요 비즈니스 이벤트 메트릭(가입/제출/철회/파일 업로드). /health, /ready 엔드포인트. 응답 P95 < 300ms(목록)/800ms(제출) 가시화.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "low",
+      "phase": 4,
+      "dependencies": ["CANDID-007"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-028": {
+      "id": "CANDID-028",
+      "title": "접근성 WCAG 2.1 AA + 320~1920px 반응형",
+      "description": "폼 라벨, 키보드 네비게이션, 대비비. iOS Safari 15+/Chrome 90+ 검증. 키보드만으로 가입~제출 완주 가능.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "low",
+      "phase": 4,
+      "dependencies": ["CANDID-019"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    },
+    "CANDID-029": {
+      "id": "CANDID-029",
+      "title": "야간 배치: 30일 미제출 Draft 파일 정리 + ClamAV 스캔 골격",
+      "description": "30일 이상 미제출 Draft 및 첨부 파일 자동 삭제 배치. ClamAV 비동기 스캔 큐 + virus_scan_status 갱신. INFECTED 시 자동 삭제 + 사용자 알림.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "low",
+      "phase": 4,
+      "dependencies": ["CANDID-016"],
+      "createdAt": "2026-05-12T18:22:05+09:00"
+    }
+  }
+}

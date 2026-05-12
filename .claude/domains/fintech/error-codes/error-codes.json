@@ -1,0 +1,222 @@
+{
+  "version": "1.0.0",
+  "prefix": "PG-GW",
+  "description": "PG Gateway 에러 코드 정의",
+  "categories": {
+    "authentication": {
+      "range": "001-019",
+      "description": "인증/토큰 관련 오류"
+    },
+    "authorization": {
+      "range": "020-039",
+      "description": "권한/접근 관련 오류"
+    },
+    "payment": {
+      "range": "040-059",
+      "description": "결제/거래 관련 오류"
+    },
+    "settlement": {
+      "range": "060-079",
+      "description": "정산 관련 오류"
+    },
+    "external": {
+      "range": "080-089",
+      "description": "외부 연동 오류"
+    },
+    "system": {
+      "range": "090-099",
+      "description": "시스템 오류"
+    }
+  },
+  "codes": [
+    {
+      "code": "PG-GW-001",
+      "httpStatus": 401,
+      "name": "TOKEN_MISSING",
+      "message": "인증 토큰이 없습니다",
+      "description": "Authorization 헤더에 토큰이 없음"
+    },
+    {
+      "code": "PG-GW-002",
+      "httpStatus": 401,
+      "name": "TOKEN_INVALID_FORMAT",
+      "message": "잘못된 토큰 형식입니다",
+      "description": "Bearer 형식이 아니거나 JWT 형식 오류"
+    },
+    {
+      "code": "PG-GW-003",
+      "httpStatus": 401,
+      "name": "TOKEN_EXPIRED",
+      "message": "토큰이 만료되었습니다",
+      "description": "Access Token 만료, 갱신 필요"
+    },
+    {
+      "code": "PG-GW-004",
+      "httpStatus": 401,
+      "name": "TOKEN_INVALID_SIGNATURE",
+      "message": "토큰 서명이 유효하지 않습니다",
+      "description": "JWT 서명 검증 실패"
+    },
+    {
+      "code": "PG-GW-005",
+      "httpStatus": 403,
+      "name": "ACCESS_DENIED",
+      "message": "접근 권한이 없습니다",
+      "description": "리소스에 대한 권한 없음"
+    },
+    {
+      "code": "PG-GW-006",
+      "httpStatus": 429,
+      "name": "RATE_LIMIT_EXCEEDED",
+      "message": "요청 한도를 초과했습니다",
+      "description": "Rate Limiting 초과"
+    },
+    {
+      "code": "PG-GW-007",
+      "httpStatus": 503,
+      "name": "SERVICE_UNAVAILABLE",
+      "message": "서비스를 사용할 수 없습니다",
+      "description": "다운스트림 서비스 불가"
+    },
+    {
+      "code": "PG-GW-008",
+      "httpStatus": 504,
+      "name": "GATEWAY_TIMEOUT",
+      "message": "게이트웨이 타임아웃",
+      "description": "다운스트림 서비스 응답 시간 초과"
+    },
+    {
+      "code": "PG-GW-009",
+      "httpStatus": 404,
+      "name": "ROUTE_NOT_FOUND",
+      "message": "라우트를 찾을 수 없습니다",
+      "description": "요청 경로에 대한 라우트 없음"
+    },
+    {
+      "code": "PG-GW-010",
+      "httpStatus": 413,
+      "name": "PAYLOAD_TOO_LARGE",
+      "message": "요청 본문이 너무 큽니다",
+      "description": "최대 요청 크기 초과"
+    },
+    {
+      "code": "PG-GW-011",
+      "httpStatus": 400,
+      "name": "INVALID_EMAIL_FORMAT",
+      "message": "잘못된 이메일 형식입니다",
+      "description": "이메일 형식 검증 실패"
+    },
+    {
+      "code": "PG-GW-012",
+      "httpStatus": 401,
+      "name": "INVALID_CREDENTIALS",
+      "message": "인증에 실패했습니다",
+      "description": "아이디 또는 비밀번호 불일치"
+    },
+    {
+      "code": "PG-GW-013",
+      "httpStatus": 403,
+      "name": "ACCOUNT_LOCKED",
+      "message": "계정이 잠겼습니다",
+      "description": "로그인 시도 초과로 계정 잠금"
+    },
+    {
+      "code": "PG-GW-014",
+      "httpStatus": 429,
+      "name": "LOGIN_ATTEMPTS_EXCEEDED",
+      "message": "로그인 시도 횟수를 초과했습니다",
+      "description": "5분 내 5회 초과"
+    },
+    {
+      "code": "PG-GW-015",
+      "httpStatus": 401,
+      "name": "REFRESH_TOKEN_INVALID",
+      "message": "Refresh Token이 유효하지 않습니다",
+      "description": "Refresh Token 검증 실패"
+    },
+    {
+      "code": "PG-GW-016",
+      "httpStatus": 401,
+      "name": "TOKEN_REUSED",
+      "message": "토큰이 재사용되었습니다",
+      "description": "Token Reuse Detection 감지"
+    },
+    {
+      "code": "PG-GW-041",
+      "httpStatus": 400,
+      "name": "INVALID_AMOUNT",
+      "message": "유효하지 않은 결제 금액입니다",
+      "description": "금액이 0 이하이거나 한도 초과"
+    },
+    {
+      "code": "PG-GW-042",
+      "httpStatus": 400,
+      "name": "INVALID_CARD_NUMBER",
+      "message": "유효하지 않은 카드 번호입니다",
+      "description": "카드번호 형식 오류 또는 Luhn 검증 실패"
+    },
+    {
+      "code": "PG-GW-043",
+      "httpStatus": 409,
+      "name": "DUPLICATE_TRANSACTION",
+      "message": "중복된 거래입니다",
+      "description": "동일 멱등성 키로 중복 요청"
+    },
+    {
+      "code": "PG-GW-044",
+      "httpStatus": 422,
+      "name": "ALREADY_CANCELLED",
+      "message": "이미 취소된 거래입니다",
+      "description": "취소 완료된 거래에 재취소 시도"
+    },
+    {
+      "code": "PG-GW-045",
+      "httpStatus": 422,
+      "name": "CANCEL_AMOUNT_EXCEEDED",
+      "message": "취소 금액이 잔여 금액을 초과합니다",
+      "description": "부분취소 금액 오류"
+    },
+    {
+      "code": "PG-GW-046",
+      "httpStatus": 422,
+      "name": "INVALID_TRANSACTION_STATUS",
+      "message": "처리할 수 없는 거래 상태입니다",
+      "description": "현재 상태에서 요청한 작업 불가"
+    },
+    {
+      "code": "PG-GW-061",
+      "httpStatus": 422,
+      "name": "SETTLEMENT_ALREADY_COMPLETED",
+      "message": "이미 정산 완료된 거래입니다",
+      "description": "정산 완료 후 취소/환불 불가"
+    },
+    {
+      "code": "PG-GW-081",
+      "httpStatus": 502,
+      "name": "PG_CONNECTION_ERROR",
+      "message": "PG사 연결에 실패했습니다",
+      "description": "외부 PG 시스템 연결 오류"
+    },
+    {
+      "code": "PG-GW-082",
+      "httpStatus": 504,
+      "name": "PG_TIMEOUT",
+      "message": "PG사 응답 시간이 초과했습니다",
+      "description": "외부 PG 시스템 타임아웃"
+    },
+    {
+      "code": "PG-GW-083",
+      "httpStatus": 502,
+      "name": "PG_ERROR",
+      "message": "PG사 처리 중 오류가 발생했습니다",
+      "description": "외부 PG 시스템에서 오류 응답"
+    },
+    {
+      "code": "PG-GW-099",
+      "httpStatus": 500,
+      "name": "INTERNAL_ERROR",
+      "message": "내부 서버 오류가 발생했습니다",
+      "description": "예상치 못한 시스템 오류"
+    }
+  ]
+}

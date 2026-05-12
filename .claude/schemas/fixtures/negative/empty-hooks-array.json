@@ -1,0 +1,14 @@
+{
+  "name": "bad-empty-inner-hooks",
+  "domain": "general",
+  "version": "2.0.0",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": []
+      }
+    ],
+    "PostToolUse": [],
+    "Stop": []
+  }
+}

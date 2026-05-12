@@ -1,0 +1,244 @@
+{
+  "version": "1.0.0",
+  "prefix": "EC",
+  "description": "이커머스 도메인 에러 코드 정의",
+  "categories": {
+    "order": {
+      "range": "001-010",
+      "description": "주문 관련 오류"
+    },
+    "inventory": {
+      "range": "011-020",
+      "description": "재고 관련 오류"
+    },
+    "payment": {
+      "range": "021-030",
+      "description": "결제 관련 오류"
+    },
+    "shipping": {
+      "range": "031-040",
+      "description": "배송 관련 오류"
+    },
+    "promotion": {
+      "range": "041-050",
+      "description": "프로모션/쿠폰 관련 오류"
+    },
+    "marketplace": {
+      "range": "051-060",
+      "description": "마켓플레이스 관련 오류"
+    },
+    "subscription": {
+      "range": "061-070",
+      "description": "구독 커머스 관련 오류"
+    },
+    "system": {
+      "range": "099",
+      "description": "시스템 오류"
+    }
+  },
+  "codes": [
+    {
+      "code": "EC-001",
+      "httpStatus": 422,
+      "name": "INVALID_ORDER_STATE_TRANSITION",
+      "message": "허용되지 않는 주문 상태 전이입니다",
+      "description": "현재 주문 상태에서 요청한 상태로 전이 불가"
+    },
+    {
+      "code": "EC-002",
+      "httpStatus": 404,
+      "name": "ORDER_NOT_FOUND",
+      "message": "주문을 찾을 수 없습니다",
+      "description": "존재하지 않는 주문 ID"
+    },
+    {
+      "code": "EC-003",
+      "httpStatus": 422,
+      "name": "CANCELLATION_DEADLINE_EXCEEDED",
+      "message": "주문 취소 가능 기한이 지났습니다",
+      "description": "배송 시작 등으로 취소 불가 상태"
+    },
+    {
+      "code": "EC-004",
+      "httpStatus": 409,
+      "name": "DUPLICATE_ORDER",
+      "message": "중복된 주문입니다",
+      "description": "동일 멱등성 키로 중복 주문 요청"
+    },
+    {
+      "code": "EC-005",
+      "httpStatus": 422,
+      "name": "ORDER_ITEM_EMPTY",
+      "message": "주문 항목이 비어 있습니다",
+      "description": "최소 1개 이상의 주문 항목 필요"
+    },
+    {
+      "code": "EC-006",
+      "httpStatus": 422,
+      "name": "REFUND_AMOUNT_EXCEEDED",
+      "message": "환불 금액이 결제 금액을 초과합니다",
+      "description": "부분환불 금액이 잔여 결제 금액보다 큼"
+    },
+    {
+      "code": "EC-011",
+      "httpStatus": 409,
+      "name": "OUT_OF_STOCK",
+      "message": "재고가 부족합니다",
+      "description": "요청 수량이 가용 재고를 초과"
+    },
+    {
+      "code": "EC-012",
+      "httpStatus": 410,
+      "name": "RESERVATION_EXPIRED",
+      "message": "재고 예약이 만료되었습니다",
+      "description": "장바구니/결제 대기 중 재고 예약 시간 초과"
+    },
+    {
+      "code": "EC-013",
+      "httpStatus": 422,
+      "name": "NEGATIVE_STOCK",
+      "message": "재고 수량이 음수입니다",
+      "description": "재고 차감 결과가 음수가 되는 비정상 상태"
+    },
+    {
+      "code": "EC-014",
+      "httpStatus": 409,
+      "name": "STOCK_CONCURRENCY_CONFLICT",
+      "message": "재고 동시 수정 충돌이 발생했습니다",
+      "description": "낙관적 잠금 충돌로 재시도 필요"
+    },
+    {
+      "code": "EC-021",
+      "httpStatus": 400,
+      "name": "PAYMENT_AMOUNT_MISMATCH",
+      "message": "결제 금액이 주문 금액과 일치하지 않습니다",
+      "description": "주문 총액과 결제 요청 금액 불일치"
+    },
+    {
+      "code": "EC-022",
+      "httpStatus": 409,
+      "name": "DUPLICATE_PAYMENT",
+      "message": "중복 결제입니다",
+      "description": "동일 주문에 대해 이미 결제 완료"
+    },
+    {
+      "code": "EC-023",
+      "httpStatus": 504,
+      "name": "PAYMENT_TIMEOUT",
+      "message": "결제 처리 시간이 초과했습니다",
+      "description": "PG사 응답 타임아웃"
+    },
+    {
+      "code": "EC-024",
+      "httpStatus": 422,
+      "name": "PAYMENT_METHOD_UNAVAILABLE",
+      "message": "사용할 수 없는 결제 수단입니다",
+      "description": "선택한 결제 수단이 비활성화 또는 미지원"
+    },
+    {
+      "code": "EC-031",
+      "httpStatus": 400,
+      "name": "INVALID_SHIPPING_ADDRESS",
+      "message": "유효하지 않은 배송 주소입니다",
+      "description": "배송지 주소 형식 오류 또는 필수 항목 누락"
+    },
+    {
+      "code": "EC-032",
+      "httpStatus": 422,
+      "name": "NON_DELIVERABLE_ZONE",
+      "message": "배송 불가 지역입니다",
+      "description": "도서산간 등 배송 불가 지역"
+    },
+    {
+      "code": "EC-033",
+      "httpStatus": 422,
+      "name": "SHIPPING_ALREADY_DISPATCHED",
+      "message": "이미 출고된 주문입니다",
+      "description": "출고 완료 후 배송지 변경/취소 불가"
+    },
+    {
+      "code": "EC-041",
+      "httpStatus": 400,
+      "name": "INVALID_COUPON",
+      "message": "유효하지 않은 쿠폰입니다",
+      "description": "존재하지 않거나 비활성화된 쿠폰 코드"
+    },
+    {
+      "code": "EC-042",
+      "httpStatus": 410,
+      "name": "COUPON_EXPIRED",
+      "message": "쿠폰 유효기간이 만료되었습니다",
+      "description": "사용 기간이 지난 쿠폰"
+    },
+    {
+      "code": "EC-043",
+      "httpStatus": 409,
+      "name": "COUPON_USAGE_LIMIT_EXCEEDED",
+      "message": "쿠폰 사용 횟수를 초과했습니다",
+      "description": "1인당 또는 전체 사용 한도 초과"
+    },
+    {
+      "code": "EC-044",
+      "httpStatus": 422,
+      "name": "PROMOTION_NOT_APPLICABLE",
+      "message": "해당 상품에 적용할 수 없는 프로모션입니다",
+      "description": "최소 주문 금액 미달 또는 대상 상품 불일치"
+    },
+    {
+      "code": "EC-051",
+      "httpStatus": 403,
+      "name": "SELLER_NOT_ACTIVE",
+      "message": "비활성 판매자입니다",
+      "description": "정지, 탈퇴 등 비활성 상태의 셀러"
+    },
+    {
+      "code": "EC-052",
+      "httpStatus": 403,
+      "name": "CROSS_SELLER_ACCESS_DENIED",
+      "message": "다른 판매자의 리소스에 접근할 수 없습니다",
+      "description": "셀러 간 데이터 격리 위반 시도"
+    },
+    {
+      "code": "EC-053",
+      "httpStatus": 422,
+      "name": "COMMISSION_CALCULATION_ERROR",
+      "message": "수수료 계산 오류입니다",
+      "description": "정산 수수료율 미설정 또는 계산 불일치"
+    },
+    {
+      "code": "EC-054",
+      "httpStatus": 422,
+      "name": "SETTLEMENT_NOT_READY",
+      "message": "정산 가능 상태가 아닙니다",
+      "description": "구매 확정 전 또는 정산 주기 미도래"
+    },
+    {
+      "code": "EC-061",
+      "httpStatus": 422,
+      "name": "SUBSCRIPTION_BILLING_FAILED",
+      "message": "구독 결제에 실패했습니다",
+      "description": "정기결제 카드 승인 실패"
+    },
+    {
+      "code": "EC-062",
+      "httpStatus": 422,
+      "name": "SUBSCRIPTION_PAUSE_LIMIT_EXCEEDED",
+      "message": "구독 일시정지 횟수를 초과했습니다",
+      "description": "허용된 최대 일시정지 횟수 초과"
+    },
+    {
+      "code": "EC-063",
+      "httpStatus": 422,
+      "name": "SUBSCRIPTION_ALREADY_CANCELLED",
+      "message": "이미 해지된 구독입니다",
+      "description": "해지 완료된 구독에 재해지 시도"
+    },
+    {
+      "code": "EC-099",
+      "httpStatus": 500,
+      "name": "INTERNAL_ERROR",
+      "message": "내부 서버 오류가 발생했습니다",
+      "description": "예상치 못한 시스템 오류"
+    }
+  ]
+}

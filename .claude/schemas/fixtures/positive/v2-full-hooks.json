@@ -1,0 +1,41 @@
+{
+  "name": "v2-step2-project",
+  "domain": "general",
+  "version": "2.0.0",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh",
+            "description": "git sync + 상태 로드",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use.sh",
+            "description": "lockedAt 리프레시 + 무한 루프 방어 (3단계 폴백)",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/stop.sh",
+            "description": "만료 잠금 해제 + continuation-plan 조건부 갱신 (60s 디바운스)",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

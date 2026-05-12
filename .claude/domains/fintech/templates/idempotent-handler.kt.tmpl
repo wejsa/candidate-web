@@ -1,0 +1,188 @@
+/**
+ * 멱등성 처리 핸들러
+ *
+ * 결제/정산 API에서 중복 요청 방지를 위한 멱등성 키 처리
+ *
+ * 생성일: {{CREATED_AT}}
+ * Task: {{TASK_ID}}
+ */
+package {{PACKAGE_NAME}}.infrastructure.idempotency
+
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.stereotype.Component
+import java.time.Duration
+import java.util.concurrent.TimeUnit
+
+/**
+ * 멱등성 키 저장소 인터페이스
+ */
+interface IdempotencyKeyStore {
+    /**
+     * 멱등성 키 저장 (최초 요청 시)
+     * @return true if key was set (first request), false if already exists (duplicate)
+     */
+    fun setIfAbsent(key: String, value: String, ttl: Duration): Boolean
+
+    /**
+     * 저장된 응답 조회
+     */
+    fun get(key: String): String?
+
+    /**
+     * 응답 저장 (처리 완료 후)
+     */
+    fun setResponse(key: String, response: String, ttl: Duration)
+
+    /**
+     * 키 삭제
+     */
+    fun delete(key: String)
+}
+
+/**
+ * Redis 기반 멱등성 키 저장소
+ */
+@Component
+class RedisIdempotencyKeyStore(
+    private val redisTemplate: RedisTemplate<String, String>
+) : IdempotencyKeyStore {
+
+    private val keyPrefix = "idempotency:"
+
+    override fun setIfAbsent(key: String, value: String, ttl: Duration): Boolean {
+        return redisTemplate.opsForValue()
+            .setIfAbsent(keyPrefix + key, value, ttl) ?: false
+    }
+
+    override fun get(key: String): String? {
+        return redisTemplate.opsForValue().get(keyPrefix + key)
+    }
+
+    override fun setResponse(key: String, response: String, ttl: Duration) {
+        redisTemplate.opsForValue().set(keyPrefix + key, response, ttl)
+    }
+
+    override fun delete(key: String) {
+        redisTemplate.delete(keyPrefix + key)
+    }
+}
+
+/**
+ * 멱등성 처리 결과
+ */
+sealed class IdempotencyResult<T> {
+    data class NewRequest<T>(val key: String) : IdempotencyResult<T>()
+    data class DuplicateRequest<T>(val cachedResponse: T) : IdempotencyResult<T>()
+    data class Processing<T>(val key: String) : IdempotencyResult<T>()
+}
+
+/**
+ * 멱등성 핸들러
+ */
+@Component
+class IdempotencyHandler(
+    private val keyStore: IdempotencyKeyStore
+) {
+    companion object {
+        private const val PROCESSING_VALUE = "__PROCESSING__"
+        val DEFAULT_TTL: Duration = Duration.ofHours(24)
+    }
+
+    /**
+     * 멱등성 키 검증 및 처리 시작
+     *
+     * @param idempotencyKey 클라이언트 제공 멱등성 키
+     * @param ttl 키 유효 기간
+     * @return NewRequest(처음 요청), DuplicateRequest(중복 요청), Processing(처리 중)
+     */
+    inline fun <reified T> checkAndStart(
+        idempotencyKey: String,
+        ttl: Duration = DEFAULT_TTL
+    ): IdempotencyResult<T> {
+        // 이미 존재하는 키 확인
+        val existing = keyStore.get(idempotencyKey)
+
+        return when {
+            existing == null -> {
+                // 새 요청 - 처리 중 상태로 마킹
+                val wasSet = keyStore.setIfAbsent(idempotencyKey, PROCESSING_VALUE, ttl)
+                if (wasSet) {
+                    IdempotencyResult.NewRequest(idempotencyKey)
+                } else {
+                    // 동시 요청으로 인한 경쟁 상태
+                    IdempotencyResult.Processing(idempotencyKey)
+                }
+            }
+            existing == PROCESSING_VALUE -> {
+                // 이전 요청이 아직 처리 중
+                IdempotencyResult.Processing(idempotencyKey)
+            }
+            else -> {
+                // 이미 처리 완료된 요청 - 캐시된 응답 반환
+                val cachedResponse = deserialize<T>(existing)
+                IdempotencyResult.DuplicateRequest(cachedResponse)
+            }
+        }
+    }
+
+    /**
+     * 처리 완료 후 응답 저장
+     */
+    fun <T> complete(
+        idempotencyKey: String,
+        response: T,
+        ttl: Duration = DEFAULT_TTL
+    ) {
+        val serialized = serialize(response)
+        keyStore.setResponse(idempotencyKey, serialized, ttl)
+    }
+
+    /**
+     * 처리 실패 시 키 삭제 (재시도 허용)
+     */
+    fun rollback(idempotencyKey: String) {
+        keyStore.delete(idempotencyKey)
+    }
+
+    private fun <T> serialize(value: T): String {
+        // JSON 직렬화 (실제 구현에서는 ObjectMapper 사용)
+        return com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+            .writeValueAsString(value)
+    }
+
+    private inline fun <reified T> deserialize(json: String): T {
+        return com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+            .readValue(json, T::class.java)
+    }
+}
+
+/*
+ * 사용 예시:
+ *
+ * @PostMapping("/payments")
+ * suspend fun createPayment(
+ *     @RequestHeader("Idempotency-Key") idempotencyKey: String,
+ *     @RequestBody request: PaymentRequest
+ * ): ResponseEntity<PaymentResponse> {
+ *
+ *     when (val result = idempotencyHandler.checkAndStart<PaymentResponse>(idempotencyKey)) {
+ *         is IdempotencyResult.DuplicateRequest -> {
+ *             return ResponseEntity.ok(result.cachedResponse)
+ *         }
+ *         is IdempotencyResult.Processing -> {
+ *             return ResponseEntity.status(HttpStatus.CONFLICT)
+ *                 .body(ErrorResponse("Request is being processed"))
+ *         }
+ *         is IdempotencyResult.NewRequest -> {
+ *             try {
+ *                 val response = paymentService.processPayment(request)
+ *                 idempotencyHandler.complete(idempotencyKey, response)
+ *                 return ResponseEntity.ok(response)
+ *             } catch (e: Exception) {
+ *                 idempotencyHandler.rollback(idempotencyKey)
+ *                 throw e
+ *             }
+ *         }
+ *     }
+ * }
+ */

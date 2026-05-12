@@ -1,0 +1,53 @@
+{
+  "id": "general",
+  "name": "범용",
+  "icon": "🔧",
+  "version": "1.1.0",
+  "description": "도메인 특화 없는 범용 프로젝트",
+  "defaultStack": {
+    "backend": "spring-boot-kotlin",
+    "frontend": "none",
+    "database": "mysql",
+    "cache": "none",
+    "messageQueue": "none",
+    "infrastructure": "docker-compose"
+  },
+  "compliance": [],
+  "keywords": {
+    "api": {
+      "triggers": ["API", "REST", "엔드포인트", "라우트"],
+      "docs": ["_base:conventions/api-design.md", "common-patterns.md"]
+    },
+    "auth": {
+      "triggers": ["인증", "로그인", "JWT", "OAuth", "권한"],
+      "docs": ["_base:conventions/security.md", "common-patterns.md"]
+    },
+    "database": {
+      "triggers": ["DB", "쿼리", "마이그레이션", "인덱스", "테이블"],
+      "docs": ["_base:conventions/database.md", "common-patterns.md"]
+    },
+    "crud": {
+      "triggers": ["CRUD", "생성", "조회", "수정", "삭제", "목록"],
+      "docs": ["_base:conventions/project-structure.md", "common-patterns.md"]
+    },
+    "error": {
+      "triggers": ["에러", "예외", "오류", "에러코드"],
+      "docs": ["_base:conventions/error-handling.md", "common-patterns.md"]
+    },
+    "test": {
+      "triggers": ["테스트", "단위테스트", "통합테스트", "E2E"],
+      "docs": ["_base:conventions/testing.md", "common-patterns.md"]
+    }
+  },
+  "errorCodePrefix": "ERR",
+  "conventions": {
+    "taskPrefix": "TASK",
+    "branchStrategy": "git-flow",
+    "commitFormat": "conventional"
+  },
+  "checklists": [
+    "_base:common.md",
+    "_base:security-basic.md",
+    "_base:architecture.md"
+  ]
+}

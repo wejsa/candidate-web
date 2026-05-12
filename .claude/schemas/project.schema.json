@@ -1,0 +1,452 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-crew-kit.dev/schemas/project.schema.json",
+  "title": "AI Crew Kit Project Configuration",
+  "description": "프로젝트 설정 스키마 - skill-init이 생성하고 각 스킬이 참조",
+  "type": "object",
+  "required": ["name", "domain", "version"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "프로젝트 이름"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "프로젝트 설명"
+    },
+    "domain": {
+      "type": "string",
+      "enum": ["fintech", "ecommerce", "saas", "healthcare", "general", "custom"],
+      "description": "도메인 유형"
+    },
+    "techStack": {
+      "type": "object",
+      "description": "기술 스택 설정",
+      "properties": {
+        "backend": {
+          "type": "string",
+          "enum": ["spring-boot-kotlin", "spring-boot-java", "nodejs-typescript", "python-fastapi", "python-django", "go", "none"],
+          "default": "spring-boot-kotlin",
+          "description": "백엔드 프레임워크"
+        },
+        "frontend": {
+          "type": "string",
+          "enum": ["nextjs", "react", "react-vite", "vue", "vue-nuxt", "astro", "none"],
+          "default": "none",
+          "description": "프론트엔드 프레임워크. skill-init/skill-onboard 파일 기반 감지 결과(react-vite/vue-nuxt/astro)와 정합."
+        },
+        "database": {
+          "type": "string",
+          "enum": ["mysql", "postgresql", "mongodb", "sqlite", "none"],
+          "default": "mysql",
+          "description": "데이터베이스. sqlite는 로컬/MVP 용도."
+        },
+        "cache": {
+          "type": "string",
+          "enum": ["redis", "memcached", "none"],
+          "default": "none",
+          "description": "캐시"
+        },
+        "messageQueue": {
+          "type": "string",
+          "enum": ["rabbitmq", "kafka", "sqs", "none"],
+          "default": "none",
+          "description": "메시지 큐"
+        },
+        "infrastructure": {
+          "type": "string",
+          "enum": ["docker-compose", "kubernetes", "none"],
+          "default": "docker-compose",
+          "description": "인프라"
+        }
+      },
+      "additionalProperties": false
+    },
+    "agents": {
+      "type": "object",
+      "description": "에이전트 활성화 설정",
+      "properties": {
+        "enabled": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["pm", "planner", "backend", "frontend", "qa", "code-reviewer", "docs", "db-designer", "devops"]
+          },
+          "default": ["pm", "backend", "code-reviewer"],
+          "description": "활성화된 에이전트 목록"
+        },
+        "disabled": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["pm", "planner", "backend", "frontend", "qa", "code-reviewer", "docs", "db-designer", "devops"]
+          },
+          "default": [],
+          "description": "비활성화된 에이전트 목록"
+        }
+      },
+      "additionalProperties": false
+    },
+    "conventions": {
+      "type": "object",
+      "description": "컨벤션 설정",
+      "properties": {
+        "taskPrefix": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9-]*$",
+          "default": "TASK",
+          "description": "태스크 ID 접두사 (예: TASK, PG-GW)"
+        },
+        "branchStrategy": {
+          "type": "string",
+          "enum": ["git-flow", "github-flow", "trunk-based"],
+          "default": "git-flow",
+          "description": "브랜치 전략"
+        },
+        "commitFormat": {
+          "type": "string",
+          "enum": ["conventional", "angular", "custom"],
+          "default": "conventional",
+          "description": "커밋 메시지 형식"
+        },
+        "prLineLimit": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 1000,
+          "default": 500,
+          "description": "PR당 최대 라인 수"
+        },
+        "testCoverage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 80,
+          "description": "테스트 커버리지 목표 (%)"
+        },
+        "language": {
+          "type": "string",
+          "enum": ["ko", "en"],
+          "default": "ko",
+          "description": "기본 언어"
+        },
+        "workflowProfile": {
+          "type": "string",
+          "enum": ["standard", "fast"],
+          "default": "standard",
+          "description": "standard: 전체 체이닝 (review 포함), fast: 프로토타입용 (리뷰 생략)"
+        },
+        "skillProfile": {
+          "type": "string",
+          "enum": ["default", "developer", "full", "docs-only", "custom"],
+          "default": "default",
+          "description": "스킬 프로파일 — CLAUDE.md에 노출할 스킬 세트. default/full: 전체, developer: 개발 핵심, docs-only: 문서 전용, custom: customSkills 배열 사용"
+        },
+        "customSkills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^skill-[a-z][a-z0-9-]*$"
+          },
+          "description": "skillProfile이 'custom'일 때 사용할 스킬 이름 목록"
+        },
+        "overridePriority": {
+          "type": "string",
+          "enum": ["domain-first", "merge"],
+          "default": "domain-first",
+          "description": "도메인 vs 언어 규칙 충돌 시 우선순위. domain-first: 도메인 룰이 언어 룰을 덮어씀. merge: 양쪽 모두 적용. v2.0 MVP는 분기 로직 미구현 — 단일 디렉토리 구조(.claude/rules/{domain}/{language}/)에서는 충돌이 구조적으로 발생하지 않음. 향후 단독 도메인/언어 룰이 도입될 때 활성화. 자세한 내용은 .claude/rules/README.md 참조."
+        }
+      },
+      "additionalProperties": false
+    },
+    "orchestrator": {
+      "type": "object",
+      "description": "워크트리 오케스트레이터 설정. 감지는 git 메타데이터(`git rev-parse --git-dir != --git-common-dir`)로 자동 수행되며, 오케스트레이터 종류(Claude Code 네이티브, Claude Squad, 수동 worktree)는 동일하게 처리된다.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["auto", "claude-squad", "none"],
+          "default": "auto",
+          "description": "auto: git 메타데이터로 자동 감지 (모든 worktree 종류 동일 처리), claude-squad: 외부 Claude Squad 도구 명시(auto와 동일 분기), none: 워크트리 미사용"
+        }
+      },
+      "additionalProperties": false
+    },
+    "buildCommands": {
+      "type": "object",
+      "description": "빌드/테스트/린트 명령어 설정. 미지정 시 techStack 기반 자동 결정.",
+      "properties": {
+        "build": {
+          "type": "string",
+          "description": "빌드 명령어 (예: ./gradlew build, npm run build, go build ./...)"
+        },
+        "test": {
+          "type": "string",
+          "description": "테스트 명령어 (예: ./gradlew test, npm test, go test ./...)"
+        },
+        "lint": {
+          "type": "string",
+          "description": "린트 명령어 (예: ./gradlew ktlintCheck, npm run lint, golangci-lint run)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ports": {
+      "type": "object",
+      "description": "서비스 포트 설정",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1024,
+        "maximum": 65535
+      }
+    },
+    "customDomain": {
+      "type": "object",
+      "description": "커스텀 도메인 설정 (domain이 'custom'일 때 사용)",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "커스텀 도메인 이름"
+        },
+        "keywords": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "triggers": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "docs": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          },
+          "description": "키워드-문서 매핑"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "동시성 제어용 메타데이터 (backlog.json과 동일 패턴)",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "낙관적 동시성 제어용 — 쓰기 시 1 증가"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "마지막 수정 일시"
+        }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "생성 일시"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "수정 일시 (하위호환용, metadata.updatedAt 우선)"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "스키마 버전 (semver)"
+    },
+    "kitVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+)*)?$",
+      "description": "AI Crew Kit 프레임워크 버전 (skill-upgrade가 관리, SemVer 2.0.0 프리릴리즈 지원)"
+    },
+    "kitSource": {
+      "type": "string",
+      "description": "AI Crew Kit 소스 저장소 URL 또는 로컬 경로"
+    },
+    "healthCheck": {
+      "type": "object",
+      "description": "건강 검진 설정 (/skill-health-check)",
+      "properties": {
+        "exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "비활성화할 검사 항목 ID 목록"
+        },
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "criticalMinScore": { "type": "integer", "default": 70 },
+            "autoBacklogSeverity": { "type": "string", "enum": ["CRITICAL", "MAJOR"], "default": "CRITICAL" }
+          },
+          "additionalProperties": false
+        },
+        "schedule": {
+          "type": "object",
+          "properties": {
+            "recommendedFrequency": { "type": "string", "default": "weekly" },
+            "autoRunOnMerge": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "hooks": {
+      "type": "object",
+      "description": "Claude Code 네이티브 라이프사이클 훅 설정 — 2층 구조: event > matcher > hooks[]. 부재 시 v1.x 동작 유지. Phase 1에서 사용하는 3개는 properties로 정의, 나머지 공식 이벤트는 patternProperties로 확장 가능.",
+      "default": {},
+      "properties": {
+        "SessionStart": {
+          "type": "array",
+          "description": "세션 시작 시 실행. git sync, 상태 로드 등.",
+          "items": { "$ref": "#/definitions/hookMatcher" },
+          "maxItems": 5
+        },
+        "PostToolUse": {
+          "type": "array",
+          "description": "도구 사용 직후 실행. matcher로 대상 도구 지정 (예: \"Edit|Write\").",
+          "items": { "$ref": "#/definitions/hookMatcher" },
+          "maxItems": 5
+        },
+        "Stop": {
+          "type": "array",
+          "description": "Claude 응답 완료 시마다 실행 (세션 종료 아님). stop_hook_active 체크 필수. 런타임 가드는 훅 스크립트 책임.",
+          "items": { "$ref": "#/definitions/hookMatcher" },
+          "maxItems": 5
+        }
+      },
+      "patternProperties": {
+        "^(PreToolUse|PostToolUseFailure|Notification|UserPromptSubmit|SessionEnd|StopFailure|SubagentStart|SubagentStop|PreCompact|PostCompact|PermissionRequest|PermissionDenied|Setup|TeammateIdle|TaskCreated|TaskCompleted|Elicitation|ElicitationResult|ConfigChange|WorktreeCreate|WorktreeRemove|InstructionsLoaded|CwdChanged|FileChanged)$": {
+          "type": "array",
+          "description": "Claude Code 공식 훅 이벤트 — Phase 1 범위 외이나 v2.1+ 확장을 위해 화이트리스트로 허용.",
+          "items": { "$ref": "#/definitions/hookMatcher" },
+          "maxItems": 5
+        }
+      },
+      "additionalProperties": false
+    },
+    "tokenHints": {
+      "type": "object",
+      "description": "토큰 최적화 힌트 — 스킬별 complexity-hint의 프로젝트 차원 오버라이드",
+      "default": {},
+      "properties": {
+        "defaultComplexity": {
+          "type": "string",
+          "enum": ["heavy", "medium", "light"],
+          "default": "medium",
+          "description": "스킬에 complexity-hint가 없을 때 적용되는 기본 복잡도"
+        },
+        "skillOverrides": {
+          "type": "object",
+          "description": "스킬별 complexity 오버라이드 (키: 스킬명, 값: 복잡도)",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["heavy", "medium", "light"]
+          }
+        },
+        "maxMcpServers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 10,
+          "description": "동시 활성화 MCP 서버 수 권장 상한"
+        },
+        "compactionThreshold": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 100,
+          "default": 50,
+          "description": "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE 권장값 (%)"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "name": "pg-gateway",
+      "description": "PG 시스템 API Gateway 서비스",
+      "domain": "fintech",
+      "techStack": {
+        "backend": "spring-boot-kotlin",
+        "frontend": "none",
+        "database": "mysql",
+        "cache": "redis",
+        "messageQueue": "rabbitmq",
+        "infrastructure": "docker-compose"
+      },
+      "agents": {
+        "enabled": ["pm", "backend", "code-reviewer", "qa", "db-designer"],
+        "disabled": ["frontend", "planner", "docs"]
+      },
+      "conventions": {
+        "taskPrefix": "PG-GW",
+        "branchStrategy": "git-flow",
+        "commitFormat": "conventional",
+        "prLineLimit": 500,
+        "testCoverage": 80,
+        "language": "ko"
+      },
+      "buildCommands": {
+        "build": "./gradlew build",
+        "test": "./gradlew test",
+        "lint": "./gradlew ktlintCheck"
+      },
+      "ports": {
+        "gateway": 10080,
+        "payment": 10081,
+        "settlement": 10082
+      },
+      "createdAt": "2026-02-03T00:00:00Z",
+      "version": "2.0.0"
+    }
+  ],
+  "definitions": {
+    "hookMatcher": {
+      "type": "object",
+      "description": "Claude Code 훅 매처 — 이벤트 내 tool 필터(선택)와 실제 훅 명령 배열을 묶음",
+      "required": ["hooks"],
+      "properties": {
+        "matcher": {
+          "type": "string",
+          "description": "Tool 이름 정규식 (예: \"Edit|Write\"). SessionStart/Stop에서는 생략 가능."
+        },
+        "hooks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["command"],
+            "properties": {
+              "command": {
+                "type": "string",
+                "minLength": 1,
+                "description": "훅 실행 명령 — .claude/hooks/ 내부 스크립트만 허용 (HI-02 감시). 위험 패턴(rm -rf, sudo, curl | sh 등) 금지 (HI-01)."
+              },
+              "description": {
+                "type": "string",
+                "description": "훅 용도 설명 (감사 추적용)"
+              },
+              "timeout": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 60,
+                "default": 30,
+                "description": "초 단위 timeout — 상한 60s. 훅당 권장값: SessionStart 30s, PostToolUse 10s, Stop 15s. 60s 초과 시 UX/DoS 위험 (H007)."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
