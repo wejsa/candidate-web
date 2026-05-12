@@ -4,7 +4,10 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
 
-  DATABASE_URL: z.string().url().optional(),
+  // CANDID-002에서 required로 격상 — Prisma client가 부팅 시 DATABASE_URL 필요.
+  // 로컬은 docker-compose db 서비스(postgresql://candidate:candidate@localhost:5432/candidate_web),
+  // 운영은 관리형 PostgreSQL 연결 문자열.
+  DATABASE_URL: z.string().url(),
 
   JWT_ACCESS_SECRET: z.string().min(32).optional(),
   JWT_REFRESH_SECRET: z.string().min(32).optional(),

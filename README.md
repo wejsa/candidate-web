@@ -56,11 +56,18 @@ nvm use   # 또는 nvm install $(cat .nvmrc)
 corepack enable           # Node 16.10+ 권장
 corepack prepare pnpm@9.15.0 --activate
 
-# 의존성 설치
+# 의존성 설치 (postinstall에서 prisma generate 자동 실행)
 pnpm install
 
-# 환경 변수 (본 task에서는 모두 optional)
+# 환경 변수 (DATABASE_URL은 CANDID-002부터 필수)
 cp .env.example .env.local
+# .env.local 파일을 열어 시크릿/DB 연결 문자열 채우기
+
+# 데이터베이스 (PostgreSQL 16)
+pnpm db:up         # docker compose up -d db
+pnpm db:migrate    # prisma migrate dev (스키마 적용)
+pnpm db:seed       # 시드 데이터 (CANDID-002 시점은 no-op)
+pnpm db:studio     # Prisma Studio GUI (선택)
 
 # 개발 서버 (http://localhost:3000)
 pnpm dev
@@ -70,7 +77,18 @@ pnpm build
 pnpm typecheck
 pnpm lint
 pnpm format:check
+
+# 정리
+pnpm db:down       # docker compose down (볼륨 보존)
+# 완전 초기화: docker compose down -v
 ```
+
+### Database 운영 메모
+
+- 마이그레이션 명령: 로컬은 `prisma migrate dev`, CI/운영은 `prisma migrate deploy`. **`db push`는 금지** (추적성 손실).
+- 마이그레이션 파일 명명: `{timestamp}_candid-{NNN}-{설명}` (task 추적성).
+- Prisma client는 `lib/prisma.ts`의 singleton 사용. **클라이언트 컴포넌트 import 금지** (`'server-only'` 가드).
+- 운영 DB는 관리형 PostgreSQL 권장 (`DATABASE_URL`은 시크릿 매니저에서 주입).
 
 ### Claude Code 워크플로우
 

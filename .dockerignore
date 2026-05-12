@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+build
+coverage
+
+.env
+.env.local
+.env.*.local
+
+.git
+.github
+.claude
+
+docs
+*.md

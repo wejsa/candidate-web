@@ -1,0 +1,30 @@
+// candidate-web — Prisma 스키마 SSOT
+//
+// 본 task(CANDID-002)는 datasource + generator + 빈 model 자리만 정의합니다.
+// 실제 model 정의는 후속 task가 분할 담당:
+//   CANDID-003 → 인증 도메인 (users, auth_providers, email_verification, password_reset_token)
+//   CANDID-004 → 공고 조회 (job_categories, job_postings, job_posting_questions)
+//   CANDID-005 → 지원서 도메인 (applications, application_drafts, application_answers,
+//                 resume_files, portfolio_links, application_status_history,
+//                 interview_schedules, audit_logs)
+//
+// Migration 명명 규약: `{timestamp}_candid-{NNN}-{설명}` (Prisma는 prefix만 강제, 본 규약은 task 추적성용)
+// 명령어: `pnpm db:migrate` (로컬) / `pnpm db:deploy` (CI·prod) — `db push`는 금지
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// === CANDID-003: 인증 도메인 ===
+// 작성 위치 자리
+
+// === CANDID-004: 공고 조회 ===
+// 작성 위치 자리
+
+// === CANDID-005: 지원서 도메인 ===
+// 작성 위치 자리
