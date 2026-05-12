@@ -59,9 +59,13 @@ corepack prepare pnpm@9.15.0 --activate
 # 의존성 설치 (postinstall에서 prisma generate 자동 실행)
 pnpm install
 
-# 환경 변수 (DATABASE_URL은 CANDID-002부터 필수)
+# 환경 변수 (DATABASE_URL은 CANDID-002, PII_ENCRYPTION_KEY는 CANDID-008부터 필수)
 cp .env.example .env.local
 # .env.local 파일을 열어 시크릿/DB 연결 문자열 채우기
+
+# PII 암호화 키 생성 (AES-256-GCM)
+openssl rand -hex 32
+# 출력값을 .env.local의 PII_ENCRYPTION_KEY=... 자리에 붙여넣기 (운영용 키와 dev/staging 분리 필수)
 
 # 데이터베이스 (PostgreSQL 16)
 pnpm db:up         # docker compose up -d db
@@ -77,6 +81,8 @@ pnpm build
 pnpm typecheck
 pnpm lint
 pnpm format:check
+pnpm test            # vitest 단위 테스트 (CANDID-008 도입)
+pnpm test:coverage   # v8 커버리지 리포트 (lines/funcs/stmts 80% / branches 75% 임계)
 
 # 정리
 pnpm db:down       # docker compose down (볼륨 보존)
@@ -89,6 +95,50 @@ pnpm db:down       # docker compose down (볼륨 보존)
 - 마이그레이션 파일 명명: `{timestamp}_candid-{NNN}-{설명}` (task 추적성).
 - Prisma client는 `lib/prisma.ts`의 singleton 사용. **클라이언트 컴포넌트 import 금지** (`'server-only'` 가드).
 - 운영 DB는 관리형 PostgreSQL 권장 (`DATABASE_URL`은 시크릿 매니저에서 주입).
+
+### PII 처리 (CANDID-008)
+
+`User.phone`, `User.birthDate`는 DB에 **AES-256-GCM ciphertext** (`BYTEA`)로 저장됩니다. 저장 포맷: `[iv 12B] || [authTag 16B] || [ciphertext]`. 키 버전은 별도 `phone_key_version` / `birth_date_key_version` `SMALLINT` 컬럼이 추적 (현재 v1).
+
+**읽기 — 자동 복호화** (`lib/prisma/extends.ts`의 result extension):
+
+```ts
+import { prisma } from '@/lib/prisma';
+
+const user = await prisma.user.findUnique({ where: { id } });
+// user.phone, user.birthDate 모두 평문 string (또는 null)로 반환됨.
+```
+
+**쓰기 — 명시적 헬퍼** (`encryptUserPiiInput`):
+
+```ts
+import { prisma } from '@/lib/prisma';
+import { encryptUserPiiInput } from '@/lib/prisma/extends';
+
+await prisma.user.create({
+  data: {
+    email: 'foo@bar.com',
+    name: 'foo',
+    ...encryptUserPiiInput({ phone: '01012345678', birthDate: '1995-03-15' }),
+  },
+});
+```
+
+**응답 마스킹** (`lib/pii/mask.ts`) — API serializer 레이어에서 적용:
+
+```ts
+import { maskPhone, maskBirthDate } from '@/lib/pii/mask';
+
+return Response.json({
+  phone: maskPhone(user.phone),         // "010-****-5678"
+  birthDate: maskBirthDate(user.birthDate), // "1995-**-**"
+});
+```
+
+**주의 사항**:
+- `prisma.$queryRaw` 등 raw query는 `$extends`를 거치지 않음 → 직접 `decryptUserPiiField(row.phone)` 호출 필요.
+- 키 회전은 별도 마이그레이션(`*_key_version` 업데이트 + 백필) 필요. 현재 모듈은 v1 단일 키.
+- 운영 진입 시 컬럼 타입 변경은 4단계 무중단 절차(M1 add → M2 backfill → M3 deploy → M4 drop+rename) 필수. dev-only 단일 마이그레이션은 PHASE-1에 한정.
 
 ### Claude Code 워크플로우
 

@@ -22,8 +22,10 @@ generator client {
 
 // === CANDID-003: 인증 도메인 ===
 // PRD §3.3.1, §3.3.2 + US-AUTH-001~004 기반.
-// 주의: phone, birth_date는 CANDID-008에서 $extends 후크로 AES-256-GCM 암호화 예정.
-//       본 task 머지 후 CANDID-008 머지 전까지는 PII 평문 저장 — PHASE-1 완료 전 운영 진입 금지.
+// CANDID-008 적용: phone, birth_date는 AES-256-GCM 암호화하여 BYTEA로 저장.
+//                  애플리케이션 코드는 string(평문)으로 다루고, lib/prisma/extends.ts의
+//                  result extension이 자동 복호화. 쓰기는 encryptUserPiiInput 헬퍼 명시 호출.
+//                  phone_key_version / birth_date_key_version으로 키 회전 추적.
 
 enum UserStatus {
   ACTIVE
@@ -37,19 +39,22 @@ enum AuthProviderType {
 }
 
 model User {
-  id               Int        @id @default(autoincrement())
-  email            String     @unique @db.VarChar(255)
-  passwordHash     String?    @map("password_hash") @db.VarChar(255)
-  name             String     @db.VarChar(100)
-  phone            String?    @db.VarChar(20)
-  birthDate        DateTime?  @map("birth_date") @db.Date
-  emailVerifiedAt  DateTime?  @map("email_verified_at")
-  status           UserStatus @default(ACTIVE)
-  failedLoginCount Int        @default(0) @map("failed_login_count")
-  lockedUntil      DateTime?  @map("locked_until")
-  withdrawnAt      DateTime?  @map("withdrawn_at")
-  createdAt        DateTime   @default(now()) @map("created_at")
-  updatedAt        DateTime   @updatedAt @map("updated_at")
+  id                  Int        @id @default(autoincrement())
+  email               String     @unique @db.VarChar(255)
+  passwordHash        String?    @map("password_hash") @db.VarChar(255)
+  name                String     @db.VarChar(100)
+  // CANDID-008: AES-256-GCM ciphertext (iv 12B || tag 16B || ct). 평문 길이는 ISO date / 휴대폰 수준.
+  phone               Bytes?
+  phoneKeyVersion     Int?       @default(1) @map("phone_key_version") @db.SmallInt
+  birthDate           Bytes?     @map("birth_date")
+  birthDateKeyVersion Int?       @default(1) @map("birth_date_key_version") @db.SmallInt
+  emailVerifiedAt     DateTime?  @map("email_verified_at")
+  status              UserStatus @default(ACTIVE)
+  failedLoginCount    Int        @default(0) @map("failed_login_count")
+  lockedUntil         DateTime?  @map("locked_until")
+  withdrawnAt         DateTime?  @map("withdrawn_at")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
 
   authProviders       AuthProvider[]
   emailVerifications  EmailVerification[]
