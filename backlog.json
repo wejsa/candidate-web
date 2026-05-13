@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 31,
+    "version": 32,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-13T14:30:52+09:00"
+    "updatedAt": "2026-05-13T14:35:51+09:00"
   },
   "summary": {
     "total": 33,
@@ -623,7 +623,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260513-231655",
-      "assignedAt": "2026-05-13T14:30:52+09:00",
+      "assignedAt": "2026-05-13T14:35:51+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "lib/pii/serializer.ts",
@@ -637,12 +637,12 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 8,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-13T14:30:52+09:00"
+        "autoChainArgs": "8 --auto-fix",
+        "updatedAt": "2026-05-13T14:35:51+09:00"
       },
       "steps": [
         {
@@ -665,12 +665,15 @@
           "number": 2,
           "title": "D7: lib/pii/serializer.ts (userPublicSchema zod DTO) + 단위 테스트",
           "description": "lib/pii/serializer.ts 신규 — zod userPublicSchema.transform()이 maskPhone/maskBirthDate를 자동 적용하는 DTO mapper. toUserPublic(user) 진입점 함수. PrismaUserDecrypted 타입 정의 (Prisma.UserGetPayload<{}>에서 phone/birthDate를 string으로 override). 단위 테스트 8케이스 이상 — phone/birthDate 마스킹, null/empty/무효 처리, password_hash 비공개 필드 미포함 검증, createdAt ISO 직렬화, 누락 필수 필드 throw.",
-          "status": "pending",
+          "status": "pr_created",
+          "prNumber": 8,
+          "branch": "feature/CANDID-031-step2",
           "files": [
             "lib/pii/serializer.ts",
             "tests/lib/pii/serializer.test.ts"
           ],
-          "estimatedLines": 305
+          "estimatedLines": 305,
+          "actualLines": 216
         },
         {
           "number": 3,
