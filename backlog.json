@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 33,
+    "version": 34,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-13T14:45:26+09:00"
+    "updatedAt": "2026-05-13T14:50:57+09:00"
   },
   "summary": {
     "total": 33,
@@ -623,7 +623,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260513-231655",
-      "assignedAt": "2026-05-13T14:45:26+09:00",
+      "assignedAt": "2026-05-13T14:50:57+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "lib/prisma/extends.ts",
@@ -635,12 +635,12 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 9,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-13T14:45:26+09:00"
+        "autoChainArgs": "9 --auto-fix",
+        "updatedAt": "2026-05-13T14:50:57+09:00"
       },
       "steps": [
         {
@@ -677,13 +677,16 @@
         {
           "number": 3,
           "title": "D8: extends query.user.$allOperations 런타임 가드 + 단위 테스트",
-          "description": "lib/prisma/extends.ts에 piiExtension.query.user.$allOperations 추가. assertUserPiiInputShape(data) named export — string phone/birthDate 입력 시 throw (L-003 적용, extension 내부 구조 의존 회피). create/createMany/update/updateMany/upsert 모두 검사 (createMany는 배열 each). null/Buffer/Uint8Array는 통과. 단위 테스트 6케이스 이상 — string throw, Buffer/Uint8Array/null 통과, createMany 배열, 비PII 필드 통과.",
-          "status": "pending",
+          "description": "lib/prisma/extends.ts에 piiExtension.query.user 5 op(create/createMany/update/updateMany/upsert) 가드 추가. assertUserPiiInputShape(data) named export — string phone/birthDate 입력 시 throw (L-003 적용). update wrapper { set: 'string' } 형태도 차단. null/Buffer/Uint8Array는 통과. 단위 테스트 14건 — 차단 4 / 통과 7 / 회귀가드 2 / 메시지 1.",
+          "status": "pr_created",
+          "prNumber": 9,
+          "branch": "feature/CANDID-031-step3",
           "files": [
             "lib/prisma/extends.ts",
             "tests/lib/prisma/extends.test.ts"
           ],
           "estimatedLines": 175,
+          "actualLines": 171,
           "prLineLimit": 300
         }
       ],
