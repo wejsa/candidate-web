@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 28,
+    "version": 29,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-13T14:16:55+09:00"
+    "updatedAt": "2026-05-13T14:18:30+09:00"
   },
   "summary": {
     "total": 33,
@@ -623,9 +623,16 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260513-231655",
-      "assignedAt": "2026-05-13T14:16:55+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-13T14:18:30+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        ".eslintrc.json",
+        "CLAUDE.md",
+        "lib/pii/serializer.ts",
+        "tests/lib/pii/serializer.test.ts",
+        "lib/prisma/extends.ts",
+        "tests/lib/prisma/extends.test.ts"
+      ],
       "dependencies": [
         "CANDID-008"
       ],
@@ -637,8 +644,46 @@
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-13T14:16:55+09:00"
-      }
+        "updatedAt": "2026-05-13T14:18:30+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "D6: ESLint $queryRaw/$executeRaw 가드 + CLAUDE.md 보안 1줄",
+          "description": ".eslintrc.json에 no-restricted-syntax 4건 추가 ($queryRaw, $queryRawUnsafe, $executeRaw, $executeRawUnsafe). CLAUDE.md 보안 강제 사항 섹션에 'User PII write는 encryptUserPiiInput 의무, raw query 시 decryptUserPiiField 직접 호출' 1줄 추가. 기존 코드에 raw query 사용 없음 (검증 완료) → lint 통과 보장. 임시 fixture로 가드 발동 동작만 수동 확인 후 제거.",
+          "status": "pending",
+          "files": [
+            ".eslintrc.json",
+            "CLAUDE.md"
+          ],
+          "estimatedLines": 50,
+          "prLineLimit": 150
+        },
+        {
+          "number": 2,
+          "title": "D7: lib/pii/serializer.ts (userPublicSchema zod DTO) + 단위 테스트",
+          "description": "lib/pii/serializer.ts 신규 — zod userPublicSchema.transform()이 maskPhone/maskBirthDate를 자동 적용하는 DTO mapper. toUserPublic(user) 진입점 함수. PrismaUserDecrypted 타입 정의 (Prisma.UserGetPayload<{}>에서 phone/birthDate를 string으로 override). 단위 테스트 8케이스 이상 — phone/birthDate 마스킹, null/empty/무효 처리, password_hash 비공개 필드 미포함 검증, createdAt ISO 직렬화, 누락 필수 필드 throw.",
+          "status": "pending",
+          "files": [
+            "lib/pii/serializer.ts",
+            "tests/lib/pii/serializer.test.ts"
+          ],
+          "estimatedLines": 305
+        },
+        {
+          "number": 3,
+          "title": "D8: extends query.user.$allOperations 런타임 가드 + 단위 테스트",
+          "description": "lib/prisma/extends.ts에 piiExtension.query.user.$allOperations 추가. assertUserPiiInputShape(data) named export — string phone/birthDate 입력 시 throw (L-003 적용, extension 내부 구조 의존 회피). create/createMany/update/updateMany/upsert 모두 검사 (createMany는 배열 each). null/Buffer/Uint8Array는 통과. 단위 테스트 6케이스 이상 — string throw, Buffer/Uint8Array/null 통과, createMany 배열, 비PII 필드 통과.",
+          "status": "pending",
+          "files": [
+            "lib/prisma/extends.ts",
+            "tests/lib/prisma/extends.test.ts"
+          ],
+          "estimatedLines": 175,
+          "prLineLimit": 300
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-032": {
       "id": "CANDID-032",
