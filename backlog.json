@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 27,
+    "version": 28,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-12T23:27:00+09:00"
+    "updatedAt": "2026-05-13T14:16:55+09:00"
   },
   "summary": {
     "total": 33,
     "done": 5,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 28
+    "todo": 27
   },
   "phases": {
     "1": {
@@ -618,15 +618,27 @@
       "id": "CANDID-031",
       "title": "CANDID-008 FU2: PII 방어 깊이 강화 ($queryRaw 가드 + 응답 마스킹 강제 + write 런타임 가드)",
       "description": "CANDID-008 Step 2 review MAJOR 3건 묶음 (D6+D7+D8). (1) ESLint custom rule `no-restricted-syntax`로 `$queryRaw`/`$executeRaw` 사용 시 경고 + CLAUDE.md 보안 강제 사항에 'encryptUserPiiInput 의무 / raw 시 decryptUserPiiField 직접 호출' 1줄 추가. (2) lib/pii/serializer.ts에 zod transform 기반 userPublicSchema 도입 — `Response.json(user)` 직접 호출 차단을 위한 branded type 또는 DTO mapper. (3) lib/prisma/extends.ts에 query.user.$allOperations 런타임 가드 추가 — string phone/birthDate 입력 시 throw (방어 깊이). + 통합 테스트 1건: string 평문 입력 시 throw 검증.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 1,
+      "assignee": "jaese@hoji-20260513-231655",
+      "assignedAt": "2026-05-13T14:16:55+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T21:35:00+09:00",
-      "specFile": "docs/retro/CANDID-008-retro.md"
+      "specFile": "docs/retro/CANDID-008-retro.md",
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-13T14:16:55+09:00"
+      }
     },
     "CANDID-032": {
       "id": "CANDID-032",
