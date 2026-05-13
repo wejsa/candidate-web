@@ -17,7 +17,34 @@
     "@typescript-eslint/no-explicit-any": "warn",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "eqeqeq": ["error", "always"],
-    "prefer-const": "error"
+    "prefer-const": "error",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.property.name='$queryRaw']",
+        "message": "CANDID-031 (D6): $queryRaw bypasses piiExtension. Use prisma.user.findX, or call decryptUserPiiField() explicitly. If unavoidable, add `// eslint-disable-next-line no-restricted-syntax -- <reason>` with a justified PR comment."
+      },
+      {
+        "selector": "TaggedTemplateExpression[tag.property.name='$queryRaw']",
+        "message": "CANDID-031 (D6): $queryRaw bypasses piiExtension. Use prisma.user.findX, or call decryptUserPiiField() explicitly."
+      },
+      {
+        "selector": "CallExpression[callee.property.name='$queryRawUnsafe']",
+        "message": "CANDID-031 (D6): $queryRawUnsafe bypasses piiExtension and is SQL-injection prone. Use prisma.user.findX, or call decryptUserPiiField() explicitly."
+      },
+      {
+        "selector": "CallExpression[callee.property.name='$executeRaw']",
+        "message": "CANDID-031 (D6): $executeRaw bypasses piiExtension write guard (encryptUserPiiInput). Use prisma.user.update/create or call encryptPiiWithVersion() explicitly."
+      },
+      {
+        "selector": "TaggedTemplateExpression[tag.property.name='$executeRaw']",
+        "message": "CANDID-031 (D6): $executeRaw bypasses piiExtension write guard (encryptUserPiiInput). Use prisma.user.update/create or call encryptPiiWithVersion() explicitly."
+      },
+      {
+        "selector": "CallExpression[callee.property.name='$executeRawUnsafe']",
+        "message": "CANDID-031 (D6): $executeRawUnsafe bypasses piiExtension write guard and is SQL-injection prone. Use prisma.user.update/create or call encryptPiiWithVersion() explicitly."
+      }
+    ]
   },
   "ignorePatterns": ["node_modules", ".next", "out", "build", "coverage", "next-env.d.ts"]
 }

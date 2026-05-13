@@ -601,6 +601,7 @@ CANDID-{번호}
 - 비밀번호는 **BCrypt strength 12** 외 어떤 형태로도 저장/로깅 금지.
 - JWT 시크릿/DB 비밀번호 등은 `.env` + `zod`로 주입. 코드/응답/로그 노출 금지.
 - PII(`phone`, `birth_date`)는 AES-256-GCM 컬럼 암호화 + 응답 마스킹.
+- User PII write는 `encryptUserPiiInput` 의무. `$queryRaw`/`$executeRaw` 우회 시(ESLint 차단 — `no-restricted-syntax`) `decryptUserPiiField`/`encryptPiiWithVersion`을 직접 호출.
 - 사용자 입력 HTML은 DOMPurify 화이트리스트 sanitize. 저장 + 출력 시 이중 방어.
 - 외부 URL fetch(OG 미리보기 등) 시 SSRF 차단: 내부망 IP(10./172.16-31./192.168./127./169.254.) 거부, 3초 타임아웃, 1MB 응답 제한.
 - 멱등성 키(`Idempotency-Key`)로 지원서 제출 중복 방지 — 24시간 보존.
