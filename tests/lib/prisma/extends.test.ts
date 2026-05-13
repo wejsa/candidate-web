@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { encryptPii } from '@/lib/crypto/aes-gcm';
 import {
   PII_KEY_VERSION,
+  assertUserPiiInputShape,
   computeDecryptedBirthDate,
   computeDecryptedPhone,
   decryptUserPiiField,
@@ -200,6 +201,90 @@ describe('end-to-end: encrypt input → decrypt result roundtrip', () => {
     expect(encoded.birthDate).toBeInstanceOf(Buffer);
     if (encoded.birthDate instanceof Buffer) {
       expect(decryptUserPiiField(encoded.birthDate)).toBe('2000-02-29');
+    }
+  });
+});
+
+// CANDID-031 D8 — write 런타임 가드. piiExtension.query.user의 모든 write op에서 호출되는
+// assertUserPiiInputShape를 단위 테스트한다 (L-003: extension 내부 구조 의존 없이 함수 직접 호출).
+describe('assertUserPiiInputShape (CANDID-031 D8)', () => {
+  // 차단 케이스 — string 평문은 반드시 throw
+
+  it('throws on string phone (raw plaintext)', () => {
+    expect(() => assertUserPiiInputShape({ phone: '010-1234-5678' })).toThrow(
+      /D8.*phone.*encryptUserPiiInput/,
+    );
+  });
+
+  it('throws on string birthDate (raw plaintext)', () => {
+    expect(() => assertUserPiiInputShape({ birthDate: '1995-03-15' })).toThrow(
+      /D8.*birthDate.*encryptUserPiiInput/,
+    );
+  });
+
+  it('throws on update wrapper { phone: { set: string } }', () => {
+    expect(() => assertUserPiiInputShape({ phone: { set: '010-1234-5678' } })).toThrow(/D8.*phone/);
+  });
+
+  it('throws on update wrapper { birthDate: { set: string } }', () => {
+    expect(() => assertUserPiiInputShape({ birthDate: { set: '1995-03-15' } })).toThrow(
+      /D8.*birthDate/,
+    );
+  });
+
+  // 통과 케이스 — 정상 입력은 throw 없음
+
+  it('passes on Buffer phone (encrypted ciphertext)', () => {
+    expect(() => assertUserPiiInputShape({ phone: Buffer.from([1, 2, 3]) })).not.toThrow();
+  });
+
+  it('passes on Uint8Array phone (encrypted ciphertext)', () => {
+    expect(() => assertUserPiiInputShape({ phone: new Uint8Array([1, 2, 3]) })).not.toThrow();
+  });
+
+  it('passes on null phone (explicit NULL column set)', () => {
+    expect(() => assertUserPiiInputShape({ phone: null })).not.toThrow();
+  });
+
+  it('passes on undefined phone (partial update)', () => {
+    expect(() => assertUserPiiInputShape({ phone: undefined })).not.toThrow();
+  });
+
+  it('passes on wrapper { phone: { set: Buffer } } (update with ciphertext)', () => {
+    expect(() => assertUserPiiInputShape({ phone: { set: Buffer.from([1, 2, 3]) } })).not.toThrow();
+  });
+
+  it('passes on input without phone/birthDate fields (non-PII update)', () => {
+    expect(() => assertUserPiiInputShape({ name: '홍길동', email: 'foo@bar.com' })).not.toThrow();
+  });
+
+  it('passes on null / undefined / non-object input', () => {
+    expect(() => assertUserPiiInputShape(null)).not.toThrow();
+    expect(() => assertUserPiiInputShape(undefined)).not.toThrow();
+    expect(() => assertUserPiiInputShape('string')).not.toThrow();
+    expect(() => assertUserPiiInputShape(42)).not.toThrow();
+  });
+
+  it('passes on empty object', () => {
+    expect(() => assertUserPiiInputShape({})).not.toThrow();
+  });
+
+  // encryptUserPiiInput 결과는 항상 통과해야 함 (회귀 가드)
+
+  it('passes on encryptUserPiiInput output (production path regression guard)', () => {
+    const encoded = encryptUserPiiInput({ phone: '010-1234-5678', birthDate: '1995-03-15' });
+    expect(() => assertUserPiiInputShape(encoded)).not.toThrow();
+  });
+
+  // 에러 메시지에 actionable 안내가 포함되는가
+
+  it('error message includes encryptUserPiiInput guidance', () => {
+    try {
+      assertUserPiiInputShape({ phone: '010-1234-5678' });
+    } catch (e) {
+      const msg = (e as Error).message;
+      expect(msg).toContain('encryptUserPiiInput');
+      expect(msg).toContain('encryptPiiWithVersion');
     }
   });
 });

@@ -74,6 +74,36 @@ export const piiExtension = Prisma.defineExtension({
       },
     },
   },
+  // CANDID-031 (D8) — write 런타임 가드. assertUserPiiInputShape를 모든 User write op에 적용.
+  // string 평문 phone/birthDate 입력 시 throw → encryptUserPiiInput 헬퍼 누락 차단.
+  query: {
+    user: {
+      async create({ args, query }) {
+        assertUserPiiInputShape(args.data);
+        return query(args);
+      },
+      async update({ args, query }) {
+        assertUserPiiInputShape(args.data);
+        return query(args);
+      },
+      async upsert({ args, query }) {
+        assertUserPiiInputShape(args.create);
+        assertUserPiiInputShape(args.update);
+        return query(args);
+      },
+      async updateMany({ args, query }) {
+        assertUserPiiInputShape(args.data);
+        return query(args);
+      },
+      async createMany({ args, query }) {
+        const dataArr = Array.isArray(args.data) ? args.data : [args.data];
+        for (const row of dataArr) {
+          assertUserPiiInputShape(row);
+        }
+        return query(args);
+      },
+    },
+  },
 });
 
 /**
@@ -180,4 +210,60 @@ export function encryptUserPiiInput(input: UserPiiPlaintextInput): UserPiiEncryp
 export function decryptUserPiiField(value: Uint8Array | null): string | null {
   if (value === null) return null;
   return decryptPii(toBuffer(value));
+}
+
+// === CANDID-031 (D8) — write 런타임 가드 ============================================
+//
+// 목적: encryptUserPiiInput 헬퍼 누락 시 string 평문이 phone/birthDate 컬럼으로 그대로
+//       전달되는 시나리오를 *런타임*에 차단한다. D6(ESLint 정적 가드)는 raw query를,
+//       D7(serializer)는 응답 직렬화를 다루며, D8은 prisma write 경로의 마지막 방어선이다.
+//
+// 본 가드는 piiExtension의 query.user 후크에서 호출되지만, named export로도 노출하여
+// 단위 테스트가 extension 내부 구조에 의존하지 않도록 한다 (L-003 학습 적용).
+
+function piiViolationMessage(field: 'phone' | 'birthDate'): string {
+  return (
+    `CANDID-031 (D8): User.${field} string plaintext input rejected. ` +
+    `Use encryptUserPiiInput({ ${field} }) to encrypt before passing to prisma.user ` +
+    `create/update/upsert. For raw queries, call encryptPiiWithVersion() directly.`
+  );
+}
+
+/**
+ * Prisma update 시 사용되는 `{ set: <value> }` wrapper 형태를 검사하기 위한 헬퍼.
+ * `prisma.user.update({ data: { phone: { set: '010-...' } } })` 같은 우회 경로 차단용.
+ */
+function isStringSetWrapper(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') return false;
+  if (!('set' in value)) return false;
+  return typeof (value as { set: unknown }).set === 'string';
+}
+
+/**
+ * User write 입력에서 string 평문 PII가 발견되면 throw.
+ *
+ * 통과 케이스: `null` / `undefined` / `Buffer` / `Uint8Array` / 해당 필드 부재.
+ * 차단 케이스: `phone: 'string'`, `birthDate: 'string'`, `phone: { set: 'string' }` (update wrapper).
+ *
+ * 단위 테스트 친화 — extension 내부 구조에 의존하지 않고 직접 호출 가능 (L-003 적용).
+ * 신규 PII 컬럼 추가 시 본 함수에 필드 검사 추가 필수.
+ */
+export function assertUserPiiInputShape(data: unknown): void {
+  if (data === null || data === undefined) return;
+  if (typeof data !== 'object') return;
+  const d = data as Record<string, unknown>;
+
+  if ('phone' in d) {
+    const phone = d.phone;
+    if (typeof phone === 'string' || isStringSetWrapper(phone)) {
+      throw new Error(piiViolationMessage('phone'));
+    }
+  }
+
+  if ('birthDate' in d) {
+    const birthDate = d.birthDate;
+    if (typeof birthDate === 'string' || isStringSetWrapper(birthDate)) {
+      throw new Error(piiViolationMessage('birthDate'));
+    }
+  }
 }
