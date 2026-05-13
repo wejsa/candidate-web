@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 32,
+    "version": 33,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-13T14:35:51+09:00"
+    "updatedAt": "2026-05-13T14:45:26+09:00"
   },
   "summary": {
     "total": 33,
@@ -623,11 +623,9 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260513-231655",
-      "assignedAt": "2026-05-13T14:35:51+09:00",
+      "assignedAt": "2026-05-13T14:45:26+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "lib/pii/serializer.ts",
-        "tests/lib/pii/serializer.test.ts",
         "lib/prisma/extends.ts",
         "tests/lib/prisma/extends.test.ts"
       ],
@@ -637,12 +635,12 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 8,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "8 --auto-fix",
-        "updatedAt": "2026-05-13T14:35:51+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-13T14:45:26+09:00"
       },
       "steps": [
         {
@@ -664,16 +662,17 @@
         {
           "number": 2,
           "title": "D7: lib/pii/serializer.ts (userPublicSchema zod DTO) + 단위 테스트",
-          "description": "lib/pii/serializer.ts 신규 — zod userPublicSchema.transform()이 maskPhone/maskBirthDate를 자동 적용하는 DTO mapper. toUserPublic(user) 진입점 함수. PrismaUserDecrypted 타입 정의 (Prisma.UserGetPayload<{}>에서 phone/birthDate를 string으로 override). 단위 테스트 8케이스 이상 — phone/birthDate 마스킹, null/empty/무효 처리, password_hash 비공개 필드 미포함 검증, createdAt ISO 직렬화, 누락 필수 필드 throw.",
-          "status": "pr_created",
+          "description": "lib/pii/serializer.ts 신규 — zod userPublicSchema.transform()이 maskPhone/maskBirthDate를 자동 적용하는 DTO mapper. toUserPublic(user) 진입점 함수. PrismaUserDecrypted 타입 정의 (Prisma.UserGetPayload<{}>에서 phone/birthDate를 string으로 override). 단위 테스트 8케이스 이상 — phone/birthDate 마스킹, null/empty/무효 처리, password_hash 비공개 필드 미포함 검증, createdAt ISO 직렬화, 누락 필수 필드 throw. + review fix 4건 (C001 type anchor / H001 ZodError 안전망 / H002 .strip 명시 / 테스트 3건 보강).",
+          "status": "merged",
           "prNumber": 8,
+          "mergedAt": "2026-05-13T14:45:26+09:00",
           "branch": "feature/CANDID-031-step2",
           "files": [
             "lib/pii/serializer.ts",
             "tests/lib/pii/serializer.test.ts"
           ],
           "estimatedLines": 305,
-          "actualLines": 216
+          "actualLines": 264
         },
         {
           "number": 3,
@@ -688,7 +687,7 @@
           "prLineLimit": 300
         }
       ],
-      "currentStep": 2
+      "currentStep": 3
     },
     "CANDID-032": {
       "id": "CANDID-032",
