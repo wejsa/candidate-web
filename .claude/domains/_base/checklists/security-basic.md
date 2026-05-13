@@ -44,6 +44,18 @@
 | 인증서 검증 | SSL 인증서 검증 활성화 | CRITICAL |
 | API 키 보호 | 클라이언트 노출 금지 | MAJOR |
 
+## ORM Extension 후크 커버리지
+
+| 항목 | 설명 | 심각도 |
+|------|------|--------|
+| Top-level write 가드 | Prisma `query.{model}.{create, createMany, update, updateMany, upsert}` 후크가 모든 write op 차단 | CRITICAL |
+| **Nested write 인지** | `prisma.X.create({ data: { user: { create: ... } } })` 같은 *역방향 관계를 통한* 모델 생성은 해당 모델의 query 후크를 trigger하지 않음 — child 모델 후크 또는 result extension(needs)로 보강 필요 | MAJOR |
+| Raw query 정적 가드 | `$queryRaw` / `$executeRaw` 우회는 ESLint `no-restricted-syntax` 등 정적 가드로 차단 | MAJOR |
+| Update wrapper 차단 | `data: { phone: { set: 'string' } }` 같은 wrapper 형태도 동일 가드 적용 | MAJOR |
+| Named export 가드 함수 | extension 내부 구조 의존을 피하기 위해 가드 로직은 별도 named function으로 export → 단위 테스트 직접 호출 | MINOR |
+
+> CANDID-031에서 도출 (defense-in-depth 3-layer: 정적 ESLint + 직렬화 zod + 런타임 query 후크). 자세한 배경은 `docs/retro/CANDID-031-retro.md` 참조.
+
 ## 에러 처리
 
 | 항목 | 설명 | 심각도 |

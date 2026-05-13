@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 1,
-    "updatedAt": "2026-05-12T21:30:00+09:00",
+    "version": 2,
+    "updatedAt": "2026-05-14T00:00:00+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -34,24 +34,24 @@
       "taskId": "CANDID-008",
       "category": "quality",
       "title": "Prisma $extends result.compute는 명시 export하여 단위 테스트",
-      "description": "`Prisma.defineExtension`의 반환 구조는 Prisma 버전에 따라 wrap될 수 있어 `(piiExtension as any).result?.user?.phone?.compute` 같은 접근은 깨질 수 있다. result extension의 compute 로직은 별도 named function으로 추출 후 export하고, 단위 테스트는 명시 함수를 직접 호출한다. extension 등록 자체는 별도 통합 테스트(testcontainer/sqlite)로 검증한다.",
-      "impact": "medium",
+      "description": "`Prisma.defineExtension`의 반환 구조는 Prisma 버전에 따라 wrap될 수 있어 `(piiExtension as any).result?.user?.phone?.compute` 같은 접근은 깨질 수 있다. result extension의 compute 로직은 별도 named function으로 추출 후 export하고, 단위 테스트는 명시 함수를 직접 호출한다. extension 등록 자체는 별도 통합 테스트(testcontainer/sqlite)로 검증한다. CANDID-031 D8(`assertUserPiiInputShape`)에서도 동일 패턴 재적용 — query 후크 가드 로직을 named export로 분리하여 14 케이스 단위 테스트가 extension 구조에 의존하지 않음.",
+      "impact": "high",
       "tags": ["prisma", "extends", "testing", "unit-test-design"],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-12T21:30:00+09:00",
-      "updatedAt": "2026-05-12T21:30:00+09:00"
+      "updatedAt": "2026-05-14T00:00:00+09:00"
     },
     {
       "id": "L-004",
       "taskId": "CANDID-008",
       "category": "process",
       "title": "Self-PR + CRITICAL=0 + MAJOR 다수 → 다음 Step PR에 fix 번들",
-      "description": "Self-PR이면 framework가 자동 APPROVE 처리하므로 MAJORs는 deferred된다. 다음 step PR commit message에 'review MAJOR N건 fix 포함 (H001/.../M001)' 명시로 follow-up 추적 가능. 마지막 step에서 발견된 MAJORs는 별도 follow-up task(FU1~FUN)로 backlog 등록 필요. CANDID-002에서 검증된 precedent, CANDID-008에서 재확인.",
+      "description": "Self-PR이면 framework가 자동 APPROVE 처리하므로 MAJORs는 deferred된다. 다음 step PR commit message에 'review MAJOR N건 fix 포함 (H001/.../M001)' 명시로 follow-up 추적 가능. 마지막 step에서 발견된 MAJORs는 별도 follow-up task(FU1~FUN)로 backlog 등록 필요. CANDID-002/CANDID-008/CANDID-031에서 검증된 precedent — 단 CANDID-031 Step 2에서는 CRITICAL 발견 시 *동일 PR fix loop*(L-009)가 더 빠른 사이클로 검증됨.",
       "impact": "high",
       "tags": ["workflow", "review", "follow-up", "self-pr"],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-12T21:30:00+09:00",
-      "updatedAt": "2026-05-12T21:30:00+09:00"
+      "updatedAt": "2026-05-14T00:00:00+09:00"
     },
     {
       "id": "L-005",
@@ -64,6 +64,78 @@
       "appliedCount": 1,
       "createdAt": "2026-05-12T21:30:00+09:00",
       "updatedAt": "2026-05-12T21:30:00+09:00"
+    },
+    {
+      "id": "L-006",
+      "taskId": "CANDID-031",
+      "category": "security",
+      "title": "PII 같은 민감 컬럼은 3-layer defense-in-depth (정적 + 직렬화 + 런타임)로 보호",
+      "description": "단일 보호막(헬퍼 호출 의무)에 의존하면 우회 경로(raw query, 직접 직렬화, string 평문 전달)가 노출된다. CANDID-031은 D6(ESLint `no-restricted-syntax` $queryRaw 정적 가드) + D7(zod `userPublicSchema.transform()` 직렬화 진입점 + fail-closed strip) + D8(`piiExtension.query.user.*` 런타임 가드 + `assertUserPiiInputShape` named export) 3-layer를 도입하여 각 계층의 우회 가능 경로를 다음 계층이 차단한다. 각 layer는 *독립 회귀 가드*를 가져야 하며, 책임 경계가 명확해야 false positive 없이 동작한다.",
+      "impact": "high",
+      "tags": ["security", "pii", "defense-in-depth", "eslint", "zod", "prisma-extension"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-14T00:00:00+09:00",
+      "updatedAt": "2026-05-14T00:00:00+09:00"
+    },
+    {
+      "id": "L-007",
+      "taskId": "CANDID-031",
+      "category": "architecture",
+      "title": "Prisma `query.{model}.{op}` 후크는 top-level write only — nested write 우회 가능",
+      "description": "`prisma.user.create(...)` 직접 호출은 `query.user.create` 후크를 trigger하지만, `prisma.authProvider.create({ data: { user: { create: {...} } } })` 같은 *역방향 관계를 통한 nested User 생성*은 trigger되지 않는다. defense-in-depth 설계 시 plan 단계에서 *호출 표면 매트릭스*(top-level / nested / raw)를 인식하고, child 모델의 query 후크도 동시에 가드하거나 result extension의 needs/select 차원에서 보강해야 한다. CANDID-031 D8에서 PR #9 리뷰 시점에 domain/security 양쪽에서 동시 지적됨 — plan 단계 체크리스트에 'ORM extension hook coverage' 항목 추가 권장.",
+      "impact": "high",
+      "tags": ["prisma", "extension", "query-hook", "nested-write", "defense-in-depth", "security"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-14T00:00:00+09:00",
+      "updatedAt": "2026-05-14T00:00:00+09:00"
+    },
+    {
+      "id": "L-008",
+      "taskId": "CANDID-031",
+      "category": "quality",
+      "title": "zod transform schema의 input 타입은 InputSchema에 anchor",
+      "description": "분리된 InputSchema(`userPublicInputSchema`)가 있으면 input 타입은 `z.infer<typeof userPublicInputSchema>`로 anchor한다. `z.input<typeof transformSchema>`는 컴파일은 통과하나 InputSchema 분리의 의도를 무효화하고, 향후 transform이 추가되면 input contract가 흔들린다. CANDID-031 PR #8 1차 리뷰에서 도메인 reviewer가 발견(C001) → skill-fix 1회차로 즉시 수정. 본 패턴은 zod로 input/output을 명시 분리하는 모든 schema에 적용된다.",
+      "impact": "medium",
+      "tags": ["zod", "typescript", "type-anchor", "schema-design"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-14T00:00:00+09:00",
+      "updatedAt": "2026-05-14T00:00:00+09:00"
+    },
+    {
+      "id": "L-009",
+      "taskId": "CANDID-031",
+      "category": "process",
+      "title": "skill-fix 동일 PR 내 fix loop은 다음 step PR 번들보다 빠른 사이클",
+      "description": "CRITICAL 발견 시 같은 PR 브랜치에서 fix 적용 → 재리뷰. 이 과정에서 MAJOR/MINOR/INFO 다수도 함께 번들 처리 가능 → 추가 PR 비용 없이 단일 사이클에서 정리된다. CANDID-031 Step 2(PR #8)에서 CRITICAL 1건 + MAJOR 4건 + 테스트 3건 추가를 fix loop 1회차로 일괄 해결 (~7분 추가). CANDID-008의 '다음 step PR에 fix 번들'(L-004) 패턴은 마지막 step에서 deferred MAJOR가 누적되는 약점이 있는데, fix loop는 즉시 해결로 누적 부채를 줄인다. `--auto-fix` 흐름이 표준 워크플로우.",
+      "impact": "high",
+      "tags": ["workflow", "skill-fix", "auto-fix", "review-loop"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-14T00:00:00+09:00",
+      "updatedAt": "2026-05-14T00:00:00+09:00"
+    },
+    {
+      "id": "L-010",
+      "taskId": "CANDID-031",
+      "category": "process",
+      "title": "Plan 단계의 라인 추정 정확도는 review fix 비용 사전 반영 + step 책임 단순화에서 온다",
+      "description": "CANDID-008의 추정 오차(+21~72%)는 CANDID-031에서 -2~-13%로 크게 개선됐다. 사유: (1) Step 2 estimatedLines에 'review fix 4건 번들'을 사전 반영 (216 LOC 실제 → 264 LOC 수정 결과, 305 추정에서 -13%), (2) 각 step의 책임 경계를 정확히 1개 layer(D6/D7/D8)로 단순화. plan 단계에서 *review fix 1~2회 사이클의 추가 비용*을 예측하여 estimatedLines에 미리 반영하면 후반 step의 라인 오버런을 줄일 수 있다.",
+      "impact": "medium",
+      "tags": ["planning", "estimation", "skill-plan", "review-cycle"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-14T00:00:00+09:00",
+      "updatedAt": "2026-05-14T00:00:00+09:00"
+    },
+    {
+      "id": "L-011",
+      "taskId": "CANDID-031",
+      "category": "security",
+      "title": "ESLint AST selector는 직접 access 패턴만 커버 — alias/computed access는 LLM 리뷰 영역",
+      "description": "`CallExpression[callee.property.name='X']` 및 `TaggedTemplateExpression[tag.property.name='X']` selector는 `prisma.X(...)` 직접 호출 패턴만 trigger한다. `const fn = prisma.X; fn(...)` (alias) 또는 `prisma['X'](...)` (computed property)는 우회 가능. MemberExpression 단위로 광역 차단하면 정상 alias 정의도 막혀 false positive 발생 → 책임 경계 분리가 합리적: 정적 가드는 실수 방지 + LLM 리뷰는 의도적 회피 검토 + 런타임 가드(`assertUserPiiInputShape`)는 마지막 방어선. 정적 가드 자체의 회귀를 막으려면 `vitest`에서 `ESLint.lintText()` 직접 호출하는 메타 테스트가 필요.",
+      "impact": "medium",
+      "tags": ["eslint", "ast", "no-restricted-syntax", "static-analysis", "limitation"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-14T00:00:00+09:00",
+      "updatedAt": "2026-05-14T00:00:00+09:00"
     }
   ]
 }

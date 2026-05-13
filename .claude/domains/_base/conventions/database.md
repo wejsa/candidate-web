@@ -100,3 +100,46 @@ ALTER TABLE "users"
 **MySQL/MariaDB**에서는 `SIGNAL SQLSTATE` + procedural block 또는 별도 사전 검증 스크립트를 사용한다. MongoDB는 destructive migration 개념이 다르므로 적용 안 함.
 
 > **출처**: CANDID-008 회고 (docs/retro/CANDID-008-retro.md, A5).
+
+---
+
+## 민감 컬럼(PII) 메타데이터는 SSOT 상수에서 derive
+
+PII로 분류되는 컬럼명(예: `phone`, `birthDate`)은 모듈 곳곳에 *하드코딩*되는 경향이 있다 — 암호화 헬퍼, 마스킹 직렬화, write 런타임 가드, 응답 schema 등. 신규 PII 컬럼이 추가될 때 한 위치만 갱신하고 다른 위치를 누락하면 누설 위험이 발생한다.
+
+대신 **단일 상수 (SSOT)** 에서 derive하여 모든 보호 계층이 동일한 필드 집합을 참조하도록 한다.
+
+```ts
+// lib/pii/fields.ts (SSOT)
+export const PII_FIELDS = ['phone', 'birthDate'] as const;
+export type PiiField = (typeof PII_FIELDS)[number];
+
+// lib/prisma/extends.ts — 런타임 가드
+import { PII_FIELDS } from '@/lib/pii/fields';
+export function assertUserPiiInputShape(data: unknown): void {
+  if (data === null || data === undefined || typeof data !== 'object') return;
+  const d = data as Record<string, unknown>;
+  for (const field of PII_FIELDS) {
+    if (field in d) {
+      const v = d[field];
+      if (typeof v === 'string' || isStringSetWrapper(v)) {
+        throw new Error(piiViolationMessage(field));
+      }
+    }
+  }
+}
+
+// lib/pii/serializer.ts — 직렬화 mapper
+// userPublicInputSchema에 PII_FIELDS 기반 필드 정의 적용 (mask 헬퍼 결합).
+```
+
+| 적용 대상 | 의도 |
+|----------|------|
+| 암호화 헬퍼 (`encryptUserPiiInput`) | 인식하는 필드 집합 SSOT |
+| 직렬화 schema (`userPublicSchema`) | 마스킹/검증 대상 SSOT |
+| 런타임 가드 (`assertUserPiiInputShape`) | 차단 대상 SSOT |
+| 도메인 docs / 컴플라이언스 매핑 | 어떤 컬럼이 PII인지 단일 답 |
+
+신규 PII 컬럼 추가 시 본 SSOT 한 곳 갱신 → 모든 보호 계층이 자동으로 신규 컬럼 인식. TypeScript `as const` 리터럴 타입으로 컴파일 타임 안전성 확보.
+
+> **출처**: CANDID-031 회고 (docs/retro/CANDID-031-retro.md, A8 / FU2-F).
