@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 29,
+    "version": 30,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-13T14:18:30+09:00"
+    "updatedAt": "2026-05-13T14:25:55+09:00"
   },
   "summary": {
     "total": 33,
@@ -623,7 +623,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260513-231655",
-      "assignedAt": "2026-05-13T14:18:30+09:00",
+      "assignedAt": "2026-05-13T14:25:55+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         ".eslintrc.json",
@@ -639,24 +639,27 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 7,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-13T14:18:30+09:00"
+        "autoChainArgs": "7 --auto-fix",
+        "updatedAt": "2026-05-13T14:25:55+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "D6: ESLint $queryRaw/$executeRaw 가드 + CLAUDE.md 보안 1줄",
           "description": ".eslintrc.json에 no-restricted-syntax 4건 추가 ($queryRaw, $queryRawUnsafe, $executeRaw, $executeRawUnsafe). CLAUDE.md 보안 강제 사항 섹션에 'User PII write는 encryptUserPiiInput 의무, raw query 시 decryptUserPiiField 직접 호출' 1줄 추가. 기존 코드에 raw query 사용 없음 (검증 완료) → lint 통과 보장. 임시 fixture로 가드 발동 동작만 수동 확인 후 제거.",
-          "status": "pending",
+          "status": "pr_created",
+          "prNumber": 7,
+          "branch": "feature/CANDID-031-step1",
           "files": [
             ".eslintrc.json",
             "CLAUDE.md"
           ],
           "estimatedLines": 50,
+          "actualLines": 30,
           "prLineLimit": 150
         },
         {
