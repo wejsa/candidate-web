@@ -125,7 +125,32 @@ describe('userPublicSchema.transform / toUserPublic', () => {
     expect(() => toUserPublic(tainted)).toThrow();
   });
 
-  it('schema export — direct parse usage works identically to toUserPublic', () => {
+  it('throws when birthDate is given as a non-string non-null (symmetry with phone)', () => {
+    // CANDID-031 D7 보강 — birthDate Buffer leak도 동일하게 거부 (defense-in-depth 대칭성).
+    const tainted = { ...buildUser(), birthDate: Buffer.from([1, 2, 3]) as unknown as string };
+    expect(() => toUserPublic(tainted)).toThrow();
+  });
+
+  it('is idempotent for the same input (pure transform)', () => {
+    // Pure function 회귀 가드 — 동일 입력은 항상 동일 결과.
+    const input = buildUser();
+    expect(toUserPublic(input)).toEqual(toUserPublic(input));
+  });
+
+  it('throws a SYS_INTERNAL_ERROR-tagged error without leaking input values', () => {
+    // CANDID-031 D7 ZodError 안전망 — parse 실패 시 입력 원본 값이 에러 메시지에 노출되지 않아야 한다.
+    expect(() => toUserPublic(buildUser({ email: 'not-an-email' }))).toThrow(/SYS_INTERNAL_ERROR/);
+    try {
+      toUserPublic(buildUser({ email: 'not-an-email' }));
+    } catch (e) {
+      // 메시지에 평문 PII 또는 원본 입력 값이 포함되지 않는다 (path만 노출).
+      const msg = (e as Error).message;
+      expect(msg).not.toContain('not-an-email');
+      expect(msg).toContain('email'); // path는 노출 OK
+    }
+  });
+
+  it('schema export — direct parse usage works identically to toUserPublic for valid input', () => {
     const direct = userPublicSchema.parse(buildUser());
     const viaHelper = toUserPublic(buildUser());
     expect(direct).toEqual(viaHelper);

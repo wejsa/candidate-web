@@ -23,35 +23,38 @@ import { maskBirthDate, maskPhone } from '@/lib/pii/mask';
  *
  * 본 schema에 정의되지 않은 필드(passwordHash 등)는 zod 기본 동작(strip)으로 제거된다.
  * 신규 PII 컬럼이 도입될 때 본 schema에 명시적으로 추가하기 전까지는 외부 응답에 포함되지 않는다.
+ *
+ * `.strip()` 명시 호출 — 미정의 필드는 누설 차단(fail-closed). 향후 `.passthrough()`로 바뀌면
+ * 변화가 명시적으로 드러나 리뷰에서 감지 가능.
  */
-const userPublicInputSchema = z.object({
-  id: z.number().int(),
-  email: z.string().email(),
-  name: z.string(),
-  phone: z.string().nullable(),
-  birthDate: z.string().nullable(),
-  emailVerifiedAt: z.date().nullable(),
-  status: z.nativeEnum(UserStatus),
-  withdrawnAt: z.date().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
+export const userPublicInputSchema = z
+  .object({
+    id: z.number().int(),
+    email: z.string().email(),
+    name: z.string(),
+    phone: z.string().nullable(),
+    birthDate: z.string().nullable(),
+    emailVerifiedAt: z.date().nullable(),
+    status: z.nativeEnum(UserStatus),
+    withdrawnAt: z.date().nullable(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+  })
+  .strip();
 
 /**
  * piiExtension으로 phone/birthDate가 string으로 복호화된 User 객체의 형태.
  * Route Handler 등 호출자는 `Prisma.UserGetPayload<{}>` 결과를 그대로 본 schema에 통과시킨다.
+ *
+ * 입력 타입은 `userPublicInputSchema`에 anchor — transform 추가/변경에도 입력 contract가
+ * 흔들리지 않으며, 신규 transform 추가 시 InputSchema가 SSOT로 유지된다.
  */
-export type UserPublicInput = z.input<typeof userPublicSchema>;
-
-/**
- * 외부 응답에 노출되는 최종 DTO 형태. 모든 PII는 마스킹되고 Date는 ISO 문자열이다.
- */
-export type UserPublicDTO = z.output<typeof userPublicSchema>;
+export type UserPublicInput = z.infer<typeof userPublicInputSchema>;
 
 /**
  * 입력 검증 + 마스킹 + ISO 직렬화를 단일 transform으로 수행하는 schema.
- * `.parse()`는 입력 형태가 어긋날 때 ZodError를 throw — Route Handler의 전역 에러 핸들러가
- * SYS_INTERNAL_ERROR로 매핑하도록 위임한다(서버 측 데이터 정합 문제이므로 5xx).
+ * `.parse()`는 입력 형태가 어긋날 때 ZodError를 throw — `toUserPublic`이 PII 원본 값을 메시지에서
+ * 제거하고 안전한 에러로 변환한다(전역 에러 핸들러 도입 전까지의 자체 안전망).
  */
 export const userPublicSchema = userPublicInputSchema.transform((u) => ({
   id: u.id,
@@ -67,6 +70,11 @@ export const userPublicSchema = userPublicInputSchema.transform((u) => ({
 }));
 
 /**
+ * 외부 응답에 노출되는 최종 DTO 형태. 모든 PII는 마스킹되고 Date는 ISO 문자열이다.
+ */
+export type UserPublicDTO = z.output<typeof userPublicSchema>;
+
+/**
  * User → 공개 DTO 단일 진입점. 모든 외부 응답 직렬화는 본 함수를 거쳐야 한다.
  *
  * - `phone` / `birthDate`: maskPhone / maskBirthDate를 통과하여 마스킹 형태(`010-****-5678`,
@@ -77,7 +85,22 @@ export const userPublicSchema = userPublicInputSchema.transform((u) => ({
  *
  * 신규 PII 컬럼 추가 시: schema에 명시 등록 + 마스킹 헬퍼 적용. 등록 누락 시 응답에서 자연
  * 제거되어 *fail-closed* 동작(누설 차단 우선).
+ *
+ * ZodError 안전망: parse 실패 시 입력 원본 값을 메시지에서 제외하고 path만 노출한다.
+ * 전역 에러 핸들러가 본 에러를 SYS_INTERNAL_ERROR로 매핑하기 전까지의 보완.
+ *
+ * 호출 컨텍스트: 본 DTO는 *자기 정보 조회* 응답을 가정한다(email/withdrawnAt 평문 포함).
+ * 타인 프로필 조회 등 다른 audience가 도입되면 별도 schema(`userPublicMinimalSchema` 등)
+ * 분리가 필요하다 — 본 PR 범위 외 (follow-up task).
  */
 export function toUserPublic(user: UserPublicInput): UserPublicDTO {
-  return userPublicSchema.parse(user);
+  try {
+    return userPublicSchema.parse(user);
+  } catch (e) {
+    if (e instanceof z.ZodError) {
+      const paths = e.errors.map((x) => x.path.join('.')).join(',');
+      throw new Error(`SYS_INTERNAL_ERROR: user public serialization failed (paths=${paths})`);
+    }
+    throw e;
+  }
 }
