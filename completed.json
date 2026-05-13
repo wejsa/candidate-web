@@ -1,11 +1,67 @@
 {
   "metadata": {
-    "version": 5,
+    "version": 6,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-12T23:27:00+09:00"
+    "updatedAt": "2026-05-13T14:54:34+09:00"
   },
   "tasks": {
+    "CANDID-031": {
+      "id": "CANDID-031",
+      "title": "CANDID-008 FU2: PII 방어 깊이 강화 ($queryRaw 가드 + 응답 마스킹 강제 + write 런타임 가드)",
+      "phase": 1,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-13T14:54:34+09:00",
+      "assignee": "jaese@hoji-20260513-231655",
+      "prs": [
+        {
+          "number": 7,
+          "title": "feat: CANDID-031 Step 1 - D6 ESLint $queryRaw guard + CLAUDE.md",
+          "mergedAt": "2026-05-13T14:30:52+09:00",
+          "additions": 29,
+          "deletions": 1,
+          "note": "D6 — .eslintrc.json no-restricted-syntax 6 selector ($queryRaw/Unsafe + $executeRaw/Unsafe × Call/Tagged) + CLAUDE.md 보안 1줄. lint clean, raw query 사용 0건 확인."
+        },
+        {
+          "number": 8,
+          "title": "feat: CANDID-031 Step 2 - D7 userPublicSchema zod DTO mapper",
+          "mergedAt": "2026-05-13T14:45:26+09:00",
+          "additions": 264,
+          "deletions": 0,
+          "note": "D7 — lib/pii/serializer.ts zod userPublicSchema.transform() DTO mapper + 17 unit tests. review fix 4건 포함 (C001 type anchor / H001 ZodError 안전망 / H002 .strip 명시 / 테스트 보강). fail-closed strip + audience docblock."
+        },
+        {
+          "number": 9,
+          "title": "feat: CANDID-031 Step 3 - D8 extends write runtime guard (final)",
+          "mergedAt": "2026-05-13T14:54:34+09:00",
+          "additions": 171,
+          "deletions": 0,
+          "note": "D8 — piiExtension.query.user 5 op 가드 (create/createMany/update/updateMany/upsert) + assertUserPiiInputShape named export + 14 unit tests. L-003 학습 적용. 알려진 한계: top-level user write only — nested write follow-up 권고."
+        }
+      ],
+      "stepCount": 3,
+      "reviewSummary": {
+        "mode": "full",
+        "critical": 1,
+        "major": 8,
+        "minor": 8,
+        "info": 15,
+        "fixLoops": 1,
+        "note": "Step 2에서 CRITICAL 1건(UserPublicInput type anchor) skill-fix 1회차 해결. 잔존 MAJOR는 모두 follow-up task로 분리 가능. defense-in-depth 3-layer (D6 ESLint / D7 zod serializer / D8 runtime guard) 완성."
+      },
+      "totalAdditions": 464,
+      "totalDeletions": 1,
+      "totalTests": 31,
+      "testCount": "98 → 112 passed (D6 0 신규, D7 17 신규, D8 14 신규)",
+      "followUps": [
+        "nested write (inverse-side) 가드 — child 모델 query 후크 추가",
+        "userPublicSchema 단일 진입점 강제 메커니즘 (ESLint / nominal type)",
+        "ESLint $queryRaw 가드 회귀 차단 메타 테스트 (vitest ESLint API)",
+        ".github/workflows/ci.yml lint+test 게이트",
+        "SerializationError 커스텀 Error 클래스 (전역 에러 핸들러 연계)"
+      ]
+    },
     "CANDID-030": {
       "id": "CANDID-030",
       "title": "CANDID-008 FU1: 마이그레이션 운영 가드 + 키 버전 결합 + env reset + 입력 정규화 + mask 회귀 테스트",

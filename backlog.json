@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 34,
+    "version": 35,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-13T14:50:57+09:00"
+    "updatedAt": "2026-05-13T14:54:34+09:00"
   },
   "summary": {
     "total": 33,
-    "done": 5,
-    "inProgress": 1,
+    "done": 6,
+    "inProgress": 0,
     "review": 0,
     "todo": 27
   },
@@ -618,30 +618,22 @@
       "id": "CANDID-031",
       "title": "CANDID-008 FU2: PII 방어 깊이 강화 ($queryRaw 가드 + 응답 마스킹 강제 + write 런타임 가드)",
       "description": "CANDID-008 Step 2 review MAJOR 3건 묶음 (D6+D7+D8). (1) ESLint custom rule `no-restricted-syntax`로 `$queryRaw`/`$executeRaw` 사용 시 경고 + CLAUDE.md 보안 강제 사항에 'encryptUserPiiInput 의무 / raw 시 decryptUserPiiField 직접 호출' 1줄 추가. (2) lib/pii/serializer.ts에 zod transform 기반 userPublicSchema 도입 — `Response.json(user)` 직접 호출 차단을 위한 branded type 또는 DTO mapper. (3) lib/prisma/extends.ts에 query.user.$allOperations 런타임 가드 추가 — string phone/birthDate 입력 시 throw (방어 깊이). + 통합 테스트 1건: string 평문 입력 시 throw 검증.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260513-231655",
-      "assignedAt": "2026-05-13T14:50:57+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 7200,
-      "lockedFiles": [
-        "lib/prisma/extends.ts",
-        "tests/lib/prisma/extends.test.ts"
-      ],
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T21:35:00+09:00",
+      "completedAt": "2026-05-13T14:54:34+09:00",
+      "updatedAt": "2026-05-13T14:54:34+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 9,
-        "fixLoopCount": 0,
-        "autoChainArgs": "9 --auto-fix",
-        "updatedAt": "2026-05-13T14:50:57+09:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
@@ -678,8 +670,9 @@
           "number": 3,
           "title": "D8: extends query.user.$allOperations 런타임 가드 + 단위 테스트",
           "description": "lib/prisma/extends.ts에 piiExtension.query.user 5 op(create/createMany/update/updateMany/upsert) 가드 추가. assertUserPiiInputShape(data) named export — string phone/birthDate 입력 시 throw (L-003 적용). update wrapper { set: 'string' } 형태도 차단. null/Buffer/Uint8Array는 통과. 단위 테스트 14건 — 차단 4 / 통과 7 / 회귀가드 2 / 메시지 1.",
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 9,
+          "mergedAt": "2026-05-13T14:54:34+09:00",
           "branch": "feature/CANDID-031-step3",
           "files": [
             "lib/prisma/extends.ts",
