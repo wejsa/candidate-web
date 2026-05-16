@@ -1,11 +1,33 @@
 {
   "metadata": {
-    "version": 6,
+    "version": 7,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-13T14:54:34+09:00"
+    "updatedAt": "2026-05-16T15:47:48+09:00"
   },
   "tasks": {
+    "CANDID-004": {
+      "id": "CANDID-004",
+      "title": "DB 스키마: job_postings + job_categories + job_posting_questions",
+      "phase": 1,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-16T15:47:48+09:00",
+      "assignee": "jaese@hoji-20260516-063010",
+      "prs": [
+        {
+          "number": 10,
+          "title": "feat: CANDID-004 Step 1 - 공고 도메인 3 모델 + 첫 migration",
+          "mergedAt": "2026-05-16T15:47:48+09:00",
+          "additions": 176,
+          "deletions": 1,
+          "note": "단일 PR, schema-only. 4 enum (EmploymentType/CareerLevel/JobStatus/QuestionType) + 3 model (JobCategory/JobPosting/JobPostingQuestion) + 6 인덱스 (PRD 명시 2 + 권장 4) + 2 FK (category→posting RESTRICT, posting→question CASCADE). 리뷰 full 모드 3관점 — CRITICAL 0, MAJOR 2(권고: BR-JOB-02 부분 인덱스 / BR-JOB-01 강제 정책 명문화), MINOR 3, INFO 11. APPROVED, auto-fix 미실행."
+        }
+      ],
+      "summary": "공고 조회 도메인 3개 테이블 신규 정의. CANDID-005/013/014/015 다운스트림 언블록. CANDID-003 단일 PR 패턴 미러. L-010(라인 추정 정확도) 적용: 추정 195 vs 실제 176 LOC (-10%).",
+      "dependencies": ["CANDID-002"],
+      "specFile": "docs/sample-requirement.md"
+    },
     "CANDID-031": {
       "id": "CANDID-031",
       "title": "CANDID-008 FU2: PII 방어 깊이 강화 ($queryRaw 가드 + 응답 마스킹 강제 + write 런타임 가드)",
