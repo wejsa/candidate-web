@@ -109,7 +109,90 @@ model PasswordResetToken {
 }
 
 // === CANDID-004: 공고 조회 ===
-// 작성 위치 자리
+// PRD §3.3.3 + ERD §3.2 + BR-JOB-01~04 기반.
+// 어드민 측에서 작성·관리하는 데이터를 지원자 측에서 조회 전용으로 노출.
+// content_html은 어드민 sanitize 결과를 그대로 저장. 조회 시 한 번 더 sanitize (BR-JOB-04).
+
+enum EmploymentType {
+  FULL_TIME
+  CONTRACT
+  INTERN
+}
+
+enum CareerLevel {
+  NEW
+  EXPERIENCED
+  ANY
+}
+
+enum JobStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+enum QuestionType {
+  SHORT_TEXT
+  LONG_TEXT
+  SELECT
+  MULTI_SELECT
+}
+
+model JobCategory {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  slug      String   @unique @db.VarChar(80)
+  sortOrder Int      @default(0) @map("sort_order")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  jobPostings JobPosting[]
+
+  @@index([active, sortOrder], map: "idx_job_categories_active_sort")
+  @@map("job_categories")
+}
+
+model JobPosting {
+  id             Int            @id @default(autoincrement())
+  title          String         @db.VarChar(200)
+  jobCategoryId  Int            @map("job_category_id")
+  employmentType EmploymentType @map("employment_type")
+  careerLevel    CareerLevel    @map("career_level")
+  contentHtml    String         @map("content_html") @db.Text
+  opensAt        DateTime       @map("opens_at")
+  closesAt       DateTime?      @map("closes_at") // NULL = 상시 모집
+  status         JobStatus      @default(DRAFT)
+  viewCount      BigInt         @default(0) @map("view_count")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  jobCategory JobCategory          @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
+  questions   JobPostingQuestion[]
+
+  @@index([status, closesAt], map: "idx_job_postings_status_closes_at")
+  @@index([jobCategoryId], map: "idx_job_postings_category")
+  @@index([opensAt, status], map: "idx_job_postings_opens_at_status")
+  @@map("job_postings")
+}
+
+model JobPostingQuestion {
+  id           Int          @id @default(autoincrement())
+  jobPostingId Int          @map("job_posting_id")
+  questionText String       @map("question_text") @db.Text
+  questionType QuestionType @default(LONG_TEXT) @map("question_type")
+  required     Boolean      @default(false)
+  maxLength    Int?         @map("max_length")
+  // SELECT / MULTI_SELECT 선택지 (예: ["주니어", "시니어"]). 단순 텍스트 타입에서는 NULL.
+  optionsJson  Json?        @map("options_json") @db.JsonB
+  sortOrder    Int          @default(0) @map("sort_order")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+
+  @@index([jobPostingId, sortOrder], map: "idx_jpq_posting_sort")
+  @@map("job_posting_questions")
+}
 
 // === CANDID-005: 지원서 도메인 ===
 // 작성 위치 자리
