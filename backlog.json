@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 35,
+    "version": 36,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-13T14:54:34+09:00"
+    "updatedAt": "2026-05-16T06:30:10+09:00"
   },
   "summary": {
     "total": 33,
     "done": 6,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 27
+    "todo": 26
   },
   "phases": {
     "1": {
@@ -168,14 +168,26 @@
       "id": "CANDID-004",
       "title": "DB 스키마: job_postings + job_categories + job_posting_questions",
       "description": "공고 조회 전용 3개 테이블 + 인덱스(idx_job_postings_status_closes_at). content_html은 어드민 측 sanitize 결과 저장 가정.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 1,
+      "assignee": "jaese@hoji-20260516-063010",
+      "assignedAt": "2026-05-16T06:30:10+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-002"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-16T06:30:10+09:00"
+      }
     },
     "CANDID-005": {
       "id": "CANDID-005",
