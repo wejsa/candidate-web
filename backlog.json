@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 37,
+    "version": 38,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-16T06:35:00+09:00"
+    "updatedAt": "2026-05-16T06:42:00+09:00"
   },
   "summary": {
     "total": 33,
@@ -185,24 +185,27 @@
       "createdAt": "2026-05-12T18:22:05+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 10,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-16T06:35:00+09:00"
+        "autoChainArgs": "10 --auto-fix",
+        "updatedAt": "2026-05-16T06:42:00+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "공고 도메인 3 모델 + 첫 Prisma migration",
           "description": "schema.prisma에 4 enum(EmploymentType/CareerLevel/JobStatus/QuestionType) + 3 model(JobCategory/JobPosting/JobPostingQuestion) 추가. 첫 Prisma migration: CREATE TYPE × 4 → CREATE TABLE × 3 (job_categories → job_postings → job_posting_questions 순) → CREATE INDEX × 6 → ADD FK × 2 (category→posting RESTRICT, posting→question CASCADE). PRD §3.3.3 + ERD §3.2 + BR-JOB-01~04 준수. prisma format/validate/typecheck/lint/build 통과.",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-004-step1",
+          "prNumber": 10,
           "files": [
             "prisma/schema.prisma",
-            "prisma/migrations/*_candid_004_job_domain/migration.sql"
+            "prisma/migrations/20260516063500_candid_004_job_domain/migration.sql"
           ],
           "estimatedLines": 195,
+          "actualLines": 176,
           "prLineLimit": 220
         }
       ],
