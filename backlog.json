@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 36,
+    "version": 37,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-16T06:30:10+09:00"
+    "updatedAt": "2026-05-16T06:35:00+09:00"
   },
   "summary": {
     "total": 33,
@@ -173,21 +173,40 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260516-063010",
-      "assignedAt": "2026-05-16T06:30:10+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-16T06:35:00+09:00",
+      "lockTTL": 3600,
+      "lockedFiles": [
+        "prisma/schema.prisma",
+        "prisma/migrations/*_candid_004_job_domain/migration.sql"
+      ],
       "dependencies": [
         "CANDID-002"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
+      "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-16T06:30:10+09:00"
-      }
+        "updatedAt": "2026-05-16T06:35:00+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "공고 도메인 3 모델 + 첫 Prisma migration",
+          "description": "schema.prisma에 4 enum(EmploymentType/CareerLevel/JobStatus/QuestionType) + 3 model(JobCategory/JobPosting/JobPostingQuestion) 추가. 첫 Prisma migration: CREATE TYPE × 4 → CREATE TABLE × 3 (job_categories → job_postings → job_posting_questions 순) → CREATE INDEX × 6 → ADD FK × 2 (category→posting RESTRICT, posting→question CASCADE). PRD §3.3.3 + ERD §3.2 + BR-JOB-01~04 준수. prisma format/validate/typecheck/lint/build 통과.",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations/*_candid_004_job_domain/migration.sql"
+          ],
+          "estimatedLines": 195,
+          "prLineLimit": 220
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-005": {
       "id": "CANDID-005",
