@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 41,
+    "version": 42,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T21:15:00+09:00"
+    "updatedAt": "2026-05-17T21:45:00+09:00"
   },
   "summary": {
     "total": 33,
@@ -228,24 +228,27 @@
       "createdAt": "2026-05-12T18:22:05+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 11,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-17T21:15:00+09:00"
+        "autoChainArgs": "11 --auto-fix",
+        "updatedAt": "2026-05-17T21:45:00+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "핵심 지원서 + 6 enum + sequences (applications + drafts + application_number_sequences)",
           "description": "schema.prisma에 6 enum(ApplicationResult/StageType/InterviewScheduleStatus/PortfolioLinkType/VirusScanStatus/AuditEventType) 일괄 정의 + applications(PII snapshot Bytes NULLABLE 포함) + application_drafts(payload_json JSONB + version 낙관적 락) + application_number_sequences 보조 테이블. 인덱스 5개 (uk_applications_active 부분 UNIQUE + uk_applications_number + idx_applications_user_submitted + idx_applications_posting_result + uk_drafts_user_posting + idx_drafts_last_saved). FK 정책: applications.user_id/job_posting_id RESTRICT, drafts.user_id CASCADE, drafts.job_posting_id RESTRICT. PII extension wiring은 CANDID-005-FU1로 분리.",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-005-step1",
+          "prNumber": 11,
           "files": [
             "prisma/schema.prisma",
-            "prisma/migrations/*_candid_005_step1_core_applications/migration.sql"
+            "prisma/migrations/20260517214005_candid_005_step1_core_applications/migration.sql"
           ],
           "estimatedLines": 205,
+          "actualLines": 224,
           "prLineLimit": 240
         },
         {
