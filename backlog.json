@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 34,
     "projectPrefix": "CANDID",
-    "version": 49,
+    "version": 50,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T22:40:00+09:00"
+    "updatedAt": "2026-05-17T22:43:00+09:00"
   },
   "summary": {
     "total": 34,
     "done": 8,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 26
+    "todo": 25
   },
   "phases": {
     "1": {
@@ -803,22 +803,30 @@
     "CANDID-034": {
       "id": "CANDID-034",
       "title": "CANDID-005 FU1: Application PII snapshot AES-256-GCM extension wiring + 단위 테스트",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "assignee": null,
-      "assignedAt": null,
-      "lockTTL": 7200,
+      "assignee": "jaese@hoji-20260517-224300",
+      "assignedAt": "2026-05-17T22:43:00+09:00",
+      "lockTTL": 1800,
       "lockedFiles": [],
       "dependencies": [
         "CANDID-005",
         "CANDID-008"
       ],
       "createdAt": "2026-05-17T22:40:00+09:00",
-      "updatedAt": "2026-05-17T22:40:00+09:00",
+      "updatedAt": "2026-05-17T22:43:00+09:00",
       "specFile": "docs/retro/CANDID-005-retro.md",
-      "description": "CANDID-005 Step 1 PR #11에서 applications 테이블에 도입된 PII snapshot 컬럼 5쌍(NULLABLE Bytes @db.ByteA — 이름·연락처·생년월일·주소 등 지원 시점 스냅샷)에 AES-256-GCM 컬럼 암호화 wiring을 적용하고 단위 테스트를 추가한다. CANDID-008 패턴 미러: lib/prisma/extends.ts의 encryptPiiWithVersion() / decryptPiiField() 패턴을 Application 모델에 적용 + Prisma $extends result.compute로 마스킹 직렬화 + 런타임 가드(assertApplicationPiiInputShape) + write 시 정규화. PII_FIELDS SSOT (lib/pii/fields.ts) 갱신 동반. L-006(3-layer defense-in-depth) + L-007(nested write 우회 주의) + L-017(PII snapshot vs 실시간 PII 분리) 적용. 자세한 내용 docs/retro/CANDID-005-retro.md §3 A1 / §2.4 D3 참조."
+      "description": "CANDID-005 Step 1 PR #11에서 applications 테이블에 도입된 PII snapshot 컬럼 5쌍(NULLABLE Bytes @db.ByteA — 이름·연락처·생년월일·주소 등 지원 시점 스냅샷)에 AES-256-GCM 컬럼 암호화 wiring을 적용하고 단위 테스트를 추가한다. CANDID-008 패턴 미러: lib/prisma/extends.ts의 encryptPiiWithVersion() / decryptPiiField() 패턴을 Application 모델에 적용 + Prisma $extends result.compute로 마스킹 직렬화 + 런타임 가드(assertApplicationPiiInputShape) + write 시 정규화. PII_FIELDS SSOT (lib/pii/fields.ts) 갱신 동반. L-006(3-layer defense-in-depth) + L-007(nested write 우회 주의) + L-017(PII snapshot vs 실시간 PII 분리) 적용. 자세한 내용 docs/retro/CANDID-005-retro.md §3 A1 / §2.4 D3 참조.",
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-17T22:43:00+09:00"
+      }
     }
   }
 }
