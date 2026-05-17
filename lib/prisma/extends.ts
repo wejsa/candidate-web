@@ -52,13 +52,60 @@ export function computeDecryptedBirthDate(user: {
   return decryptPii(toBuffer(user.birthDate));
 }
 
+// CANDID-034 Step 3 — Application PII snapshot compute 함수 5쌍 (L-003 명시 export).
+// 각 compute는 needs에 *_snapshot_key_version 컬럼을 포함하여 향후 v2 키 분기에서 시그니처 안정.
+
+export function computeDecryptedApplicantName(application: {
+  applicantNameSnapshot: Uint8Array | null;
+  applicantNameSnapshotKeyVersion: number | null;
+}): string | null {
+  if (application.applicantNameSnapshot === null) return null;
+  return decryptPii(toBuffer(application.applicantNameSnapshot));
+}
+
+export function computeDecryptedApplicantEmail(application: {
+  applicantEmailSnapshot: Uint8Array | null;
+  applicantEmailSnapshotKeyVersion: number | null;
+}): string | null {
+  if (application.applicantEmailSnapshot === null) return null;
+  return decryptPii(toBuffer(application.applicantEmailSnapshot));
+}
+
+export function computeDecryptedPhoneSnapshot(application: {
+  phoneSnapshot: Uint8Array | null;
+  phoneSnapshotKeyVersion: number | null;
+}): string | null {
+  if (application.phoneSnapshot === null) return null;
+  return decryptPii(toBuffer(application.phoneSnapshot));
+}
+
+export function computeDecryptedBirthDateSnapshot(application: {
+  birthDateSnapshot: Uint8Array | null;
+  birthDateSnapshotKeyVersion: number | null;
+}): string | null {
+  if (application.birthDateSnapshot === null) return null;
+  return decryptPii(toBuffer(application.birthDateSnapshot));
+}
+
+export function computeDecryptedAddressSnapshot(application: {
+  addressSnapshot: Uint8Array | null;
+  addressSnapshotKeyVersion: number | null;
+}): string | null {
+  if (application.addressSnapshot === null) return null;
+  return decryptPii(toBuffer(application.addressSnapshot));
+}
+
 /**
- * Prisma User 모델의 phone/birthDate 컬럼을 자동 복호화하는 result extension.
+ * Prisma User + Application 모델의 PII 컬럼을 자동 복호화하는 result extension.
  * needs에 *_key_version 컬럼을 포함하여 키 회전 분기 시 시그니처 안정성 보장.
  *
  * 사용 예:
  *   const user = await prisma.user.findUnique({ where: { id } });
  *   // user.phone, user.birthDate 모두 평문 string (또는 null)로 반환됨.
+ *
+ *   const app = await prisma.application.findUnique({ where: { id } });
+ *   // app.applicantNameSnapshot/applicantEmailSnapshot/phoneSnapshot/birthDateSnapshot/addressSnapshot
+ *   // 모두 평문 string (또는 null). 외부 응답 전에 toApplicationPublic(Step 4)으로 마스킹 필요.
  */
 export const piiExtension = Prisma.defineExtension({
   name: 'pii-encryption',
@@ -73,9 +120,35 @@ export const piiExtension = Prisma.defineExtension({
         compute: computeDecryptedBirthDate,
       },
     },
+    application: {
+      applicantNameSnapshot: {
+        needs: { applicantNameSnapshot: true, applicantNameSnapshotKeyVersion: true },
+        compute: computeDecryptedApplicantName,
+      },
+      applicantEmailSnapshot: {
+        needs: { applicantEmailSnapshot: true, applicantEmailSnapshotKeyVersion: true },
+        compute: computeDecryptedApplicantEmail,
+      },
+      phoneSnapshot: {
+        needs: { phoneSnapshot: true, phoneSnapshotKeyVersion: true },
+        compute: computeDecryptedPhoneSnapshot,
+      },
+      birthDateSnapshot: {
+        needs: { birthDateSnapshot: true, birthDateSnapshotKeyVersion: true },
+        compute: computeDecryptedBirthDateSnapshot,
+      },
+      addressSnapshot: {
+        needs: { addressSnapshot: true, addressSnapshotKeyVersion: true },
+        compute: computeDecryptedAddressSnapshot,
+      },
+    },
   },
-  // CANDID-031 (D8) — write 런타임 가드. assertUserPiiInputShape를 모든 User write op에 적용.
-  // string 평문 phone/birthDate 입력 시 throw → encryptUserPiiInput 헬퍼 누락 차단.
+  // CANDID-031 (D8) — write 런타임 가드.
+  // User: assertUserPiiInputShape — string 평문 phone/birthDate 입력 차단.
+  // Application: assertApplicationPiiInputShape — string 평문 5쌍 snapshot 입력 차단 (CANDID-034 Step 3).
+  // L-007 한계: top-level write op만 적용. nested write 우회(`user.update({ data: { applications: { create: {...} } } })`)는
+  //   여기서 차단되지 않음 — encryptApplicationPiiSnapshotInput 명시 호출 컨벤션 + ESLint(CANDID-031 D6) 정적 가드로 보완.
+  //   nested write 회귀 통합 테스트는 CANDID-005-FU2 위임.
   query: {
     user: {
       async create({ args, query }) {
@@ -99,6 +172,32 @@ export const piiExtension = Prisma.defineExtension({
         const dataArr = Array.isArray(args.data) ? args.data : [args.data];
         for (const row of dataArr) {
           assertUserPiiInputShape(row);
+        }
+        return query(args);
+      },
+    },
+    application: {
+      async create({ args, query }) {
+        assertApplicationPiiInputShape(args.data);
+        return query(args);
+      },
+      async update({ args, query }) {
+        assertApplicationPiiInputShape(args.data);
+        return query(args);
+      },
+      async upsert({ args, query }) {
+        assertApplicationPiiInputShape(args.create);
+        assertApplicationPiiInputShape(args.update);
+        return query(args);
+      },
+      async updateMany({ args, query }) {
+        assertApplicationPiiInputShape(args.data);
+        return query(args);
+      },
+      async createMany({ args, query }) {
+        const dataArr = Array.isArray(args.data) ? args.data : [args.data];
+        for (const row of dataArr) {
+          assertApplicationPiiInputShape(row);
         }
         return query(args);
       },
