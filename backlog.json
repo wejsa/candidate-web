@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 43,
+    "version": 44,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T21:47:26+09:00"
+    "updatedAt": "2026-05-17T21:55:00+09:00"
   },
   "summary": {
     "total": 33,
@@ -227,12 +227,12 @@
       "createdAt": "2026-05-12T18:22:05+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 12,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-17T21:47:26+09:00"
+        "autoChainArgs": "12 --auto-fix",
+        "updatedAt": "2026-05-17T21:55:00+09:00"
       },
       "steps": [
         {
@@ -255,12 +255,15 @@
           "number": 2,
           "title": "첨부/응답 3 모델 + job_posting_questions.archived_at (L-015 R1 종결)",
           "description": "application_answers + resume_files + portfolio_links 추가. job_posting_questions에 archived_at NULLABLE 컬럼 추가 (L-015 R1 종결 — application_answers.question_id RESTRICT + question soft-archive). CHECK XOR(application_id, draft_id) on resume_files + portfolio_links. 인덱스 6개 (uk_answers_app_question UNIQUE + idx_resume_files_* 3 부분 + idx_portfolio_* 2 부분). FK 정책: answers.application_id CASCADE/question_id RESTRICT, resume_files.application_id SET NULL/draft_id SET NULL/owner RESTRICT, portfolio_links CASCADE × 2.",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-005-step2",
+          "prNumber": 12,
           "files": [
             "prisma/schema.prisma",
-            "prisma/migrations/*_candid_005_step2_attachments/migration.sql"
+            "prisma/migrations/20260517214800_candid_005_step2_attachments/migration.sql"
           ],
           "estimatedLines": 215,
+          "actualLines": 174,
           "prLineLimit": 240
         },
         {
