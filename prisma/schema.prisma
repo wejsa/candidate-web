@@ -59,6 +59,8 @@ model User {
   authProviders       AuthProvider[]
   emailVerifications  EmailVerification[]
   passwordResetTokens PasswordResetToken[]
+  applications        Application[]
+  applicationDrafts   ApplicationDraft[]
 
   @@index([status], map: "idx_users_status")
   @@map("users")
@@ -167,8 +169,10 @@ model JobPosting {
   createdAt      DateTime       @default(now()) @map("created_at")
   updatedAt      DateTime       @updatedAt @map("updated_at")
 
-  jobCategory JobCategory          @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
-  questions   JobPostingQuestion[]
+  jobCategory       JobCategory          @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
+  questions         JobPostingQuestion[]
+  applications      Application[]
+  applicationDrafts ApplicationDraft[]
 
   @@index([status, closesAt], map: "idx_job_postings_status_closes_at")
   @@index([jobCategoryId], map: "idx_job_postings_category")
@@ -195,4 +199,116 @@ model JobPostingQuestion {
 }
 
 // === CANDID-005: 지원서 도메인 ===
-// 작성 위치 자리
+// PRD §3.3.4~3.3.11 + ERD §3.2 + BR-APP-01~06 / BR-PII-03 / BR-TX-01,02 / BR-FILE-01~07 기반.
+// Step 1: 핵심 지원서(applications + drafts + sequences) + 6 enum 일괄 정의.
+// PII snapshot 컬럼(applicants_*_snapshot)은 NULLABLE Bytes로 사전 정의.
+// 암복호화 extension wiring 및 단위 테스트는 CANDID-005-FU1(후속 task)에서 처리.
+
+enum ApplicationResult {
+  IN_PROGRESS
+  PASSED
+  FAILED
+  WITHDRAWN
+}
+
+enum StageType {
+  SUBMITTED
+  DOC_REVIEW
+  INTERVIEW_1
+  INTERVIEW_2
+  OFFER
+  HIRED
+  REJECTED
+}
+
+enum InterviewScheduleStatus {
+  SCHEDULED
+  DONE
+  CANCELLED
+}
+
+enum PortfolioLinkType {
+  GITHUB
+  NOTION
+  BLOG
+  LINKEDIN
+  FIGMA
+  ETC
+}
+
+enum VirusScanStatus {
+  PENDING
+  CLEAN
+  INFECTED
+  FAILED
+}
+
+enum AuditEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  APPLICATION_SUBMIT
+  APPLICATION_WITHDRAW
+  PII_VIEW
+  PASSWORD_CHANGE
+  USER_WITHDRAWN
+}
+
+model Application {
+  id                          Int               @id @default(autoincrement())
+  applicationNumber           String            @unique @map("application_number") @db.VarChar(20) // BR-APP-05: A-YYYYMM-NNNNN
+  userId                      Int               @map("user_id")
+  jobPostingId                Int               @map("job_posting_id")
+  currentStage                StageType         @default(SUBMITTED) @map("current_stage")
+  result                      ApplicationResult @default(IN_PROGRESS)
+  submittedAt                 DateTime          @map("submitted_at")
+  withdrawnAt                 DateTime?         @map("withdrawn_at")
+  // PII snapshot (BR-PII-03 익명화 보존). CANDID-008 패턴 미러 — AES-256-GCM ciphertext.
+  // 본 Step은 NULLABLE 컬럼만 정의. extension wiring/암복호화는 CANDID-005-FU1.
+  applicantNameSnapshot       Bytes?            @map("applicant_name_snapshot")
+  applicantNameKeyVersion     Int?              @default(1) @map("applicant_name_key_version") @db.SmallInt
+  applicantEmailSnapshot      Bytes?            @map("applicant_email_snapshot")
+  applicantEmailKeyVersion    Int?              @default(1) @map("applicant_email_key_version") @db.SmallInt
+  phoneSnapshot               Bytes?            @map("phone_snapshot")
+  phoneSnapshotKeyVersion     Int?              @default(1) @map("phone_snapshot_key_version") @db.SmallInt
+  birthDateSnapshot           Bytes?            @map("birth_date_snapshot")
+  birthDateSnapshotKeyVersion Int?              @default(1) @map("birth_date_snapshot_key_version") @db.SmallInt
+  addressSnapshot             Bytes?            @map("address_snapshot")
+  addressSnapshotKeyVersion   Int?              @default(1) @map("address_snapshot_key_version") @db.SmallInt
+  createdAt                   DateTime          @default(now()) @map("created_at")
+  updatedAt                   DateTime          @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
+
+  // BR-APP-01 활성 지원서 UNIQUE 제약은 partial(`WHERE result <> 'WITHDRAWN'`)이라 Prisma schema에서 직접 표현 불가 — migration.sql에서 정의.
+  @@index([userId, submittedAt(sort: Desc)], map: "idx_applications_user_submitted")
+  @@index([jobPostingId, result], map: "idx_applications_posting_result")
+  @@map("applications")
+}
+
+model ApplicationDraft {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  jobPostingId Int      @map("job_posting_id")
+  payloadJson  Json     @map("payload_json") @db.JsonB // 작성 중 zod 직렬화 데이터
+  lastSavedAt  DateTime @map("last_saved_at")
+  version      Int      @default(1) // 낙관적 락 (BR-APP-02)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, jobPostingId], map: "uk_drafts_user_posting")
+  @@index([lastSavedAt], map: "idx_drafts_last_saved") // BR-FILE-06 30일 배치 정리
+  @@map("application_drafts")
+}
+
+// 보조 테이블: application_number 월별 시퀀스 (BR-APP-05).
+// 앱 레이어 generator가 SELECT ... FOR UPDATE로 row lock 후 lastSeq 증가.
+model ApplicationNumberSequence {
+  yearMonth String   @id @map("year_month") @db.VarChar(6) // "202605" 등
+  lastSeq   Int      @default(0) @map("last_seq")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("application_number_sequences")
+}
