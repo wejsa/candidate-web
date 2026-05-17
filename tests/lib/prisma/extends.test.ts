@@ -1,14 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { encryptPii } from '@/lib/crypto/aes-gcm';
+import { APPLICATION_PII_SNAPSHOT_FIELDS } from '@/lib/pii/fields';
 import {
   PII_KEY_VERSION,
+  assertApplicationPiiInputShape,
   assertUserPiiInputShape,
   computeDecryptedBirthDate,
   computeDecryptedPhone,
+  decryptApplicationPiiSnapshotField,
   decryptUserPiiField,
+  encryptApplicationPiiSnapshotInput,
   encryptPiiWithVersion,
   encryptUserPiiInput,
+  normalizeAddress,
   normalizeBirthDate,
+  normalizeEmail,
+  normalizeName,
   normalizePhone,
   piiExtension,
 } from '@/lib/prisma/extends';
@@ -286,5 +293,266 @@ describe('assertUserPiiInputShape (CANDID-031 D8)', () => {
       expect(msg).toContain('encryptUserPiiInput');
       expect(msg).toContain('encryptPiiWithVersion');
     }
+  });
+});
+
+// === CANDID-034 (CANDID-005 FU1) Step 2 — Application PII snapshot wiring 단위 테스트 ===
+
+describe('normalizeName (CANDID-034 Step 2)', () => {
+  it('trims surrounding whitespace', () => {
+    expect(normalizeName('  홍길동  ')).toBe('홍길동');
+    expect(normalizeName('Foo Bar')).toBe('Foo Bar');
+  });
+
+  it('throws on empty after trim', () => {
+    expect(() => normalizeName('   ')).toThrow(/1~100 chars/);
+    expect(() => normalizeName('')).toThrow(/1~100 chars/);
+  });
+
+  it('throws on too long input (>100 chars)', () => {
+    expect(() => normalizeName('a'.repeat(101))).toThrow(/1~100 chars/);
+  });
+
+  it('accepts boundary lengths (1, 100)', () => {
+    expect(normalizeName('a')).toBe('a');
+    expect(normalizeName('a'.repeat(100))).toBe('a'.repeat(100));
+  });
+});
+
+describe('normalizeEmail (CANDID-034 Step 2)', () => {
+  it('lowercases and trims', () => {
+    expect(normalizeEmail('  Foo@Bar.COM  ')).toBe('foo@bar.com');
+  });
+
+  it('throws on missing @', () => {
+    expect(() => normalizeEmail('foobar.com')).toThrow(/basic format/);
+  });
+
+  it('throws on missing TLD', () => {
+    expect(() => normalizeEmail('foo@bar')).toThrow(/basic format/);
+  });
+
+  it('throws on whitespace in local or domain part', () => {
+    expect(() => normalizeEmail('a b@bar.com')).toThrow(/basic format/);
+  });
+
+  it('throws on too short (<3 chars)', () => {
+    expect(() => normalizeEmail('a@')).toThrow(/3~254/);
+  });
+
+  it('throws on too long (>254 chars)', () => {
+    // 250 + '@bb.com'(7) = 257 — 254 초과
+    expect(() => normalizeEmail('a'.repeat(250) + '@bb.com')).toThrow(/3~254/);
+  });
+
+  it('accepts typical email', () => {
+    expect(normalizeEmail('jaeseong.sim85@gmail.com')).toBe('jaeseong.sim85@gmail.com');
+  });
+});
+
+describe('normalizeAddress (CANDID-034 Step 2)', () => {
+  it('trims surrounding whitespace', () => {
+    expect(normalizeAddress('  서울시 강남구 테헤란로 123  ')).toBe('서울시 강남구 테헤란로 123');
+  });
+
+  it('throws on empty after trim', () => {
+    expect(() => normalizeAddress('   ')).toThrow(/1~500 chars/);
+  });
+
+  it('throws on too long input (>500 chars)', () => {
+    expect(() => normalizeAddress('a'.repeat(501))).toThrow(/1~500 chars/);
+  });
+
+  it('accepts boundary lengths (1, 500)', () => {
+    expect(normalizeAddress('A')).toBe('A');
+    expect(normalizeAddress('가'.repeat(500))).toBe('가'.repeat(500));
+  });
+});
+
+describe('encryptApplicationPiiSnapshotInput (CANDID-034 Step 2)', () => {
+  it('encrypts all 5 fields with key version', () => {
+    const enc = encryptApplicationPiiSnapshotInput({
+      applicantNameSnapshot: '홍길동',
+      applicantEmailSnapshot: 'foo@bar.com',
+      phoneSnapshot: '010-1234-5678',
+      birthDateSnapshot: '1995-03-15',
+      addressSnapshot: '서울시 강남구 테헤란로 123',
+    });
+    expect(enc.applicantNameSnapshot).toBeInstanceOf(Buffer);
+    expect(enc.applicantNameSnapshotKeyVersion).toBe(PII_KEY_VERSION);
+    expect(enc.applicantEmailSnapshot).toBeInstanceOf(Buffer);
+    expect(enc.applicantEmailSnapshotKeyVersion).toBe(PII_KEY_VERSION);
+    expect(enc.phoneSnapshot).toBeInstanceOf(Buffer);
+    expect(enc.phoneSnapshotKeyVersion).toBe(PII_KEY_VERSION);
+    expect(enc.birthDateSnapshot).toBeInstanceOf(Buffer);
+    expect(enc.birthDateSnapshotKeyVersion).toBe(PII_KEY_VERSION);
+    expect(enc.addressSnapshot).toBeInstanceOf(Buffer);
+    expect(enc.addressSnapshotKeyVersion).toBe(PII_KEY_VERSION);
+  });
+
+  it('supports partial update — only fields in input are present in output', () => {
+    const enc = encryptApplicationPiiSnapshotInput({ applicantNameSnapshot: '김철수' });
+    expect(enc.applicantNameSnapshot).toBeInstanceOf(Buffer);
+    expect('applicantEmailSnapshot' in enc).toBe(false);
+    expect('phoneSnapshot' in enc).toBe(false);
+    expect('birthDateSnapshot' in enc).toBe(false);
+    expect('addressSnapshot' in enc).toBe(false);
+  });
+
+  it('passes null through as null without key version', () => {
+    const enc = encryptApplicationPiiSnapshotInput({ phoneSnapshot: null });
+    expect(enc.phoneSnapshot).toBeNull();
+    expect('phoneSnapshotKeyVersion' in enc).toBe(false);
+  });
+
+  it('treats undefined identically to null (column NULL set)', () => {
+    const enc = encryptApplicationPiiSnapshotInput({
+      applicantNameSnapshot: undefined,
+    });
+    expect(enc.applicantNameSnapshot).toBeNull();
+  });
+
+  it('round-trip decrypt via decryptApplicationPiiSnapshotField', () => {
+    const enc = encryptApplicationPiiSnapshotInput({
+      applicantNameSnapshot: '홍길동',
+      addressSnapshot: '서울시 강남구 테헤란로 123',
+    });
+    expect(decryptApplicationPiiSnapshotField(enc.applicantNameSnapshot!)).toBe('홍길동');
+    expect(decryptApplicationPiiSnapshotField(enc.addressSnapshot!)).toBe(
+      '서울시 강남구 테헤란로 123',
+    );
+  });
+
+  it('normalizes phone via normalizePhone (reuse) — strips formatting before encrypt', () => {
+    const enc = encryptApplicationPiiSnapshotInput({ phoneSnapshot: '(010) 1234-5678' });
+    expect(decryptApplicationPiiSnapshotField(enc.phoneSnapshot!)).toBe('01012345678');
+  });
+
+  it('normalizes email via normalizeEmail (reuse) — lowercases before encrypt', () => {
+    const enc = encryptApplicationPiiSnapshotInput({ applicantEmailSnapshot: '  Foo@Bar.COM  ' });
+    expect(decryptApplicationPiiSnapshotField(enc.applicantEmailSnapshot!)).toBe('foo@bar.com');
+  });
+
+  it('throws on invalid birthDateSnapshot (calendar validation reuse)', () => {
+    expect(() =>
+      encryptApplicationPiiSnapshotInput({ birthDateSnapshot: '1995-13-99' }),
+    ).toThrow(/valid calendar date/);
+  });
+
+  it('throws on empty name (normalize 위임)', () => {
+    expect(() => encryptApplicationPiiSnapshotInput({ applicantNameSnapshot: '   ' })).toThrow(
+      /1~100 chars/,
+    );
+  });
+
+  it('throws on invalid email (normalize 위임)', () => {
+    expect(() =>
+      encryptApplicationPiiSnapshotInput({ applicantEmailSnapshot: 'no-at-sign' }),
+    ).toThrow(/basic format/);
+  });
+});
+
+describe('decryptApplicationPiiSnapshotField (CANDID-034 Step 2)', () => {
+  it('returns null on null input', () => {
+    expect(decryptApplicationPiiSnapshotField(null)).toBeNull();
+  });
+
+  it('decrypts a single BYTEA value to plaintext (round-trip with encryptPii)', () => {
+    const cipher = encryptPii('서울시');
+    expect(decryptApplicationPiiSnapshotField(cipher)).toBe('서울시');
+  });
+});
+
+describe('assertApplicationPiiInputShape (CANDID-034 Step 2)', () => {
+  it('throws on string plaintext for each of the 5 fields', () => {
+    expect(() =>
+      assertApplicationPiiInputShape({ applicantNameSnapshot: '홍길동' }),
+    ).toThrow(/applicantNameSnapshot/);
+    expect(() =>
+      assertApplicationPiiInputShape({ applicantEmailSnapshot: 'foo@bar.com' }),
+    ).toThrow(/applicantEmailSnapshot/);
+    expect(() => assertApplicationPiiInputShape({ phoneSnapshot: '010-1234-5678' })).toThrow(
+      /phoneSnapshot/,
+    );
+    expect(() => assertApplicationPiiInputShape({ birthDateSnapshot: '1995-03-15' })).toThrow(
+      /birthDateSnapshot/,
+    );
+    expect(() => assertApplicationPiiInputShape({ addressSnapshot: '서울시 강남구' })).toThrow(
+      /addressSnapshot/,
+    );
+  });
+
+  it('throws on { set: string } update wrapper (prisma update form)', () => {
+    expect(() =>
+      assertApplicationPiiInputShape({ phoneSnapshot: { set: '010-1234-5678' } }),
+    ).toThrow(/phoneSnapshot/);
+    expect(() =>
+      assertApplicationPiiInputShape({ applicantNameSnapshot: { set: '홍길동' } }),
+    ).toThrow(/applicantNameSnapshot/);
+  });
+
+  it('passes when value is Buffer (encrypted form)', () => {
+    expect(() =>
+      assertApplicationPiiInputShape({ phoneSnapshot: Buffer.alloc(28) }),
+    ).not.toThrow();
+  });
+
+  it('passes when value is null', () => {
+    expect(() =>
+      assertApplicationPiiInputShape({ phoneSnapshot: null, addressSnapshot: null }),
+    ).not.toThrow();
+  });
+
+  it('passes when 5 fields are absent', () => {
+    expect(() =>
+      assertApplicationPiiInputShape({ applicationNumber: 'A-202605-00001' }),
+    ).not.toThrow();
+  });
+
+  it('handles null/undefined/primitive input gracefully', () => {
+    expect(() => assertApplicationPiiInputShape(null)).not.toThrow();
+    expect(() => assertApplicationPiiInputShape(undefined)).not.toThrow();
+    expect(() => assertApplicationPiiInputShape('not-an-object')).not.toThrow();
+    expect(() => assertApplicationPiiInputShape(42)).not.toThrow();
+  });
+
+  it('passes on encryptApplicationPiiSnapshotInput output (production path regression guard)', () => {
+    const encoded = encryptApplicationPiiSnapshotInput({
+      applicantNameSnapshot: '홍길동',
+      applicantEmailSnapshot: 'foo@bar.com',
+      phoneSnapshot: '010-1234-5678',
+      birthDateSnapshot: '1995-03-15',
+      addressSnapshot: '서울시 강남구',
+    });
+    expect(() => assertApplicationPiiInputShape(encoded)).not.toThrow();
+  });
+
+  it('error message includes encryptApplicationPiiSnapshotInput guidance', () => {
+    try {
+      assertApplicationPiiInputShape({ phoneSnapshot: '010-1234-5678' });
+      throw new Error('expected throw');
+    } catch (e) {
+      const msg = (e as Error).message;
+      expect(msg).toContain('encryptApplicationPiiSnapshotInput');
+      expect(msg).toContain('encryptPiiWithVersion');
+    }
+  });
+});
+
+describe('APPLICATION_PII_SNAPSHOT_FIELDS SSOT (CANDID-034 Step 2)', () => {
+  it('contains exactly the 5 expected snapshot fields in expected order', () => {
+    expect(APPLICATION_PII_SNAPSHOT_FIELDS).toEqual([
+      'applicantNameSnapshot',
+      'applicantEmailSnapshot',
+      'phoneSnapshot',
+      'birthDateSnapshot',
+      'addressSnapshot',
+    ]);
+  });
+
+  it('all 5 fields use the consistent Snapshot suffix (Step 1 schema rename 정합)', () => {
+    APPLICATION_PII_SNAPSHOT_FIELDS.forEach((f) => {
+      expect(f).toMatch(/Snapshot$/);
+    });
   });
 });
