@@ -56,12 +56,13 @@ model User {
   createdAt           DateTime   @default(now()) @map("created_at")
   updatedAt           DateTime   @updatedAt @map("updated_at")
 
-  authProviders       AuthProvider[]
-  emailVerifications  EmailVerification[]
-  passwordResetTokens PasswordResetToken[]
-  applications        Application[]
-  applicationDrafts   ApplicationDraft[]
-  resumeFiles         ResumeFile[]
+  authProviders          AuthProvider[]
+  emailVerifications     EmailVerification[]
+  passwordResetTokens    PasswordResetToken[]
+  applications           Application[]
+  applicationDrafts      ApplicationDraft[]
+  resumeFiles            ResumeFile[]
+  changedStatusHistories ApplicationStatusHistory[] @relation("changedBy")
 
   @@index([status], map: "idx_users_status")
   @@map("users")
@@ -282,11 +283,13 @@ model Application {
   createdAt                   DateTime          @default(now()) @map("created_at")
   updatedAt                   DateTime          @updatedAt @map("updated_at")
 
-  user           User                @relation(fields: [userId], references: [id], onDelete: Restrict)
-  jobPosting     JobPosting          @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
-  answers        ApplicationAnswer[]
-  resumeFiles    ResumeFile[]
-  portfolioLinks PortfolioLink[]
+  user               User                       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  jobPosting         JobPosting                 @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
+  answers            ApplicationAnswer[]
+  resumeFiles        ResumeFile[]
+  portfolioLinks     PortfolioLink[]
+  statusHistories    ApplicationStatusHistory[]
+  interviewSchedules InterviewSchedule[]
 
   // BR-APP-01 활성 지원서 UNIQUE 제약은 partial(`WHERE result <> 'WITHDRAWN'`)이라 Prisma schema에서 직접 표현 불가 — migration.sql에서 정의.
   @@index([userId, submittedAt(sort: Desc)], map: "idx_applications_user_submitted")
@@ -383,4 +386,59 @@ model PortfolioLink {
   // XOR CHECK (application_id IS NULL <> draft_id IS NULL) — migration.sql에서 정의.
   // 최대 5개 검증은 앱 레이어 (US-APP-004).
   @@map("portfolio_links")
+}
+
+// === CANDID-005 Step 3: 이력/면접/감사 ===
+// PRD §3.3.8~3.3.9 (status_history / interview_schedules) + audit_logs(골격, CANDID-026 본격 도입).
+
+model ApplicationStatusHistory {
+  id                 Int        @id @default(autoincrement())
+  applicationId      Int        @map("application_id")
+  fromStage          StageType? @map("from_stage") // 초기 SUBMITTED는 NULL
+  toStage            StageType  @map("to_stage")
+  changedByUserId    Int?       @map("changed_by_user_id") // 시스템 자동 변경은 NULL
+  changedAt          DateTime   @default(now()) @map("changed_at")
+  visibleToCandidate Boolean    @default(true) @map("visible_to_candidate") // 내부 이력 미노출
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+  changedBy   User?       @relation("changedBy", fields: [changedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([applicationId, changedAt(sort: Desc)], map: "idx_status_history_app_changed")
+  @@map("application_status_history")
+}
+
+model InterviewSchedule {
+  id            Int                     @id @default(autoincrement())
+  applicationId Int                     @map("application_id")
+  stage         StageType
+  scheduledAt   DateTime                @map("scheduled_at")
+  locationOrUrl String                  @map("location_or_url") @db.VarChar(500) // 오프라인 주소 또는 화상 링크
+  status        InterviewScheduleStatus @default(SCHEDULED)
+  icsUid        String                  @unique @map("ics_uid") @db.VarChar(120) // .ics 발급 멱등성
+  createdAt     DateTime                @default(now()) @map("created_at")
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+
+  @@index([applicationId, scheduledAt], map: "idx_interview_app_scheduled")
+  @@map("interview_schedules")
+}
+
+// audit_logs: 본 Step은 골격만 정의 — 본격 도입은 CANDID-026 (감사 AOP + traceId 전파).
+// FK 미설정 (PHI 분리 원칙 — actorUserId는 plain BigInt, JOIN은 앱 레이어).
+// 파티셔닝(PARTITION BY RANGE occurred_at)은 CANDID-026에서 운영 단계 도입.
+model AuditLog {
+  id           BigInt         @id @default(autoincrement())
+  occurredAt   DateTime       @default(now()) @map("occurred_at")
+  actorUserId  Int?           @map("actor_user_id") // FK 미설정 — PHI 분리
+  eventType    AuditEventType @map("event_type")
+  resourceType String?        @map("resource_type") @db.VarChar(50) // "application" 등
+  resourceId   String?        @map("resource_id") @db.VarChar(64)
+  ipAddress    String?        @map("ip_address") @db.Inet
+  userAgent    String?        @map("user_agent") @db.VarChar(500)
+  metadataJson Json?          @map("metadata_json") @db.JsonB
+
+  @@index([actorUserId, occurredAt(sort: Desc)], map: "idx_audit_actor_occurred")
+  @@index([resourceType, resourceId, occurredAt(sort: Desc)], map: "idx_audit_resource")
+  @@index([eventType, occurredAt(sort: Desc)], map: "idx_audit_event")
+  @@map("audit_logs")
 }
