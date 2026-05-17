@@ -1,11 +1,53 @@
 {
   "metadata": {
-    "version": 7,
+    "version": 8,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-16T15:47:48+09:00"
+    "updatedAt": "2026-05-17T22:11:41+09:00"
   },
   "tasks": {
+    "CANDID-005": {
+      "id": "CANDID-005",
+      "title": "DB 스키마: applications + drafts + answers + resume_files + portfolio_links + status_history + interview_schedules + audit_logs",
+      "phase": 1,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-17T22:11:41+09:00",
+      "assignee": "jaese@hoji-20260517-210840",
+      "prs": [
+        {
+          "number": 11,
+          "title": "feat: CANDID-005 Step 1 - 지원서 핵심 3 모델 + 6 enum",
+          "mergedAt": "2026-05-17T21:47:26+09:00",
+          "additions": 224,
+          "deletions": 3,
+          "note": "applications(PII snapshot 5쌍 NULLABLE Bytes) + drafts + sequences + 6 enum 일괄 정의. 부분 UNIQUE 인덱스 BR-APP-01 (L-013). 리뷰 CRITICAL 0, MAJOR 4, MINOR 3, INFO 9 — APPROVED (FU1 위임 합의)."
+        },
+        {
+          "number": 12,
+          "title": "feat: CANDID-005 Step 2 - 첨부/응답 3 모델 + L-015 R1 종결",
+          "mergedAt": "2026-05-17T22:03:23+09:00",
+          "additions": 180,
+          "deletions": 5,
+          "note": "ApplicationAnswer (RESTRICT FK) + ResumeFile (SET NULL XOR) + PortfolioLink (CASCADE XOR) + job_posting_questions.archived_at. **L-015 R1 종결** (CANDID-004 미결). 리뷰 CRITICAL 1 (C001) → skill-fix 1회 → resume_files CHECK 'XOR' → 'at most one' 수정. 최종 APPROVED."
+        },
+        {
+          "number": 13,
+          "title": "feat: CANDID-005 Step 3 - 이력/면접/감사 3 모델 (audit_logs 골격)",
+          "mergedAt": "2026-05-17T22:11:41+09:00",
+          "additions": 149,
+          "deletions": 11,
+          "note": "ApplicationStatusHistory + InterviewSchedule + AuditLog(골격 CANDID-026 본격 도입). 리뷰 CRITICAL 0, MAJOR 9, MINOR 6, INFO 7 — APPROVED (모두 후속 task 위임)."
+        }
+      ],
+      "summary": "지원서 도메인 8 신규 테이블 + 1 보조(application_number_sequences) + 1 컬럼 변경(job_posting_questions.archived_at) + 6 enum + 17 인덱스. 3-step (3-3-2 분리) 모두 schema-only. L-015 R1 종결, L-013/L-014 적용. 1회 fixLoop (C001 — resume_files XOR vs SET NULL 충돌). 전체 +553 LOC. CANDID-015/018/019/022/023/026 다운스트림 언블록.",
+      "dependencies": ["CANDID-003", "CANDID-004"],
+      "specFile": "docs/sample-requirement.md",
+      "followUpTasksRecommended": [
+        "CANDID-005-FU1: Application PII snapshot AES-256-GCM extension wiring + 단위 테스트 (CANDID-008 패턴 미러)",
+        "CANDID-005-FU2 (선택): docs/architecture/erd.md 신설 + 통합 테스트 묶음 + audit_logs 운영 정책"
+      ]
+    },
     "CANDID-004": {
       "id": "CANDID-004",
       "title": "DB 스키마: job_postings + job_categories + job_posting_questions",

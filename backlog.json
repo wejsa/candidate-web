@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 47,
+    "version": 48,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T22:10:00+09:00"
+    "updatedAt": "2026-05-17T22:11:41+09:00"
   },
   "summary": {
     "total": 33,
-    "done": 7,
-    "inProgress": 1,
+    "done": 8,
+    "inProgress": 0,
     "review": 0,
     "todo": 25
   },
@@ -208,31 +208,23 @@
       "id": "CANDID-005",
       "title": "DB 스키마: applications + drafts + answers + resume_files + portfolio_links + status_history + interview_schedules + audit_logs",
       "description": "지원서 도메인 8개 테이블. UNIQUE(user_id, job_posting_id) 활성 지원서 제약, application_drafts payload_json + version 낙관적 락, application_number 형식 A-YYYYMM-NNNNN.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260517-210840",
-      "assignedAt": "2026-05-17T22:03:23+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 3600,
-      "lockedFiles": [
-        "prisma/schema.prisma",
-        "prisma/migrations/*_candid_005_step3_history_audit/migration.sql"
-      ],
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-003",
         "CANDID-004"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
+      "updatedAt": "2026-05-17T22:11:41+09:00",
+      "completedAt": "2026-05-17T22:11:41+09:00",
       "specFile": "docs/sample-requirement.md",
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 13,
-        "fixLoopCount": 0,
-        "autoChainArgs": "13 --auto-fix",
-        "updatedAt": "2026-05-17T22:10:00+09:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
@@ -271,9 +263,10 @@
           "number": 3,
           "title": "이력/면접/감사 3 모델 (audit_logs 골격)",
           "description": "application_status_history (append-only, visible_to_candidate 플래그) + interview_schedules (ics_uid UNIQUE 멱등성) + audit_logs (CANDID-026 골격, FK 미설정, BIGSERIAL). 인덱스 5개. audit_logs 파티셔닝은 CANDID-026 위임.",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-005-step3",
           "prNumber": 13,
+          "mergedAt": "2026-05-17T22:11:41+09:00",
           "files": [
             "prisma/schema.prisma",
             "prisma/migrations/20260517220600_candid_005_step3_history_audit/migration.sql"
