@@ -88,5 +88,15 @@
     "prNumber": 15,
     "mergeMethod": "squash",
     "timestamp": "2026-05-17T23:20:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-034",
+    "stepNumber": 3,
+    "prNumber": 16,
+    "branch": "feature/CANDID-034-step3",
+    "additions": 291,
+    "deletions": 3,
+    "timestamp": "2026-05-17T23:28:00+09:00"
   }
 ]
