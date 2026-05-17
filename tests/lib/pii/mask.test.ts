@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { maskBirthDate, maskPhone } from '@/lib/pii/mask';
+import {
+  maskAddress,
+  maskBirthDate,
+  maskEmail,
+  maskName,
+  maskPhone,
+} from '@/lib/pii/mask';
 
 describe('maskPhone', () => {
   it('masks 11-digit mobile (no hyphens)', () => {
@@ -100,5 +106,107 @@ describe('maskBirthDate — 무효 날짜 회귀 (H004 fix)', () => {
 
   it('accepts last day of month 2026-01-31', () => {
     expect(maskBirthDate('2026-01-31')).toBe('2026-**-**');
+  });
+});
+
+// === CANDID-034 (CANDID-005 FU1) Step 4 — Application snapshot mask 단위 테스트 ===
+
+describe('maskName (CANDID-034 Step 4)', () => {
+  it('masks Korean 3-char name to first char + **', () => {
+    expect(maskName('홍길동')).toBe('홍**');
+  });
+
+  it('masks English name to first char + **', () => {
+    expect(maskName('Kim')).toBe('K**');
+  });
+
+  it('preserves single-char name as-is (no leak risk)', () => {
+    expect(maskName('A')).toBe('A');
+    expect(maskName('홍')).toBe('홍');
+  });
+
+  it('returns null for null/undefined/empty/whitespace-only', () => {
+    expect(maskName(null)).toBeNull();
+    expect(maskName(undefined)).toBeNull();
+    expect(maskName('')).toBeNull();
+    expect(maskName('   ')).toBeNull();
+  });
+
+  it('trims surrounding whitespace before masking', () => {
+    expect(maskName('  홍길동  ')).toBe('홍**');
+  });
+
+  it('handles long names (preserves only first char)', () => {
+    expect(maskName('Christopher')).toBe('C**');
+  });
+});
+
+describe('maskEmail (CANDID-034 Step 4)', () => {
+  it('masks typical email to first char of local + *** + domain', () => {
+    expect(maskEmail('foo@bar.com')).toBe('f***@bar.com');
+  });
+
+  it('handles single-char local part', () => {
+    expect(maskEmail('a@bar.com')).toBe('a***@bar.com');
+  });
+
+  it('preserves multi-dot domain', () => {
+    expect(maskEmail('jaeseong.sim85@gmail.com')).toBe('j***@gmail.com');
+  });
+
+  it('returns null on missing @ (invalid format)', () => {
+    expect(maskEmail('foobar.com')).toBeNull();
+  });
+
+  it('returns null on @ at start (no local)', () => {
+    expect(maskEmail('@bar.com')).toBeNull();
+  });
+
+  it('returns null on @ at end (no domain)', () => {
+    expect(maskEmail('foo@')).toBeNull();
+  });
+
+  it('returns null on null/undefined/empty/whitespace-only', () => {
+    expect(maskEmail(null)).toBeNull();
+    expect(maskEmail(undefined)).toBeNull();
+    expect(maskEmail('')).toBeNull();
+    expect(maskEmail('   ')).toBeNull();
+  });
+
+  it('trims surrounding whitespace before masking', () => {
+    expect(maskEmail('  foo@bar.com  ')).toBe('f***@bar.com');
+  });
+});
+
+describe('maskAddress (CANDID-034 Step 4)', () => {
+  it('masks address with 4+ tokens to first 2 + ***', () => {
+    expect(maskAddress('서울시 강남구 테헤란로 123')).toBe('서울시 강남구 ***');
+  });
+
+  it('masks 3-token address to first 2 + ***', () => {
+    expect(maskAddress('서울시 강남구 역삼동')).toBe('서울시 강남구 ***');
+  });
+
+  it('preserves 2-token address as-is (no leak — partial info already minimal)', () => {
+    expect(maskAddress('서울시 강남구')).toBe('서울시 강남구');
+  });
+
+  it('preserves 1-token address as-is', () => {
+    expect(maskAddress('서울시')).toBe('서울시');
+  });
+
+  it('collapses multiple spaces between tokens', () => {
+    expect(maskAddress('서울시    강남구    테헤란로')).toBe('서울시 강남구 ***');
+  });
+
+  it('handles English address (first 2 tokens preserved)', () => {
+    expect(maskAddress('123 Main Street Springfield IL')).toBe('123 Main ***');
+  });
+
+  it('returns null on null/undefined/empty/whitespace-only', () => {
+    expect(maskAddress(null)).toBeNull();
+    expect(maskAddress(undefined)).toBeNull();
+    expect(maskAddress('')).toBeNull();
+    expect(maskAddress('   ')).toBeNull();
   });
 });

@@ -23,6 +23,56 @@ export function maskPhone(phone: string | null | undefined): string | null {
   return `****-${digits.slice(-4)}`;
 }
 
+// === CANDID-034 (CANDID-005 FU1) Step 4 — Application PII snapshot 마스킹 헬퍼 =========
+
+/**
+ * 이름 마스킹 — 첫 글자만 노출하고 나머지는 `**`로 처리.
+ * '홍길동' → '홍**', 'Kim' → 'K**', 'A' → 'A' (1글자는 그대로), null/empty/공백만 → null.
+ * trim 후 적용. 한국어/영문 모두 동일 규칙.
+ */
+export function maskName(name: string | null | undefined): string | null {
+  if (name === null || name === undefined) return null;
+  const trimmed = name.trim();
+  if (trimmed === '') return null;
+  if (trimmed.length === 1) return trimmed;
+  return `${Array.from(trimmed)[0]}**`;
+}
+
+/**
+ * 이메일 마스킹 — local-part의 첫 글자만 노출하고 나머지는 `***` + 도메인 그대로.
+ * 'foo@bar.com' → 'f***@bar.com', 'a@bar.com' → 'a***@bar.com'.
+ * `@` 부재/local 또는 domain 비어있음 → null (잘못된 형식).
+ */
+export function maskEmail(email: string | null | undefined): string | null {
+  if (email === null || email === undefined) return null;
+  const trimmed = email.trim();
+  if (trimmed === '') return null;
+  const atIdx = trimmed.indexOf('@');
+  if (atIdx <= 0 || atIdx >= trimmed.length - 1) return null;
+  const local = trimmed.slice(0, atIdx);
+  const domain = trimmed.slice(atIdx); // '@bar.com'
+  return `${Array.from(local)[0]}***${domain}`;
+}
+
+/**
+ * 주소 마스킹 — 공백 기준 처음 2 토큰만 노출하고 이후는 ` ***`로 처리.
+ * '서울시 강남구 테헤란로 123' → '서울시 강남구 ***'
+ * '서울시 강남구' (2 토큰) → '서울시 강남구' (그대로)
+ * '서울시' (1 토큰) → '서울시' (그대로)
+ * null/empty/공백만 → null.
+ *
+ * 한국 도로명/지번/영문 주소 모두 first-2-token 노출 규칙 일관 적용.
+ * 정교한 분기(시·구만 노출 등)는 추후 도메인 규칙 정밀화 시 별도 task.
+ */
+export function maskAddress(address: string | null | undefined): string | null {
+  if (address === null || address === undefined) return null;
+  const trimmed = address.trim();
+  if (trimmed === '') return null;
+  const tokens = trimmed.split(/\s+/);
+  if (tokens.length <= 2) return tokens.join(' ');
+  return `${tokens.slice(0, 2).join(' ')} ***`;
+}
+
 export function maskBirthDate(birthDate: string | Date | null | undefined): string | null {
   if (birthDate === null || birthDate === undefined || birthDate === '') return null;
 
