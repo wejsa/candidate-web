@@ -120,5 +120,16 @@
     "prNumber": 16,
     "mergeMethod": "squash",
     "timestamp": "2026-05-17T23:30:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-034",
+    "stepNumber": 4,
+    "prNumber": 17,
+    "branch": "feature/CANDID-034-step4",
+    "additions": 431,
+    "deletions": 3,
+    "isLastStep": true,
+    "timestamp": "2026-05-17T23:35:00+09:00"
   }
 ]
