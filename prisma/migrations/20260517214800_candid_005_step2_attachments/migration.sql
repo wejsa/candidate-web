@@ -40,9 +40,12 @@ CREATE TABLE "resume_files" (
     "uploaded_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "resume_files_pkey" PRIMARY KEY ("id"),
-    -- XOR: 첨부는 application_id 또는 draft_id 중 정확히 한쪽만 NOT NULL.
-    -- Draft → Submit 전이 시 트랜잭션 내 SET application_id + SET draft_id = NULL (BR-TX-01).
-    CONSTRAINT "chk_resume_files_app_xor_draft" CHECK (("application_id" IS NULL) <> ("draft_id" IS NULL))
+    -- C001 fix: "at most one" 제약 (XOR 대신).
+    -- application_id와 draft_id가 동시에 NOT NULL일 수 없음. 둘 다 NULL (orphan) 허용 —
+    -- FK ON DELETE SET NULL과 호환 (BR-PII-03 파일 메타 보존: 부모 삭제 후에도 row 잔존).
+    -- INSERT 시 "exactly one" 보장은 앱 레이어 책임 (Draft 첨부 또는 Application 첨부 명시).
+    -- Draft → Submit 전이 시 단일 UPDATE로 application_id=? + draft_id=NULL 동시 set (BR-TX-01).
+    CONSTRAINT "chk_resume_files_app_xor_draft" CHECK (NOT ("application_id" IS NOT NULL AND "draft_id" IS NOT NULL))
 );
 
 -- CreateTable

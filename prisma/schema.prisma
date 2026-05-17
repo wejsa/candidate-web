@@ -345,8 +345,10 @@ model ApplicationAnswer {
 model ResumeFile {
   id               Int             @id @default(autoincrement())
   ownerUserId      Int             @map("owner_user_id")
-  applicationId    Int?            @map("application_id") // XOR with draftId
-  draftId          Int?            @map("draft_id") // XOR with applicationId
+  // applicationId와 draftId는 동시에 NOT NULL 불가 (앱 레이어가 "exactly one" 보장).
+  // 부모 SET NULL 발동 시 둘 다 NULL인 orphan 상태 허용 (BR-PII-03 메타 보존).
+  applicationId    Int?            @map("application_id")
+  draftId          Int?            @map("draft_id")
   originalFilename String          @map("original_filename") @db.VarChar(255)
   storedPath       String          @map("stored_path") @db.VarChar(500) // S3 키 또는 UUID 재명명 경로
   contentType      String          @map("content_type") @db.VarChar(100) // MIME 화이트리스트
@@ -360,7 +362,8 @@ model ResumeFile {
   application Application?      @relation(fields: [applicationId], references: [id], onDelete: SetNull)
   draft       ApplicationDraft? @relation(fields: [draftId], references: [id], onDelete: SetNull)
 
-  // XOR CHECK (application_id IS NULL <> draft_id IS NULL) — migration.sql에서 정의.
+  // "At most one" CHECK (application_id, draft_id 동시 NOT NULL 금지) — migration.sql에서 정의.
+  // C001 fix: 기존 XOR CHECK는 FK SET NULL과 충돌하여 BR-FILE-06 batch failure 유발 → "at most one"으로 완화.
   @@map("resume_files")
 }
 
