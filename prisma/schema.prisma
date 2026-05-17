@@ -61,6 +61,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   applications        Application[]
   applicationDrafts   ApplicationDraft[]
+  resumeFiles         ResumeFile[]
 
   @@index([status], map: "idx_users_status")
   @@map("users")
@@ -190,9 +191,13 @@ model JobPostingQuestion {
   // SELECT / MULTI_SELECT 선택지 (예: ["주니어", "시니어"]). 단순 텍스트 타입에서는 NULL.
   optionsJson  Json?        @map("options_json") @db.JsonB
   sortOrder    Int          @default(0) @map("sort_order")
+  // CANDID-005 Step 2 (L-015 R1 종결): soft-archive. 신규 응답 차단(앱 레이어 where 필터),
+  // application_answers는 RESTRICT FK로 보존 → 어드민 hard-delete 불가, archived_at만 set.
+  archivedAt   DateTime?    @map("archived_at")
   createdAt    DateTime     @default(now()) @map("created_at")
 
-  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  jobPosting JobPosting          @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  answers    ApplicationAnswer[]
 
   @@index([jobPostingId, sortOrder], map: "idx_jpq_posting_sort")
   @@map("job_posting_questions")
@@ -277,8 +282,11 @@ model Application {
   createdAt                   DateTime          @default(now()) @map("created_at")
   updatedAt                   DateTime          @updatedAt @map("updated_at")
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Restrict)
-  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
+  user           User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  jobPosting     JobPosting          @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
+  answers        ApplicationAnswer[]
+  resumeFiles    ResumeFile[]
+  portfolioLinks PortfolioLink[]
 
   // BR-APP-01 활성 지원서 UNIQUE 제약은 partial(`WHERE result <> 'WITHDRAWN'`)이라 Prisma schema에서 직접 표현 불가 — migration.sql에서 정의.
   @@index([userId, submittedAt(sort: Desc)], map: "idx_applications_user_submitted")
@@ -295,8 +303,10 @@ model ApplicationDraft {
   version      Int      @default(1) // 낙관적 락 (BR-APP-02)
   createdAt    DateTime @default(now()) @map("created_at")
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobPosting     JobPosting      @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
+  resumeFiles    ResumeFile[]
+  portfolioLinks PortfolioLink[]
 
   @@unique([userId, jobPostingId], map: "uk_drafts_user_posting")
   @@index([lastSavedAt], map: "idx_drafts_last_saved") // BR-FILE-06 30일 배치 정리
@@ -311,4 +321,63 @@ model ApplicationNumberSequence {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("application_number_sequences")
+}
+
+// === CANDID-005 Step 2: 첨부/응답 ===
+// PRD §3.3.6~3.3.7 (resume_files / portfolio_links) + ERD §3.2 (application_answers) 기반.
+// L-015 R1 종결: application_answers.question_id RESTRICT + JobPostingQuestion.archivedAt soft-archive.
+
+model ApplicationAnswer {
+  id                Int      @id @default(autoincrement())
+  applicationId     Int      @map("application_id")
+  questionId        Int      @map("question_id")
+  answerText        String?  @map("answer_text") @db.Text // SHORT_TEXT / LONG_TEXT 응답
+  answerOptionsJson Json?    @map("answer_options_json") @db.JsonB // SELECT / MULTI_SELECT 응답
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  application Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  question    JobPostingQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict) // L-015: 응답 보존
+
+  @@unique([applicationId, questionId], map: "uk_answers_app_question") // 질문당 1응답
+  @@map("application_answers")
+}
+
+model ResumeFile {
+  id               Int             @id @default(autoincrement())
+  ownerUserId      Int             @map("owner_user_id")
+  applicationId    Int?            @map("application_id") // XOR with draftId
+  draftId          Int?            @map("draft_id") // XOR with applicationId
+  originalFilename String          @map("original_filename") @db.VarChar(255)
+  storedPath       String          @map("stored_path") @db.VarChar(500) // S3 키 또는 UUID 재명명 경로
+  contentType      String          @map("content_type") @db.VarChar(100) // MIME 화이트리스트
+  fileSize         BigInt          @map("file_size") // bytes
+  checksumSha256   String          @map("checksum_sha256") @db.VarChar(64) // 무결성 검증
+  virusScanStatus  VirusScanStatus @default(PENDING) @map("virus_scan_status")
+  scannedAt        DateTime?       @map("scanned_at")
+  uploadedAt       DateTime        @default(now()) @map("uploaded_at")
+
+  owner       User              @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  application Application?      @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  draft       ApplicationDraft? @relation(fields: [draftId], references: [id], onDelete: SetNull)
+
+  // XOR CHECK (application_id IS NULL <> draft_id IS NULL) — migration.sql에서 정의.
+  @@map("resume_files")
+}
+
+model PortfolioLink {
+  id            Int               @id @default(autoincrement())
+  applicationId Int?              @map("application_id") // XOR with draftId
+  draftId       Int?              @map("draft_id") // XOR with applicationId
+  linkType      PortfolioLinkType @map("link_type")
+  url           String            @db.VarChar(1000)
+  memo          String?           @db.VarChar(500)
+  sortOrder     Int               @default(0) @map("sort_order")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  application Application?      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  draft       ApplicationDraft? @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  // XOR CHECK (application_id IS NULL <> draft_id IS NULL) — migration.sql에서 정의.
+  // 최대 5개 검증은 앱 레이어 (US-APP-004).
+  @@map("portfolio_links")
 }
