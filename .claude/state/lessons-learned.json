@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 4,
-    "updatedAt": "2026-05-17T22:35:00+09:00",
+    "version": 5,
+    "updatedAt": "2026-05-17T23:45:00+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -106,9 +106,9 @@
         "zod",
         "prisma-extension"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-14T00:00:00+09:00",
-      "updatedAt": "2026-05-14T00:00:00+09:00"
+      "updatedAt": "2026-05-17T23:45:00+09:00"
     },
     {
       "id": "L-007",
@@ -125,9 +125,9 @@
         "defense-in-depth",
         "security"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-14T00:00:00+09:00",
-      "updatedAt": "2026-05-14T00:00:00+09:00"
+      "updatedAt": "2026-05-17T23:45:00+09:00"
     },
     {
       "id": "L-008",
@@ -168,7 +168,7 @@
       "taskId": "CANDID-031",
       "category": "process",
       "title": "Plan 단계의 라인 추정 정확도는 review fix 비용 사전 반영 + step 책임 단순화에서 온다",
-      "description": "CANDID-008의 추정 오차(+21~72%)는 CANDID-031에서 -2~-13%로 크게 개선됐다. 사유: (1) Step 2 estimatedLines에 'review fix 4건 번들'을 사전 반영 (216 LOC 실제 → 264 LOC 수정 결과, 305 추정에서 -13%), (2) 각 step의 책임 경계를 정확히 1개 layer(D6/D7/D8)로 단순화. plan 단계에서 *review fix 1~2회 사이클의 추가 비용*을 예측하여 estimatedLines에 미리 반영하면 후반 step의 라인 오버런을 줄일 수 있다. CANDID-004에서도 동일 패턴 적용 (추정 195 → 실제 176, -10%) — schema-only task에도 일관 효과.",
+      "description": "Plan 단계의 라인 추정 정확도 보정 모델 v2 (CANDID-034 4-step 데이터로 갱신). v1: review fix buffer 사전 반영. v2 추가 보정: (1) SSOT derive 불가 시 N쌍 명시 분기 → N × 12줄 추가 (예: 5쌍 → +60줄), (2) 단위 테스트 LOC = 본문 LOC × 1.2~1.4 비율 (User/Application wiring 양쪽 검증), (3) prisma format 자동 spacing 정렬 시 schema.prisma ±20% 변동(예측 어려움 — schema 변경 step에 buffer 명시 권장). CANDID-034 데이터: Step 1 +22% / Step 2 +35% / Step 3 +32% / Step 4 -10%. v2 적용 시 ±15% 이내 목표.",
       "impact": "medium",
       "tags": [
         "planning",
@@ -176,9 +176,9 @@
         "skill-plan",
         "review-cycle"
       ],
-      "appliedCount": 3,
+      "appliedCount": 4,
       "createdAt": "2026-05-14T00:00:00+09:00",
-      "updatedAt": "2026-05-17T22:35:00+09:00"
+      "updatedAt": "2026-05-17T23:45:00+09:00"
     },
     {
       "id": "L-011",
@@ -304,9 +304,9 @@
         "schema-only",
         "aes-gcm"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-17T22:35:00+09:00",
-      "updatedAt": "2026-05-17T22:35:00+09:00"
+      "updatedAt": "2026-05-17T23:45:00+09:00"
     },
     {
       "id": "L-018",
@@ -325,6 +325,61 @@
       "appliedCount": 1,
       "createdAt": "2026-05-17T22:35:00+09:00",
       "updatedAt": "2026-05-17T22:35:00+09:00"
+    },
+    {
+      "id": "L-019",
+      "taskId": "CANDID-034",
+      "category": "process",
+      "title": "In-task self-correction — 직전 step review MAJOR를 다음 step PR에서 자체 보강 (fix loop 없이 회수)",
+      "description": "동일 파일 영역이 다음 step에서도 수정되는 경우, 직전 step PR의 review MAJOR 후속 권고를 skill-fix 호출 없이 다음 step PR에 자체 보강 가능. CANDID-034 Step 2 PR #15 MAJOR(birthDateSnapshot round-trip 누락 + normalizeEmail 경계 통과 케이스 누락)가 Step 3 PR #16에서 자체 보강됨 — fix loop 0회로 회수. 조건: (1) 동일 파일 또는 동일 모듈을 다음 step에서 수정 (2) MAJOR/MINOR 수준 (CRITICAL은 즉시 fix loop 필수) (3) 직전 step 머지 완료 후 (amend 아님). 효과: skill-fix → skill-review-pr 사이클 1회 절약 + 후속 보강 컨텍스트 자연 통합.",
+      "impact": "medium",
+      "tags": [
+        "review-fix",
+        "in-task-correction",
+        "fix-loop",
+        "workflow",
+        "process-optimization"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T23:45:00+09:00",
+      "updatedAt": "2026-05-17T23:45:00+09:00"
+    },
+    {
+      "id": "L-020",
+      "taskId": "CANDID-034",
+      "category": "architecture",
+      "title": "PII wiring 5쌍 명시 분기 vs 매핑 테이블 — 필드별 normalize 함수 차이로 SSOT 루프 derive 불가 시 명시 분기 채택",
+      "description": "PII SSOT(`APPLICATION_PII_SNAPSHOT_FIELDS`)를 도입해도 encrypt 헬퍼는 필드별 normalize 함수가 다르면(name → trim+length, email → format check, address → trim+length, phone → digits, birthDate → calendar validation) 단일 루프로 derive 불가. CANDID-034에서 5쌍 명시 분기(60줄) 채택 — 60줄 = 5필드 × 12줄. 대안: `Record<Field, NormalizeFn>` 매핑 테이블 + 단일 루프 리팩토링은 신규 PII 필드 추가 비용 절감하나 필드별 정밀 normalize 검증 분리가 어려워짐. 현재는 *런타임 가드(assertShape)와 직렬화 strip*에서 SSOT 가치가 발휘되고, encrypt 헬퍼는 명시 분기가 더 명료.",
+      "impact": "medium",
+      "tags": [
+        "pii",
+        "ssot",
+        "refactor",
+        "encrypt-helper",
+        "normalize",
+        "trade-off"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T23:45:00+09:00",
+      "updatedAt": "2026-05-17T23:45:00+09:00"
+    },
+    {
+      "id": "L-021",
+      "taskId": "CANDID-034",
+      "category": "architecture",
+      "title": "piiExtension 단일 객체 vs 모델별 분리 변곡점 — 3+ 모델 진입 시 composePiiExtensions 팩토리 고려",
+      "description": "Prisma `$extends(piiExtension)`을 단일 호출로 유지하는 것이 가독성 우위이나, User+Application 통합 시 piiExtension 객체가 ~135줄로 비대화. 3+ 모델 추가 시점에 `composePiiExtensions([userExt, applicationExt, ...])` 팩토리 패턴으로 분리하는 것이 유지보수성 ↑. 현재 2 모델(User + Application)까지는 통합 유지가 합리적. 분리 시점 결정 기준: (1) piiExtension 객체 200줄+ (2) 모델별 wiring 책임 격리 필요 (3) 단위 테스트가 piiExtension 구조에 의존하는 케이스 다수.",
+      "impact": "low",
+      "tags": [
+        "prisma",
+        "extension",
+        "architecture",
+        "scaling",
+        "refactor"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T23:45:00+09:00",
+      "updatedAt": "2026-05-17T23:45:00+09:00"
     }
   ]
 }

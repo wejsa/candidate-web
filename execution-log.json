@@ -166,5 +166,26 @@
       "added": 87
     },
     "timestamp": "2026-05-17T23:40:00+09:00"
+  },
+  {
+    "event": "retro_completed",
+    "taskId": "CANDID-034",
+    "reportPath": "docs/retro/CANDID-034-retro.md",
+    "lessonsLearned": {
+      "added": [
+        "L-019",
+        "L-020",
+        "L-021"
+      ],
+      "appliedCountIncreased": [
+        "L-006",
+        "L-007",
+        "L-017"
+      ],
+      "descriptionUpdated": [
+        "L-010"
+      ]
+    },
+    "timestamp": "2026-05-17T23:45:00+09:00"
   }
 ]
