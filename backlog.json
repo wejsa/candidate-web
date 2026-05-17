@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "lastTaskNumber": 34,
+    "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 63,
+    "version": 64,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T23:40:00+09:00"
+    "updatedAt": "2026-05-17T23:50:00+09:00"
   },
   "summary": {
-    "total": 34,
+    "total": 35,
     "done": 9,
     "inProgress": 0,
     "review": 0,
-    "todo": 25
+    "todo": 26
   },
   "phases": {
     "1": {
@@ -891,6 +891,26 @@
       ],
       "currentStep": 4,
       "completedAt": "2026-05-17T23:39:17+09:00"
+    },
+    "CANDID-035": {
+      "id": "CANDID-035",
+      "title": "CANDID-005 FU2: Application PII snapshot 통합 테스트 + L-007 nested write 회귀 차단",
+      "status": "todo",
+      "type": "chore",
+      "priority": "high",
+      "phase": 1,
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": 7200,
+      "lockedFiles": [],
+      "dependencies": [
+        "CANDID-034",
+        "CANDID-005"
+      ],
+      "createdAt": "2026-05-17T23:50:00+09:00",
+      "updatedAt": "2026-05-17T23:50:00+09:00",
+      "specFile": "docs/retro/CANDID-034-retro.md",
+      "description": "CANDID-034 (CANDID-005 FU1) wiring 완료 후속 — 실제 PrismaClient($extends(piiExtension)) + 실 PostgreSQL DB 통합 테스트로 회귀 차단. CANDID-032 패턴 미러(CANDID-008 FU3). 검증 대상: (1) prisma.application.create/update/upsert/updateMany/createMany 5경로에서 string 평문 입력 시 query.application 후크가 throw하는지, (2) prisma.application.findX 결과가 piiExtension result wiring으로 5쌍 *Snapshot 컬럼을 평문 string으로 자동 복호화하는지, (3) **L-007 nested write 회귀** — `prisma.user.update({ data: { applications: { create: { applicantNameSnapshot: '평문' } } } })`가 top-level user.update 후크만 발동하고 nested application.create는 미발동 → 평문 BYTEA 저장 가능 (docstring 명시된 한계, FU2에서 정확한 동작 단정 + 우회 방지 컨벤션 도출), (4) 5 compute 함수의 needs 시그니처에 *SnapshotKeyVersion 필드명 정적 단정 (M002 보강 — piiExtension internal 구조 회귀 가드), (5) (선택) testcontainers/pg 또는 docker-compose db로 마이그레이션 SQL apply 후 컬럼명 검증 (Step 1 schema rename 회귀). 자세한 내용 docs/retro/CANDID-034-retro.md §3 A1 / §2.4 H001 참조."
     }
   }
 }
