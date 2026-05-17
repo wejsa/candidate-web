@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 2,
-    "updatedAt": "2026-05-14T00:00:00+09:00",
+    "version": 3,
+    "updatedAt": "2026-05-17T00:00:00+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -118,12 +118,12 @@
       "taskId": "CANDID-031",
       "category": "process",
       "title": "Plan 단계의 라인 추정 정확도는 review fix 비용 사전 반영 + step 책임 단순화에서 온다",
-      "description": "CANDID-008의 추정 오차(+21~72%)는 CANDID-031에서 -2~-13%로 크게 개선됐다. 사유: (1) Step 2 estimatedLines에 'review fix 4건 번들'을 사전 반영 (216 LOC 실제 → 264 LOC 수정 결과, 305 추정에서 -13%), (2) 각 step의 책임 경계를 정확히 1개 layer(D6/D7/D8)로 단순화. plan 단계에서 *review fix 1~2회 사이클의 추가 비용*을 예측하여 estimatedLines에 미리 반영하면 후반 step의 라인 오버런을 줄일 수 있다.",
+      "description": "CANDID-008의 추정 오차(+21~72%)는 CANDID-031에서 -2~-13%로 크게 개선됐다. 사유: (1) Step 2 estimatedLines에 'review fix 4건 번들'을 사전 반영 (216 LOC 실제 → 264 LOC 수정 결과, 305 추정에서 -13%), (2) 각 step의 책임 경계를 정확히 1개 layer(D6/D7/D8)로 단순화. plan 단계에서 *review fix 1~2회 사이클의 추가 비용*을 예측하여 estimatedLines에 미리 반영하면 후반 step의 라인 오버런을 줄일 수 있다. CANDID-004에서도 동일 패턴 적용 (추정 195 → 실제 176, -10%) — schema-only task에도 일관 효과.",
       "impact": "medium",
       "tags": ["planning", "estimation", "skill-plan", "review-cycle"],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-14T00:00:00+09:00",
-      "updatedAt": "2026-05-14T00:00:00+09:00"
+      "updatedAt": "2026-05-17T00:00:00+09:00"
     },
     {
       "id": "L-011",
@@ -136,6 +136,54 @@
       "appliedCount": 1,
       "createdAt": "2026-05-14T00:00:00+09:00",
       "updatedAt": "2026-05-14T00:00:00+09:00"
+    },
+    {
+      "id": "L-012",
+      "taskId": "CANDID-004",
+      "category": "process",
+      "title": "db-designer 백그라운드 호출 — plan 단계 메인 컨텍스트 토큰 절약 + 설계 보강",
+      "description": "skill-plan 섹션 3.0에서 agent-db-designer를 `run_in_background: true`로 호출하면 메인 컨텍스트는 spec 읽기/컨벤션 로딩에 집중하면서 동시에 별도 컨텍스트가 ERD/컬럼/인덱스를 자체 분석한다. CANDID-004에서 메인이 자체 설계 초안을 작성하는 동안 db-designer가 (1) QuestionType 2종→4종 확장 + optionsJson JSONB, (2) 추가 인덱스 `idx_job_postings_opens_at_status` 제안, (3) viewCount 동시성/seed 미결 사항 식별을 병렬 도출. 메인 컨텍스트는 결과 도착 후 ~10% diff만 머지하면 충분 → 총 plan 시간 단축 + 단독 메인보다 설계 풍부. 도메인 task plan 시 표준 적용 권장.",
+      "impact": "medium",
+      "tags": ["skill-plan", "subagent", "background-task", "design-analysis", "token-efficiency"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T00:00:00+09:00",
+      "updatedAt": "2026-05-17T00:00:00+09:00"
+    },
+    {
+      "id": "L-013",
+      "taskId": "CANDID-004",
+      "category": "architecture",
+      "title": "PostgreSQL 부분 인덱스 — 특정 status 필터링 쿼리에 size·성능 우위",
+      "description": "`CREATE INDEX ... ON tbl(...) WHERE status = 'OPEN'` 형태의 부분 인덱스는 (status, col) 일반 복합 인덱스보다 (1) index size 감소 (status=OPEN row만 인덱싱), (2) plan-time predicate matching 최적화로 성능 우위를 가진다. BR-JOB-02 `status='OPEN' AND opens_at<=now() AND (closes_at IS NULL OR closes_at>now())` 같은 \"특정 status에 한정된 조회\" 패턴의 표준 접근법. CANDID-004 plan에서는 일반 복합 인덱스로 시작하고 CANDID-013 EXPLAIN 결과에 따라 채택 결정 위임 (P1 action). 적용 대상은 *status 등 카디널리티 낮은 enum이 필터에 자주 등장*하는 쿼리.",
+      "impact": "medium",
+      "tags": ["postgresql", "partial-index", "performance", "indexing", "prisma"],
+      "appliedCount": 0,
+      "createdAt": "2026-05-17T00:00:00+09:00",
+      "updatedAt": "2026-05-17T00:00:00+09:00"
+    },
+    {
+      "id": "L-014",
+      "taskId": "CANDID-004",
+      "category": "architecture",
+      "title": "Enum 확장은 destructive — 초기 정의 시점에 사전 정의 비용이 최저",
+      "description": "PostgreSQL enum 값 추가는 `ALTER TYPE ... ADD VALUE`로 가능하지만 트랜잭션 내 사용 불가 등 제약이 있고, prisma 측 enum 정의 변경은 destructive migration으로 분류되어 L-001(COUNT>0 guard) 적용 대상이 된다. CANDID-004에서 QuestionType을 MVP 2종(SHORT_TEXT/LONG_TEXT) 대신 4종(+ SELECT/MULTI_SELECT) 사전 정의하여 추후 CANDID-005/015 시점 destructive migration을 회피했다. 적용 기준: (1) 도메인 모델링 시점에 *예상 가능한* 확장 값이 있으면 사전 도입, (2) 단순 텍스트 vs 구조화 데이터 같은 *유형 분기*는 enum+optional 컬럼(예: optionsJson)으로 미리 대비, (3) MVP 단순화 명목으로 미루지 않는다.",
+      "impact": "medium",
+      "tags": ["postgresql", "enum", "prisma", "migration", "destructive", "schema-design"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T00:00:00+09:00",
+      "updatedAt": "2026-05-17T00:00:00+09:00"
+    },
+    {
+      "id": "L-015",
+      "taskId": "CANDID-004",
+      "category": "architecture",
+      "title": "CASCADE FK 결정 시 reverse dependency graph 검토 필수",
+      "description": "`job_posting_questions ON DELETE CASCADE`는 부모(공고)-자식(질문) 생명주기 일치라는 단순 관점에서는 자연스럽지만, 향후 CANDID-005에서 `application_answers.question_id` FK가 추가되면 *질문 삭제 시 답변까지 동반 삭제*되어 GDPR 익명화 정책(BR-PII-03)과 audit_log 우회 경로가 될 위험이 있다. plan 단계에서 CASCADE를 결정할 때는 *현재 ERD뿐 아니라 향후 도입될 reverse reference(역방향 FK)*까지 그래프로 검토해야 한다. 해결책: (1) 자식 entity가 다른 도메인 entity의 reference 대상이 될 가능성이 있으면 RESTRICT를 기본, (2) 공고-질문 같이 *내부적 동반 자원*인 경우만 CASCADE, (3) 후속 task plan에서 reverse FK 정책을 명시 위임(R-항목으로 기록).",
+      "impact": "high",
+      "tags": ["foreign-key", "cascade", "schema-design", "gdpr", "audit", "prisma"],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T00:00:00+09:00",
+      "updatedAt": "2026-05-17T00:00:00+09:00"
     }
   ]
 }
