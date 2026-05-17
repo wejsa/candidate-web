@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 8,
+    "version": 9,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-17T22:11:41+09:00"
+    "updatedAt": "2026-05-17T23:40:00+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -41,7 +41,10 @@
         }
       ],
       "summary": "지원서 도메인 8 신규 테이블 + 1 보조(application_number_sequences) + 1 컬럼 변경(job_posting_questions.archived_at) + 6 enum + 17 인덱스. 3-step (3-3-2 분리) 모두 schema-only. L-015 R1 종결, L-013/L-014 적용. 1회 fixLoop (C001 — resume_files XOR vs SET NULL 충돌). 전체 +553 LOC. CANDID-015/018/019/022/023/026 다운스트림 언블록.",
-      "dependencies": ["CANDID-003", "CANDID-004"],
+      "dependencies": [
+        "CANDID-003",
+        "CANDID-004"
+      ],
       "specFile": "docs/sample-requirement.md",
       "followUpTasksRecommended": [
         "CANDID-005-FU1: Application PII snapshot AES-256-GCM extension wiring + 단위 테스트 (CANDID-008 패턴 미러)",
@@ -67,7 +70,9 @@
         }
       ],
       "summary": "공고 조회 도메인 3개 테이블 신규 정의. CANDID-005/013/014/015 다운스트림 언블록. CANDID-003 단일 PR 패턴 미러. L-010(라인 추정 정확도) 적용: 추정 195 vs 실제 176 LOC (-10%).",
-      "dependencies": ["CANDID-002"],
+      "dependencies": [
+        "CANDID-002"
+      ],
       "specFile": "docs/sample-requirement.md"
     },
     "CANDID-031": {
@@ -175,7 +180,13 @@
           ]
         }
       },
-      "fixesAppliedFromCANDID_008": ["D1", "D2", "D3", "D4", "D5"],
+      "fixesAppliedFromCANDID_008": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ],
       "note": "Step 2에서 누락된 lib/pii/mask.ts Date.UTC normalize도 본 PR에서 함께 적용 (CANDID-008 회고 검증). 5 fix 모두 의도대로 반영됨."
     },
     "CANDID-002": {
@@ -343,6 +354,61 @@
           "H007 통합 검증 부재 (사용자 검증)"
         ]
       }
+    },
+    "CANDID-034": {
+      "id": "CANDID-034",
+      "title": "CANDID-005 FU1: Application PII snapshot AES-256-GCM extension wiring + 단위 테스트",
+      "phase": 1,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-17T23:39:17+09:00",
+      "assignee": "jaese@hoji-20260517-224300",
+      "prs": [
+        {
+          "number": 14,
+          "title": "feat: CANDID-034 Step 1 - schema rename (key_version 컬럼명 일관화)",
+          "mergedAt": "2026-05-17T23:07:11+09:00",
+          "additions": 49,
+          "deletions": 20,
+          "note": "name/email key_version 2개 컬럼명을 `_snapshot_key_version` suffix로 통일. L-001 destructive guard 적용. 리뷰 CRITICAL 0, MAJOR 1, MINOR 4, INFO 9 — APPROVED (자기 PR COMMENT)."
+        },
+        {
+          "number": 15,
+          "title": "feat: CANDID-034 Step 2 - PII SSOT + Application encrypt 헬퍼 + 단위 테스트",
+          "mergedAt": "2026-05-17T23:19:44+09:00",
+          "additions": 511,
+          "deletions": 0,
+          "note": "lib/pii/fields.ts 신설(USER_PII_FIELDS + APPLICATION_PII_SNAPSHOT_FIELDS SSOT). normalizeName/Email/Address + encryptApplicationPiiSnapshotInput + assertApplicationPiiInputShape + 37 unit tests. 라인 511 (limit 450 강력 경고 범위). 리뷰 CRITICAL 0, MAJOR 2 (birthDate round-trip / email 경계 — Step 3에서 보강), MINOR 4, INFO 6 — APPROVED."
+        },
+        {
+          "number": 16,
+          "title": "feat: CANDID-034 Step 3 - piiExtension wiring 확장 (result.application + query.application)",
+          "mergedAt": "2026-05-17T23:29:29+09:00",
+          "additions": 291,
+          "deletions": 3,
+          "note": "5개 computeDecrypted* 명시 export(L-003) + piiExtension result.application 5필드 + query.application 5 op 후크. PR #15 MAJOR H001/H002 후속 보강 포함(birthDate round-trip + email lowercase + 경계 5/254). 18 신규 tests. L-007 nested write 한계 docstring 명시. 리뷰 CRITICAL 0, MAJOR 1 (L-007 — FU2 위임), MINOR 3, INFO 12 — APPROVED."
+        },
+        {
+          "number": 17,
+          "title": "feat: CANDID-034 Step 4 - mask 3건 + applicationPublic serializer + 단위 테스트 (마지막)",
+          "mergedAt": "2026-05-17T23:39:17+09:00",
+          "additions": 431,
+          "deletions": 3,
+          "note": "maskName/maskEmail/maskAddress 신규 + applicationPublicInputSchema(.strip fail-closed) + applicationPublicSchema.transform + toApplicationPublic(ZodError 안전망). 32 신규 tests (vitest 199 passed). L-006 3-layer defense 완성. 라인 추정 480 vs 실제 431 (-10%). 리뷰 CRITICAL 0, MAJOR 0 (가장 깨끗), MINOR 5 (모두 후속 위임), INFO 16 — APPROVED."
+        }
+      ],
+      "summary": "CANDID-005 FU1 wiring 완료. 4-step (schema rename → SSOT+헬퍼 → piiExtension → serializer) 모두 머지. lib/pii/fields.ts 신설(PII SSOT), lib/prisma/extends.ts 확장(5 normalize/encrypt/decrypt + assert + 5 compute + result.application + query.application 5 op), lib/pii/mask.ts 확장(maskName/Email/Address), lib/pii/serializer.ts 확장(applicationPublic*). 전체 +1282 / -26 LOC, 87 신규 unit tests (vitest 199 passed, 회귀 0). **L-006 3-layer defense 완성** (정적 D6 + 런타임 query 후크 + 직렬화 serializer). Step 1 fixLoop 0회, Step 2 review MAJOR 2건이 Step 3에서 후속 보강됨 — 양호한 사이클. 라인 추정 정확도: Step 1(40 vs 49 +22%), Step 2(380 vs 511 +35%), Step 3(220 vs 291 +32%), Step 4(480 vs 431 -10%) — L-010 추정 보정 필요(회고 항목).",
+      "dependencies": [
+        "CANDID-005",
+        "CANDID-008"
+      ],
+      "specFile": "docs/retro/CANDID-005-retro.md",
+      "followUpTasksRecommended": [
+        "CANDID-005-FU2 (P1): Application PII snapshot 통합 테스트 (실 PrismaClient + DB) + L-007 nested write 회귀 차단 + 5 query.application op trigger 검증",
+        "(micro) maskName/maskEmail 1글자 노출 정책 통일 + currentStage/result z.string() → enum 강화",
+        "(별도) docs/security/pii-masking-policy.md 신설 + _base/conventions/database.md '3-layer 체크리스트' 보강 + CLAUDE.md `to*Public` 의무 명시 (docs-impact 분석 권고)",
+        "(micro) surrogate pair/4-byte 이모지 회귀 케이스 + applicationPublicSchema reject 케이스 분리 (test 보강)"
+      ]
     }
   }
 }

@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 34,
     "projectPrefix": "CANDID",
-    "version": 61,
+    "version": 63,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T23:35:00+09:00"
+    "updatedAt": "2026-05-17T23:40:00+09:00"
   },
   "summary": {
     "total": 34,
-    "done": 8,
-    "inProgress": 1,
+    "done": 9,
+    "inProgress": 0,
     "review": 0,
     "todo": 25
   },
@@ -803,35 +803,23 @@
     "CANDID-034": {
       "id": "CANDID-034",
       "title": "CANDID-005 FU1: Application PII snapshot AES-256-GCM extension wiring + 단위 테스트",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260517-224300",
-      "assignedAt": "2026-05-17T23:35:00+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "lib/pii/mask.ts",
-        "lib/pii/serializer.ts",
-        "tests/lib/pii/mask.test.ts",
-        "tests/lib/pii/serializer.test.ts"
-      ],
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-005",
         "CANDID-008"
       ],
       "createdAt": "2026-05-17T22:40:00+09:00",
-      "updatedAt": "2026-05-17T23:35:00+09:00",
+      "updatedAt": "2026-05-17T23:40:00+09:00",
       "specFile": "docs/retro/CANDID-005-retro.md",
       "description": "CANDID-005 Step 1 PR #11에서 applications 테이블에 도입된 PII snapshot 컬럼 5쌍(NULLABLE Bytes @db.ByteA — 이름·연락처·생년월일·주소 등 지원 시점 스냅샷)에 AES-256-GCM 컬럼 암호화 wiring을 적용하고 단위 테스트를 추가한다. CANDID-008 패턴 미러: lib/prisma/extends.ts의 encryptPiiWithVersion() / decryptPiiField() 패턴을 Application 모델에 적용 + Prisma $extends result.compute로 마스킹 직렬화 + 런타임 가드(assertApplicationPiiInputShape) + write 시 정규화. PII_FIELDS SSOT (lib/pii/fields.ts) 갱신 동반. L-006(3-layer defense-in-depth) + L-007(nested write 우회 주의) + L-017(PII snapshot vs 실시간 PII 분리) 적용. 자세한 내용 docs/retro/CANDID-005-retro.md §3 A1 / §2.4 D3 참조.",
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 17,
-        "fixLoopCount": 0,
-        "autoChainArgs": "17 --auto-fix",
-        "updatedAt": "2026-05-17T23:35:00+09:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
@@ -886,10 +874,10 @@
           "number": 4,
           "title": "mask 3건 + applicationPublic serializer + 단위 테스트",
           "description": "lib/pii/mask.ts에 maskName/maskEmail/maskAddress 신규 (maskPhone/maskBirthDate 재사용). lib/pii/serializer.ts에 applicationPublicInputSchema(.strip) + applicationPublicSchema(.transform mask 5건 + Date→ISO) + toApplicationPublic(ZodError 안전망). 단위 테스트: mask 3건 happy/null/edge, toApplicationPublic 마스킹 + key_version 5건 strip 회귀, ZodError path 노출.",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-034-step4",
           "prNumber": 17,
-          "mergedAt": null,
+          "mergedAt": "2026-05-17T23:39:17+09:00",
           "files": [
             "lib/pii/mask.ts",
             "lib/pii/serializer.ts",
@@ -901,7 +889,8 @@
           "prLineLimit": 550
         }
       ],
-      "currentStep": 4
+      "currentStep": 4,
+      "completedAt": "2026-05-17T23:39:17+09:00"
     }
   }
 }
