@@ -103,6 +103,55 @@ ALTER TABLE "users"
 
 ---
 
+## CHECK 제약과 NULL semantics
+
+CHECK 제약은 표현식 결과가 **FALSE일 때만** 위반으로 차단한다. `NULL`이 포함된 표현식은 종종 `UNKNOWN`으로 평가되어 *통과*하므로, NULL 가능 컬럼에 대해 boolean 연산자(`XOR`, `AND`, `OR`)를 직접 사용하면 의도와 다른 false positive가 발생한다.
+
+### 안티패턴 (PostgreSQL)
+
+```sql
+-- 의도: "(a, b) 중 정확히 하나가 NULL"
+-- 결함: 둘 다 NULL이면 (NULL IS NULL XOR NULL IS NULL) = (TRUE XOR TRUE) = FALSE
+--        그러나 'CHECK (a IS NULL XOR b IS NULL)'을 그냥 본 NULL XOR 형식은
+--        NULL 비교 의도가 모호하면 UNKNOWN 평가 경로로 빠질 수 있음.
+ALTER TABLE resume_files
+  ADD CONSTRAINT ck_resume_files_attachment_xor
+  CHECK (existing_resume_id IS NULL XOR uploaded_path IS NULL);
+```
+
+### 안전 패턴
+
+```sql
+-- 옵션 1: "정확히 하나가 NOT NULL" — boolean XOR 효과를 비교 연산으로 표현
+ALTER TABLE resume_files
+  ADD CONSTRAINT ck_resume_files_attachment_xor
+  CHECK ((existing_resume_id IS NULL) <> (uploaded_path IS NULL));
+
+-- 옵션 2: "최대 한 컬럼만 NOT NULL" — num_nonnulls 사용 (PostgreSQL 9.5+)
+ALTER TABLE resume_files
+  ADD CONSTRAINT ck_resume_files_attachment_at_most_one
+  CHECK (num_nonnulls(existing_resume_id, uploaded_path) <= 1);
+
+-- 옵션 3: "정확히 하나만 NOT NULL" — num_nonnulls = 1
+ALTER TABLE resume_files
+  ADD CONSTRAINT ck_resume_files_attachment_exactly_one
+  CHECK (num_nonnulls(existing_resume_id, uploaded_path) = 1);
+```
+
+### 리뷰 체크리스트
+
+| 항목 | 확인 |
+|------|------|
+| CHECK 표현식에 NULL 가능 컬럼이 있는가 | `IS NULL` / `IS NOT NULL` 명시 또는 `num_nonnulls(..)` 사용 |
+| boolean 연산자(`XOR`, `AND`, `OR`)를 직접 사용했는가 | 비교 연산자(`<>`, `=`) 또는 `num_nonnulls(..)`로 대체 검토 |
+| 의도 문구(주석)가 SQL 의미와 일치하는가 | "XOR" 자연어 ≠ SQL `XOR` 연산자 — `at most one` / `exactly one` / `not both` 등 정확히 명시 |
+
+**MySQL 8.0+**는 `XOR` 키워드를 지원하나 동일한 NULL semantics 함정이 있다. `num_nonnulls`는 미지원이라 `((a IS NULL) <> (b IS NULL))` 형태로 작성한다.
+
+> **출처**: CANDID-005 회고 (docs/retro/CANDID-005-retro.md, L-016) — resume_files CHECK 제약 'XOR' 의미 충돌이 Step 2 PR #12 C001의 원인.
+
+---
+
 ## 민감 컬럼(PII) 메타데이터는 SSOT 상수에서 derive
 
 PII로 분류되는 컬럼명(예: `phone`, `birthDate`)은 모듈 곳곳에 *하드코딩*되는 경향이 있다 — 암호화 헬퍼, 마스킹 직렬화, write 런타임 가드, 응답 schema 등. 신규 PII 컬럼이 추가될 때 한 위치만 갱신하고 다른 위치를 누락하면 누설 위험이 발생한다.

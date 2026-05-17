@@ -1,0 +1,19 @@
+[
+  {
+    "event": "retro_completed",
+    "taskId": "CANDID-005",
+    "reportPath": "docs/retro/CANDID-005-retro.md",
+    "lessonsLearned": {
+      "added": ["L-016", "L-017", "L-018"],
+      "appliedCountIncreased": ["L-010", "L-013", "L-014", "L-015"]
+    },
+    "timestamp": "2026-05-17T22:35:00+09:00"
+  },
+  {
+    "event": "checklist_updated",
+    "file": ".claude/domains/_base/conventions/database.md",
+    "section": "CHECK 제약과 NULL semantics",
+    "source": "CANDID-005-retro L-016 / A5",
+    "timestamp": "2026-05-17T22:35:00+09:00"
+  }
+]

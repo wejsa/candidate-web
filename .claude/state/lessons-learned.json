@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 3,
-    "updatedAt": "2026-05-17T00:00:00+09:00",
+    "version": 4,
+    "updatedAt": "2026-05-17T22:35:00+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -12,7 +12,13 @@
       "title": "Destructive 마이그레이션 SQL에 COUNT(*) > 0 guard 동반",
       "description": "DROP COLUMN / TYPE 변경 등 destructive ALTER 마이그레이션은 SQL 본문 상단에 `DO $$ BEGIN IF (SELECT COUNT(*) FROM <table>) > 0 THEN RAISE EXCEPTION '...' END $$;` guard를 동반해야 한다. `prisma migrate deploy`는 환경을 구분하지 않으므로 dev 주석만으로는 운영 적용 차단에 부족하다. _base/conventions/database.md에 패턴 반영됨.",
       "impact": "high",
-      "tags": ["migration", "postgres", "destructive", "guard", "operational-safety"],
+      "tags": [
+        "migration",
+        "postgres",
+        "destructive",
+        "guard",
+        "operational-safety"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-12T21:30:00+09:00",
       "updatedAt": "2026-05-12T21:30:00+09:00"
@@ -24,7 +30,12 @@
       "title": "모듈 스코프 캐시는 __resetCachedXForTesting helper 동반 export",
       "description": "`getEnv()`, `getDefaultKey()`처럼 module-level 변수에 캐싱하는 함수는 처음부터 testing-only reset helper를 export해야 한다. CANDID-008에서 aes-gcm.ts는 `__resetCachedKeyForTesting()`을 가졌으나 env.ts의 cached 변수는 reset 없음 → 키 회전 회귀 테스트 false-positive 위험. 캐시 도입 시점에 함께 추가가 비용이 가장 낮다.",
       "impact": "medium",
-      "tags": ["testing", "cache", "module-state", "regression"],
+      "tags": [
+        "testing",
+        "cache",
+        "module-state",
+        "regression"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-12T21:30:00+09:00",
       "updatedAt": "2026-05-12T21:30:00+09:00"
@@ -36,7 +47,12 @@
       "title": "Prisma $extends result.compute는 명시 export하여 단위 테스트",
       "description": "`Prisma.defineExtension`의 반환 구조는 Prisma 버전에 따라 wrap될 수 있어 `(piiExtension as any).result?.user?.phone?.compute` 같은 접근은 깨질 수 있다. result extension의 compute 로직은 별도 named function으로 추출 후 export하고, 단위 테스트는 명시 함수를 직접 호출한다. extension 등록 자체는 별도 통합 테스트(testcontainer/sqlite)로 검증한다. CANDID-031 D8(`assertUserPiiInputShape`)에서도 동일 패턴 재적용 — query 후크 가드 로직을 named export로 분리하여 14 케이스 단위 테스트가 extension 구조에 의존하지 않음.",
       "impact": "high",
-      "tags": ["prisma", "extends", "testing", "unit-test-design"],
+      "tags": [
+        "prisma",
+        "extends",
+        "testing",
+        "unit-test-design"
+      ],
       "appliedCount": 2,
       "createdAt": "2026-05-12T21:30:00+09:00",
       "updatedAt": "2026-05-14T00:00:00+09:00"
@@ -48,7 +64,12 @@
       "title": "Self-PR + CRITICAL=0 + MAJOR 다수 → 다음 Step PR에 fix 번들",
       "description": "Self-PR이면 framework가 자동 APPROVE 처리하므로 MAJORs는 deferred된다. 다음 step PR commit message에 'review MAJOR N건 fix 포함 (H001/.../M001)' 명시로 follow-up 추적 가능. 마지막 step에서 발견된 MAJORs는 별도 follow-up task(FU1~FUN)로 backlog 등록 필요. CANDID-002/CANDID-008/CANDID-031에서 검증된 precedent — 단 CANDID-031 Step 2에서는 CRITICAL 발견 시 *동일 PR fix loop*(L-009)가 더 빠른 사이클로 검증됨.",
       "impact": "high",
-      "tags": ["workflow", "review", "follow-up", "self-pr"],
+      "tags": [
+        "workflow",
+        "review",
+        "follow-up",
+        "self-pr"
+      ],
       "appliedCount": 2,
       "createdAt": "2026-05-12T21:30:00+09:00",
       "updatedAt": "2026-05-14T00:00:00+09:00"
@@ -60,7 +81,12 @@
       "title": "Coverage exclude는 wiring 코드를 숨겨 100% 통계 안전성 오인",
       "description": "`vitest.config.ts` `coverage.exclude`에서 boot/wiring 모듈(`lib/env.ts`, `lib/prisma.ts`)을 제외하면 100% 커버리지 통계가 실제 통합 안전성을 보장하지 않는다. CANDID-008에서 `prisma.$extends(piiExtension)` 라인이 100% 통계에서 빠진 채 단위 테스트만 100% 도달. exclude 사유를 주석화하고 별도 smoke test(예: `prisma + basePrisma export 검증` 1라인 테스트)를 동반한다.",
       "impact": "medium",
-      "tags": ["coverage", "testing", "vitest", "integration-test"],
+      "tags": [
+        "coverage",
+        "testing",
+        "vitest",
+        "integration-test"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-12T21:30:00+09:00",
       "updatedAt": "2026-05-12T21:30:00+09:00"
@@ -72,7 +98,14 @@
       "title": "PII 같은 민감 컬럼은 3-layer defense-in-depth (정적 + 직렬화 + 런타임)로 보호",
       "description": "단일 보호막(헬퍼 호출 의무)에 의존하면 우회 경로(raw query, 직접 직렬화, string 평문 전달)가 노출된다. CANDID-031은 D6(ESLint `no-restricted-syntax` $queryRaw 정적 가드) + D7(zod `userPublicSchema.transform()` 직렬화 진입점 + fail-closed strip) + D8(`piiExtension.query.user.*` 런타임 가드 + `assertUserPiiInputShape` named export) 3-layer를 도입하여 각 계층의 우회 가능 경로를 다음 계층이 차단한다. 각 layer는 *독립 회귀 가드*를 가져야 하며, 책임 경계가 명확해야 false positive 없이 동작한다.",
       "impact": "high",
-      "tags": ["security", "pii", "defense-in-depth", "eslint", "zod", "prisma-extension"],
+      "tags": [
+        "security",
+        "pii",
+        "defense-in-depth",
+        "eslint",
+        "zod",
+        "prisma-extension"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-14T00:00:00+09:00",
       "updatedAt": "2026-05-14T00:00:00+09:00"
@@ -84,7 +117,14 @@
       "title": "Prisma `query.{model}.{op}` 후크는 top-level write only — nested write 우회 가능",
       "description": "`prisma.user.create(...)` 직접 호출은 `query.user.create` 후크를 trigger하지만, `prisma.authProvider.create({ data: { user: { create: {...} } } })` 같은 *역방향 관계를 통한 nested User 생성*은 trigger되지 않는다. defense-in-depth 설계 시 plan 단계에서 *호출 표면 매트릭스*(top-level / nested / raw)를 인식하고, child 모델의 query 후크도 동시에 가드하거나 result extension의 needs/select 차원에서 보강해야 한다. CANDID-031 D8에서 PR #9 리뷰 시점에 domain/security 양쪽에서 동시 지적됨 — plan 단계 체크리스트에 'ORM extension hook coverage' 항목 추가 권장.",
       "impact": "high",
-      "tags": ["prisma", "extension", "query-hook", "nested-write", "defense-in-depth", "security"],
+      "tags": [
+        "prisma",
+        "extension",
+        "query-hook",
+        "nested-write",
+        "defense-in-depth",
+        "security"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-14T00:00:00+09:00",
       "updatedAt": "2026-05-14T00:00:00+09:00"
@@ -96,7 +136,12 @@
       "title": "zod transform schema의 input 타입은 InputSchema에 anchor",
       "description": "분리된 InputSchema(`userPublicInputSchema`)가 있으면 input 타입은 `z.infer<typeof userPublicInputSchema>`로 anchor한다. `z.input<typeof transformSchema>`는 컴파일은 통과하나 InputSchema 분리의 의도를 무효화하고, 향후 transform이 추가되면 input contract가 흔들린다. CANDID-031 PR #8 1차 리뷰에서 도메인 reviewer가 발견(C001) → skill-fix 1회차로 즉시 수정. 본 패턴은 zod로 input/output을 명시 분리하는 모든 schema에 적용된다.",
       "impact": "medium",
-      "tags": ["zod", "typescript", "type-anchor", "schema-design"],
+      "tags": [
+        "zod",
+        "typescript",
+        "type-anchor",
+        "schema-design"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-14T00:00:00+09:00",
       "updatedAt": "2026-05-14T00:00:00+09:00"
@@ -108,7 +153,12 @@
       "title": "skill-fix 동일 PR 내 fix loop은 다음 step PR 번들보다 빠른 사이클",
       "description": "CRITICAL 발견 시 같은 PR 브랜치에서 fix 적용 → 재리뷰. 이 과정에서 MAJOR/MINOR/INFO 다수도 함께 번들 처리 가능 → 추가 PR 비용 없이 단일 사이클에서 정리된다. CANDID-031 Step 2(PR #8)에서 CRITICAL 1건 + MAJOR 4건 + 테스트 3건 추가를 fix loop 1회차로 일괄 해결 (~7분 추가). CANDID-008의 '다음 step PR에 fix 번들'(L-004) 패턴은 마지막 step에서 deferred MAJOR가 누적되는 약점이 있는데, fix loop는 즉시 해결로 누적 부채를 줄인다. `--auto-fix` 흐름이 표준 워크플로우.",
       "impact": "high",
-      "tags": ["workflow", "skill-fix", "auto-fix", "review-loop"],
+      "tags": [
+        "workflow",
+        "skill-fix",
+        "auto-fix",
+        "review-loop"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-14T00:00:00+09:00",
       "updatedAt": "2026-05-14T00:00:00+09:00"
@@ -120,10 +170,15 @@
       "title": "Plan 단계의 라인 추정 정확도는 review fix 비용 사전 반영 + step 책임 단순화에서 온다",
       "description": "CANDID-008의 추정 오차(+21~72%)는 CANDID-031에서 -2~-13%로 크게 개선됐다. 사유: (1) Step 2 estimatedLines에 'review fix 4건 번들'을 사전 반영 (216 LOC 실제 → 264 LOC 수정 결과, 305 추정에서 -13%), (2) 각 step의 책임 경계를 정확히 1개 layer(D6/D7/D8)로 단순화. plan 단계에서 *review fix 1~2회 사이클의 추가 비용*을 예측하여 estimatedLines에 미리 반영하면 후반 step의 라인 오버런을 줄일 수 있다. CANDID-004에서도 동일 패턴 적용 (추정 195 → 실제 176, -10%) — schema-only task에도 일관 효과.",
       "impact": "medium",
-      "tags": ["planning", "estimation", "skill-plan", "review-cycle"],
-      "appliedCount": 2,
+      "tags": [
+        "planning",
+        "estimation",
+        "skill-plan",
+        "review-cycle"
+      ],
+      "appliedCount": 3,
       "createdAt": "2026-05-14T00:00:00+09:00",
-      "updatedAt": "2026-05-17T00:00:00+09:00"
+      "updatedAt": "2026-05-17T22:35:00+09:00"
     },
     {
       "id": "L-011",
@@ -132,7 +187,13 @@
       "title": "ESLint AST selector는 직접 access 패턴만 커버 — alias/computed access는 LLM 리뷰 영역",
       "description": "`CallExpression[callee.property.name='X']` 및 `TaggedTemplateExpression[tag.property.name='X']` selector는 `prisma.X(...)` 직접 호출 패턴만 trigger한다. `const fn = prisma.X; fn(...)` (alias) 또는 `prisma['X'](...)` (computed property)는 우회 가능. MemberExpression 단위로 광역 차단하면 정상 alias 정의도 막혀 false positive 발생 → 책임 경계 분리가 합리적: 정적 가드는 실수 방지 + LLM 리뷰는 의도적 회피 검토 + 런타임 가드(`assertUserPiiInputShape`)는 마지막 방어선. 정적 가드 자체의 회귀를 막으려면 `vitest`에서 `ESLint.lintText()` 직접 호출하는 메타 테스트가 필요.",
       "impact": "medium",
-      "tags": ["eslint", "ast", "no-restricted-syntax", "static-analysis", "limitation"],
+      "tags": [
+        "eslint",
+        "ast",
+        "no-restricted-syntax",
+        "static-analysis",
+        "limitation"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-14T00:00:00+09:00",
       "updatedAt": "2026-05-14T00:00:00+09:00"
@@ -144,7 +205,13 @@
       "title": "db-designer 백그라운드 호출 — plan 단계 메인 컨텍스트 토큰 절약 + 설계 보강",
       "description": "skill-plan 섹션 3.0에서 agent-db-designer를 `run_in_background: true`로 호출하면 메인 컨텍스트는 spec 읽기/컨벤션 로딩에 집중하면서 동시에 별도 컨텍스트가 ERD/컬럼/인덱스를 자체 분석한다. CANDID-004에서 메인이 자체 설계 초안을 작성하는 동안 db-designer가 (1) QuestionType 2종→4종 확장 + optionsJson JSONB, (2) 추가 인덱스 `idx_job_postings_opens_at_status` 제안, (3) viewCount 동시성/seed 미결 사항 식별을 병렬 도출. 메인 컨텍스트는 결과 도착 후 ~10% diff만 머지하면 충분 → 총 plan 시간 단축 + 단독 메인보다 설계 풍부. 도메인 task plan 시 표준 적용 권장.",
       "impact": "medium",
-      "tags": ["skill-plan", "subagent", "background-task", "design-analysis", "token-efficiency"],
+      "tags": [
+        "skill-plan",
+        "subagent",
+        "background-task",
+        "design-analysis",
+        "token-efficiency"
+      ],
       "appliedCount": 1,
       "createdAt": "2026-05-17T00:00:00+09:00",
       "updatedAt": "2026-05-17T00:00:00+09:00"
@@ -156,10 +223,16 @@
       "title": "PostgreSQL 부분 인덱스 — 특정 status 필터링 쿼리에 size·성능 우위",
       "description": "`CREATE INDEX ... ON tbl(...) WHERE status = 'OPEN'` 형태의 부분 인덱스는 (status, col) 일반 복합 인덱스보다 (1) index size 감소 (status=OPEN row만 인덱싱), (2) plan-time predicate matching 최적화로 성능 우위를 가진다. BR-JOB-02 `status='OPEN' AND opens_at<=now() AND (closes_at IS NULL OR closes_at>now())` 같은 \"특정 status에 한정된 조회\" 패턴의 표준 접근법. CANDID-004 plan에서는 일반 복합 인덱스로 시작하고 CANDID-013 EXPLAIN 결과에 따라 채택 결정 위임 (P1 action). 적용 대상은 *status 등 카디널리티 낮은 enum이 필터에 자주 등장*하는 쿼리.",
       "impact": "medium",
-      "tags": ["postgresql", "partial-index", "performance", "indexing", "prisma"],
-      "appliedCount": 0,
+      "tags": [
+        "postgresql",
+        "partial-index",
+        "performance",
+        "indexing",
+        "prisma"
+      ],
+      "appliedCount": 1,
       "createdAt": "2026-05-17T00:00:00+09:00",
-      "updatedAt": "2026-05-17T00:00:00+09:00"
+      "updatedAt": "2026-05-17T22:35:00+09:00"
     },
     {
       "id": "L-014",
@@ -168,10 +241,17 @@
       "title": "Enum 확장은 destructive — 초기 정의 시점에 사전 정의 비용이 최저",
       "description": "PostgreSQL enum 값 추가는 `ALTER TYPE ... ADD VALUE`로 가능하지만 트랜잭션 내 사용 불가 등 제약이 있고, prisma 측 enum 정의 변경은 destructive migration으로 분류되어 L-001(COUNT>0 guard) 적용 대상이 된다. CANDID-004에서 QuestionType을 MVP 2종(SHORT_TEXT/LONG_TEXT) 대신 4종(+ SELECT/MULTI_SELECT) 사전 정의하여 추후 CANDID-005/015 시점 destructive migration을 회피했다. 적용 기준: (1) 도메인 모델링 시점에 *예상 가능한* 확장 값이 있으면 사전 도입, (2) 단순 텍스트 vs 구조화 데이터 같은 *유형 분기*는 enum+optional 컬럼(예: optionsJson)으로 미리 대비, (3) MVP 단순화 명목으로 미루지 않는다.",
       "impact": "medium",
-      "tags": ["postgresql", "enum", "prisma", "migration", "destructive", "schema-design"],
-      "appliedCount": 1,
+      "tags": [
+        "postgresql",
+        "enum",
+        "prisma",
+        "migration",
+        "destructive",
+        "schema-design"
+      ],
+      "appliedCount": 2,
       "createdAt": "2026-05-17T00:00:00+09:00",
-      "updatedAt": "2026-05-17T00:00:00+09:00"
+      "updatedAt": "2026-05-17T22:35:00+09:00"
     },
     {
       "id": "L-015",
@@ -180,10 +260,71 @@
       "title": "CASCADE FK 결정 시 reverse dependency graph 검토 필수",
       "description": "`job_posting_questions ON DELETE CASCADE`는 부모(공고)-자식(질문) 생명주기 일치라는 단순 관점에서는 자연스럽지만, 향후 CANDID-005에서 `application_answers.question_id` FK가 추가되면 *질문 삭제 시 답변까지 동반 삭제*되어 GDPR 익명화 정책(BR-PII-03)과 audit_log 우회 경로가 될 위험이 있다. plan 단계에서 CASCADE를 결정할 때는 *현재 ERD뿐 아니라 향후 도입될 reverse reference(역방향 FK)*까지 그래프로 검토해야 한다. 해결책: (1) 자식 entity가 다른 도메인 entity의 reference 대상이 될 가능성이 있으면 RESTRICT를 기본, (2) 공고-질문 같이 *내부적 동반 자원*인 경우만 CASCADE, (3) 후속 task plan에서 reverse FK 정책을 명시 위임(R-항목으로 기록).",
       "impact": "high",
-      "tags": ["foreign-key", "cascade", "schema-design", "gdpr", "audit", "prisma"],
-      "appliedCount": 1,
+      "tags": [
+        "foreign-key",
+        "cascade",
+        "schema-design",
+        "gdpr",
+        "audit",
+        "prisma"
+      ],
+      "appliedCount": 2,
       "createdAt": "2026-05-17T00:00:00+09:00",
-      "updatedAt": "2026-05-17T00:00:00+09:00"
+      "updatedAt": "2026-05-17T22:35:00+09:00"
+    },
+    {
+      "id": "L-016",
+      "taskId": "CANDID-005",
+      "category": "quality",
+      "title": "CHECK 제약 문구는 NULL semantics 명시 검증 — XOR/boolean 연산자 직접 사용은 NULL과 충돌",
+      "description": "PostgreSQL CHECK 제약에서 'CHECK (a IS NULL XOR b IS NULL)' 같은 표현은 의도가 '정확히 하나가 NULL'이지만, 둘 다 NULL일 때 결과가 FALSE가 아닌 UNKNOWN으로 평가되어 PostgreSQL이 통과시킴 → false positive(둘 다 NULL인 row도 통과). 안전한 표현: 'CHECK ((a IS NULL) <> (b IS NULL))' 또는 'at most one is NOT NULL' 의도라면 'CHECK (num_nonnulls(a, b) <= 1)'. CANDID-005 Step 2 PR #12 C001 — resume_files 첨부 XOR 제약 문구 수정 사례. 리뷰 체크리스트에 'CHECK 제약 NULL semantics 명시 검증' 항목 추가 권장.",
+      "impact": "high",
+      "tags": [
+        "check-constraint",
+        "postgres",
+        "null-semantics",
+        "ddl",
+        "review-checklist"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T22:35:00+09:00",
+      "updatedAt": "2026-05-17T22:35:00+09:00"
+    },
+    {
+      "id": "L-017",
+      "taskId": "CANDID-005",
+      "category": "architecture",
+      "title": "PII snapshot은 실시간 PII와 분리 — 암호화 wiring은 schema 골격과 분리 가능",
+      "description": "지원서/계약서 등 trigger 시점의 PII는 사용자 테이블의 실시간 PII와 분리해 해당 row에 snapshot 컬럼(예: applications.applicant_name_enc Bytes? @db.ByteA)으로 저장하여 사용자 PII 변경에 영향받지 않게 한다. AES-256-GCM 컬럼 암호화 wiring은 schema 골격(Phase 1)과 분리하여 후속 FU task에서 단위 테스트와 함께 도입(CANDID-008 패턴 미러). 신규 PII 컬럼 추가 시 _base/conventions/database.md PII SSOT 갱신 동반.",
+      "impact": "medium",
+      "tags": [
+        "pii",
+        "snapshot",
+        "encryption",
+        "schema-only",
+        "aes-gcm"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T22:35:00+09:00",
+      "updatedAt": "2026-05-17T22:35:00+09:00"
+    },
+    {
+      "id": "L-018",
+      "taskId": "CANDID-005",
+      "category": "architecture",
+      "title": "audit_logs 골격 도입 시 운영 정책 + 임계치 hook 필수 — 누적 후 ALTER 다운타임 회피",
+      "description": "audit_logs를 BIGSERIAL + 일반 테이블로 골격만 정의해 schema-only 단계 line 부담을 줄이는 패턴은 유효하지만, 반드시 후속 본격 도입 task(여기서는 CANDID-026)에 다음 5가지를 명문화한 hook을 백로그에 등록해야 한다: (1) 파티셔닝 SOP + 임계치(예: 1M rows), (2) GDPR 보존 기간(BR-PII-03 1년), (3) metadata_json sanitize allowlist, (4) actor_user_id FK 무결성 또는 CHECK 제약, (5) userAgent XSS escape. 누락 시 운영 단계에서 ALTER TABLE PARTITION BY 다운타임 비용 발생.",
+      "impact": "high",
+      "tags": [
+        "audit-log",
+        "partitioning",
+        "operational-policy",
+        "gdpr",
+        "hook-debt"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-17T22:35:00+09:00",
+      "updatedAt": "2026-05-17T22:35:00+09:00"
     }
   ]
 }
