@@ -98,5 +98,27 @@
     "additions": 291,
     "deletions": 3,
     "timestamp": "2026-05-17T23:28:00+09:00"
+  },
+  {
+    "event": "approved",
+    "taskId": "CANDID-034",
+    "stepNumber": 3,
+    "prNumber": 16,
+    "mode": "comment",
+    "severitySummary": {
+      "critical": 0,
+      "major": 1,
+      "minor": 3,
+      "info": 12
+    },
+    "timestamp": "2026-05-17T23:35:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-034",
+    "stepNumber": 3,
+    "prNumber": 16,
+    "mergeMethod": "squash",
+    "timestamp": "2026-05-17T23:30:00+09:00"
   }
 ]
