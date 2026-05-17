@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 34,
     "projectPrefix": "CANDID",
-    "version": 52,
+    "version": 54,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T23:05:00+09:00"
+    "updatedAt": "2026-05-17T23:08:00+09:00"
   },
   "summary": {
     "total": 34,
@@ -808,10 +808,9 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260517-224300",
-      "assignedAt": "2026-05-17T23:05:00+09:00",
+      "assignedAt": "2026-05-17T23:08:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "prisma/schema.prisma",
         "lib/pii/fields.ts",
         "lib/prisma/extends.ts",
         "lib/pii/mask.ts",
@@ -825,26 +824,26 @@
         "CANDID-008"
       ],
       "createdAt": "2026-05-17T22:40:00+09:00",
-      "updatedAt": "2026-05-17T23:05:00+09:00",
+      "updatedAt": "2026-05-17T23:08:00+09:00",
       "specFile": "docs/retro/CANDID-005-retro.md",
       "description": "CANDID-005 Step 1 PR #11에서 applications 테이블에 도입된 PII snapshot 컬럼 5쌍(NULLABLE Bytes @db.ByteA — 이름·연락처·생년월일·주소 등 지원 시점 스냅샷)에 AES-256-GCM 컬럼 암호화 wiring을 적용하고 단위 테스트를 추가한다. CANDID-008 패턴 미러: lib/prisma/extends.ts의 encryptPiiWithVersion() / decryptPiiField() 패턴을 Application 모델에 적용 + Prisma $extends result.compute로 마스킹 직렬화 + 런타임 가드(assertApplicationPiiInputShape) + write 시 정규화. PII_FIELDS SSOT (lib/pii/fields.ts) 갱신 동반. L-006(3-layer defense-in-depth) + L-007(nested write 우회 주의) + L-017(PII snapshot vs 실시간 PII 분리) 적용. 자세한 내용 docs/retro/CANDID-005-retro.md §3 A1 / §2.4 D3 참조.",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 14,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "14 --auto-fix",
-        "updatedAt": "2026-05-17T23:05:00+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-17T23:08:00+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "schema rename (key_version 컬럼명 일관화)",
           "description": "applicant_name/email_key_version 컬럼명을 `_snapshot_` 토큰 포함으로 통일. schema.prisma 2줄 @map 수정 + 필드명 Snapshot 접미 통일 + migration.sql (ALTER TABLE RENAME COLUMN × 2) + L-001 destructive guard (COUNT(*) > 0 RAISE EXCEPTION). dev 환경 applications 비어있음 가정.",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-034-step1",
           "prNumber": 14,
-          "mergedAt": null,
+          "mergedAt": "2026-05-17T23:07:11+09:00",
           "files": [
             "prisma/schema.prisma",
             "prisma/migrations/20260517223000_candid_034_step1_keyver_rename/migration.sql"
@@ -905,7 +904,7 @@
           "prLineLimit": 550
         }
       ],
-      "currentStep": 1
+      "currentStep": 2
     }
   }
 }
