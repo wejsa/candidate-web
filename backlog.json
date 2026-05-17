@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 40,
+    "version": 41,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T21:08:40+09:00"
+    "updatedAt": "2026-05-17T21:15:00+09:00"
   },
   "summary": {
     "total": 33,
@@ -213,22 +213,67 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260517-210840",
-      "assignedAt": "2026-05-17T21:08:40+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-17T21:15:00+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "prisma/schema.prisma",
+        "prisma/migrations/*_candid_005_step1_core_applications/migration.sql",
+        "prisma/migrations/*_candid_005_step2_attachments/migration.sql",
+        "prisma/migrations/*_candid_005_step3_history_audit/migration.sql"
+      ],
       "dependencies": [
         "CANDID-003",
         "CANDID-004"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
+      "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-17T21:08:40+09:00"
-      }
+        "updatedAt": "2026-05-17T21:15:00+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "핵심 지원서 + 6 enum + sequences (applications + drafts + application_number_sequences)",
+          "description": "schema.prisma에 6 enum(ApplicationResult/StageType/InterviewScheduleStatus/PortfolioLinkType/VirusScanStatus/AuditEventType) 일괄 정의 + applications(PII snapshot Bytes NULLABLE 포함) + application_drafts(payload_json JSONB + version 낙관적 락) + application_number_sequences 보조 테이블. 인덱스 5개 (uk_applications_active 부분 UNIQUE + uk_applications_number + idx_applications_user_submitted + idx_applications_posting_result + uk_drafts_user_posting + idx_drafts_last_saved). FK 정책: applications.user_id/job_posting_id RESTRICT, drafts.user_id CASCADE, drafts.job_posting_id RESTRICT. PII extension wiring은 CANDID-005-FU1로 분리.",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations/*_candid_005_step1_core_applications/migration.sql"
+          ],
+          "estimatedLines": 205,
+          "prLineLimit": 240
+        },
+        {
+          "number": 2,
+          "title": "첨부/응답 3 모델 + job_posting_questions.archived_at (L-015 R1 종결)",
+          "description": "application_answers + resume_files + portfolio_links 추가. job_posting_questions에 archived_at NULLABLE 컬럼 추가 (L-015 R1 종결 — application_answers.question_id RESTRICT + question soft-archive). CHECK XOR(application_id, draft_id) on resume_files + portfolio_links. 인덱스 6개 (uk_answers_app_question UNIQUE + idx_resume_files_* 3 부분 + idx_portfolio_* 2 부분). FK 정책: answers.application_id CASCADE/question_id RESTRICT, resume_files.application_id SET NULL/draft_id SET NULL/owner RESTRICT, portfolio_links CASCADE × 2.",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations/*_candid_005_step2_attachments/migration.sql"
+          ],
+          "estimatedLines": 215,
+          "prLineLimit": 240
+        },
+        {
+          "number": 3,
+          "title": "이력/면접/감사 3 모델 (audit_logs 골격)",
+          "description": "application_status_history (append-only, visible_to_candidate 플래그) + interview_schedules (ics_uid UNIQUE 멱등성) + audit_logs (CANDID-026 골격, FK 미설정, BIGSERIAL). 인덱스 5개. audit_logs 파티셔닝은 CANDID-026 위임.",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations/*_candid_005_step3_history_audit/migration.sql"
+          ],
+          "estimatedLines": 165,
+          "prLineLimit": 200
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-006": {
       "id": "CANDID-006",
