@@ -267,3 +267,201 @@ export function assertUserPiiInputShape(data: unknown): void {
     }
   }
 }
+
+// === CANDID-034 (CANDID-005 FU1) Step 2 — Application PII snapshot wiring ============
+//
+// applications 테이블의 PII snapshot 5쌍(BR-PII-03 익명화 보존)을 위한 normalize/encrypt
+// 헬퍼 + 런타임 가드. 본 Step은 헬퍼 + 단위 테스트만 신설하고, Prisma `$extends` 통합
+// (result.application + query.application 후크)은 Step 3에서 추가한다.
+//
+// SSOT: lib/pii/fields.ts의 APPLICATION_PII_SNAPSHOT_FIELDS. 신규 필드 추가 시
+// 본 파일의 헬퍼 시그니처도 함께 확장 (5필드 명시 normalize 경로 때문 — derive 불가).
+
+import {
+  APPLICATION_PII_SNAPSHOT_FIELDS,
+  type ApplicationPiiSnapshotField,
+} from '@/lib/pii/fields';
+
+/**
+ * 이름 정규화 — 양끝 trim + 1~100자 길이 검증. 잘못된 입력은 throw.
+ */
+export function normalizeName(input: string): string {
+  const trimmed = input.trim();
+  if (trimmed.length < 1 || trimmed.length > 100) {
+    throw new Error(`name must be 1~100 chars after trim (got ${trimmed.length})`);
+  }
+  return trimmed;
+}
+
+/**
+ * 이메일 정규화 — trim + lowercase + 단순 형식(local@domain.tld) + 3~254자 길이 검증.
+ * RFC 5321 SMTP 경로 길이 상한 254자. 형식 검증은 fail-fast 수준 — 정밀 검증은 zod 레이어 책임.
+ */
+export function normalizeEmail(input: string): string {
+  const trimmed = input.trim().toLowerCase();
+  if (trimmed.length < 3 || trimmed.length > 254) {
+    throw new Error(`email length must be 3~254 (got ${trimmed.length})`);
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    throw new Error('email must match basic format local@domain.tld');
+  }
+  return trimmed;
+}
+
+/**
+ * 주소 정규화 — 양끝 trim + 1~500자 길이 검증. 한국 도로명/지번/영문 주소 모두 수용 범위.
+ */
+export function normalizeAddress(input: string): string {
+  const trimmed = input.trim();
+  if (trimmed.length < 1 || trimmed.length > 500) {
+    throw new Error(`address must be 1~500 chars after trim (got ${trimmed.length})`);
+  }
+  return trimmed;
+}
+
+export type ApplicationPiiSnapshotPlaintextInput = {
+  applicantNameSnapshot?: string | null;
+  applicantEmailSnapshot?: string | null;
+  phoneSnapshot?: string | null;
+  birthDateSnapshot?: string | null;
+  addressSnapshot?: string | null;
+};
+
+export type ApplicationPiiSnapshotEncryptedInput = {
+  applicantNameSnapshot?: Buffer | null;
+  applicantNameSnapshotKeyVersion?: number;
+  applicantEmailSnapshot?: Buffer | null;
+  applicantEmailSnapshotKeyVersion?: number;
+  phoneSnapshot?: Buffer | null;
+  phoneSnapshotKeyVersion?: number;
+  birthDateSnapshot?: Buffer | null;
+  birthDateSnapshotKeyVersion?: number;
+  addressSnapshot?: Buffer | null;
+  addressSnapshotKeyVersion?: number;
+};
+
+/**
+ * Application PII snapshot 입력 암호화 헬퍼. 지원서 제출(CANDID-015 entry) 트랜잭션에서
+ * `prisma.application.create` 직전 호출하여 5쌍의 평문을 BYTEA + keyVersion으로 변환한다.
+ *
+ *   await prisma.application.create({
+ *     data: {
+ *       applicationNumber: '...', userId, jobPostingId, submittedAt: new Date(),
+ *       ...encryptApplicationPiiSnapshotInput({
+ *         applicantNameSnapshot: '홍길동',
+ *         applicantEmailSnapshot: 'foo@example.com',
+ *         phoneSnapshot: '010-1234-5678',
+ *         birthDateSnapshot: '1995-03-15',
+ *         addressSnapshot: '서울시 강남구 테헤란로 123',
+ *       }),
+ *     },
+ *   });
+ *
+ * - 필드 미명시 시 결과에도 포함되지 않아 partial update 지원 (`'X' in input` 검사).
+ * - `null` 전달 시 컬럼 NULL set, keyVersion은 결과 누락 (BYTEA NULL → keyVersion 의미 없음).
+ * - 각 필드별 정규화: name/email/address는 자체 normalize, phone은 normalizePhone 재사용,
+ *   birthDate는 normalizeBirthDate 재사용. 잘못된 평문은 throw — 호출자 측 zod 검증 권장.
+ * - 키 버전 atomic 결합 (L-006 / CANDID-030 D2 패턴) — encryptPiiWithVersion 사용.
+ */
+export function encryptApplicationPiiSnapshotInput(
+  input: ApplicationPiiSnapshotPlaintextInput,
+): ApplicationPiiSnapshotEncryptedInput {
+  const result: ApplicationPiiSnapshotEncryptedInput = {};
+
+  if ('applicantNameSnapshot' in input) {
+    if (input.applicantNameSnapshot === null || input.applicantNameSnapshot === undefined) {
+      result.applicantNameSnapshot = null;
+    } else {
+      const normalized = normalizeName(input.applicantNameSnapshot);
+      const { ciphertext, keyVersion } = encryptPiiWithVersion(normalized);
+      result.applicantNameSnapshot = ciphertext;
+      result.applicantNameSnapshotKeyVersion = keyVersion;
+    }
+  }
+
+  if ('applicantEmailSnapshot' in input) {
+    if (input.applicantEmailSnapshot === null || input.applicantEmailSnapshot === undefined) {
+      result.applicantEmailSnapshot = null;
+    } else {
+      const normalized = normalizeEmail(input.applicantEmailSnapshot);
+      const { ciphertext, keyVersion } = encryptPiiWithVersion(normalized);
+      result.applicantEmailSnapshot = ciphertext;
+      result.applicantEmailSnapshotKeyVersion = keyVersion;
+    }
+  }
+
+  if ('phoneSnapshot' in input) {
+    if (input.phoneSnapshot === null || input.phoneSnapshot === undefined) {
+      result.phoneSnapshot = null;
+    } else {
+      const normalized = normalizePhone(input.phoneSnapshot);
+      const { ciphertext, keyVersion } = encryptPiiWithVersion(normalized);
+      result.phoneSnapshot = ciphertext;
+      result.phoneSnapshotKeyVersion = keyVersion;
+    }
+  }
+
+  if ('birthDateSnapshot' in input) {
+    if (input.birthDateSnapshot === null || input.birthDateSnapshot === undefined) {
+      result.birthDateSnapshot = null;
+    } else {
+      const normalized = normalizeBirthDate(input.birthDateSnapshot);
+      const { ciphertext, keyVersion } = encryptPiiWithVersion(normalized);
+      result.birthDateSnapshot = ciphertext;
+      result.birthDateSnapshotKeyVersion = keyVersion;
+    }
+  }
+
+  if ('addressSnapshot' in input) {
+    if (input.addressSnapshot === null || input.addressSnapshot === undefined) {
+      result.addressSnapshot = null;
+    } else {
+      const normalized = normalizeAddress(input.addressSnapshot);
+      const { ciphertext, keyVersion } = encryptPiiWithVersion(normalized);
+      result.addressSnapshot = ciphertext;
+      result.addressSnapshotKeyVersion = keyVersion;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Raw query 등 $extends 우회 경로에서 Application PII snapshot Bytes → string 복호화.
+ * 일반 prisma.application.findX 경로는 piiExtension(Step 3 도입)이 자동 처리한다.
+ * 함수 본문은 decryptUserPiiField와 동일 — 의도 명시용 별칭.
+ */
+export const decryptApplicationPiiSnapshotField = decryptUserPiiField;
+
+function applicationPiiSnapshotViolationMessage(field: ApplicationPiiSnapshotField): string {
+  return (
+    `CANDID-034 Step 2 (D8 pattern): Application.${field} string plaintext input rejected. ` +
+    `Use encryptApplicationPiiSnapshotInput({ ${field} }) to encrypt before passing to ` +
+    `prisma.application create/update/upsert. For raw queries, call encryptPiiWithVersion() directly.`
+  );
+}
+
+/**
+ * Application write 입력에서 string 평문 PII가 발견되면 throw.
+ *
+ * 통과 케이스: `null` / `undefined` / `Buffer` / `Uint8Array` / 해당 필드 부재.
+ * 차단 케이스: 5필드 중 하나라도 `: 'string'` 또는 `: { set: 'string' }` (update wrapper).
+ *
+ * L-006 (3-layer defense) + L-007 (top-level write only — nested write는 Step 3 query.application
+ * 후크에서 처리하되 본 함수는 단위 테스트가 extension 내부 구조에 의존하지 않도록 명시 export).
+ * SSOT(APPLICATION_PII_SNAPSHOT_FIELDS) 기반 derive — 신규 필드 추가 시 본 함수 자동 인식.
+ */
+export function assertApplicationPiiInputShape(data: unknown): void {
+  if (data === null || data === undefined) return;
+  if (typeof data !== 'object') return;
+  const d = data as Record<string, unknown>;
+
+  for (const field of APPLICATION_PII_SNAPSHOT_FIELDS) {
+    if (field in d) {
+      const v = d[field];
+      if (typeof v === 'string' || isStringSetWrapper(v)) {
+        throw new Error(applicationPiiSnapshotViolationMessage(field));
+      }
+    }
+  }
+}
