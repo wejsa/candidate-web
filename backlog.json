@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 46,
+    "version": 47,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-17T22:03:23+09:00"
+    "updatedAt": "2026-05-17T22:10:00+09:00"
   },
   "summary": {
     "total": 33,
@@ -226,12 +226,12 @@
       "createdAt": "2026-05-12T18:22:05+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 13,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-17T22:03:23+09:00"
+        "autoChainArgs": "13 --auto-fix",
+        "updatedAt": "2026-05-17T22:10:00+09:00"
       },
       "steps": [
         {
@@ -271,12 +271,15 @@
           "number": 3,
           "title": "이력/면접/감사 3 모델 (audit_logs 골격)",
           "description": "application_status_history (append-only, visible_to_candidate 플래그) + interview_schedules (ics_uid UNIQUE 멱등성) + audit_logs (CANDID-026 골격, FK 미설정, BIGSERIAL). 인덱스 5개. audit_logs 파티셔닝은 CANDID-026 위임.",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-005-step3",
+          "prNumber": 13,
           "files": [
             "prisma/schema.prisma",
-            "prisma/migrations/*_candid_005_step3_history_audit/migration.sql"
+            "prisma/migrations/20260517220600_candid_005_step3_history_audit/migration.sql"
           ],
           "estimatedLines": 165,
+          "actualLines": 149,
           "prLineLimit": 200
         }
       ],
