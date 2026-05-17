@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 33,
     "projectPrefix": "CANDID",
-    "version": 39,
+    "version": 40,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-16T15:47:48+09:00"
+    "updatedAt": "2026-05-17T21:08:40+09:00"
   },
   "summary": {
     "total": 33,
     "done": 7,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 26
+    "todo": 25
   },
   "phases": {
     "1": {
@@ -208,15 +208,27 @@
       "id": "CANDID-005",
       "title": "DB 스키마: applications + drafts + answers + resume_files + portfolio_links + status_history + interview_schedules + audit_logs",
       "description": "지원서 도메인 8개 테이블. UNIQUE(user_id, job_posting_id) 활성 지원서 제약, application_drafts payload_json + version 낙관적 락, application_number 형식 A-YYYYMM-NNNNN.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 1,
+      "assignee": "jaese@hoji-20260517-210840",
+      "assignedAt": "2026-05-17T21:08:40+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-003",
         "CANDID-004"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-17T21:08:40+09:00"
+      }
     },
     "CANDID-006": {
       "id": "CANDID-006",
