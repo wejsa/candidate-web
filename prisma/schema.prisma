@@ -260,28 +260,28 @@ enum AuditEventType {
 }
 
 model Application {
-  id                          Int               @id @default(autoincrement())
-  applicationNumber           String            @unique @map("application_number") @db.VarChar(20) // BR-APP-05: A-YYYYMM-NNNNN
-  userId                      Int               @map("user_id")
-  jobPostingId                Int               @map("job_posting_id")
-  currentStage                StageType         @default(SUBMITTED) @map("current_stage")
-  result                      ApplicationResult @default(IN_PROGRESS)
-  submittedAt                 DateTime          @map("submitted_at")
-  withdrawnAt                 DateTime?         @map("withdrawn_at")
+  id                               Int               @id @default(autoincrement())
+  applicationNumber                String            @unique @map("application_number") @db.VarChar(20) // BR-APP-05: A-YYYYMM-NNNNN
+  userId                           Int               @map("user_id")
+  jobPostingId                     Int               @map("job_posting_id")
+  currentStage                     StageType         @default(SUBMITTED) @map("current_stage")
+  result                           ApplicationResult @default(IN_PROGRESS)
+  submittedAt                      DateTime          @map("submitted_at")
+  withdrawnAt                      DateTime?         @map("withdrawn_at")
   // PII snapshot (BR-PII-03 익명화 보존). CANDID-008 패턴 미러 — AES-256-GCM ciphertext.
   // 본 Step은 NULLABLE 컬럼만 정의. extension wiring/암복호화는 CANDID-005-FU1.
-  applicantNameSnapshot       Bytes?            @map("applicant_name_snapshot")
-  applicantNameKeyVersion     Int?              @default(1) @map("applicant_name_key_version") @db.SmallInt
-  applicantEmailSnapshot      Bytes?            @map("applicant_email_snapshot")
-  applicantEmailKeyVersion    Int?              @default(1) @map("applicant_email_key_version") @db.SmallInt
-  phoneSnapshot               Bytes?            @map("phone_snapshot")
-  phoneSnapshotKeyVersion     Int?              @default(1) @map("phone_snapshot_key_version") @db.SmallInt
-  birthDateSnapshot           Bytes?            @map("birth_date_snapshot")
-  birthDateSnapshotKeyVersion Int?              @default(1) @map("birth_date_snapshot_key_version") @db.SmallInt
-  addressSnapshot             Bytes?            @map("address_snapshot")
-  addressSnapshotKeyVersion   Int?              @default(1) @map("address_snapshot_key_version") @db.SmallInt
-  createdAt                   DateTime          @default(now()) @map("created_at")
-  updatedAt                   DateTime          @updatedAt @map("updated_at")
+  applicantNameSnapshot            Bytes?            @map("applicant_name_snapshot")
+  applicantNameSnapshotKeyVersion  Int?              @default(1) @map("applicant_name_snapshot_key_version") @db.SmallInt
+  applicantEmailSnapshot           Bytes?            @map("applicant_email_snapshot")
+  applicantEmailSnapshotKeyVersion Int?              @default(1) @map("applicant_email_snapshot_key_version") @db.SmallInt
+  phoneSnapshot                    Bytes?            @map("phone_snapshot")
+  phoneSnapshotKeyVersion          Int?              @default(1) @map("phone_snapshot_key_version") @db.SmallInt
+  birthDateSnapshot                Bytes?            @map("birth_date_snapshot")
+  birthDateSnapshotKeyVersion      Int?              @default(1) @map("birth_date_snapshot_key_version") @db.SmallInt
+  addressSnapshot                  Bytes?            @map("address_snapshot")
+  addressSnapshotKeyVersion        Int?              @default(1) @map("address_snapshot_key_version") @db.SmallInt
+  createdAt                        DateTime          @default(now()) @map("created_at")
+  updatedAt                        DateTime          @updatedAt @map("updated_at")
 
   user               User                       @relation(fields: [userId], references: [id], onDelete: Restrict)
   jobPosting         JobPosting                 @relation(fields: [jobPostingId], references: [id], onDelete: Restrict)
