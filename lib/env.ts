@@ -15,8 +15,17 @@ const envSchema = z.object({
       'DATABASE_URL contains placeholder — set actual credentials before startup',
     ),
 
-  JWT_ACCESS_SECRET: z.string().min(32).optional(),
-  JWT_REFRESH_SECRET: z.string().min(32).optional(),
+  // CANDID-006에서 required로 격상 (BR-AUTH-07) — JWT 시그니처 검증의 단일 진실원.
+  // HS512 알고리즘. `openssl rand -base64 48` 권장. Access/Refresh secret은 *분리* 필수
+  // (서로 다른 라이프사이클 + 누수 영향 격리).
+  JWT_ACCESS_SECRET: z.string().min(32),
+  JWT_REFRESH_SECRET: z.string().min(32),
+
+  // CANDID-006: TTL 환경 변수화 — 운영/스테이징 환경별 조정 가능.
+  // 기본: Access 30분(1800), Refresh 14일(1209600), 상태유지 미체크 시 1일(86400).
+  JWT_ACCESS_TTL_SEC: z.coerce.number().int().positive().default(1800),
+  JWT_REFRESH_TTL_SEC: z.coerce.number().int().positive().default(1209600),
+  JWT_REFRESH_TTL_SHORT_SEC: z.coerce.number().int().positive().default(86400),
 
   // CANDID-008에서 required로 격상 — 부팅 시 키 없으면 차단 (BR-PII-01).
   // `openssl rand -hex 32`로 생성. AES-256-GCM 키 (32 bytes).
