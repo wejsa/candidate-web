@@ -217,5 +217,26 @@
     "mergeMethod": "squash",
     "actualLines": 276,
     "timestamp": "2026-05-19T22:58:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-035",
+    "stepNumber": 2,
+    "prNumber": 19,
+    "branch": "feature/CANDID-035-step2",
+    "additions": 509,
+    "timestamp": "2026-05-19T23:10:00+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-035",
+    "stepNumber": 2,
+    "prNumber": 19,
+    "reviewState": "COMMENTED",
+    "critical": 0,
+    "major": 13,
+    "minor": 9,
+    "info": 7,
+    "timestamp": "2026-05-19T23:13:00+09:00"
   }
 ]
