@@ -268,5 +268,26 @@
     "minor": 8,
     "info": 7,
     "timestamp": "2026-05-19T23:28:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-035",
+    "stepNumber": 3,
+    "prNumber": 20,
+    "mergeMethod": "squash",
+    "actualLines": 181,
+    "timestamp": "2026-05-19T23:30:00+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-035",
+    "totalSteps": 3,
+    "totalAdditions": 966,
+    "totalDeletions": 10,
+    "vitest": {
+      "passed": 199,
+      "added": 0
+    },
+    "timestamp": "2026-05-19T23:30:00+09:00"
   }
 ]

@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 9,
+    "version": 10,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-17T23:40:00+09:00"
+    "updatedAt": "2026-05-19T23:30:00+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -408,6 +408,55 @@
         "(micro) maskName/maskEmail 1글자 노출 정책 통일 + currentStage/result z.string() → enum 강화",
         "(별도) docs/security/pii-masking-policy.md 신설 + _base/conventions/database.md '3-layer 체크리스트' 보강 + CLAUDE.md `to*Public` 의무 명시 (docs-impact 분석 권고)",
         "(micro) surrogate pair/4-byte 이모지 회귀 케이스 + applicationPublicSchema reject 케이스 분리 (test 보강)"
+      ]
+    },
+    "CANDID-035": {
+      "id": "CANDID-035",
+      "title": "CANDID-005 FU2: Application PII snapshot 통합 테스트 + L-007 nested write 회귀 차단",
+      "phase": 1,
+      "priority": "high",
+      "type": "chore",
+      "completedAt": "2026-05-19T23:30:00+09:00",
+      "assignee": "jaese@hoji-20260519-221104",
+      "prs": [
+        {
+          "number": 18,
+          "title": "feat: CANDID-035 Step 1 - 통합 테스트 인프라 셋업 + smoke",
+          "mergedAt": "2026-05-19T22:58:00+09:00",
+          "additions": 276,
+          "deletions": 0,
+          "note": "vitest.config.integration.ts 분리 runner + tests/integration/{setup,global-setup,helpers/{prisma,raw}}.ts 인프라 + prisma-smoke.test.ts 1건. docker-compose db 재사용 + ?schema=test_integration 분리. globalSetup migrate deploy. helpers/seed.ts는 Step 2로 위임(line-limit 차단 회피). 리뷰 CRITICAL 0, MAJOR 8, MINOR 9, INFO 2."
+        },
+        {
+          "number": 19,
+          "title": "feat: CANDID-035 Step 2 - 5 op throw + 5쌍 round-trip + needs satisfies + helpers/seed",
+          "mergedAt": "2026-05-19T23:15:00+09:00",
+          "additions": 509,
+          "deletions": 0,
+          "note": "V1 5경로 throw + happy BYTEA octet_length ≥ 29 + V2 5쌍 round-trip + null + V4 needs satisfies (compile+runtime). helpers/seed.ts + encryptApplicationSnapshotForPrisma (Buffer↔Uint8Array Exact 변환 SSOT). Step 1 review H005-H008 4건 동시 보강 (in-task self-correction L-019). 리뷰 CRITICAL 0, MAJOR 13, MINOR 9, INFO 7."
+        },
+        {
+          "number": 20,
+          "title": "feat: CANDID-035 Step 3 - L-007 nested write 회귀 + migration 컬럼 + 컨벤션 + 보강",
+          "mergedAt": "2026-05-19T23:30:00+09:00",
+          "additions": 181,
+          "deletions": 10,
+          "note": "V3 L-007 nested write SSOT 증거 (fail = wiring 강화 신호) + V5 5쌍 BYTEA + 5쌍 SMALLINT exact 컬럼명 매칭 + conventions/database.md L-007 우회 방지 절 + README 통합 테스트 범주 표 5건. Step 2 review H001(truncateAll fail-fast, 위험도 최상) + H009(wrapper) + H010(keyVersion 5쌍) + H012(createMany 롤백) 동시 보강 (in-task L-019). 리뷰 CRITICAL 0, MAJOR 2, MINOR 8, INFO 7."
+        }
+      ],
+      "summary": "CANDID-005 FU2 통합 테스트 완료. 3-step (인프라+smoke → 5 op throw/round-trip/needs → L-007 회귀+migration+컨벤션) 모두 머지. tests/integration/ 전체 신설 (vitest.config.integration.ts + setup/global-setup + helpers/{prisma,raw,seed} + 5 테스트 파일). 전체 +966 / -10 LOC, 단위 회귀 0건 (vitest 199 유지). truncateAll current_schema() fail-fast로 운영 데이터 사고 차단. conventions/database.md L-007 우회 방지 컨벤션 절 신설. 회귀 발견 (Buffer↔Uint8Array Exact 비호환): Step 1에서 발견 후 helpers/seed.ts의 encryptApplicationSnapshotForPrisma + toUint8 SSOT 우회로 해소. 근본 정정은 별도 micro 위임. in-task self-correction L-019 패턴 2회 적용. 라인 추정 정확도: Step 1(+53%), Step 2(+41%), Step 3(+21%) — 추정 개선 추세. CI workflow는 본 task 범위 외 (Action Items A1).",
+      "dependencies": [
+        "CANDID-034",
+        "CANDID-005"
+      ],
+      "specFile": "docs/retro/CANDID-034-retro.md",
+      "followUpTasksRecommended": [
+        "(micro) lib/prisma/extends.ts encryptPiiWithVersion/UserPiiEncryptedInput/ApplicationPiiSnapshotEncryptedInput 반환 타입을 Uint8Array<ArrayBuffer>로 widen + tests/lib/prisma/extends.test.ts의 Buffer.equals() 사용 정리 (Step 1 발견 회귀 근본 정정)",
+        "(micro) V5 컬럼명 SSOT derive (APPLICATION_PII_SNAPSHOT_FIELDS camelToSnake) + H010 PII_KEY_VERSION 상수 import",
+        "(micro) H011 부분 NULL 혼합 round-trip + H013 빈 문자열 edge 케이스 추가",
+        "(micro) helpers/buffer.ts 추출 (toUint8 중복 제거) + helpers/client.ts 분리 + (piiExtension as any) → PiiExtensionShape public type export",
+        "(별도 chore) GitHub Actions services.postgres + pnpm test:integration workflow (CI 미구축 — A1)",
+        "(별도) ESLint no-restricted-syntax로 nested write applications:{create:...} 정적 차단 (CANDID-031 D6 패턴)"
       ]
     }
   }
