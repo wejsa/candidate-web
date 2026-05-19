@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 65,
+    "version": 66,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-19T22:11:04+09:00"
+    "updatedAt": "2026-05-19T22:18:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -900,24 +900,87 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260519-221104",
-      "assignedAt": "2026-05-19T22:11:04+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-19T22:18:00+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "vitest.config.integration.ts",
+        "tests/integration/setup.ts",
+        "tests/integration/helpers/prisma.ts",
+        "tests/integration/helpers/seed.ts",
+        "tests/integration/helpers/raw.ts",
+        "tests/integration/prisma-smoke.test.ts",
+        "tests/integration/prisma-extends-application-write-guard.test.ts",
+        "tests/integration/prisma-extends-application-roundtrip.test.ts",
+        "tests/integration/prisma-extends-application-nested-write.test.ts",
+        "tests/integration/migrations-applications-schema.test.ts",
+        "package.json",
+        ".env.example",
+        "README.md",
+        ".claude/domains/_base/conventions/database.md"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "autoChainArgs": "",
-        "updatedAt": "2026-05-19T22:11:04+09:00"
+        "updatedAt": "2026-05-19T22:18:00+09:00"
       },
       "dependencies": [
         "CANDID-034",
         "CANDID-005"
       ],
       "createdAt": "2026-05-17T23:50:00+09:00",
-      "updatedAt": "2026-05-19T22:11:04+09:00",
+      "updatedAt": "2026-05-19T22:18:00+09:00",
       "specFile": "docs/retro/CANDID-034-retro.md",
-      "description": "CANDID-034 (CANDID-005 FU1) wiring 완료 후속 — 실제 PrismaClient($extends(piiExtension)) + 실 PostgreSQL DB 통합 테스트로 회귀 차단. CANDID-032 패턴 미러(CANDID-008 FU3). 검증 대상: (1) prisma.application.create/update/upsert/updateMany/createMany 5경로에서 string 평문 입력 시 query.application 후크가 throw하는지, (2) prisma.application.findX 결과가 piiExtension result wiring으로 5쌍 *Snapshot 컬럼을 평문 string으로 자동 복호화하는지, (3) **L-007 nested write 회귀** — `prisma.user.update({ data: { applications: { create: { applicantNameSnapshot: '평문' } } } })`가 top-level user.update 후크만 발동하고 nested application.create는 미발동 → 평문 BYTEA 저장 가능 (docstring 명시된 한계, FU2에서 정확한 동작 단정 + 우회 방지 컨벤션 도출), (4) 5 compute 함수의 needs 시그니처에 *SnapshotKeyVersion 필드명 정적 단정 (M002 보강 — piiExtension internal 구조 회귀 가드), (5) (선택) testcontainers/pg 또는 docker-compose db로 마이그레이션 SQL apply 후 컬럼명 검증 (Step 1 schema rename 회귀). 자세한 내용 docs/retro/CANDID-034-retro.md §3 A1 / §2.4 H001 참조."
+      "description": "CANDID-034 (CANDID-005 FU1) wiring 완료 후속 — 실제 PrismaClient($extends(piiExtension)) + 실 PostgreSQL DB 통합 테스트로 회귀 차단. CANDID-032 패턴 미러(CANDID-008 FU3). 검증 대상: (1) prisma.application.create/update/upsert/updateMany/createMany 5경로에서 string 평문 입력 시 query.application 후크가 throw하는지, (2) prisma.application.findX 결과가 piiExtension result wiring으로 5쌍 *Snapshot 컬럼을 평문 string으로 자동 복호화하는지, (3) **L-007 nested write 회귀** — `prisma.user.update({ data: { applications: { create: { applicantNameSnapshot: '평문' } } } })`가 top-level user.update 후크만 발동하고 nested application.create는 미발동 → 평문 BYTEA 저장 가능 (docstring 명시된 한계, FU2에서 정확한 동작 단정 + 우회 방지 컨벤션 도출), (4) 5 compute 함수의 needs 시그니처에 *SnapshotKeyVersion 필드명 정적 단정 (M002 보강 — piiExtension internal 구조 회귀 가드), (5) (선택) testcontainers/pg 또는 docker-compose db로 마이그레이션 SQL apply 후 컬럼명 검증 (Step 1 schema rename 회귀).",
+      "steps": [
+        {
+          "number": 1,
+          "title": "통합 테스트 인프라 셋업 + smoke",
+          "description": "vitest.config.integration.ts 분리 runner + tests/integration/{setup,helpers/{prisma,seed,raw}}.ts 인프라 + prisma-smoke.test.ts 1건. docker-compose db 재사용 + `?schema=test_integration` 분리. globalSetup에서 `prisma migrate deploy` 1회. TEST_DATABASE_URL + 고정 PII_ENCRYPTION_KEY 주입. pnpm scripts(test:integration) 추가. README 통합 테스트 가이드 섹션.",
+          "status": "pending",
+          "files": [
+            "vitest.config.integration.ts",
+            "tests/integration/setup.ts",
+            "tests/integration/helpers/prisma.ts",
+            "tests/integration/helpers/seed.ts",
+            "tests/integration/helpers/raw.ts",
+            "tests/integration/prisma-smoke.test.ts",
+            "package.json",
+            ".env.example",
+            "README.md"
+          ],
+          "estimatedLines": 180,
+          "prLineLimit": 250
+        },
+        {
+          "number": 2,
+          "title": "5 query.application op throw 검증 + 5쌍 round-trip + needs satisfies",
+          "description": "V1 (5경로 string 평문 throw + 정상 Buffer happy → BYTEA octet_length ≥ 28 단정) + V2 (5쌍 round-trip findUnique 평문 string + null 입력) + V4 (5 compute needs `satisfies Record<...>` 컴파일타임 + runtime expect.toEqual 이중 단정). 헬퍼/seed는 Step 1 재사용.",
+          "status": "pending",
+          "files": [
+            "tests/integration/prisma-extends-application-write-guard.test.ts",
+            "tests/integration/prisma-extends-application-roundtrip.test.ts"
+          ],
+          "estimatedLines": 280,
+          "prLineLimit": 350
+        },
+        {
+          "number": 3,
+          "title": "L-007 nested write 회귀 + migration 컬럼 검증 + 컨벤션 1줄",
+          "description": "V3 (L-007 nested write 한계 SSOT 증거 — throw 안 됨 + BYTEA UTF-8 평문 저장 단정, regression-witness 명명) + V5 (information_schema.columns로 5쌍 `*_snapshot` BYTEA + 5쌍 `*_snapshot_key_version` SMALLINT 단정 — Step 1 schema rename 회귀 차단) + _base/conventions/database.md L-007 우회 방지 컨벤션 1줄 + README 통합 테스트 범주 표.",
+          "status": "pending",
+          "files": [
+            "tests/integration/prisma-extends-application-nested-write.test.ts",
+            "tests/integration/migrations-applications-schema.test.ts",
+            ".claude/domains/_base/conventions/database.md",
+            "README.md"
+          ],
+          "estimatedLines": 150,
+          "prLineLimit": 220
+        }
+      ],
+      "currentStep": 1
     }
   }
 }
