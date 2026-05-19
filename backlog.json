@@ -937,13 +937,14 @@
         {
           "number": 1,
           "title": "통합 테스트 인프라 셋업 + smoke",
-          "description": "vitest.config.integration.ts 분리 runner + tests/integration/{setup,helpers/{prisma,seed,raw}}.ts 인프라 + prisma-smoke.test.ts 1건. docker-compose db 재사용 + `?schema=test_integration` 분리. globalSetup에서 `prisma migrate deploy` 1회. TEST_DATABASE_URL + 고정 PII_ENCRYPTION_KEY 주입. pnpm scripts(test:integration) 추가. README 통합 테스트 가이드 섹션.",
+          "description": "vitest.config.integration.ts 분리 runner + tests/integration/{setup,global-setup,helpers/{prisma,raw}}.ts 인프라 + prisma-smoke.test.ts 1건. docker-compose db 재사용 + `?schema=test_integration` 분리. globalSetup에서 `prisma migrate deploy` 1회. TEST_DATABASE_URL + 고정 PII_ENCRYPTION_KEY 주입. pnpm scripts(test:integration) 추가. README 통합 테스트 가이드. ※ helpers/seed.ts는 line-limit 차단 회피 위해 Step 2로 위임.",
           "status": "pending",
           "files": [
             "vitest.config.integration.ts",
+            "vitest.config.ts",
             "tests/integration/setup.ts",
+            "tests/integration/global-setup.ts",
             "tests/integration/helpers/prisma.ts",
-            "tests/integration/helpers/seed.ts",
             "tests/integration/helpers/raw.ts",
             "tests/integration/prisma-smoke.test.ts",
             "package.json",
@@ -955,15 +956,16 @@
         },
         {
           "number": 2,
-          "title": "5 query.application op throw 검증 + 5쌍 round-trip + needs satisfies",
-          "description": "V1 (5경로 string 평문 throw + 정상 Buffer happy → BYTEA octet_length ≥ 28 단정) + V2 (5쌍 round-trip findUnique 평문 string + null 입력) + V4 (5 compute needs `satisfies Record<...>` 컴파일타임 + runtime expect.toEqual 이중 단정). 헬퍼/seed는 Step 1 재사용.",
+          "title": "5 query.application op throw + 5쌍 round-trip + needs satisfies + helpers/seed",
+          "description": "V1 (5경로 string 평문 throw + 정상 Buffer happy → BYTEA octet_length ≥ 28 단정) + V2 (5쌍 round-trip findUnique 평문 string + null 입력) + V4 (5 compute needs `satisfies Record<...>` 컴파일타임 + runtime expect.toEqual 이중 단정) + helpers/seed.ts (Step 1에서 위임됨, User+JobCategory+JobPosting 최소 fixture).",
           "status": "pending",
           "files": [
+            "tests/integration/helpers/seed.ts",
             "tests/integration/prisma-extends-application-write-guard.test.ts",
             "tests/integration/prisma-extends-application-roundtrip.test.ts"
           ],
-          "estimatedLines": 280,
-          "prLineLimit": 350
+          "estimatedLines": 360,
+          "prLineLimit": 420
         },
         {
           "number": 3,

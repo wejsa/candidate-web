@@ -8,6 +8,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    // CANDID-035 Step 1: 통합 테스트는 별도 runner(`vitest.config.integration.ts`)에서 실행.
+    exclude: ['tests/integration/**', 'node_modules/**', 'dist/**', '.next/**'],
     setupFiles: ['tests/setup.ts'],
     coverage: {
       provider: 'v8',
