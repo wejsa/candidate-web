@@ -289,5 +289,14 @@
       "added": 0
     },
     "timestamp": "2026-05-19T23:30:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-006",
+    "stepNumber": 1,
+    "prNumber": 21,
+    "branch": "feature/CANDID-006-step1",
+    "additions": 100,
+    "timestamp": "2026-05-19T23:45:00+09:00"
   }
 ]
