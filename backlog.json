@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 71,
+    "version": 72,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-19T23:10:00+09:00"
+    "updatedAt": "2026-05-19T23:15:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -900,30 +900,30 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260519-221104",
-      "assignedAt": "2026-05-19T23:10:00+09:00",
+      "assignedAt": "2026-05-19T23:15:00+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "tests/integration/helpers/seed.ts",
-        "tests/integration/prisma-extends-application-write-guard.test.ts",
-        "tests/integration/prisma-extends-application-roundtrip.test.ts",
         "tests/integration/prisma-extends-application-nested-write.test.ts",
         "tests/integration/migrations-applications-schema.test.ts",
+        "tests/integration/helpers/prisma.ts",
+        "tests/integration/prisma-extends-application-write-guard.test.ts",
+        "tests/integration/prisma-extends-application-roundtrip.test.ts",
         "README.md",
         ".claude/domains/_base/conventions/database.md"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 19,
-        "autoChainArgs": "19",
-        "updatedAt": "2026-05-19T23:13:00+09:00"
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-19T23:15:00+09:00"
       },
       "dependencies": [
         "CANDID-034",
         "CANDID-005"
       ],
       "createdAt": "2026-05-17T23:50:00+09:00",
-      "updatedAt": "2026-05-19T23:10:00+09:00",
+      "updatedAt": "2026-05-19T23:15:00+09:00",
       "specFile": "docs/retro/CANDID-034-retro.md",
       "description": "CANDID-034 (CANDID-005 FU1) wiring 완료 후속 — 실제 PrismaClient($extends(piiExtension)) + 실 PostgreSQL DB 통합 테스트로 회귀 차단. CANDID-032 패턴 미러(CANDID-008 FU3). 검증 대상: (1) prisma.application.create/update/upsert/updateMany/createMany 5경로에서 string 평문 입력 시 query.application 후크가 throw하는지, (2) prisma.application.findX 결과가 piiExtension result wiring으로 5쌍 *Snapshot 컬럼을 평문 string으로 자동 복호화하는지, (3) **L-007 nested write 회귀** — `prisma.user.update({ data: { applications: { create: { applicantNameSnapshot: '평문' } } } })`가 top-level user.update 후크만 발동하고 nested application.create는 미발동 → 평문 BYTEA 저장 가능 (docstring 명시된 한계, FU2에서 정확한 동작 단정 + 우회 방지 컨벤션 도출), (4) 5 compute 함수의 needs 시그니처에 *SnapshotKeyVersion 필드명 정적 단정 (M002 보강 — piiExtension internal 구조 회귀 가드), (5) (선택) testcontainers/pg 또는 docker-compose db로 마이그레이션 SQL apply 후 컬럼명 검증 (Step 1 schema rename 회귀).",
       "steps": [
@@ -956,9 +956,10 @@
           "number": 2,
           "title": "5 query.application op throw + 5쌍 round-trip + needs satisfies + helpers/seed",
           "description": "V1 (5경로 string 평문 throw + 정상 Buffer happy → BYTEA octet_length ≥ 29 단정) + V2 (5쌍 round-trip findUnique 평문 string + null 입력) + V4 (5 compute needs `satisfies Record<...>` 컴파일타임 + runtime expect.toEqual 이중 단정) + helpers/seed.ts (Step 1에서 위임됨, User+JobCategory+JobPosting 최소 fixture + encryptApplicationSnapshotForPrisma 회귀 우회 SSOT). Step 1 review H005-H008 4건 동시 보강.",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-035-step2",
           "prNumber": 19,
+          "mergedAt": "2026-05-19T23:15:00+09:00",
           "files": [
             "tests/integration/helpers/seed.ts",
             "tests/integration/prisma-extends-application-write-guard.test.ts",
@@ -968,7 +969,8 @@
           ],
           "estimatedLines": 360,
           "actualLines": 509,
-          "prLineLimit": 420
+          "prLineLimit": 420,
+          "note": "review CRITICAL 0 / MAJOR 13 / MINOR 9 / INFO 7. H001(truncateAll schema fail-fast, 위험도 최상) + H009(wrapper 분기) + H010(keyVersion 단정) + H011(부분 NULL 혼합) + H012(createMany 롤백) + H013(빈 문자열 edge)는 Step 3 진입 첫 작업으로 보강 권고 (in-task self-correction L-019)."
         },
         {
           "number": 3,
@@ -985,7 +987,7 @@
           "prLineLimit": 220
         }
       ],
-      "currentStep": 2
+      "currentStep": 3
     }
   }
 }

@@ -238,5 +238,14 @@
     "minor": 9,
     "info": 7,
     "timestamp": "2026-05-19T23:13:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-035",
+    "stepNumber": 2,
+    "prNumber": 19,
+    "mergeMethod": "squash",
+    "actualLines": 509,
+    "timestamp": "2026-05-19T23:15:00+09:00"
   }
 ]
