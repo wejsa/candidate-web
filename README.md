@@ -83,6 +83,7 @@ pnpm lint
 pnpm format:check
 pnpm test            # vitest 단위 테스트 (CANDID-008 도입)
 pnpm test:coverage   # v8 커버리지 리포트 (lines/funcs/stmts 80% / branches 75% 임계)
+pnpm test:integration # 실제 PostgreSQL DB + Prisma + piiExtension 통합 테스트 (CANDID-035, 아래 참조)
 
 # 정리
 pnpm db:down       # docker compose down (볼륨 보존)
@@ -97,6 +98,23 @@ pnpm db:down       # docker compose down (볼륨 보존)
 - 운영 DB는 관리형 PostgreSQL 권장 (`DATABASE_URL`은 시크릿 매니저에서 주입).
 - **Destructive migration guard** (CANDID-030 부터): `DROP COLUMN` / 컬럼 `TYPE` 변경 같은 destructive ALTER는 SQL 본문 상단에 `COUNT(*) > 0` guard를 동반해야 한다 (`.claude/domains/_base/conventions/database.md` 참조).
 - ⚠ **이미 적용된 마이그레이션의 SQL 수정 시 Prisma hash mismatch**: 본 PR(CANDID-030)에서 `20260512210900_candid_008_pii_encryption/migration.sql`에 guard 추가 → 이미 적용된 dev DB에서는 `prisma migrate dev` 실행 시 drift 감지. dev 환경은 `prisma migrate reset`으로 재적용 권장 (운영 데이터 없음 가정 — CANDID-008 dev-only 마이그레이션 정합).
+
+### 통합 테스트 (CANDID-035)
+
+`pnpm test:integration`은 실제 PostgreSQL DB 위에서 Prisma + piiExtension wiring 회귀를 차단한다. dev 인스턴스를 재사용하되 `?schema=test_integration` 파라미터로 schema만 분리해 dev 데이터를 손상시키지 않는다.
+
+```bash
+# 1. PostgreSQL 기동 (postgres:16-alpine, docker-compose)
+pnpm db:up
+
+# 2. 통합 테스트 실행 (globalSetup에서 prisma migrate deploy --schema=test_integration 1회 자동 실행)
+pnpm test:integration
+```
+
+- 단위 테스트(`pnpm test`)와 별도 runner(`vitest.config.integration.ts`) — 격리는 각 테스트 `beforeEach` `TRUNCATE ... RESTART IDENTITY CASCADE`.
+- `TEST_DATABASE_URL`을 별도 환경 변수로 지정하면 다른 인스턴스 사용 가능 (`.env.example` 참조).
+- `PII_ENCRYPTION_KEY`는 setup이 테스트 전용 고정 32B hex로 강제 주입 — 운영 키 누수 위험 0.
+- CI workflow(`services.postgres` 매핑)는 본 task 범위 밖 — 별도 chore 위임 (Action Items A1).
 
 ### PII 처리 (CANDID-008)
 

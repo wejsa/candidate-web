@@ -187,5 +187,26 @@
       ]
     },
     "timestamp": "2026-05-17T23:45:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-035",
+    "stepNumber": 1,
+    "prNumber": 18,
+    "branch": "feature/CANDID-035-step1",
+    "additions": 276,
+    "timestamp": "2026-05-19T22:50:00+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-035",
+    "stepNumber": 1,
+    "prNumber": 18,
+    "reviewState": "COMMENTED",
+    "critical": 0,
+    "major": 8,
+    "minor": 9,
+    "info": 2,
+    "timestamp": "2026-05-19T22:57:00+09:00"
   }
 ]
