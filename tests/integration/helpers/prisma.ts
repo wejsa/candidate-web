@@ -53,8 +53,22 @@ const TRUNCATE_TARGETS = [
   'users',
 ];
 
+const EXPECTED_TEST_SCHEMA = 'test_integration';
+
 export async function truncateAll(): Promise<void> {
   const prisma = getTestPrisma();
+  // CANDID-035 Step 3 (H001 보강, 위험도 최상): schema fail-fast.
+  // TEST_DATABASE_URL override 실패/누락 시 dev/prod schema에 도달 가능 → 1회 사고로 데이터 전체 손실.
+  // 매 호출마다 current_schema()를 검증해 절대 사고를 차단한다.
+  // eslint-disable-next-line no-restricted-syntax -- schema 메타 조회 (PII 우회와 무관)
+  const rows = await prisma.$queryRaw<Array<{ current_schema: string }>>`SELECT current_schema()`;
+  const cur = rows[0]?.current_schema;
+  if (cur !== EXPECTED_TEST_SCHEMA) {
+    throw new Error(
+      `[integration] truncateAll() refused: current_schema='${cur}' (expected '${EXPECTED_TEST_SCHEMA}'). ` +
+        `TEST_DATABASE_URL의 ?schema 파라미터를 확인하세요.`,
+    );
+  }
   const tableList = TRUNCATE_TARGETS.map((t) => `"${t}"`).join(', ');
   // eslint-disable-next-line no-restricted-syntax -- 통합 테스트 격리 전용. TRUNCATE는 PII 우회와 무관.
   await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE`);

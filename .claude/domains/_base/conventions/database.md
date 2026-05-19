@@ -192,3 +192,13 @@ export function assertUserPiiInputShape(data: unknown): void {
 신규 PII 컬럼 추가 시 본 SSOT 한 곳 갱신 → 모든 보호 계층이 자동으로 신규 컬럼 인식. TypeScript `as const` 리터럴 타입으로 컴파일 타임 안전성 확보.
 
 > **출처**: CANDID-031 회고 (docs/retro/CANDID-031-retro.md, A8 / FU2-F).
+
+## PII 모델의 nested write 우회 차단 (L-007)
+
+Prisma `query.{model}.{op}` 후크는 **top-level write에만 발동**한다. `prisma.user.update({ data: { applications: { create: { applicantNameSnapshot: '평문' } } } })`처럼 상위 모델 관계로 child를 생성하는 *nested write*는 `query.application` 후크를 trigger하지 않으므로 `assertApplicationPiiInputShape` 런타임 가드가 우회된다 — 평문 string이 UTF-8 raw bytes로 BYTEA 컬럼에 저장된다.
+
+**컨벤션**: PII 컬럼이 있는 모델은 항상 **top-level `prisma.{piiModel}.create/update/upsert(...)` 직접 호출** 또는 `encrypt{Model}PiiInput(...)` / `encrypt{Model}PiiSnapshotInput(...)` 명시 사전 적용. 상위 모델 관계로 nested write 금지.
+
+회귀 차단: `tests/integration/prisma-extends-application-nested-write.test.ts`가 L-007 한계의 SSOT 증거로 동작 (fail = wiring 강화 → 컨벤션 갱신 필요).
+
+> **출처**: CANDID-035 Step 3 (docs/retro/CANDID-034-retro.md §3 A1, L-007).

@@ -114,7 +114,18 @@ pnpm test:integration
 - 단위 테스트(`pnpm test`)와 별도 runner(`vitest.config.integration.ts`) — 격리는 각 테스트 `beforeEach` `TRUNCATE ... RESTART IDENTITY CASCADE`.
 - `TEST_DATABASE_URL`을 별도 환경 변수로 지정하면 다른 인스턴스 사용 가능 (`.env.example` 참조).
 - `PII_ENCRYPTION_KEY`는 setup이 테스트 전용 고정 32B hex로 강제 주입 — 운영 키 누수 위험 0.
+- `truncateAll()`은 매 호출마다 `current_schema() === 'test_integration'` fail-fast — schema override 실패 시 운영 데이터 사고 차단.
 - CI workflow(`services.postgres` 매핑)는 본 task 범위 밖 — 별도 chore 위임 (Action Items A1).
+
+**통합 테스트 범주** (CANDID-035 완료 기준):
+
+| 파일 | 검증 |
+|------|------|
+| `prisma-smoke.test.ts` | DB 연결 + 5쌍 컬럼 메타 + truncate 격리 + piiExtension wiring 1줄 (H006) |
+| `prisma-extends-application-write-guard.test.ts` | 5 query.application op string 평문 throw + BYTEA happy (V1) |
+| `prisma-extends-application-roundtrip.test.ts` | 5쌍 round-trip + null + needs satisfies (V2 + V4) |
+| `prisma-extends-application-nested-write.test.ts` | L-007 nested write 우회 SSOT 증거 (V3, fail = wiring 강화 신호) |
+| `migrations-applications-schema.test.ts` | 5쌍 BYTEA + 5쌍 SMALLINT 컬럼명 정확 매칭 (V5, schema rename 회귀) |
 
 ### PII 처리 (CANDID-008)
 

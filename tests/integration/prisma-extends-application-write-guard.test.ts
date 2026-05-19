@@ -89,6 +89,12 @@ describe('integration: piiExtension query.application write guard (V1)', () => {
       expect(raw!.phone_snapshot!.length).toBeGreaterThanOrEqual(29);
       expect(raw!.birth_date_snapshot!.length).toBeGreaterThanOrEqual(29);
       expect(raw!.address_snapshot!.length).toBeGreaterThanOrEqual(29);
+      // CANDID-035 Step 3 (H010 보강): 5쌍 keyVersion = 1 단정 — keyVersion NULL/0 회귀 차단.
+      expect(created.applicantNameSnapshotKeyVersion).toBe(1);
+      expect(created.applicantEmailSnapshotKeyVersion).toBe(1);
+      expect(created.phoneSnapshotKeyVersion).toBe(1);
+      expect(created.birthDateSnapshotKeyVersion).toBe(1);
+      expect(created.addressSnapshotKeyVersion).toBe(1);
     });
   });
 
@@ -111,6 +117,29 @@ describe('integration: piiExtension query.application write guard (V1)', () => {
           where: { id: created.id },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 가드 발동 검증
           data: { addressSnapshot: '서울 강남' as any },
+        }),
+      ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
+    });
+
+    // CANDID-035 Step 3 (H009 보강): `{ set: 'string' }` wrapper 분기 — isStringSetWrapper.
+    it('throws on { set: "string" } wrapper (isStringSetWrapper branch)', async () => {
+      const prisma = getTestPrisma();
+      const user = await seedUser();
+      const posting = await seedJobPosting();
+      const created = await prisma.application.create({
+        data: {
+          applicationNumber: buildApplicationNumber(),
+          userId: user.id,
+          jobPostingId: posting.id,
+          submittedAt: new Date(),
+        },
+      });
+
+      await expect(
+        prisma.application.update({
+          where: { id: created.id },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- wrapper 분기 발동
+          data: { phoneSnapshot: { set: '09099999999' } as any },
         }),
       ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
     });
@@ -189,6 +218,10 @@ describe('integration: piiExtension query.application write guard (V1)', () => {
           ],
         }),
       ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
+
+      // CANDID-035 Step 3 (H012 보강): throw 시 row[0]도 미커밋 (트랜잭션성 단정).
+      const count = await prisma.application.count({ where: { userId: user.id } });
+      expect(count).toBe(0);
     });
   });
 });
