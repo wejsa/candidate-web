@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 67,
+    "version": 68,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-19T22:50:00+09:00"
+    "updatedAt": "2026-05-19T22:57:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -919,11 +919,11 @@
         ".claude/domains/_base/conventions/database.md"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 18,
-        "autoChainArgs": "18 --auto-fix",
-        "updatedAt": "2026-05-19T22:50:00+09:00"
+        "autoChainArgs": "18",
+        "updatedAt": "2026-05-19T22:57:00+09:00"
       },
       "dependencies": [
         "CANDID-034",
