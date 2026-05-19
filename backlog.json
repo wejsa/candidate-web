@@ -2,7 +2,7 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 72,
+    "version": 74,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-05-19T23:15:00+09:00"
   },
@@ -900,7 +900,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260519-221104",
-      "assignedAt": "2026-05-19T23:15:00+09:00",
+      "assignedAt": "2026-05-19T23:21:00+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "tests/integration/prisma-extends-application-nested-write.test.ts",
@@ -912,11 +912,11 @@
         ".claude/domains/_base/conventions/database.md"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-19T23:15:00+09:00"
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
+        "prNumber": 20,
+        "autoChainArgs": "20",
+        "updatedAt": "2026-05-19T23:28:00+09:00"
       },
       "dependencies": [
         "CANDID-034",
@@ -974,16 +974,21 @@
         },
         {
           "number": 3,
-          "title": "L-007 nested write 회귀 + migration 컬럼 검증 + 컨벤션 1줄",
-          "description": "V3 (L-007 nested write 한계 SSOT 증거 — throw 안 됨 + BYTEA UTF-8 평문 저장 단정, regression-witness 명명) + V5 (information_schema.columns로 5쌍 `*_snapshot` BYTEA + 5쌍 `*_snapshot_key_version` SMALLINT 단정 — Step 1 schema rename 회귀 차단) + _base/conventions/database.md L-007 우회 방지 컨벤션 1줄 + README 통합 테스트 범주 표.",
-          "status": "pending",
+          "title": "L-007 nested write 회귀 + migration 컬럼 검증 + 컨벤션 + Step 2 review 보강",
+          "description": "V3 (L-007 nested write 한계 SSOT 증거) + V5 (information_schema 컬럼명 5쌍 BYTEA + 5쌍 SMALLINT 단정) + _base/conventions/database.md L-007 우회 방지 절 + README 통합 테스트 범주 표 + Step 2 review H001(truncateAll fail-fast)/H009(wrapper)/H010(keyVersion 단정)/H012(createMany 롤백) 동시 보강.",
+          "status": "pr_created",
+          "branch": "feature/CANDID-035-step3",
+          "prNumber": 20,
           "files": [
             "tests/integration/prisma-extends-application-nested-write.test.ts",
             "tests/integration/migrations-applications-schema.test.ts",
+            "tests/integration/helpers/prisma.ts",
+            "tests/integration/prisma-extends-application-write-guard.test.ts",
             ".claude/domains/_base/conventions/database.md",
             "README.md"
           ],
           "estimatedLines": 150,
+          "actualLines": 181,
           "prLineLimit": 220
         }
       ],
