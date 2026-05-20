@@ -74,6 +74,7 @@ describe('issueRefreshSession', () => {
     const result = await issueRefreshSession(USER_ID);
 
     expect(result.token.split('.')).toHaveLength(3);
+    expect(result.userId).toBe(USER_ID);
     expect(result.rotationCounter).toBe(0);
     expect(result.familyId).toMatch(UUID_RE);
     expect(db.refreshToken.create).toHaveBeenCalledWith({
@@ -181,6 +182,7 @@ describe('rotateRefreshSession', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('expected ok');
     expect(result.session.familyId).toBe(FAMILY);
+    expect(result.session.userId).toBe(USER_ID);
     expect(result.session.rotationCounter).toBe(3);
     expect(result.session.token).not.toBe(oldToken);
 
