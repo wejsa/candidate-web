@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 90,
+    "version": 92,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T22:54:00+09:00"
+    "updatedAt": "2026-05-20T23:02:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -287,7 +287,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260519-233304",
-      "assignedAt": "2026-05-20T22:54:00+09:00",
+      "assignedAt": "2026-05-20T23:02:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/auth/middleware.ts",
@@ -296,18 +296,18 @@
         "tests/app/api/v1/auth/refresh.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
+        "prNumber": 24,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-20T22:54:00+09:00"
+        "autoChainArgs": "24",
+        "updatedAt": "2026-05-20T23:02:00+09:00"
       },
       "dependencies": [
         "CANDID-003"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T22:54:00+09:00",
+      "updatedAt": "2026-05-20T23:02:00+09:00",
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
@@ -372,15 +372,21 @@
           "number": 4,
           "title": "lib/auth/middleware.ts + /api/v1/auth/refresh route + 단위 테스트",
           "description": "requireAuth(request) / getOptionalAuth(request) — 401 분기 (AUTH_TOKEN_EXPIRED vs AUTH_TOKEN_INVALID). middleware는 Edge 호환 (jose verify만). /api/v1/auth/refresh POST Route Handler — Refresh Cookie 읽기 → rotateRefreshSession → 새 Access+Refresh Set-Cookie. 단위 테스트 8+/6+ 케이스.",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-006-step4",
+          "prNumber": 24,
           "files": [
             "lib/auth/middleware.ts",
             "app/api/v1/auth/refresh/route.ts",
             "tests/lib/auth/middleware.test.ts",
-            "tests/app/api/v1/auth/refresh.test.ts"
+            "tests/app/api/v1/auth/refresh.test.ts",
+            "lib/auth/session.ts",
+            "tests/lib/auth/session.test.ts"
           ],
           "estimatedLines": 350,
-          "prLineLimit": 450
+          "actualLines": 305,
+          "prLineLimit": 450,
+          "note": "RefreshSession에 userId 추가 — refresh route Access 발급용, Step 3 통합 gap 보정 (L-019)."
         }
       ],
       "currentStep": 4

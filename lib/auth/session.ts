@@ -18,6 +18,8 @@ export interface RefreshSession {
   /** 서명된 refresh JWT 원문 — HttpOnly Cookie에 저장. DB에는 sha256 해시만 저장된다. */
   token: string;
   expiresAt: Date;
+  /** 세션 소유자 — 호출측(refresh route)이 새 Access 토큰 발급에 사용. */
+  userId: number;
   familyId: string;
   rotationCounter: number;
 }
@@ -65,7 +67,7 @@ export async function issueRefreshSession(
       ipAddress: options.ipAddress ?? null,
     },
   });
-  return { token, expiresAt, familyId, rotationCounter: 0 };
+  return { token, expiresAt, userId, familyId, rotationCounter: 0 };
 }
 
 /**
@@ -150,7 +152,10 @@ export async function rotateRefreshSession(oldToken: string): Promise<RotateRefr
     }
     throw err;
   }
-  return { ok: true, session: { token, expiresAt, familyId: old.familyId, rotationCounter } };
+  return {
+    ok: true,
+    session: { token, expiresAt, userId: old.userId, familyId: old.familyId, rotationCounter },
+  };
 }
 
 /**
