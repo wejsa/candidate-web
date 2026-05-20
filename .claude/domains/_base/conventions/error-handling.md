@@ -3,6 +3,11 @@
 모든 프로젝트에 적용되는 에러 처리 규칙입니다.
 도메인별 에러 코드 체계(PG 에러코드, 폴백 패턴 등)는 해당 도메인 문서를 참조하세요.
 
+> **스택별 구체 구현은 프로젝트 `CLAUDE.md`와 코드를 우선 참조하세요.** 본 문서는 범용 가이드이며,
+> 아래 `{PREFIX}-{DOMAIN}-{NUMBER}` 코드 구조·5필드 응답·Spring 예시는 일반 예시입니다. 예: candidate-web은
+> underscore 코드(`AUTH_TOKEN_INVALID`, SSOT `lib/errors/codes.ts`), 7필드 응답
+> (`{timestamp,status,code,message,path,traceId,details}`), Next.js `withErrorHandler` HOF를 채택합니다.
+
 ## 에러 코드 구조
 
 ```

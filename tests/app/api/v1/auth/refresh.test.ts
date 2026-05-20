@@ -36,29 +36,32 @@ function setCookieValue(response: Response, name: string): string {
 
 describe('POST /api/v1/auth/refresh', () => {
   it('returns 401 AUTH_REFRESH_INVALID when no refresh cookie is present', async () => {
-    const response = await POST(refreshRequest());
+    const response = await POST(refreshRequest(), undefined);
     expect(response.status).toBe(401);
-    expect(await response.json()).toMatchObject({ code: 'AUTH_REFRESH_INVALID' });
+    const body = await response.json();
+    expect(body).toMatchObject({ code: 'AUTH_REFRESH_INVALID', status: 401 });
+    // withErrorHandler 표준 에러 응답 — 7필드 traceId 포함 확인
+    expect(typeof body.traceId).toBe('string');
     expect(rotate).not.toHaveBeenCalled();
   });
 
   it('returns 401 AUTH_REFRESH_INVALID when rotation reports invalid', async () => {
     rotate.mockResolvedValue({ ok: false, reason: 'invalid' });
-    const response = await POST(refreshRequest('stale-token'));
+    const response = await POST(refreshRequest('stale-token'), undefined);
     expect(response.status).toBe(401);
     expect(await response.json()).toMatchObject({ code: 'AUTH_REFRESH_INVALID' });
   });
 
   it('returns 401 AUTH_REFRESH_INVALID when rotation reports revoked', async () => {
     rotate.mockResolvedValue({ ok: false, reason: 'revoked' });
-    const response = await POST(refreshRequest('revoked-token'));
+    const response = await POST(refreshRequest('revoked-token'), undefined);
     expect(response.status).toBe(401);
     expect(await response.json()).toMatchObject({ code: 'AUTH_REFRESH_INVALID' });
   });
 
   it('returns 401 AUTH_REFRESH_EXPIRED when rotation reports expired', async () => {
     rotate.mockResolvedValue({ ok: false, reason: 'expired' });
-    const response = await POST(refreshRequest('expired-token'));
+    const response = await POST(refreshRequest('expired-token'), undefined);
     expect(response.status).toBe(401);
     expect(await response.json()).toMatchObject({ code: 'AUTH_REFRESH_EXPIRED' });
   });
@@ -75,7 +78,7 @@ describe('POST /api/v1/auth/refresh', () => {
       },
     });
 
-    const response = await POST(refreshRequest('current-refresh-token'));
+    const response = await POST(refreshRequest('current-refresh-token'), undefined);
 
     expect(response.status).toBe(200);
     expect(typeof (await response.json()).accessExpiresAt).toBe('string');
@@ -96,7 +99,7 @@ describe('POST /api/v1/auth/refresh', () => {
       },
     });
 
-    const response = await POST(refreshRequest('current'));
+    const response = await POST(refreshRequest('current'), undefined);
     const verified = await verifyAccessToken(setCookieValue(response, ACCESS_COOKIE));
     expect(verified.ok).toBe(true);
     if (!verified.ok) throw new Error('expected ok');
