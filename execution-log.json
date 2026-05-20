@@ -472,5 +472,15 @@
       "added": 59
     },
     "timestamp": "2026-05-20T23:04:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-007",
+    "stepNumber": 1,
+    "prNumber": 25,
+    "branch": "feature/CANDID-007-step1",
+    "additions": 234,
+    "deletions": 0,
+    "timestamp": "2026-05-20T23:28:42+09:00"
   }
 ]
