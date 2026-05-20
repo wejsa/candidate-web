@@ -428,5 +428,15 @@
     "actualLines": 369,
     "fixLoop": 1,
     "timestamp": "2026-05-20T22:53:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-006",
+    "stepNumber": 4,
+    "prNumber": 24,
+    "branch": "feature/CANDID-006-step4",
+    "additions": 305,
+    "isLastStep": true,
+    "timestamp": "2026-05-20T22:58:00+09:00"
   }
 ]
