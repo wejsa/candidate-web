@@ -545,5 +545,18 @@
     "deletions": 80,
     "isLastStep": true,
     "timestamp": "2026-05-20T23:55:20+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-007",
+    "stepNumber": 3,
+    "prNumber": 27,
+    "reviewState": "COMMENTED",
+    "critical": 0,
+    "major": 3,
+    "minor": 2,
+    "info": 10,
+    "isLastStep": true,
+    "timestamp": "2026-05-20T23:58:38+09:00"
   }
 ]

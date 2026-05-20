@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 102,
+    "version": 103,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:55:20+09:00"
+    "updatedAt": "2026-05-20T23:58:38+09:00"
   },
   "summary": {
     "total": 35,
@@ -390,7 +390,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260520-231217",
-      "assignedAt": "2026-05-20T23:55:20+09:00",
+      "assignedAt": "2026-05-20T23:58:38+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/auth/middleware.ts",
@@ -404,15 +404,15 @@
         "CANDID-001"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T23:55:20+09:00",
+      "updatedAt": "2026-05-20T23:58:38+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 27,
         "fixLoopCount": 0,
-        "autoChainArgs": "27 --auto-fix",
-        "updatedAt": "2026-05-20T23:55:20+09:00"
+        "autoChainArgs": "27",
+        "updatedAt": "2026-05-20T23:58:38+09:00"
       },
       "steps": [
         {
