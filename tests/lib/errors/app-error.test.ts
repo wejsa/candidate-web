@@ -12,10 +12,26 @@ describe('AppError', () => {
   });
 
   it('allows overriding the message while keeping the catalog status', () => {
-    const err = new AppError('USER_NOT_FOUND', { message: 'ID 42 사용자가 없습니다.' });
-    expect(err.message).toBe('ID 42 사용자가 없습니다.');
+    const err = new AppError('USER_NOT_FOUND', { message: '등록되지 않은 사용자입니다.' });
+    expect(err.message).toBe('등록되지 않은 사용자입니다.');
     expect(err.code).toBe('USER_NOT_FOUND');
     expect(err.status).toBe(404);
+  });
+
+  // CANDID-007 Step 1 PR #25 리뷰 H003 — 빈/공백 override는 카탈로그 기본값으로 폴백.
+  it('falls back to the catalog message for an empty or whitespace override', () => {
+    expect(new AppError('JOB_NOT_FOUND', { message: '' }).message).toBe(
+      ERROR_CATALOG.JOB_NOT_FOUND.message,
+    );
+    expect(new AppError('JOB_NOT_FOUND', { message: '   ' }).message).toBe(
+      ERROR_CATALOG.JOB_NOT_FOUND.message,
+    );
+  });
+
+  it('trims a message override', () => {
+    expect(new AppError('USER_NOT_FOUND', { message: '  사용자 없음  ' }).message).toBe(
+      '사용자 없음',
+    );
   });
 
   it('carries field-level details', () => {
@@ -23,6 +39,21 @@ describe('AppError', () => {
     const err = new AppError('SYS_VALIDATION_FAILED', { details });
     expect(err.details).toEqual(details);
     expect(err.status).toBe(400);
+  });
+
+  // CANDID-007 Step 1 PR #25 리뷰 H003 — details 빈 배열은 보존 (응답 생략은 errorResponse 책임).
+  it('preserves an empty details array as-is', () => {
+    const err = new AppError('SYS_VALIDATION_FAILED', { details: [] });
+    expect(err.details).toEqual([]);
+  });
+
+  // CANDID-007 Step 1 PR #25 리뷰 H003 — cause는 unknown이므로 비-Error 값도 안전히 수용.
+  it('accepts a non-Error cause without throwing', () => {
+    expect(() => new AppError('SYS_INTERNAL_ERROR', { cause: 'raw string cause' })).not.toThrow();
+    expect(new AppError('SYS_INTERNAL_ERROR', { cause: { db: 'timeout' } }).cause).toEqual({
+      db: 'timeout',
+    });
+    expect(new AppError('SYS_INTERNAL_ERROR', { cause: null }).cause).toBeNull();
   });
 
   it('preserves the cause without exposing it in the message', () => {
