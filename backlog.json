@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 101,
+    "version": 102,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:48:48+09:00"
+    "updatedAt": "2026-05-20T23:55:20+09:00"
   },
   "summary": {
     "total": 35,
@@ -390,28 +390,29 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260520-231217",
-      "assignedAt": "2026-05-20T23:48:48+09:00",
+      "assignedAt": "2026-05-20T23:55:20+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/auth/middleware.ts",
         "app/api/v1/auth/refresh/route.ts",
         "tests/lib/auth/middleware.test.ts",
         "tests/app/api/v1/auth/refresh.test.ts",
-        "CLAUDE.md"
+        "CLAUDE.md",
+        ".claude/domains/_base/conventions/error-handling.md"
       ],
       "dependencies": [
         "CANDID-001"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T23:48:48+09:00",
+      "updatedAt": "2026-05-20T23:55:20+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 27,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-20T23:48:48+09:00"
+        "autoChainArgs": "27 --auto-fix",
+        "updatedAt": "2026-05-20T23:55:20+09:00"
       },
       "steps": [
         {
@@ -459,16 +460,21 @@
           "number": 3,
           "title": "CANDID-006 authErrorResponse 이관 + 통합",
           "description": "lib/auth/middleware.ts — authErrorResponse 제거, requireAuth가 실패 시 throw new AppError('AUTH_TOKEN_*'), 반환 타입 Promise<AuthContext>. app/api/v1/auth/refresh/route.ts — withErrorHandler 래핑 + throw AppError('AUTH_REFRESH_*'). 테스트 2종 throw 단정으로 전환. CLAUDE.md 에러 코드 표에 AUTH_TOKEN_*/AUTH_REFRESH_* 4종 + SSOT 1줄 추가.",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-007-step3",
+          "prNumber": 27,
           "files": [
             "lib/auth/middleware.ts",
             "app/api/v1/auth/refresh/route.ts",
             "tests/lib/auth/middleware.test.ts",
             "tests/app/api/v1/auth/refresh.test.ts",
-            "CLAUDE.md"
+            "CLAUDE.md",
+            ".claude/domains/_base/conventions/error-handling.md"
           ],
           "estimatedLines": 240,
-          "prLineLimit": 350
+          "actualLines": 57,
+          "prLineLimit": 350,
+          "note": "authErrorResponse 제거 + requireAuth/refresh route를 AppError throw + withErrorHandler로 이관. CLAUDE.md 에러 코드 표/SSOT + error-handling.md 정합(PR #26 docs 인계). 변경 137줄(+57/-80)."
         }
       ],
       "currentStep": 3
