@@ -132,6 +132,8 @@ model RefreshToken {
   userAgent       String?   @map("user_agent") @db.VarChar(500)
   ipAddress       String?   @map("ip_address") @db.Inet
   createdAt       DateTime  @default(now()) @map("created_at")
+  // revoke/rotation으로 변경되는 가변 엔티티 — 마지막 변경 시각 추적 (감사 정합성)
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

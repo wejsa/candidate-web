@@ -11,6 +11,8 @@ process.env.DATABASE_URL ??= 'postgresql://test:test@localhost:5432/test_db';
 process.env.PII_ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 // CANDID-006 — JWT secret required 격상. 동일 H007 패턴 (운영 시크릿 누수 차단).
-// Access/Refresh 분리 (서로 다른 secret) — 라이프사이클 + 누수 영향 격리 검증.
-process.env.JWT_ACCESS_SECRET = 'test-access-secret-min-32-chars-XXXXXXXX-test-only';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-min-32-chars-YYYYYYYY-test-only';
+// HS512 min(64) 충족 + Access/Refresh 분리 (서로 다른 secret 강제 — env refine).
+process.env.JWT_ACCESS_SECRET =
+  'test-access-secret-candid006-hs512-min-64-chars-XXXXXXXXXXXXXXXX-only';
+process.env.JWT_REFRESH_SECRET =
+  'test-refresh-secret-candid006-hs512-min-64-chars-YYYYYYYYYYYYYY-only';

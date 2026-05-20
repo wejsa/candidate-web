@@ -15,6 +15,7 @@ CREATE TABLE "refresh_tokens" (
     "user_agent" VARCHAR(500),
     "ip_address" INET,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "refresh_tokens_pkey" PRIMARY KEY ("id")
 );

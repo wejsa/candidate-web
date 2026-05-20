@@ -49,6 +49,7 @@ const TRUNCATE_TARGETS = [
   'audit_logs',
   'email_verifications',
   'password_reset_tokens',
+  'refresh_tokens',
   'auth_providers',
   'users',
 ];
