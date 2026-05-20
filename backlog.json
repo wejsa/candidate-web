@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 93,
+    "version": 94,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:04:00+09:00"
+    "updatedAt": "2026-05-20T23:12:17+09:00"
   },
   "summary": {
     "total": 35,
     "done": 11,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 24
+    "todo": 23
   },
   "phases": {
     "1": {
@@ -385,10 +385,14 @@
       "id": "CANDID-007",
       "title": "전역 에러 핸들러 + 에러 코드 체계 (AUTH_/USER_/JOB_/APP_/FILE_/SYS_)",
       "description": "표준 에러 응답 포맷(timestamp/status/code/message/path/traceId/details). HTTP 코드 매핑(401/403/404/409/422/429). 운영 환경 스택 트레이스 미노출.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 1,
+      "assignee": "jaese@hoji-20260520-231217",
+      "assignedAt": "2026-05-20T23:12:17+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-001"
       ],
