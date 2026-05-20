@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
+    "jose": "^5.10.0",
     "next": "^14.2.15",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -44,6 +45,7 @@
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
+    "@vitest/coverage-v8": "^2.1.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.15",
     "eslint-config-prettier": "^9.1.0",
@@ -51,7 +53,6 @@
     "prisma": "^6.1.0",
     "tsx": "^4.19.2",
     "typescript": "^5.6.2",
-    "vitest": "^2.1.0",
-    "@vitest/coverage-v8": "^2.1.0"
+    "vitest": "^2.1.0"
   }
 }

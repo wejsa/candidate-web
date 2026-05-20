@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 81,
+    "version": 82,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T00:18:00+09:00"
+    "updatedAt": "2026-05-20T22:14:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -287,7 +287,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260519-233304",
-      "assignedAt": "2026-05-20T00:18:00+09:00",
+      "assignedAt": "2026-05-20T22:14:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "package.json",
@@ -308,13 +308,13 @@
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": "--next",
-        "updatedAt": "2026-05-20T00:18:00+09:00"
+        "updatedAt": "2026-05-20T22:14:00+09:00"
       },
       "dependencies": [
         "CANDID-003"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T00:18:00+09:00",
+      "updatedAt": "2026-05-20T22:14:00+09:00",
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
@@ -381,7 +381,7 @@
           "prLineLimit": 450
         }
       ],
-      "currentStep": 1
+      "currentStep": 2
     },
     "CANDID-007": {
       "id": "CANDID-007",
