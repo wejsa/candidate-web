@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 81,
+    "version": 84,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T00:18:00+09:00"
+    "updatedAt": "2026-05-20T22:33:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -287,7 +287,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260519-233304",
-      "assignedAt": "2026-05-20T00:18:00+09:00",
+      "assignedAt": "2026-05-20T22:33:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "package.json",
@@ -303,18 +303,18 @@
         "tests/app/api/v1/auth/refresh.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
+        "prNumber": 22,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-20T00:18:00+09:00"
+        "autoChainArgs": "22",
+        "updatedAt": "2026-05-20T22:33:00+09:00"
       },
       "dependencies": [
         "CANDID-003"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T00:18:00+09:00",
+      "updatedAt": "2026-05-20T22:33:00+09:00",
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
@@ -343,7 +343,9 @@
           "number": 2,
           "title": "lib/auth/jwt.ts (jose HS512) + cookies.ts + 단위 테스트",
           "description": "jose 라이브러리 도입 (Edge 호환). issueAccessToken/issueRefreshToken/verifyAccessToken/verifyRefreshToken 4함수 HS512. cookies.ts에서 HttpOnly+Secure(prod)+SameSite=Lax+Path=/ 통일. 단위 테스트 12+/6+ 케이스.",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-006-step2",
+          "prNumber": 22,
           "files": [
             "package.json",
             "lib/auth/jwt.ts",
@@ -352,6 +354,7 @@
             "tests/lib/auth/cookies.test.ts"
           ],
           "estimatedLines": 400,
+          "actualLines": 497,
           "prLineLimit": 500
         },
         {
@@ -381,7 +384,7 @@
           "prLineLimit": 450
         }
       ],
-      "currentStep": 1
+      "currentStep": 2
     },
     "CANDID-007": {
       "id": "CANDID-007",
