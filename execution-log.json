@@ -494,5 +494,14 @@
     "minor": 5,
     "info": 6,
     "timestamp": "2026-05-20T23:32:59+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-007",
+    "stepNumber": 1,
+    "prNumber": 25,
+    "mergeMethod": "squash",
+    "actualLines": 234,
+    "timestamp": "2026-05-20T23:35:16+09:00"
   }
 ]

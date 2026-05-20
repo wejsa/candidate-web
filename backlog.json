@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 97,
+    "version": 98,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:32:59+09:00"
+    "updatedAt": "2026-05-20T23:35:16+09:00"
   },
   "summary": {
     "total": 35,
@@ -390,17 +390,13 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260520-231217",
-      "assignedAt": "2026-05-20T23:32:59+09:00",
+      "assignedAt": "2026-05-20T23:35:16+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/errors/codes.ts",
-        "lib/errors/app-error.ts",
         "lib/errors/response.ts",
         "lib/errors/index.ts",
         "lib/auth/middleware.ts",
         "app/api/v1/auth/refresh/route.ts",
-        "tests/lib/errors/codes.test.ts",
-        "tests/lib/errors/app-error.test.ts",
         "tests/lib/errors/response.test.ts",
         "tests/lib/auth/middleware.test.ts",
         "tests/app/api/v1/auth/refresh.test.ts",
@@ -410,24 +406,25 @@
         "CANDID-001"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T23:32:59+09:00",
+      "updatedAt": "2026-05-20T23:35:16+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 25,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "25",
-        "updatedAt": "2026-05-20T23:32:59+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-20T23:35:16+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "에러 코드 카탈로그 + AppError 클래스",
           "description": "lib/errors/codes.ts — ERROR_CATALOG 22종 SSOT(code → {status, message}) + ErrorCode 타입 + errorStatus() 헬퍼. lib/errors/app-error.ts — AppError extends Error(code→status 파생, message 기본값 catalog) + ErrorDetail 타입 + isAppError() 가드. 단위 테스트 2종(카탈로그 구조/status 범위 + AppError 생성·instanceof·가드).",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-007-step1",
           "prNumber": 25,
+          "mergedAt": "2026-05-20T23:35:16+09:00",
           "files": [
             "lib/errors/codes.ts",
             "lib/errors/app-error.ts",
@@ -436,7 +433,8 @@
           ],
           "estimatedLines": 290,
           "actualLines": 234,
-          "prLineLimit": 400
+          "prLineLimit": 400,
+          "note": "review CRITICAL 0 / MAJOR 3 (H001 PRD 코드 네이밍→Step 3, H002/H003 테스트 회귀 방어→Step 2 L-019) / MINOR 5 / INFO 6."
         },
         {
           "number": 2,
@@ -467,7 +465,7 @@
           "prLineLimit": 350
         }
       ],
-      "currentStep": 1
+      "currentStep": 2
     },
     "CANDID-008": {
       "id": "CANDID-008",
