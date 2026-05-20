@@ -96,10 +96,22 @@ export async function verifyRefreshSession(token: string): Promise<VerifyRefresh
   return { ok: true, session: row };
 }
 
+/** rotate 트랜잭션 내부 신호 — 동시 회전 경쟁에서 패한 요청을 롤백시키기 위한 sentinel. */
+class RotationConflictError extends Error {
+  constructor() {
+    super('refresh token rotation conflict — concurrent rotation already revoked the token');
+    this.name = 'RotationConflictError';
+  }
+}
+
 /**
  * refresh 토큰 회전 — 구 토큰 검증 후 revoke('rotated') + 신규 토큰 발급을 단일 트랜잭션으로 수행.
  * familyId는 승계되고 rotationCounter는 1 증가한다. 이미 revoke된 토큰은 'revoked'로 거부된다
  * (reuse detection 본격 로직은 CANDID-021 위임 — familyId/rotationCounter가 그 기반).
+ *
+ * 동시성(C001): 구 토큰 revoke를 `updateMany(where: revokedAt=null)` 조건부 갱신으로 수행하고
+ * affected rows로 경쟁을 감지한다 — verify와 트랜잭션 사이 TOCTOU 윈도우에서 동일 토큰이
+ * 동시에 회전돼도 정확히 하나만 성공하고 나머지는 'revoked'로 거부된다(한 family 활성 토큰 1개 보장).
  */
 export async function rotateRefreshSession(oldToken: string): Promise<RotateRefreshSessionResult> {
   const verified = await verifyRefreshSession(oldToken);
@@ -109,23 +121,35 @@ export async function rotateRefreshSession(oldToken: string): Promise<RotateRefr
   const old = verified.session;
   const { token, expiresAt } = await issueRefreshToken(old.userId);
   const rotationCounter = old.rotationCounter + 1;
-  await prisma.$transaction([
-    prisma.refreshToken.update({
-      where: { id: old.id },
-      data: { revokedAt: new Date(), revokedReason: 'rotated' },
-    }),
-    prisma.refreshToken.create({
-      data: {
-        userId: old.userId,
-        tokenHash: hashToken(token),
-        familyId: old.familyId,
-        rotationCounter,
-        expiresAt,
-        userAgent: old.userAgent,
-        ipAddress: old.ipAddress,
-      },
-    }),
-  ]);
+  try {
+    await prisma.$transaction(async (tx) => {
+      // 조건부 revoke — revokedAt이 아직 NULL인 row만 갱신. 다른 요청이 먼저 회전했다면
+      // count=0 → RotationConflictError로 트랜잭션 롤백 → 신규 토큰 미발급.
+      const revoked = await tx.refreshToken.updateMany({
+        where: { id: old.id, revokedAt: null },
+        data: { revokedAt: new Date(), revokedReason: 'rotated' },
+      });
+      if (revoked.count === 0) {
+        throw new RotationConflictError();
+      }
+      await tx.refreshToken.create({
+        data: {
+          userId: old.userId,
+          tokenHash: hashToken(token),
+          familyId: old.familyId,
+          rotationCounter,
+          expiresAt,
+          userAgent: old.userAgent,
+          ipAddress: old.ipAddress,
+        },
+      });
+    });
+  } catch (err) {
+    if (err instanceof RotationConflictError) {
+      return { ok: false, reason: 'revoked' };
+    }
+    throw err;
+  }
   return { ok: true, session: { token, expiresAt, familyId: old.familyId, rotationCounter } };
 }
 

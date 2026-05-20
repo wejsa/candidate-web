@@ -394,5 +394,17 @@
     "major": 8,
     "minor": 5,
     "timestamp": "2026-05-20T22:44:00+09:00"
+  },
+  {
+    "event": "fix_completed",
+    "taskId": "CANDID-006",
+    "stepNumber": 3,
+    "prNumber": 23,
+    "issueCount": 1,
+    "issues": [
+      "C001"
+    ],
+    "fixLoop": 1,
+    "timestamp": "2026-05-20T22:48:00+09:00"
   }
 ]

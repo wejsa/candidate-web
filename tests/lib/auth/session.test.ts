@@ -13,20 +13,23 @@ import {
 
 // 외부 의존성(Prisma DB)만 mock — jwt.ts(jose 서명/검증)는 실제 사용.
 // 실제 PrismaClient 통합 테스트는 CANDID-006-FU(별도 follow-up)로 위임 (계획서 A1).
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
-    refreshToken: {
-      create: vi.fn(),
-      findUnique: vi.fn(),
-      update: vi.fn(),
-      updateMany: vi.fn(),
+vi.mock('@/lib/prisma', () => {
+  const refreshToken = {
+    create: vi.fn(),
+    findUnique: vi.fn(),
+    updateMany: vi.fn(),
+  };
+  return {
+    prisma: {
+      refreshToken,
+      // interactive 트랜잭션 mock — 콜백에 동일 refreshToken mock을 tx로 전달.
+      $transaction: vi.fn(async (cb: (tx: unknown) => unknown) => cb({ refreshToken })),
     },
-    $transaction: vi.fn(),
-  },
-}));
+  };
+});
 
 const db = prisma as unknown as {
-  refreshToken: { create: Mock; findUnique: Mock; update: Mock; updateMany: Mock };
+  refreshToken: { create: Mock; findUnique: Mock; updateMany: Mock };
   $transaction: Mock;
 };
 
@@ -56,6 +59,10 @@ function fakeRow(overrides: Partial<RefreshToken> = {}): RefreshToken {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  // resetAllMocks가 지운 $transaction의 콜백 실행 구현을 매 테스트마다 복구.
+  db.$transaction.mockImplementation(async (cb: (tx: unknown) => unknown) =>
+    cb({ refreshToken: db.refreshToken }),
+  );
 });
 
 afterEach(() => {
@@ -162,11 +169,12 @@ describe('verifyRefreshSession', () => {
 });
 
 describe('rotateRefreshSession', () => {
-  it('rotates — revokes the old row and creates a new one in a transaction', async () => {
+  it('rotates — conditionally revokes the old row and creates a new one in a transaction', async () => {
     const { token: oldToken } = await issueRefreshToken(USER_ID);
     db.refreshToken.findUnique.mockResolvedValue(
       fakeRow({ id: 55n, familyId: FAMILY, rotationCounter: 2 }),
     );
+    db.refreshToken.updateMany.mockResolvedValue({ count: 1 });
 
     const result = await rotateRefreshSession(oldToken);
 
@@ -177,8 +185,9 @@ describe('rotateRefreshSession', () => {
     expect(result.session.token).not.toBe(oldToken);
 
     expect(db.$transaction).toHaveBeenCalledTimes(1);
-    expect(db.refreshToken.update).toHaveBeenCalledWith({
-      where: { id: 55n },
+    // 조건부 revoke — revokedAt=null인 row만 갱신 (C001 TOCTOU 차단)
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { id: 55n, revokedAt: null },
       data: { revokedAt: expect.any(Date), revokedReason: 'rotated' },
     });
     expect(db.refreshToken.create).toHaveBeenCalledWith({
@@ -192,6 +201,18 @@ describe('rotateRefreshSession', () => {
         ipAddress: null,
       },
     });
+  });
+
+  it('aborts with revoked when a concurrent request already revoked the old row (C001)', async () => {
+    const { token: oldToken } = await issueRefreshToken(USER_ID);
+    db.refreshToken.findUnique.mockResolvedValue(fakeRow({ id: 55n }));
+    // 조건부 updateMany가 0건 갱신 — 경쟁 요청이 먼저 회전을 완료한 상황
+    db.refreshToken.updateMany.mockResolvedValue({ count: 0 });
+
+    const result = await rotateRefreshSession(oldToken);
+
+    expect(result).toEqual({ ok: false, reason: 'revoked' });
+    expect(db.refreshToken.create).not.toHaveBeenCalled();
   });
 
   it('fails rotation with invalid when the old token is malformed', async () => {
