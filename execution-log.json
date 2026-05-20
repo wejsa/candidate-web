@@ -384,5 +384,15 @@
     "branch": "feature/CANDID-006-step3",
     "additions": 369,
     "timestamp": "2026-05-20T22:40:00+09:00"
+  },
+  {
+    "event": "request_changes",
+    "taskId": "CANDID-006",
+    "stepNumber": 3,
+    "prNumber": 23,
+    "critical": 1,
+    "major": 8,
+    "minor": 5,
+    "timestamp": "2026-05-20T22:44:00+09:00"
   }
 ]
