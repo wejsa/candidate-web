@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 92,
+    "version": 93,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:02:00+09:00"
+    "updatedAt": "2026-05-20T23:04:00+09:00"
   },
   "summary": {
     "total": 35,
-    "done": 10,
-    "inProgress": 1,
+    "done": 11,
+    "inProgress": 0,
     "review": 0,
     "todo": 24
   },
@@ -282,32 +282,21 @@
       "id": "CANDID-006",
       "title": "JWT(Access 30분) + Refresh Token(HttpOnly Cookie) 인증 미들웨어",
       "description": "Next.js Route Handler 인증 미들웨어. Access 30분 / Refresh 14일(상태유지 미체크 시 1일), HttpOnly Secure SameSite Cookie. 자동 갱신 + 만료 시 401. 4-step: env+schema → jwt/cookies → session DB → middleware+/auth/refresh.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260519-233304",
-      "assignedAt": "2026-05-20T23:02:00+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "lib/auth/middleware.ts",
-        "app/api/v1/auth/refresh/route.ts",
-        "tests/lib/auth/middleware.test.ts",
-        "tests/app/api/v1/auth/refresh.test.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 24,
-        "fixLoopCount": 0,
-        "autoChainArgs": "24",
-        "updatedAt": "2026-05-20T23:02:00+09:00"
-      },
+      "lockedFiles": [],
+      "workflowState": null,
       "dependencies": [
         "CANDID-003"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T23:02:00+09:00",
+      "updatedAt": "2026-05-20T23:04:00+09:00",
+      "completedAt": "2026-05-20T23:04:00+09:00",
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
@@ -372,9 +361,10 @@
           "number": 4,
           "title": "lib/auth/middleware.ts + /api/v1/auth/refresh route + 단위 테스트",
           "description": "requireAuth(request) / getOptionalAuth(request) — 401 분기 (AUTH_TOKEN_EXPIRED vs AUTH_TOKEN_INVALID). middleware는 Edge 호환 (jose verify만). /api/v1/auth/refresh POST Route Handler — Refresh Cookie 읽기 → rotateRefreshSession → 새 Access+Refresh Set-Cookie. 단위 테스트 8+/6+ 케이스.",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-006-step4",
           "prNumber": 24,
+          "mergedAt": "2026-05-20T23:03:00+09:00",
           "files": [
             "lib/auth/middleware.ts",
             "app/api/v1/auth/refresh/route.ts",

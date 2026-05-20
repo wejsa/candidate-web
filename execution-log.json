@@ -450,5 +450,27 @@
     "minor": 6,
     "isLastStep": true,
     "timestamp": "2026-05-20T23:02:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-006",
+    "stepNumber": 4,
+    "prNumber": 24,
+    "mergeMethod": "squash",
+    "actualLines": 305,
+    "isLastStep": true,
+    "timestamp": "2026-05-20T23:03:00+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-006",
+    "totalSteps": 4,
+    "totalAdditions": 1271,
+    "totalDeletions": 53,
+    "vitest": {
+      "passed": 258,
+      "added": 59
+    },
+    "timestamp": "2026-05-20T23:04:00+09:00"
   }
 ]

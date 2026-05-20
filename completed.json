@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 10,
+    "version": 11,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-19T23:30:00+09:00"
+    "updatedAt": "2026-05-20T23:04:00+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -457,6 +457,61 @@
         "(micro) helpers/buffer.ts 추출 (toUint8 중복 제거) + helpers/client.ts 분리 + (piiExtension as any) → PiiExtensionShape public type export",
         "(별도 chore) GitHub Actions services.postgres + pnpm test:integration workflow (CI 미구축 — A1)",
         "(별도) ESLint no-restricted-syntax로 nested write applications:{create:...} 정적 차단 (CANDID-031 D6 패턴)"
+      ]
+    },
+    "CANDID-006": {
+      "id": "CANDID-006",
+      "title": "JWT(Access 30분) + Refresh Token(HttpOnly Cookie) 인증 미들웨어",
+      "phase": 1,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-20T23:04:00+09:00",
+      "assignee": "jaese@hoji-20260519-233304",
+      "prs": [
+        {
+          "number": 21,
+          "title": "feat: CANDID-006 Step 1 - env required + RefreshToken model + migration",
+          "mergedAt": "2026-05-20T00:18:00+09:00",
+          "additions": 100,
+          "deletions": 48,
+          "note": "lib/env.ts JWT_ACCESS/REFRESH_SECRET required(min 64) 격상 + TTL 3종 env + RefreshToken 모델/마이그레이션(CREATE TABLE + 3 인덱스 + FK). 리뷰 CRITICAL 1(C001 TRUNCATE_TARGETS) → skill-fix 회차 1로 해소 + H001/H003/H004 동시 보강. 재리뷰 CRITICAL 0."
+        },
+        {
+          "number": 22,
+          "title": "feat: CANDID-006 Step 2 - lib/auth/jwt.ts (jose HS512) + cookies.ts",
+          "mergedAt": "2026-05-20T22:34:00+09:00",
+          "additions": 497,
+          "deletions": 3,
+          "note": "jose 5.10.0 도입(Edge/Node 공용). jwt.ts HS512 발급/검증 4함수 — tokenType claim으로 access↔refresh 교차 사용 차단, expired/invalid reason 분기. cookies.ts HttpOnly+Secure(prod)+SameSite=Lax+Path=/ 통일. 단위 26건. 리뷰 CRITICAL 0, MAJOR 9, MINOR 6 — APPROVED."
+        },
+        {
+          "number": 23,
+          "title": "feat: CANDID-006 Step 3 - lib/auth/session.ts (RefreshToken DB 세션)",
+          "mergedAt": "2026-05-20T22:53:00+09:00",
+          "additions": 369,
+          "deletions": 0,
+          "note": "session.ts RefreshToken DB 세션 레이어 — issue/verify/rotate/revoke. 토큰 원문 미저장(sha256 hex만). 리뷰 CRITICAL 1(C001 rotation TOCTOU race condition) → skill-fix 회차 1로 조건부 updateMany(where revokedAt=null) + 콜백 트랜잭션으로 해소. 재리뷰 CRITICAL 0, MAJOR 5."
+        },
+        {
+          "number": 24,
+          "title": "feat: CANDID-006 Step 4 - middleware + /api/v1/auth/refresh route",
+          "mergedAt": "2026-05-20T23:03:00+09:00",
+          "additions": 305,
+          "deletions": 2,
+          "note": "middleware.ts requireAuth/getOptionalAuth(Edge 호환, jose verify만) + authErrorResponse. POST /api/v1/auth/refresh route(runtime=nodejs). RefreshSession에 userId 추가 — refresh route Access 발급용 통합 gap 보정(L-019). 리뷰 CRITICAL 0, MAJOR 10(대부분 CANDID-007/009/021/026 위임) — APPROVED."
+        }
+      ],
+      "summary": "CANDID-006 완료 — 4-step JWT 인증 미들웨어. jose HS512 Access(30분)/Refresh(14일·상태유지 미체크 시 1일) 발급·검증, Access/Refresh 분리 secret + tokenType claim 교차사용 차단. Refresh Token DB 화이트리스트(sha256 해시 저장 — 원문 미저장) + rotation(familyId 승계/rotationCounter). HttpOnly+Secure(prod)+SameSite=Lax Cookie 입출력. Route Handler 인증 헬퍼(requireAuth/getOptionalAuth)와 POST /api/v1/auth/refresh 엔드포인트. Node/Edge 런타임 격리(계획서 R6) 정확 구현 — middleware는 jose verify만, refresh route는 runtime=nodejs. 전체 +1271 LOC, 단위 테스트 199→258(+59). skill-fix 2회(Step 1 C001 migration guard / Step 3 C001 rotation TOCTOU — 조건부 updateMany로 한 family 활성 토큰 1개 불변식 확보). 라인 추정 vs 실제: Step 1(140→100), Step 2(400→497), Step 3(350→369), Step 4(350→305) — 새 도메인(인증) 첫 진입이라 변동폭 컸으나 L-010 v2 보정 prLineLimit 내 수렴.",
+      "dependencies": ["CANDID-003"],
+      "specFile": "docs/sample-requirement.md",
+      "followUpTasksRecommended": [
+        "(CANDID-006-FU1) lib/auth/session.ts 실 PrismaClient 통합 테스트 — 동시 rotation TOCTOU 시나리오(병렬 Promise.all) + UNIQUE/FK 제약 검증 (계획서 A1, CANDID-035 패턴 미러)",
+        "(CANDID-007) AUTH_TOKEN_*/AUTH_REFRESH_* 4종 에러 코드 상수화 + CLAUDE.md 에러 코드 표 등록 + 전역 에러 핸들러로 authErrorResponse 이관",
+        "(CANDID-009) POST /api/v1/auth/refresh rate limiting + 인증 응답 Cache-Control: no-store 보안 헤더",
+        "(CANDID-021) refresh rotation reuse detection(rotated 토큰 재제출 시 family 전체 revoke) + 동시 회전 패자를 reuse_detected 사유로 분리 + rememberMe TTL 승계",
+        "(CANDID-026) 인증 실패·토큰 회전 감사 로그 (토큰 원문 미로깅 — jti/sha256만)",
+        "(micro) middleware/refresh route 테스트 보강 — 비-POST 메서드 405, Set-Cookie 보안속성, 에러응답 전체필드, getOptionalAuth refresh-as-access 교차 케이스",
+        "(micro) docs/api-specs/auth.md 작성 — POST /api/v1/auth/refresh 명세 + 표준 에러 포맷"
       ]
     }
   }
