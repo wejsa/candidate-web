@@ -375,5 +375,14 @@
     "mergeMethod": "squash",
     "actualLines": 497,
     "timestamp": "2026-05-20T22:34:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-006",
+    "stepNumber": 3,
+    "prNumber": 23,
+    "branch": "feature/CANDID-006-step3",
+    "additions": 369,
+    "timestamp": "2026-05-20T22:40:00+09:00"
   }
 ]
