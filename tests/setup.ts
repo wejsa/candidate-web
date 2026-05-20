@@ -9,3 +9,10 @@ process.env.DATABASE_URL ??= 'postgresql://test:test@localhost:5432/test_db';
 // H007 fix: ??= 가 아닌 = 사용 — 외부 env에 운영 키가 export되어 있더라도
 // 테스트는 항상 고정 키 사용 (운영 키 누수 방지).
 process.env.PII_ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+
+// CANDID-006 — JWT secret required 격상. 동일 H007 패턴 (운영 시크릿 누수 차단).
+// HS512 min(64) 충족 + Access/Refresh 분리 (서로 다른 secret 강제 — env refine).
+process.env.JWT_ACCESS_SECRET =
+  'test-access-secret-candid006-hs512-min-64-chars-XXXXXXXXXXXXXXXX-only';
+process.env.JWT_REFRESH_SECRET =
+  'test-refresh-secret-candid006-hs512-min-64-chars-YYYYYYYYYYYYYY-only';
