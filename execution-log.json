@@ -558,5 +558,27 @@
     "info": 10,
     "isLastStep": true,
     "timestamp": "2026-05-20T23:58:38+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-007",
+    "stepNumber": 3,
+    "prNumber": 27,
+    "mergeMethod": "squash",
+    "actualLines": 57,
+    "isLastStep": true,
+    "timestamp": "2026-05-21T00:00:31+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-007",
+    "totalSteps": 3,
+    "totalAdditions": 676,
+    "totalDeletions": 84,
+    "vitest": {
+      "passed": 296,
+      "added": 38
+    },
+    "timestamp": "2026-05-21T00:00:31+09:00"
   }
 ]

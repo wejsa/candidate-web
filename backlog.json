@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 103,
+    "version": 104,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:58:38+09:00"
+    "updatedAt": "2026-05-21T00:00:31+09:00"
   },
   "summary": {
     "total": 35,
-    "done": 11,
-    "inProgress": 1,
+    "done": 12,
+    "inProgress": 0,
     "review": 0,
     "todo": 23
   },
@@ -385,35 +385,22 @@
       "id": "CANDID-007",
       "title": "전역 에러 핸들러 + 에러 코드 체계 (AUTH_/USER_/JOB_/APP_/FILE_/SYS_)",
       "description": "표준 에러 응답 포맷(timestamp/status/code/message/path/traceId/details). HTTP 코드 매핑(401/403/404/409/422/429). 운영 환경 스택 트레이스 미노출.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260520-231217",
-      "assignedAt": "2026-05-20T23:58:38+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "lib/auth/middleware.ts",
-        "app/api/v1/auth/refresh/route.ts",
-        "tests/lib/auth/middleware.test.ts",
-        "tests/app/api/v1/auth/refresh.test.ts",
-        "CLAUDE.md",
-        ".claude/domains/_base/conventions/error-handling.md"
-      ],
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-001"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T23:58:38+09:00",
+      "updatedAt": "2026-05-21T00:00:31+09:00",
+      "completedAt": "2026-05-21T00:00:31+09:00",
       "specFile": "docs/sample-requirement.md",
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 27,
-        "fixLoopCount": 0,
-        "autoChainArgs": "27",
-        "updatedAt": "2026-05-20T23:58:38+09:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
@@ -460,9 +447,10 @@
           "number": 3,
           "title": "CANDID-006 authErrorResponse 이관 + 통합",
           "description": "lib/auth/middleware.ts — authErrorResponse 제거, requireAuth가 실패 시 throw new AppError('AUTH_TOKEN_*'), 반환 타입 Promise<AuthContext>. app/api/v1/auth/refresh/route.ts — withErrorHandler 래핑 + throw AppError('AUTH_REFRESH_*'). 테스트 2종 throw 단정으로 전환. CLAUDE.md 에러 코드 표에 AUTH_TOKEN_*/AUTH_REFRESH_* 4종 + SSOT 1줄 추가.",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-007-step3",
           "prNumber": 27,
+          "mergedAt": "2026-05-21T00:00:31+09:00",
           "files": [
             "lib/auth/middleware.ts",
             "app/api/v1/auth/refresh/route.ts",
@@ -474,7 +462,7 @@
           "estimatedLines": 240,
           "actualLines": 57,
           "prLineLimit": 350,
-          "note": "authErrorResponse 제거 + requireAuth/refresh route를 AppError throw + withErrorHandler로 이관. CLAUDE.md 에러 코드 표/SSOT + error-handling.md 정합(PR #26 docs 인계). 변경 137줄(+57/-80)."
+          "note": "authErrorResponse 제거 + requireAuth/refresh route를 AppError throw + withErrorHandler로 이관. CLAUDE.md 에러 코드 표/SSOT + error-handling.md 정합. review CRITICAL 0 / MAJOR 3 (H001~H003 retro follow-up 인계) / MINOR 2 / INFO 10 — 보안 결함 0건."
         }
       ],
       "currentStep": 3
