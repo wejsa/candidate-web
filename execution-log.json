@@ -418,5 +418,15 @@
     "minor": 4,
     "note": "재리뷰 — fix 회차 1 후 C001 해소",
     "timestamp": "2026-05-20T22:52:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-006",
+    "stepNumber": 3,
+    "prNumber": 23,
+    "mergeMethod": "squash",
+    "actualLines": 369,
+    "fixLoop": 1,
+    "timestamp": "2026-05-20T22:53:00+09:00"
   }
 ]

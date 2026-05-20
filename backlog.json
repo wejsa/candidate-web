@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 89,
+    "version": 90,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T22:52:00+09:00"
+    "updatedAt": "2026-05-20T22:54:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -287,29 +287,27 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260519-233304",
-      "assignedAt": "2026-05-20T22:52:00+09:00",
+      "assignedAt": "2026-05-20T22:54:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/auth/session.ts",
         "lib/auth/middleware.ts",
         "app/api/v1/auth/refresh/route.ts",
-        "tests/lib/auth/session.test.ts",
         "tests/lib/auth/middleware.test.ts",
         "tests/app/api/v1/auth/refresh.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 23,
-        "fixLoopCount": 1,
-        "autoChainArgs": "23",
-        "updatedAt": "2026-05-20T22:52:00+09:00"
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-20T22:54:00+09:00"
       },
       "dependencies": [
         "CANDID-003"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T22:52:00+09:00",
+      "updatedAt": "2026-05-20T22:54:00+09:00",
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
@@ -357,16 +355,18 @@
           "number": 3,
           "title": "lib/auth/session.ts (RefreshToken DB issue/verify/rotate/revoke) + 단위 테스트",
           "description": "issueRefreshSession + verifyRefreshSession (sha256 + DB SELECT + expires/revoked 검사) + rotateRefreshSession (구 revoke 'rotated' + 새 issue, familyId 승계) + revokeAllForUser(reason) (BR-AUTH-05). 단위 테스트 mock 기반 15+ 케이스. session.ts는 Node 전용 (Route Handler), Edge runtime 분리.",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-006-step3",
           "prNumber": 23,
+          "mergedAt": "2026-05-20T22:53:00+09:00",
           "files": [
             "lib/auth/session.ts",
             "tests/lib/auth/session.test.ts"
           ],
           "estimatedLines": 350,
           "actualLines": 369,
-          "prLineLimit": 450
+          "prLineLimit": 450,
+          "note": "review CRITICAL 1 (C001 rotation TOCTOU race condition) → skill-fix 회차 1로 해소 (조건부 updateMany + 콜백 트랜잭션). 재리뷰 CRITICAL 0 / MAJOR 5 / MINOR 4."
         },
         {
           "number": 4,
@@ -383,7 +383,7 @@
           "prLineLimit": 450
         }
       ],
-      "currentStep": 3
+      "currentStep": 4
     },
     "CANDID-007": {
       "id": "CANDID-007",
