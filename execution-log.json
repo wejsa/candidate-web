@@ -335,5 +335,15 @@
     "minor": 0,
     "note": "재리뷰 — fix 회차 1 후 전부 해소",
     "timestamp": "2026-05-20T00:15:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-006",
+    "stepNumber": 1,
+    "prNumber": 21,
+    "mergeMethod": "squash",
+    "actualLines": 100,
+    "fixLoop": 1,
+    "timestamp": "2026-05-20T00:18:00+09:00"
   }
 ]
