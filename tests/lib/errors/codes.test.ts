@@ -31,6 +31,51 @@ describe('ERROR_CATALOG', () => {
     expect(ERROR_CATALOG.AUTH_REFRESH_INVALID.status).toBe(401);
     expect(ERROR_CATALOG.AUTH_REFRESH_EXPIRED.status).toBe(401);
   });
+
+  // CANDID-007 Step 1 PR #25 리뷰 H002 — 코드별 status를 1:1로 고정해 동일군 내 오변경 회귀를 차단.
+  // EXPECTED_STATUS는 Record<ErrorCode, number>라 코드 추가/삭제 시 컴파일 단계에서 동기화가 강제된다.
+  it('maps every code to its exact intended HTTP status', () => {
+    const EXPECTED_STATUS: Record<ErrorCode, number> = {
+      AUTH_INVALID_CREDENTIALS: 401,
+      AUTH_ACCOUNT_LOCKED: 429,
+      AUTH_EMAIL_NOT_VERIFIED: 403,
+      AUTH_TOKEN_INVALID: 401,
+      AUTH_TOKEN_EXPIRED: 401,
+      AUTH_REFRESH_INVALID: 401,
+      AUTH_REFRESH_EXPIRED: 401,
+      AUTH_FORBIDDEN: 403,
+      USER_EMAIL_DUPLICATED: 409,
+      USER_NOT_FOUND: 404,
+      JOB_NOT_FOUND: 404,
+      JOB_NOT_OPEN: 422,
+      JOB_CLOSED: 422,
+      APP_ALREADY_SUBMITTED: 409,
+      APP_DEADLINE_PASSED: 422,
+      APP_DRAFT_CONFLICT: 409,
+      FILE_SIZE_EXCEEDED: 422,
+      FILE_TYPE_NOT_ALLOWED: 422,
+      FILE_UPLOAD_FAILED: 500,
+      SYS_INTERNAL_ERROR: 500,
+      SYS_DEPENDENCY_UNAVAILABLE: 503,
+      SYS_VALIDATION_FAILED: 400,
+    };
+    for (const code of ALL_CODES) {
+      expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);
+    }
+  });
+
+  // CANDID-007 Step 1 PR #25 리뷰 M005 — 키 형식을 UPPER_SNAKE로 엄격 검증 (startsWith 보강).
+  it('uses a strict UPPER_SNAKE format for every code key', () => {
+    for (const code of ALL_CODES) {
+      expect(code).toMatch(/^(AUTH|USER|JOB|APP|FILE|SYS)_[A-Z]+(_[A-Z]+)*$/);
+    }
+  });
+
+  // CANDID-007 Step 1 PR #25 리뷰 M004 — 메시지 중복(붙여넣기 실수)을 회귀로 차단.
+  it('gives every code a unique message', () => {
+    const messages = ALL_CODES.map((code) => ERROR_CATALOG[code].message);
+    expect(new Set(messages).size).toBe(ALL_CODES.length);
+  });
 });
 
 describe('errorStatus / errorMessage', () => {

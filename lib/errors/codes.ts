@@ -2,6 +2,7 @@
 // 표준 에러 응답의 `code`는 이 카탈로그에 정의된 불변 문자열 상수만 사용한다.
 // 도메인 접두어: AUTH_ / USER_ / JOB_ / APP_ / FILE_ / SYS_ (CLAUDE.md 에러 코드 체계).
 // 각 코드는 기본 HTTP status와 사용자 친화적 한국어 message를 가진다.
+// 순수 TS만 사용 — Edge/Node 양 런타임 호환 유지. node: 모듈·Prisma 의존 추가 금지.
 
 export interface ErrorCodeSpec {
   /** 기본 HTTP 상태 코드 — AppError가 별도 status를 받지 않으면 이 값을 사용. */
