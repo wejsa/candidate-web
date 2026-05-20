@@ -595,7 +595,8 @@ CANDID-{번호}
 - Server Components 기본, Client Component는 `'use client'` 명시 + 최소화.
 - Route Handlers(`app/api/.../route.ts`) — REST 메서드는 export named function(`GET`, `POST`, ...).
 - 환경 변수는 `zod` 스키마로 단일 진입점에서 검증.
-- 에러 응답은 표준 포맷(`{timestamp, status, code, message, path, traceId, details}`) — `code`는 도메인 접두어 사용.
+- 에러 응답은 표준 포맷(`{timestamp, status, code, message, path, traceId, details}`) — `code`는 `lib/errors/codes.ts` `ERROR_CATALOG`의 `ErrorCode`만 사용.
+- Route Handler는 `withErrorHandler`(`@/lib/errors`)로 감싸고 실패 시 `AppError`를 throw한다 — 전역 핸들러가 표준 에러 응답으로 변환. 핸들러에서 응답 포맷 수동 조립 금지.
 
 ### 보안 강제 사항 (PR 리뷰 CRITICAL)
 - 비밀번호는 **BCrypt strength 12** 외 어떤 형태로도 저장/로깅 금지.
@@ -622,14 +623,15 @@ CANDID-{번호}
 
 | 도메인 | 접두어 | 예시 |
 |--------|--------|------|
-| 인증 | `AUTH_` | `AUTH_INVALID_CREDENTIALS`, `AUTH_ACCOUNT_LOCKED`, `AUTH_EMAIL_NOT_VERIFIED` |
+| 인증 | `AUTH_` | `AUTH_INVALID_CREDENTIALS`, `AUTH_ACCOUNT_LOCKED`, `AUTH_EMAIL_NOT_VERIFIED`, `AUTH_TOKEN_INVALID`, `AUTH_TOKEN_EXPIRED`, `AUTH_REFRESH_INVALID`, `AUTH_REFRESH_EXPIRED`, `AUTH_FORBIDDEN` |
 | 사용자 | `USER_` | `USER_EMAIL_DUPLICATED`, `USER_NOT_FOUND` |
 | 공고 | `JOB_` | `JOB_NOT_FOUND`, `JOB_NOT_OPEN`, `JOB_CLOSED` |
 | 지원 | `APP_` | `APP_ALREADY_SUBMITTED`, `APP_DEADLINE_PASSED`, `APP_DRAFT_CONFLICT` |
 | 파일 | `FILE_` | `FILE_SIZE_EXCEEDED`, `FILE_TYPE_NOT_ALLOWED`, `FILE_UPLOAD_FAILED` |
-| 시스템 | `SYS_` | `SYS_INTERNAL_ERROR`, `SYS_DEPENDENCY_UNAVAILABLE` |
+| 시스템 | `SYS_` | `SYS_INTERNAL_ERROR`, `SYS_DEPENDENCY_UNAVAILABLE`, `SYS_VALIDATION_FAILED` |
 
 > `code`는 클라이언트가 분기 처리할 수 있도록 **불변 문자열 상수**로 정의. 운영 환경 응답에 스택 트레이스 미노출.
+> 에러 코드 **SSOT는 `lib/errors/codes.ts`의 `ERROR_CATALOG`** — 신규 코드는 카탈로그를 먼저 갱신한다. 위 표는 예시다.
 
 ---
 
