@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 98,
+    "version": 99,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:35:16+09:00"
+    "updatedAt": "2026-05-20T23:43:02+09:00"
   },
   "summary": {
     "total": 35,
@@ -390,14 +390,18 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260520-231217",
-      "assignedAt": "2026-05-20T23:35:16+09:00",
+      "assignedAt": "2026-05-20T23:43:02+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/errors/response.ts",
         "lib/errors/index.ts",
+        "lib/errors/codes.ts",
+        "lib/errors/app-error.ts",
         "lib/auth/middleware.ts",
         "app/api/v1/auth/refresh/route.ts",
         "tests/lib/errors/response.test.ts",
+        "tests/lib/errors/codes.test.ts",
+        "tests/lib/errors/app-error.test.ts",
         "tests/lib/auth/middleware.test.ts",
         "tests/app/api/v1/auth/refresh.test.ts",
         "CLAUDE.md"
@@ -406,15 +410,15 @@
         "CANDID-001"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T23:35:16+09:00",
+      "updatedAt": "2026-05-20T23:43:02+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 26,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-20T23:35:16+09:00"
+        "autoChainArgs": "26 --auto-fix",
+        "updatedAt": "2026-05-20T23:43:02+09:00"
       },
       "steps": [
         {
@@ -440,14 +444,22 @@
           "number": 2,
           "title": "전역 핸들러 + 응답 빌더 + Route Handler 래퍼",
           "description": "lib/errors/response.ts — ErrorResponseBody 타입, errorResponse() 7필드 빌더(traceId 기본 randomUUID), handleApiError() 분기(AppError / ZodError→400 SYS_VALIDATION_FAILED / unknown→500 SYS_INTERNAL_ERROR + 운영 스택 비노출 + console.error), withErrorHandler() HOF(요청당 traceId 생성 → catch). lib/errors/index.ts barrel. 단위 테스트 1종(전 분기 + prod/dev + traceId + 래퍼).",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-007-step2",
+          "prNumber": 26,
           "files": [
             "lib/errors/response.ts",
             "lib/errors/index.ts",
-            "tests/lib/errors/response.test.ts"
+            "lib/errors/codes.ts",
+            "lib/errors/app-error.ts",
+            "tests/lib/errors/response.test.ts",
+            "tests/lib/errors/codes.test.ts",
+            "tests/lib/errors/app-error.test.ts"
           ],
           "estimatedLines": 360,
-          "prLineLimit": 500
+          "actualLines": 385,
+          "prLineLimit": 500,
+          "note": "PR #25 리뷰 H002/H003/M002/M004/M005를 L-019 in-task self-correction으로 동반 보강 (codes.ts/app-error.ts + 테스트 2종)."
         },
         {
           "number": 3,
