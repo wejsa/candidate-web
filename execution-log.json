@@ -323,5 +323,17 @@
     ],
     "fixLoop": 1,
     "timestamp": "2026-05-20T00:10:00+09:00"
+  },
+  {
+    "event": "approved",
+    "taskId": "CANDID-006",
+    "stepNumber": 1,
+    "prNumber": 21,
+    "reviewState": "COMMENTED",
+    "critical": 0,
+    "major": 0,
+    "minor": 0,
+    "note": "재리뷰 — fix 회차 1 후 전부 해소",
+    "timestamp": "2026-05-20T00:15:00+09:00"
   }
 ]
