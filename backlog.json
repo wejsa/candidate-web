@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 94,
+    "version": 95,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:12:17+09:00"
+    "updatedAt": "2026-05-20T23:23:06+09:00"
   },
   "summary": {
     "total": 35,
@@ -390,13 +390,81 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260520-231217",
-      "assignedAt": "2026-05-20T23:12:17+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-20T23:23:06+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "lib/errors/codes.ts",
+        "lib/errors/app-error.ts",
+        "lib/errors/response.ts",
+        "lib/errors/index.ts",
+        "lib/auth/middleware.ts",
+        "app/api/v1/auth/refresh/route.ts",
+        "tests/lib/errors/codes.test.ts",
+        "tests/lib/errors/app-error.test.ts",
+        "tests/lib/errors/response.test.ts",
+        "tests/lib/auth/middleware.test.ts",
+        "tests/app/api/v1/auth/refresh.test.ts",
+        "CLAUDE.md"
+      ],
       "dependencies": [
         "CANDID-001"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "updatedAt": "2026-05-20T23:23:06+09:00",
+      "specFile": "docs/sample-requirement.md",
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-20T23:23:06+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "에러 코드 카탈로그 + AppError 클래스",
+          "description": "lib/errors/codes.ts — ERROR_CATALOG 22종 SSOT(code → {status, message}) + ErrorCode 타입 + errorStatus() 헬퍼. lib/errors/app-error.ts — AppError extends Error(code→status 파생, message 기본값 catalog) + ErrorDetail 타입 + isAppError() 가드. 단위 테스트 2종(카탈로그 구조/status 범위 + AppError 생성·instanceof·가드).",
+          "status": "pending",
+          "files": [
+            "lib/errors/codes.ts",
+            "lib/errors/app-error.ts",
+            "tests/lib/errors/codes.test.ts",
+            "tests/lib/errors/app-error.test.ts"
+          ],
+          "estimatedLines": 290,
+          "prLineLimit": 400
+        },
+        {
+          "number": 2,
+          "title": "전역 핸들러 + 응답 빌더 + Route Handler 래퍼",
+          "description": "lib/errors/response.ts — ErrorResponseBody 타입, errorResponse() 7필드 빌더(traceId 기본 randomUUID), handleApiError() 분기(AppError / ZodError→400 SYS_VALIDATION_FAILED / unknown→500 SYS_INTERNAL_ERROR + 운영 스택 비노출 + console.error), withErrorHandler() HOF(요청당 traceId 생성 → catch). lib/errors/index.ts barrel. 단위 테스트 1종(전 분기 + prod/dev + traceId + 래퍼).",
+          "status": "pending",
+          "files": [
+            "lib/errors/response.ts",
+            "lib/errors/index.ts",
+            "tests/lib/errors/response.test.ts"
+          ],
+          "estimatedLines": 360,
+          "prLineLimit": 500
+        },
+        {
+          "number": 3,
+          "title": "CANDID-006 authErrorResponse 이관 + 통합",
+          "description": "lib/auth/middleware.ts — authErrorResponse 제거, requireAuth가 실패 시 throw new AppError('AUTH_TOKEN_*'), 반환 타입 Promise<AuthContext>. app/api/v1/auth/refresh/route.ts — withErrorHandler 래핑 + throw AppError('AUTH_REFRESH_*'). 테스트 2종 throw 단정으로 전환. CLAUDE.md 에러 코드 표에 AUTH_TOKEN_*/AUTH_REFRESH_* 4종 + SSOT 1줄 추가.",
+          "status": "pending",
+          "files": [
+            "lib/auth/middleware.ts",
+            "app/api/v1/auth/refresh/route.ts",
+            "tests/lib/auth/middleware.test.ts",
+            "tests/app/api/v1/auth/refresh.test.ts",
+            "CLAUDE.md"
+          ],
+          "estimatedLines": 240,
+          "prLineLimit": 350
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-008": {
       "id": "CANDID-008",
