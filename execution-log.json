@@ -482,5 +482,17 @@
     "additions": 234,
     "deletions": 0,
     "timestamp": "2026-05-20T23:28:42+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-007",
+    "stepNumber": 1,
+    "prNumber": 25,
+    "reviewState": "COMMENTED",
+    "critical": 0,
+    "major": 3,
+    "minor": 5,
+    "info": 6,
+    "timestamp": "2026-05-20T23:32:59+09:00"
   }
 ]

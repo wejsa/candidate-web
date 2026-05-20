@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 96,
+    "version": 97,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-20T23:28:42+09:00"
+    "updatedAt": "2026-05-20T23:32:59+09:00"
   },
   "summary": {
     "total": 35,
@@ -390,7 +390,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260520-231217",
-      "assignedAt": "2026-05-20T23:28:42+09:00",
+      "assignedAt": "2026-05-20T23:32:59+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/errors/codes.ts",
@@ -410,15 +410,15 @@
         "CANDID-001"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-20T23:28:42+09:00",
+      "updatedAt": "2026-05-20T23:32:59+09:00",
       "specFile": "docs/sample-requirement.md",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 25,
         "fixLoopCount": 0,
-        "autoChainArgs": "25 --auto-fix",
-        "updatedAt": "2026-05-20T23:28:42+09:00"
+        "autoChainArgs": "25",
+        "updatedAt": "2026-05-20T23:32:59+09:00"
       },
       "steps": [
         {
