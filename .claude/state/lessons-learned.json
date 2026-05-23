@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 5,
-    "updatedAt": "2026-05-17T23:45:00+09:00",
+    "version": 6,
+    "updatedAt": "2026-05-23T12:55:00+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -380,6 +380,24 @@
       "appliedCount": 1,
       "createdAt": "2026-05-17T23:45:00+09:00",
       "updatedAt": "2026-05-17T23:45:00+09:00"
+    },
+    {
+      "id": "L-022",
+      "taskId": "CANDID-010",
+      "category": "process",
+      "title": "MAJOR carry-over 누적 임계 — 7건+ 시 별도 fix PR 분리",
+      "description": "스텝별 PR로 분할 진행 시 MAJOR carry-over가 누적 증가(CANDID-010: Step1→2 carry 2건, Step2→3 carry 9건, Step3→다음 task 14건)하면 마지막 step PR이 신규 기능 + carry fix + 신규 review 누적으로 line inflation·검토 부담이 동시에 증가한다. L-019(in-task self-correction)의 자연 합류 패턴은 carry 건수가 적을 때만 유효하며, 임계(권장: MAJOR ≥7건)를 초과하면 다음 step에 번들하지 말고 별도 fix PR(예: `fix/CANDID-XXX-carryover`)로 분리해 신규 기능 PR과 검토 컨텍스트를 격리한다. 분리 기준: (1) carry MAJOR ≥7건, (2) 누적 추세 증가, (3) carry 항목이 신규 step 파일 외부에 위치. L-009(skill-fix 동일 PR loop)는 CRITICAL 전용이므로 본 패턴과 직교.",
+      "impact": "low",
+      "tags": [
+        "carry-over",
+        "review-process",
+        "step-bundling",
+        "major-accumulation",
+        "fix-pr"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-23T12:55:00+09:00",
+      "updatedAt": "2026-05-23T12:55:00+09:00"
     }
   ]
 }
