@@ -32,16 +32,20 @@
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
+    "bcryptjs": "2",
     "isomorphic-dompurify": "^3.14.0",
     "jose": "^5.10.0",
     "next": "^14.2.15",
+    "nodemailer": "6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "server-only": "0.0.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/bcryptjs": "2",
     "@types/node": "^20.16.10",
+    "@types/nodemailer": "^8.0.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",

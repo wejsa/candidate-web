@@ -16,3 +16,11 @@ process.env.JWT_ACCESS_SECRET =
   'test-access-secret-candid006-hs512-min-64-chars-XXXXXXXXXXXXXXXX-only';
 process.env.JWT_REFRESH_SECRET =
   'test-refresh-secret-candid006-hs512-min-64-chars-YYYYYYYYYYYYYY-only';
+
+// CANDID-010 — SMTP required 격상. 테스트는 nodemailer transporter를 mock하므로
+// 실 SMTP는 호출되지 않지만 env boot 검증 통과를 위해 placeholder 값 고정.
+process.env.SMTP_HOST = 'sandbox.smtp.test.local';
+process.env.SMTP_PORT = '2525';
+process.env.SMTP_USER = '';
+process.env.SMTP_PASS = '';
+process.env.SMTP_FROM = 'noreply@candidate.test';

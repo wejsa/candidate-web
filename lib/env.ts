@@ -85,10 +85,14 @@ const envSchema = z
     S3_ACCESS_KEY: z.string().optional(),
     S3_SECRET_KEY: z.string().optional(),
 
-    SMTP_HOST: z.string().optional(),
-    SMTP_PORT: z.coerce.number().int().min(1).max(65535).optional(),
-    SMTP_USER: z.string().optional(),
-    SMTP_PASS: z.string().optional(),
+    // CANDID-010에서 required로 격상 — 회원가입 인증 메일 발송에 SMTP 필수.
+    // dev/test: Mailtrap(sandbox.smtp.mailtrap.io:2525) 또는 ethereal.email.
+    // 운영: AWS SES / SendGrid / Mailgun — SMTP_FROM은 검증된 발신자 주소.
+    SMTP_HOST: z.string().min(1),
+    SMTP_PORT: z.coerce.number().int().min(1).max(65535),
+    SMTP_USER: z.string().default(''),
+    SMTP_PASS: z.string().default(''),
+    SMTP_FROM: z.string().email(),
   })
   .refine((e) => e.JWT_ACCESS_SECRET !== e.JWT_REFRESH_SECRET, {
     // CANDID-006: Access/Refresh secret 분리 강제 — 동일 값이면 누수 영향 격리 무력화.
