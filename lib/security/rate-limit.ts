@@ -1,6 +1,7 @@
 import 'server-only';
 import type { NextRequest, NextResponse } from 'next/server';
-import { AppError } from '@/lib/errors';
+import { getEnv } from '@/lib/env';
+import { errorResponse } from '@/lib/errors';
 
 // CANDID-009 Step 2 — Rate Limit 카탈로그 + sliding-window in-memory 리미터.
 // BR-SEC-04: 로그인 10회/분/IP, 회원가입 5회/시간/IP, 파일 30회/시간/사용자.
@@ -30,18 +31,28 @@ export interface RateLimitPolicy {
   readonly keyExtractor: (request: NextRequest) => string;
 }
 
-/** IP 키 추출 — X-Forwarded-For 신뢰 모델은 호출측이 결정 (TRUST_PROXY env). */
+/**
+ * IP 키 추출 — Step 3 보강(MAJOR-SEC-1): TRUST_PROXY env 분리.
+ * `TRUST_PROXY=true` (신뢰 LB/CDN 뒤)인 경우에만 X-Forwarded-For/X-Real-IP 우선.
+ * `TRUST_PROXY=false` (기본, 직접 노출 환경)에서는 NextRequest.ip만 사용 — 클라이언트의
+ * 헤더 위조로 카운터 격리 우회를 차단. 부재 시 'unknown' 단일 키로 수렴(공격 노출 최소화).
+ * isSecureRequest(middleware.ts)의 신뢰 모델과 동일한 게이트 — 한 곳에서 결정.
+ */
 export function rateLimitKeyByIp(request: NextRequest): string {
-  // 보수적 fallback chain — 운영은 신뢰 프록시 뒤 가정.
-  // 직접 노출 환경에서는 X-Forwarded-For가 위조 가능하나, 본 함수는 키 추출만 담당.
-  const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded !== null && forwarded !== '') {
-    const first = forwarded.split(',')[0]?.trim() ?? '';
-    if (first !== '') return `ip:${first}`;
+  const env = getEnv();
+  if (env.TRUST_PROXY) {
+    const forwarded = request.headers.get('x-forwarded-for');
+    if (forwarded !== null && forwarded !== '') {
+      const first = forwarded.split(',')[0]?.trim() ?? '';
+      if (first !== '') return `ip:${first}`;
+    }
+    const real = request.headers.get('x-real-ip');
+    if (real !== null && real !== '') return `ip:${real}`;
   }
-  const real = request.headers.get('x-real-ip');
-  if (real !== null && real !== '') return `ip:${real}`;
-  return 'ip:unknown';
+  // TRUST_PROXY=false 또는 신뢰 헤더 부재 — NextRequest.ip(Edge runtime 제공) 폴백.
+  // 부재 시 'unknown' — 단일 키로 수렴해 위조로 격리 우회 차단(보수적 trade-off).
+  const directIp = (request as { ip?: string }).ip ?? '';
+  return directIp !== '' ? `ip:${directIp}` : 'ip:unknown';
 }
 
 /**
@@ -141,8 +152,13 @@ function applyRateLimitHeaders(
 }
 
 /**
- * Route Handler를 감싸 정책을 강제한다. 한도 초과 시 AppError('SYS_RATE_LIMITED')를 throw
- * — withErrorHandler가 표준 429 응답으로 변환한다. 응답에는 X-RateLimit-* 헤더가 부착된다.
+ * Route Handler를 감싸 정책을 강제한다.
+ *
+ * Step 3 보강(H001/H002 — Step 2 review):
+ * - 한도 초과 시 throw 대신 errorResponse를 직접 반환 → X-RateLimit-* / Retry-After 헤더가
+ *   429 응답에 부착되어 클라이언트의 표준 backoff 로직 가용(RFC 6585).
+ * - 운영 메타데이터(policy/retryAfterSec)를 details에 담는 대신 헤더 채널로만 노출
+ *   (ErrorDetail 시맨틱은 입력 필드 검증 전용).
  *
  * 사용: `export const POST = withErrorHandler(withRateLimit(POLICIES.LOGIN, async (req) => {...}));`
  */
@@ -153,12 +169,9 @@ export function withRateLimit<C = unknown>(
   return async (request, context) => {
     const probe = checkRateLimit(policy, request);
     if (probe.limited) {
-      throw new AppError('SYS_RATE_LIMITED', {
-        details: [
-          { field: 'policy', reason: policy.name },
-          { field: 'retryAfterSec', reason: String(Math.ceil(probe.retryAfterMs / 1000)) },
-        ],
-      });
+      const response = errorResponse(request, 'SYS_RATE_LIMITED');
+      applyRateLimitHeaders(response, policy, probe);
+      return response;
     }
     const response = await handler(request, context);
     applyRateLimitHeaders(response, policy, probe);

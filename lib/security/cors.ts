@@ -39,10 +39,20 @@ export function getAllowedOrigins(): ReadonlySet<string> {
   return cachedAllowed;
 }
 
-/** 요청 Origin이 화이트리스트에 있으면 그대로 반환, 아니면 null. */
+/**
+ * 요청 Origin이 화이트리스트에 있으면 정규화된 origin을 반환, 아니면 null.
+ * Step 3 보강(MAJOR-SEC-2): URL constructor로 origin 정규화 (대소문자/기본 포트/trailing slash).
+ * 정당 요청 false-positive 차단(`https://Candidate.example.com:443` → 매칭).
+ */
 export function resolveAllowedOrigin(origin: string | null): string | null {
   if (origin === null || origin === '') return null;
-  return getAllowedOrigins().has(origin) ? origin : null;
+  let normalized: string;
+  try {
+    normalized = new URL(origin).origin;
+  } catch {
+    return null;
+  }
+  return getAllowedOrigins().has(normalized) ? normalized : null;
 }
 
 function appendVary(response: NextResponse, value: string): void {
