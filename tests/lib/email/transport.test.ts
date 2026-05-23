@@ -72,15 +72,80 @@ describe('sendMail', () => {
     );
   });
 
-  it('SMTP_USER/PASS 빈 값이면 auth 미지정 (Mailtrap 익명 등)', async () => {
+  it('SMTP_USER/PASS 빈 값이면 auth 키 자체를 부착하지 않음 (Mailtrap 익명 등)', async () => {
+    // C001 fix — expect.not.objectContaining({ auth: expect.anything() })는 auth: undefined도 통과해
+    // false-positive 발생. mock.calls 첫 인자를 직접 검증하여 auth 키 부재를 명시.
     vi.stubEnv('SMTP_USER', '');
     vi.stubEnv('SMTP_PASS', '');
     __resetCachedEnvForTesting();
     __resetMailerCacheForTesting();
     await sendMail({ to: 'a@b.test', subject: 's', html: 'h', text: 't' });
+    const opts = nm.createTransport.mock.calls.at(-1)?.[0] as Record<string, unknown> | undefined;
+    expect(opts).toBeDefined();
+    expect(opts).not.toHaveProperty('auth');
+  });
+
+  it('H007 fix — SMTP_USER/PASS 모두 채워지면 auth 객체 부착 (운영 정상 동작)', async () => {
+    vi.stubEnv('SMTP_USER', 'apikey');
+    vi.stubEnv('SMTP_PASS', 'SG.example-secret');
+    __resetCachedEnvForTesting();
+    __resetMailerCacheForTesting();
+    await sendMail({ to: 'a@b.test', subject: 's', html: 'h', text: 't' });
     expect(nm.createTransport).toHaveBeenCalledWith(
-      expect.not.objectContaining({ auth: expect.anything() }),
+      expect.objectContaining({
+        auth: { user: 'apikey', pass: 'SG.example-secret' },
+      }),
     );
+  });
+
+  it('H007 fix — SMTP_USER만 있고 PASS 빈 값이면 auth 미부착 (부분 누락 익명 시도)', async () => {
+    vi.stubEnv('SMTP_USER', 'user-only');
+    vi.stubEnv('SMTP_PASS', '');
+    __resetCachedEnvForTesting();
+    __resetMailerCacheForTesting();
+    await sendMail({ to: 'a@b.test', subject: 's', html: 'h', text: 't' });
+    const opts = nm.createTransport.mock.calls.at(-1)?.[0] as Record<string, unknown> | undefined;
+    expect(opts).not.toHaveProperty('auth');
+  });
+
+  it('H001 fix — STARTTLS 강제 (requireTLS) + TLS 1.2+ + 운영 인증서 검증', async () => {
+    vi.stubEnv('SMTP_PORT', '587');
+    __resetCachedEnvForTesting();
+    __resetMailerCacheForTesting();
+    await sendMail({ to: 'a@b.test', subject: 's', html: 'h', text: 't' });
+    const opts = nm.createTransport.mock.calls.at(-1)?.[0] as {
+      requireTLS?: boolean;
+      tls?: { minVersion?: string };
+    };
+    expect(opts.requireTLS).toBe(true);
+    expect(opts.tls?.minVersion).toBe('TLSv1.2');
+  });
+
+  it('H001 fix — implicit TLS(465)는 requireTLS=false (이미 TLS)', async () => {
+    vi.stubEnv('SMTP_PORT', '465');
+    __resetCachedEnvForTesting();
+    __resetMailerCacheForTesting();
+    await sendMail({ to: 'a@b.test', subject: 's', html: 'h', text: 't' });
+    const opts = nm.createTransport.mock.calls.at(-1)?.[0] as {
+      requireTLS?: boolean;
+      secure?: boolean;
+    };
+    expect(opts.secure).toBe(true);
+    expect(opts.requireTLS).toBe(false);
+  });
+
+  it('H004 fix — SMTP 타임아웃 명시 (connection/greeting/socket)', async () => {
+    __resetMailerCacheForTesting();
+    await sendMail({ to: 'a@b.test', subject: 's', html: 'h', text: 't' });
+    const opts = nm.createTransport.mock.calls.at(-1)?.[0] as {
+      connectionTimeout?: number;
+      greetingTimeout?: number;
+      socketTimeout?: number;
+    };
+    expect(opts.connectionTimeout).toBeGreaterThan(0);
+    expect(opts.connectionTimeout).toBeLessThanOrEqual(10_000);
+    expect(opts.greetingTimeout).toBeGreaterThan(0);
+    expect(opts.socketTimeout).toBeGreaterThan(0);
   });
 
   it('transporter는 캐시 — 동일 호출 시 createTransport 1회만', async () => {

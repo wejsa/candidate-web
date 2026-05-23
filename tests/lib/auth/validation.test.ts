@@ -68,6 +68,25 @@ describe('SignupInputSchema', () => {
     const result = SignupInputSchema.parse({ ...validInput, email: '  user@example.com  ' });
     expect(result.email).toBe('user@example.com');
   });
+
+  it('H003 fix — 한글 비밀번호 25자(75 bytes)는 거부 (UTF-8 byte 한계)', () => {
+    expect(() =>
+      SignupInputSchema.parse({
+        ...validInput,
+        password: '가'.repeat(25),
+        passwordConfirm: '가'.repeat(25),
+      }),
+    ).toThrow(/72바이트|72 bytes/);
+  });
+
+  it('name max(100) 경계 — 101자 거부', () => {
+    expect(() => SignupInputSchema.parse({ ...validInput, name: '가'.repeat(101) })).toThrow();
+  });
+
+  it('email max(255) 초과는 거부', () => {
+    const tooLong = `${'a'.repeat(64)}@${'b'.repeat(200)}.com`; // > 255
+    expect(() => SignupInputSchema.parse({ ...validInput, email: tooLong })).toThrow();
+  });
 });
 
 describe('VerifyEmailInputSchema', () => {

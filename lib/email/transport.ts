@@ -13,15 +13,29 @@ let cachedTransporter: Transporter | null = null;
 function getTransporter(): Transporter {
   if (cachedTransporter !== null) return cachedTransporter;
   const env = getEnv();
+  const isImplicitTls = env.SMTP_PORT === 465;
+  const hasAuth = env.SMTP_USER !== '' && env.SMTP_PASS !== '';
+
+  // Step 1 fix(H001 Sec): STARTTLS 강제 — 서버가 STARTTLS 미지원 응답 시 평문 fallback 차단.
+  //   MITM이 STARTTLS를 차단해도 인증 토큰의 평문 SMTP 노출 방지. 465(implicit TLS)에는 N/A.
+  // Step 1 fix(H004 Dom): 외부 SMTP 호출 타임아웃 — 호스트 장애 시 promise 누적 방지.
+  //   nodemailer 기본값(connection 2분/socket 10분)이 너무 김.
+  // 운영은 인증서 검증 강제(rejectUnauthorized: true), dev/test는 self-signed 허용.
   cachedTransporter = nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
-    // SMTP_PORT=465면 implicit TLS, 587이면 STARTTLS — nodemailer 자동 분기.
-    secure: env.SMTP_PORT === 465,
-    auth: env.SMTP_USER !== '' && env.SMTP_PASS !== '' ? {
-      user: env.SMTP_USER,
-      pass: env.SMTP_PASS,
-    } : undefined,
+    secure: isImplicitTls,
+    requireTLS: !isImplicitTls,
+    tls: {
+      rejectUnauthorized: process.env.NODE_ENV === 'production',
+      minVersion: 'TLSv1.2',
+    },
+    connectionTimeout: 5_000,
+    greetingTimeout: 5_000,
+    socketTimeout: 10_000,
+    // spread 패턴 — SMTP_USER/PASS 둘 다 채워진 경우에만 auth 키 자체를 부착.
+    // `auth: undefined` 명시 전달 회피 (테스트 가독성 + 의도 명확).
+    ...(hasAuth ? { auth: { user: env.SMTP_USER, pass: env.SMTP_PASS } } : {}),
   });
   return cachedTransporter;
 }

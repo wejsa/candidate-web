@@ -25,11 +25,13 @@ const EMAIL_FIELD = z
   .email('이메일 형식이 올바르지 않습니다')
   .transform((s) => s.toLowerCase());
 
-/** 비밀번호 필드 — 길이 + 3-of-4 강도. */
+/** 비밀번호 필드 — 길이 + 3-of-4 강도. Step 1 fix(H003): UTF-8 byte 기준 72(한글 24자). */
 const PASSWORD_FIELD = z
   .string()
   .min(10, '비밀번호는 최소 10자 이상이어야 합니다')
-  .max(72, '비밀번호가 너무 깁니다') // bcrypt 입력 길이 제한
+  .refine((s) => Buffer.byteLength(s, 'utf8') <= 72, {
+    message: '비밀번호가 너무 깁니다 (UTF-8 72바이트 이내, 한글은 24자)',
+  })
   .refine(hasThreeOfFourCharClasses, {
     message: '비밀번호는 영문 대/소문자·숫자·특수문자 중 3종 이상을 포함해야 합니다',
   });

@@ -7,15 +7,22 @@ import bcrypt from 'bcryptjs';
 // timing attack 방어는 bcrypt.compare가 자체 제공 (상수 시간 비교).
 
 const STRENGTH = 12;
+/** bcrypt 입력 한계 — 72 bytes 초과분은 silent truncate. UTF-8 한글 24자 = 72 bytes. */
+const MAX_PASSWORD_BYTES = 72;
 
 /**
  * 평문 비밀번호를 BCrypt strength 12 해시로 변환. ~250ms.
  * 호출측은 트랜잭션 진입 *전*에 호출하여 DB 커넥션 점유를 회피한다.
+ *
+ * Step 1 fix(H003/H006): UTF-8 byte 길이 가드 — zod 사전 검증(72 char) 외 경로(스크립트/관리자
+ * 직접 호출)에서도 silent truncation을 명시 throw로 방어. 한글 multi-byte는 24자에서 72 bytes 도달.
  */
 export async function hashPassword(plain: string): Promise<string> {
-  // bcrypt 자체 입력 길이 제한(72 bytes) — 호출측 zod 스키마가 사전 검증하지만 방어적 가드.
   if (plain.length === 0) {
     throw new Error('password must not be empty');
+  }
+  if (Buffer.byteLength(plain, 'utf8') > MAX_PASSWORD_BYTES) {
+    throw new Error(`password must be at most ${MAX_PASSWORD_BYTES} bytes in UTF-8`);
   }
   return bcrypt.hash(plain, STRENGTH);
 }

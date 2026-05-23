@@ -19,6 +19,23 @@ describe('hashPassword', () => {
   it('빈 문자열 입력은 throw (방어적 가드)', async () => {
     await expect(hashPassword('')).rejects.toThrow(/empty/);
   });
+
+  it('H003/H006 fix — 72 bytes 정확(ASCII 72자)은 정상 처리', async () => {
+    const plain = 'a'.repeat(72);
+    const hash = await hashPassword(plain);
+    expect(await verifyPassword(plain, hash)).toBe(true);
+  });
+
+  it('H003/H006 fix — UTF-8 72 bytes 초과(ASCII 73자)는 throw — bcrypt silent truncation 방지', async () => {
+    await expect(hashPassword('a'.repeat(73))).rejects.toThrow(/72 bytes/);
+  });
+
+  it('H003/H006 fix — UTF-8 한글 24자(72 bytes)는 정상, 25자(75 bytes)는 throw', async () => {
+    const ok = '가'.repeat(24);
+    const hash = await hashPassword(ok);
+    expect(await verifyPassword(ok, hash)).toBe(true);
+    await expect(hashPassword('가'.repeat(25))).rejects.toThrow(/72 bytes/);
+  });
 });
 
 describe('verifyPassword', () => {

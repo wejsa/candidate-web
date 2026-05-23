@@ -6,8 +6,20 @@
 --  4. BR-PII-05 옵션 C (age_confirmed_at)
 
 -- L-001 학습: destructive 마이그레이션 guard.
--- 본 마이그레이션은 token 컬럼을 교체하나, CANDID-010이 회원가입 API 자체를 처음 도입하므로
--- 기존 email_verifications row는 0건 — backfill/guard 불요. 배포 직전 row count 재확인 필수.
+-- 본 마이그레이션은 token 컬럼을 교체. CANDID-010이 회원가입 API 자체를 처음 도입하나
+-- dev/staging에 수동 seed가 있을 가능성을 방어 — Step 1 fix(H010): 자동 row count guard.
+-- 1건이라도 발견되면 마이그레이션 중단 (token 평문 → 해시 매핑 불가 = 데이터 손실 차단).
+DO $$
+DECLARE
+  v_count INT;
+BEGIN
+  SELECT COUNT(*) INTO v_count FROM "email_verifications";
+  IF v_count > 0 THEN
+    RAISE EXCEPTION
+      'CANDID-010 destructive migration aborted: email_verifications has % row(s) (expected 0). 백필 전략 없이 token 컬럼을 drop할 수 없습니다. 수동 정리 후 재실행하세요.',
+      v_count;
+  END IF;
+END $$;
 
 -- === users: 동의/연령 확인 컬럼 4종 추가 ===
 ALTER TABLE "users" ADD COLUMN "terms_agreed_at"     TIMESTAMP(3);
