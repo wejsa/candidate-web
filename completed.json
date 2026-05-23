@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 14,
+    "version": 15,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-23T23:16:28+09:00"
+    "updatedAt": "2026-05-24T00:38:26+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -593,6 +593,21 @@
         32,
         33,
         34
+      ]
+    },
+    "CANDID-036": {
+      "id": "CANDID-036",
+      "title": "CANDID-010 FU1: 이메일 인증 보안 hardening (race + RL + 메일링크 + 회귀 가드)",
+      "type": "enhancement",
+      "priority": "high",
+      "phase": 2,
+      "completedAt": "2026-05-24T00:37:44+09:00",
+      "steps": 3,
+      "totalLines": 932,
+      "prNumbers": [
+        35,
+        36,
+        37
       ]
     }
   }
