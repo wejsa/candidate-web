@@ -33,10 +33,12 @@ export const POST = withErrorHandler(
       token: result.verificationToken,
     });
     void sendMail(mailMsg).catch((err) => {
+      // PR #33 H003 fix: 평문 email은 PII — 도메인만 남겨 디버깅 충분성과 PII 보호를 양립.
       console.error('[signup] verification email send failed', {
         userId: result.user.id,
-        email: result.user.email,
-        err,
+        emailDomain: result.user.email.split('@')[1],
+        errName: err instanceof Error ? err.name : 'Unknown',
+        errMessage: err instanceof Error ? err.message : String(err),
       });
     });
 
