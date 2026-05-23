@@ -1,6 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
+import { Prisma } from '@prisma/client';
 import { AppError } from '@/lib/errors';
+
+// Step 3 fix(Step 2 review D3): instanceof 가드 통과를 위해 PrismaClientKnownRequestError 직접 생성.
+function fakePrismaP2002(target: string[]): Prisma.PrismaClientKnownRequestError {
+  const err = new Prisma.PrismaClientKnownRequestError('Unique constraint', {
+    code: 'P2002',
+    clientVersion: 'test',
+    meta: { target },
+  });
+  return err;
+}
 
 // Prisma + JWT + session 모듈을 mock — DB 의존 제거. signup.ts 비즈니스 로직만 검증.
 // 통합(실 DB) 검증은 별도 integration 테스트에서 수행 (vitest.config.integration.ts).
@@ -70,9 +81,10 @@ describe('createUserAndIssueTokens', () => {
     expect(result.verificationToken).toMatch(/^[0-9a-f]{64}$/);
 
     // 동의 시각 4종 + marketingAgreedAt=null (false 입력) 검증
-    const createCall = txMocks.user.create.mock.calls[0]?.[0] as {
-      data: Record<string, unknown>;
-    };
+    const createCalls = txMocks.user.create.mock.calls as unknown as Array<
+      [{ data: Record<string, unknown> }]
+    >;
+    const createCall = createCalls[0]?.[0] ?? { data: {} };
     expect(createCall.data.email).toBe('newuser@example.com');
     expect(createCall.data.termsAgreedAt).toBeInstanceOf(Date);
     expect(createCall.data.privacyAgreedAt).toBeInstanceOf(Date);
@@ -81,8 +93,11 @@ describe('createUserAndIssueTokens', () => {
     expect(createCall.data.passwordHash).toMatch(/^\$2[ab]\$12\$/); // bcrypt 12 rounds
 
     // emailVerification는 sha256 해시 + 24h 만료 + lastSentAt
-    const evCall = txMocks.emailVerification.create.mock.calls[0]?.[0] as {
-      data: { tokenHash: string; expiresAt: Date; lastSentAt: Date };
+    const evCalls = txMocks.emailVerification.create.mock.calls as unknown as Array<
+      [{ data: { tokenHash: string; expiresAt: Date; lastSentAt: Date } }]
+    >;
+    const evCall = evCalls[0]?.[0] ?? {
+      data: { tokenHash: '', expiresAt: new Date(0), lastSentAt: new Date(0) },
     };
     expect(evCall.data.tokenHash).toMatch(/^[0-9a-f]{64}$/);
     expect(evCall.data.tokenHash).not.toBe(result.verificationToken); // 평문 ≠ 해시
@@ -97,16 +112,15 @@ describe('createUserAndIssueTokens', () => {
     };
     prisma.$transaction.mockImplementation(async (cb) => cb(txMocks));
     await createUserAndIssueTokens({ ...validInput, marketingAgreed: true });
-    const data = (txMocks.user.create.mock.calls[0]?.[0] as { data: Record<string, unknown> })
-      .data;
+    const calls = txMocks.user.create.mock.calls as unknown as Array<
+      [{ data: Record<string, unknown> }]
+    >;
+    const data = calls[0]?.[0]?.data ?? {};
     expect(data.marketingAgreedAt).toBeInstanceOf(Date);
   });
 
   it('중복 이메일 — Prisma P2002 → AppError USER_EMAIL_DUPLICATED (409)', async () => {
-    const p2002 = Object.assign(new Error('Unique constraint'), {
-      code: 'P2002',
-      meta: { target: ['email'] },
-    });
+    const p2002 = fakePrismaP2002(['email']);
     prisma.$transaction.mockRejectedValueOnce(p2002);
     await expect(createUserAndIssueTokens(validInput)).rejects.toMatchObject({
       code: 'USER_EMAIL_DUPLICATED',
@@ -115,12 +129,19 @@ describe('createUserAndIssueTokens', () => {
   });
 
   it('Prisma P2002 — target이 email이 아니면 원본 throw (다른 unique 충돌)', async () => {
-    const p2002 = Object.assign(new Error('Unique constraint'), {
-      code: 'P2002',
-      meta: { target: ['some_other_column'] },
-    });
+    const p2002 = fakePrismaP2002(['some_other_column']);
     prisma.$transaction.mockRejectedValueOnce(p2002);
     await expect(createUserAndIssueTokens(validInput)).rejects.toBe(p2002);
+  });
+
+  it('Step 3 fix(D3) — `code:"P2002"`인 임의 객체는 instanceof 가드 미통과로 원본 throw', async () => {
+    // Plain Error에 code 속성만 부착한 가짜 P2002 — instanceof Prisma.PrismaClientKnownRequestError 미통과
+    const fake = Object.assign(new Error('Fake P2002'), {
+      code: 'P2002',
+      meta: { target: ['email'] },
+    });
+    prisma.$transaction.mockRejectedValueOnce(fake);
+    await expect(createUserAndIssueTokens(validInput)).rejects.toBe(fake);
   });
 
   it('Prisma 트랜잭션 외 일반 에러는 원본 throw (DB 연결 실패 등)', async () => {
@@ -142,10 +163,8 @@ describe('createUserAndIssueTokens', () => {
   });
 
   it('AppError 발생 시 passwordHash가 응답·로그에 노출되지 않음 (BR-AUTH-02)', async () => {
-    const p2002 = Object.assign(new Error('Unique constraint'), {
-      code: 'P2002',
-      meta: { target: ['email'] },
-    });
+    // D3 fix 이후: 정상 Prisma 에러로 fake 생성 → instanceof 가드 통과 → AppError 변환
+    const p2002 = fakePrismaP2002(['email']);
     prisma.$transaction.mockRejectedValueOnce(p2002);
     try {
       await createUserAndIssueTokens(validInput);

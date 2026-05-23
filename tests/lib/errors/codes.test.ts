@@ -4,12 +4,22 @@ import type { ErrorCode } from '@/lib/errors/codes';
 
 const ALL_CODES = Object.keys(ERROR_CATALOG) as ErrorCode[];
 const PREFIXES = ['AUTH_', 'USER_', 'JOB_', 'APP_', 'FILE_', 'SYS_'];
-const VALID_STATUSES = new Set([400, 401, 403, 404, 409, 422, 429, 500, 503]);
+const VALID_STATUSES = new Set([400, 401, 403, 404, 409, 410, 422, 429, 500, 503]);
 
 describe('ERROR_CATALOG', () => {
-  it('contains 24 codes', () => {
+  it('contains 27 codes', () => {
     // CANDID-009 Step 2: SYS_RATE_LIMITED, SYS_FORBIDDEN_ORIGIN 추가로 22 → 24
-    expect(ALL_CODES).toHaveLength(24);
+    // CANDID-010 Step 3: AUTH_VERIFICATION_TOKEN_INVALID/EXPIRED/RESEND_COOLDOWN 추가로 24 → 27
+    expect(ALL_CODES).toHaveLength(27);
+  });
+
+  it('CANDID-010 Step 3 신규 코드: AUTH_VERIFICATION_TOKEN_INVALID=400, _EXPIRED=410, _RESEND_COOLDOWN=429', () => {
+    expect(ERROR_CATALOG.AUTH_VERIFICATION_TOKEN_INVALID.status).toBe(400);
+    expect(ERROR_CATALOG.AUTH_VERIFICATION_TOKEN_EXPIRED.status).toBe(410);
+    expect(ERROR_CATALOG.AUTH_VERIFICATION_RESEND_COOLDOWN.status).toBe(429);
+    expect(errorMessage('AUTH_VERIFICATION_TOKEN_INVALID')).toMatch(/유효하지 않은/);
+    expect(errorMessage('AUTH_VERIFICATION_TOKEN_EXPIRED')).toMatch(/만료/);
+    expect(errorMessage('AUTH_VERIFICATION_RESEND_COOLDOWN')).toMatch(/60초/);
   });
 
   it('CANDID-009 신규 코드: SYS_RATE_LIMITED=429, SYS_FORBIDDEN_ORIGIN=403', () => {
@@ -68,6 +78,9 @@ describe('ERROR_CATALOG', () => {
       SYS_VALIDATION_FAILED: 400,
       SYS_RATE_LIMITED: 429,
       SYS_FORBIDDEN_ORIGIN: 403,
+      AUTH_VERIFICATION_TOKEN_INVALID: 400,
+      AUTH_VERIFICATION_TOKEN_EXPIRED: 410,
+      AUTH_VERIFICATION_RESEND_COOLDOWN: 429,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);

@@ -30,6 +30,19 @@ export const ERROR_CATALOG = {
     message: 'Refresh 토큰이 만료되었습니다. 다시 로그인해 주세요.',
   },
   AUTH_FORBIDDEN: { status: 403, message: '이 작업을 수행할 권한이 없습니다.' },
+  // CANDID-010 Step 3 — 이메일 인증 토큰 검증/재발송
+  AUTH_VERIFICATION_TOKEN_INVALID: {
+    status: 400,
+    message: '유효하지 않은 이메일 인증 토큰입니다.',
+  },
+  AUTH_VERIFICATION_TOKEN_EXPIRED: {
+    status: 410,
+    message: '이메일 인증 토큰이 만료되었습니다. 재발송을 요청해 주세요.',
+  },
+  AUTH_VERIFICATION_RESEND_COOLDOWN: {
+    status: 429,
+    message: '재발송 요청이 너무 빠릅니다. 60초 후 다시 시도해 주세요.',
+  },
 
   // 사용자 — USER_
   USER_EMAIL_DUPLICATED: { status: 409, message: '이미 가입된 이메일입니다.' },

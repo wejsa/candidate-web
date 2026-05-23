@@ -78,12 +78,25 @@ describe('POST /api/v1/auth/signup — 정상', () => {
     const body = await response.json();
     expect(body).toMatchObject({
       user: { id: 42, email: 'newuser@example.com', name: '홍길동', emailVerifiedAt: null },
-      verificationEmailSent: true,
+      verificationEmailQueued: true,
     });
+
+    // Step 3 fix(Step 2 review Test MAJOR-1): 평문 verificationToken은 응답에 절대 노출 금지.
+    expect(body).not.toHaveProperty('verificationToken');
+    expect(JSON.stringify(body)).not.toContain(successResult.verificationToken);
 
     const setCookies = response.headers.getSetCookie();
     expect(setCookies.some((c) => c.startsWith('access_token=access-jwt-fake'))).toBe(true);
     expect(setCookies.some((c) => c.startsWith('refresh_token=refresh-jwt-fake'))).toBe(true);
+
+    // Step 3 fix(Step 2 review Test MAJOR-2): Cookie 보안 속성 명시 검증.
+    const accessCookie = setCookies.find((c) => c.startsWith('access_token='));
+    expect(accessCookie).toContain('HttpOnly');
+    expect(accessCookie).toContain('SameSite=lax');
+    expect(accessCookie).toContain('Path=/');
+    const refreshCookie = setCookies.find((c) => c.startsWith('refresh_token='));
+    expect(refreshCookie).toContain('HttpOnly');
+    expect(refreshCookie).toContain('SameSite=lax');
   });
 
   it('X-RateLimit-* 헤더 부착 (CANDID-009 첫 실 부착)', async () => {
@@ -161,12 +174,20 @@ describe('POST /api/v1/auth/signup — 검증 실패', () => {
 });
 
 describe('POST /api/v1/auth/signup — 비즈니스 에러', () => {
-  it('중복 이메일 — AppError USER_EMAIL_DUPLICATED → 409', async () => {
+  it('중복 이메일 — AppError USER_EMAIL_DUPLICATED → 409 + 표준 7필드 + 메시지 검증', async () => {
     createUserAndIssueTokens.mockRejectedValueOnce(new AppError('USER_EMAIL_DUPLICATED'));
     const response = await POST(postRequest(validBody), undefined);
     expect(response.status).toBe(409);
     const body = await response.json();
-    expect(body.code).toBe('USER_EMAIL_DUPLICATED');
+    // Step 3 fix(Step 2 review Test MAJOR-4): code + 사용자 가시 메시지(US-AUTH-001 수락기준) 회귀 가드.
+    expect(body).toMatchObject({
+      code: 'USER_EMAIL_DUPLICATED',
+      status: 409,
+      message: '이미 가입된 이메일입니다.',
+      path: '/api/v1/auth/signup',
+    });
+    expect(body.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(body.traceId).toMatch(/^[0-9a-f-]{36}$/i);
   });
 });
 
