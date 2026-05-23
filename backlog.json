@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 114,
+    "version": 115,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T20:10:12+09:00"
+    "updatedAt": "2026-05-23T20:21:41+09:00"
   },
   "summary": {
     "total": 35,
@@ -550,7 +550,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260523-191619",
-      "assignedAt": "2026-05-23T20:10:12+09:00",
+      "assignedAt": "2026-05-23T20:21:41+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "docs/security/security-controls.md",
@@ -559,12 +559,12 @@
         "tests/lib/security/sanitize.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 30,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-23T20:10:12+09:00"
+        "autoChainArgs": "--auto-fix",
+        "updatedAt": "2026-05-23T20:21:41+09:00"
       },
       "steps": [
         {
@@ -614,7 +614,7 @@
         {
           "step": 3,
           "title": "XSS Sanitizer + 컨트롤 가이드 문서",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/security/sanitize.ts",
             "docs/security/security-controls.md",
@@ -625,7 +625,9 @@
           "dependsOn": [
             2
           ],
-          "prNumber": null
+          "prNumber": 30,
+          "branch": "feature/CANDID-009-step3",
+          "mergedLines": 781
         }
       ],
       "currentStep": 3,
