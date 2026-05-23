@@ -44,7 +44,19 @@ export function rateLimitKeyByIp(request: NextRequest): string {
   return 'ip:unknown';
 }
 
-/** BR-SEC-04 정책 카탈로그 — 변경 시점이 곧 SSOT. 호출측은 import해서 사용. */
+/**
+ * BR-SEC-04 정책 카탈로그 — 변경 시점이 곧 SSOT. 호출측은 import해서 사용.
+ *
+ * **누락 정책 — FILE_UPLOAD**:
+ * BR-SEC-04는 "파일 30회/시간/**사용자**"를 요구하나, 사용자별 카운팅에는
+ * `withRateLimit` 호출 *시점에 이미 인증이 완료*되어 userId가 알려져 있어야 한다.
+ * 현재 keyExtractor 시그니처(`(request) => string`)는 인증 후 context를 받지 못하므로
+ * 카탈로그에 잘못된 IP 기반 정책을 노출하면 후속 task(CANDID-016 파일 업로드)가
+ * 그대로 import해 BR-SEC-04 위반(IP-NAT 공유 환경에서 합법 사용자 차단)이 silent로 일어난다.
+ * 따라서 본 Step 2는 LOGIN/SIGNUP만 정의하고, FILE_UPLOAD는 CANDID-016에서
+ * `withRateLimit` 시그니처를 (request, AuthContext) → string으로 확장하거나
+ * `withUserRateLimit(policy, userId, handler)` 변형을 도입하면서 함께 정의한다.
+ */
 export const POLICIES = Object.freeze({
   LOGIN: Object.freeze({
     name: 'login',
@@ -56,13 +68,6 @@ export const POLICIES = Object.freeze({
     name: 'signup',
     windowMs: 3_600_000,
     maxRequests: 5,
-    keyExtractor: rateLimitKeyByIp,
-  } satisfies RateLimitPolicy),
-  FILE_UPLOAD: Object.freeze({
-    name: 'file-upload',
-    windowMs: 3_600_000,
-    maxRequests: 30,
-    // 파일 업로드는 인증 필수 — 사용자별 카운팅. 호출측에서 userId를 구성한 키로 override 가능.
     keyExtractor: rateLimitKeyByIp,
   } satisfies RateLimitPolicy),
 });

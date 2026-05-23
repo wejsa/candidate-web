@@ -92,18 +92,21 @@ describe('checkRateLimit — sliding window', () => {
 });
 
 describe('POLICIES catalog (BR-SEC-04)', () => {
-  it('정책 카탈로그는 BR-SEC-04 사양과 정합', () => {
+  it('정책 카탈로그는 BR-SEC-04 사양(LOGIN/SIGNUP)과 정합', () => {
     expect(POLICIES.LOGIN).toMatchObject({ name: 'login', windowMs: 60_000, maxRequests: 10 });
     expect(POLICIES.SIGNUP).toMatchObject({
       name: 'signup',
       windowMs: 3_600_000,
       maxRequests: 5,
     });
-    expect(POLICIES.FILE_UPLOAD).toMatchObject({
-      name: 'file-upload',
-      windowMs: 3_600_000,
-      maxRequests: 30,
-    });
+  });
+
+  it('FILE_UPLOAD는 카탈로그에서 의도적으로 누락 — CANDID-016에서 user-key 시그니처와 함께 정의 (C001 회귀 가드)', () => {
+    // BR-SEC-04 "파일 30회/시간/사용자"는 인증 후 userId 키 추출이 필요하나 현재
+    // keyExtractor 시그니처는 NextRequest만 받음. IP 기반으로 잘못 카탈로그화하면
+    // 후속 task가 import해 silent BR 위반(NAT 공유 환경 합법 사용자 차단).
+    // CANDID-016에서 시그니처 확장(request, AuthContext)과 함께 정의한다.
+    expect(POLICIES).not.toHaveProperty('FILE_UPLOAD');
   });
 
   it('정책 객체는 동결되어 변경 불가', () => {
