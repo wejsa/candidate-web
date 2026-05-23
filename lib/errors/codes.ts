@@ -60,6 +60,15 @@ export const ERROR_CATALOG = {
     message: '일시적으로 서비스를 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
   },
   SYS_VALIDATION_FAILED: { status: 400, message: '입력값이 올바르지 않습니다.' },
+  // CANDID-009 Step 2 — Rate Limit / CSRF Origin 차단
+  SYS_RATE_LIMITED: {
+    status: 429,
+    message: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+  },
+  SYS_FORBIDDEN_ORIGIN: {
+    status: 403,
+    message: '허용되지 않은 출처의 요청입니다.',
+  },
 } as const satisfies Record<string, ErrorCodeSpec>;
 
 /** 카탈로그에 정의된 모든 에러 코드의 유니온 — 클라이언트 분기 처리용 불변 상수. */

@@ -7,8 +7,16 @@ const PREFIXES = ['AUTH_', 'USER_', 'JOB_', 'APP_', 'FILE_', 'SYS_'];
 const VALID_STATUSES = new Set([400, 401, 403, 404, 409, 422, 429, 500, 503]);
 
 describe('ERROR_CATALOG', () => {
-  it('contains 22 codes', () => {
-    expect(ALL_CODES).toHaveLength(22);
+  it('contains 24 codes', () => {
+    // CANDID-009 Step 2: SYS_RATE_LIMITED, SYS_FORBIDDEN_ORIGIN 추가로 22 → 24
+    expect(ALL_CODES).toHaveLength(24);
+  });
+
+  it('CANDID-009 신규 코드: SYS_RATE_LIMITED=429, SYS_FORBIDDEN_ORIGIN=403', () => {
+    expect(ERROR_CATALOG.SYS_RATE_LIMITED.status).toBe(429);
+    expect(ERROR_CATALOG.SYS_FORBIDDEN_ORIGIN.status).toBe(403);
+    expect(errorMessage('SYS_RATE_LIMITED')).toMatch(/요청이 너무 많/);
+    expect(errorMessage('SYS_FORBIDDEN_ORIGIN')).toMatch(/허용되지 않은 출처/);
   });
 
   it('gives every code a known HTTP status and a non-empty message', () => {
@@ -58,6 +66,8 @@ describe('ERROR_CATALOG', () => {
       SYS_INTERNAL_ERROR: 500,
       SYS_DEPENDENCY_UNAVAILABLE: 503,
       SYS_VALIDATION_FAILED: 400,
+      SYS_RATE_LIMITED: 429,
+      SYS_FORBIDDEN_ORIGIN: 403,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);

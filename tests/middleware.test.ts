@@ -51,13 +51,26 @@ describe('HTTPS 강제 (BR-SEC-01)', () => {
     expect(response.status).not.toBe(308);
   });
 
-  it('다중 값의 X-Forwarded-Proto는 첫 번째 값을 사용한다', () => {
+  it('TRUST_PROXY=true + 다중 값의 X-Forwarded-Proto는 첫 번째 값(https)을 신뢰', () => {
+    vi.stubEnv('TRUST_PROXY', 'true');
+    __resetCachedEnvForTesting();
     const response = middleware(
       makeRequest('http://candidate.example.com/jobs', {
         headers: { 'x-forwarded-proto': 'https, http' },
       }),
     );
     expect(response.status).not.toBe(308);
+    expect(response.headers.get('X-Frame-Options')).toBe('DENY');
+  });
+
+  it('TRUST_PROXY=false(기본) 시 X-Forwarded-Proto=https 위조 무시 — nextUrl.protocol 폴백 (H001)', () => {
+    // 위조된 헤더가 들어와도 직접 노출 환경에서는 헤더를 신뢰하지 않아야 한다.
+    const response = middleware(
+      makeRequest('http://candidate.example.com/jobs', {
+        headers: { 'x-forwarded-proto': 'https' }, // 위조 시도
+      }),
+    );
+    expect(response.status).toBe(308); // 헤더 무시하고 nextUrl.protocol='http'로 판단
   });
 
   it('FORCE_HTTPS_REDIRECT=false 시 http 요청도 통과', () => {
@@ -80,6 +93,60 @@ describe('HTTPS 강제 (BR-SEC-01)', () => {
     expect(response.status).toBe(308);
     expect(response.headers.get('X-Frame-Options')).toBe('DENY');
     expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff');
+  });
+
+  it('H003: nextUrl.host 위조(공격자 통제 호스트)는 421 Misdirected (open redirect 차단)', () => {
+    // 실제 공격: 클라이언트가 `Host: evil.example.com` 위조 → nextUrl.host = evil → redirect Location 위조 가능.
+    // 본 테스트는 URL의 host로 그 상태를 직접 시뮬레이션한다.
+    const response = middleware(makeRequest('http://evil.example.com/jobs'));
+    expect(response.status).toBe(421);
+    expect(response.headers.get('X-Frame-Options')).toBe('DENY'); // 421에도 보안 헤더
+    expect(response.headers.get('Location')).toBeNull();
+  });
+});
+
+describe('CSRF Origin 검증 (BR-SEC-02, Step 2)', () => {
+  it.each(['POST', 'PUT', 'PATCH', 'DELETE'])(
+    '%s + 미허용 Origin → 403 SYS_FORBIDDEN_ORIGIN',
+    async (method) => {
+      const response = middleware(
+        makeRequest('https://candidate.example.com/api/v1/auth/login', {
+          method,
+          headers: { origin: 'https://evil.example.com' },
+        }),
+      );
+      expect(response.status).toBe(403);
+      const body = await response.json();
+      expect(body.code).toBe('SYS_FORBIDDEN_ORIGIN');
+      expect(response.headers.get('X-Frame-Options')).toBe('DENY'); // 보안 헤더는 에러 응답에도
+    },
+  );
+
+  it('POST + 허용 Origin은 통과', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/api/v1/auth/login', {
+        method: 'POST',
+        headers: { origin: 'https://candidate.example.com' },
+      }),
+    );
+    expect(response.status).not.toBe(403);
+  });
+
+  it('POST + Origin 부재는 통과 (SameSite=Lax 결합)', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/api/v1/auth/login', { method: 'POST' }),
+    );
+    expect(response.status).not.toBe(403);
+  });
+
+  it('GET + 미허용 Origin은 통과 (CSRF 비대상)', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/jobs', {
+        method: 'GET',
+        headers: { origin: 'https://evil.example.com' },
+      }),
+    );
+    expect(response.status).not.toBe(403);
   });
 });
 
