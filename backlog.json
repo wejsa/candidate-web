@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 104,
+    "version": 105,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-21T00:00:31+09:00"
+    "updatedAt": "2026-05-23T19:16:19+09:00"
   },
   "summary": {
     "total": 35,
@@ -541,14 +541,26 @@
       "id": "CANDID-009",
       "title": "Rate Limit + Security 헤더 (CSRF/CORS/XSS sanitizer)",
       "description": "Rate Limit(로그인 10/분/IP, 회원가입 5/시간/IP, 파일 30/시간/사용자). CSRF(SameSite+Origin), CORS 화이트리스트, XSS sanitizer(DOMPurify). HTTPS 강제 308.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 1,
       "dependencies": [
         "CANDID-006"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "jaese@hoji-20260523-191619",
+      "assignedAt": "2026-05-23T19:16:19+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-23T19:16:19+09:00"
+      }
     },
     "CANDID-010": {
       "id": "CANDID-010",
