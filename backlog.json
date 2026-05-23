@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 124,
+    "version": 125,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T21:04:14+09:00"
+    "updatedAt": "2026-05-23T21:10:37+09:00"
   },
   "summary": {
     "total": 35,
@@ -638,7 +638,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260523-203308",
-      "assignedAt": "2026-05-23T21:04:14+09:00",
+      "assignedAt": "2026-05-23T21:10:37+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/resend-verification/route.ts",
@@ -655,12 +655,12 @@
         "tests/lib/errors/codes.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 32,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-23T21:04:14+09:00"
+        "autoChainArgs": "--auto-fix",
+        "updatedAt": "2026-05-23T21:10:37+09:00"
       },
       "steps": [
         {
@@ -696,7 +696,7 @@
         {
           "step": 2,
           "title": "회원가입 API (POST /signup) — 핵심 비즈니스 + 자동 로그인 + 인증 메일 발송",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/auth/signup.ts",
             "app/api/v1/auth/signup/route.ts",
@@ -708,7 +708,9 @@
           "dependsOn": [
             1
           ],
-          "prNumber": null
+          "prNumber": 32,
+          "branch": "feature/CANDID-010-step2",
+          "mergedLines": 566
         },
         {
           "step": 3,
