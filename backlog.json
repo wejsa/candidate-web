@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 128,
+    "version": 129,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T21:30:13+09:00"
+    "updatedAt": "2026-05-23T23:16:28+09:00"
   },
   "summary": {
     "total": 35,
@@ -627,7 +627,7 @@
       "id": "CANDID-010",
       "title": "이메일 회원가입 API + 이메일 인증 메일 발송 (US-AUTH-001)",
       "description": "이메일/비밀번호/이름/약관 동의 입력 → BCrypt(strength 12) 해시 저장 → 인증 메일 발송(24h 토큰, 60초 재발송 쿨다운). 중복 가입 409.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
@@ -637,27 +637,11 @@
         "CANDID-009"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260523-203308",
-      "assignedAt": "2026-05-23T21:30:13+09:00",
-      "lockTTL": 10800,
-      "lockedFiles": [
-        "app/api/v1/auth/resend-verification/route.ts",
-        "app/api/v1/auth/verify-email/route.ts",
-        "lib/auth/email-verification.ts",
-        "lib/errors/codes.ts",
-        "tests/app/api/v1/auth/resend-verification.test.ts",
-        "tests/app/api/v1/auth/verify-email.test.ts",
-        "tests/lib/auth/email-verification.test.ts",
-        "tests/lib/errors/codes.test.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 33,
-        "fixLoopCount": 0,
-        "autoChainArgs": "--auto-fix",
-        "updatedAt": "2026-05-23T21:30:13+09:00"
-      },
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": null,
+      "lockedFiles": [],
+      "workflowState": null,
       "steps": [
         {
           "step": 1,
@@ -712,7 +696,7 @@
         {
           "step": 3,
           "title": "이메일 인증 토큰 검증 + 재발송 API + 신규 에러 코드",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/auth/email-verification.ts",
             "app/api/v1/auth/verify-email/route.ts",
@@ -729,11 +713,13 @@
           ],
           "prNumber": 33,
           "branch": "feature/CANDID-010-step3",
-          "mergedLines": 694
+          "mergedLines": 694,
+          "mergedAt": "2026-05-23T21:51:22+09:00"
         }
       ],
       "currentStep": 3,
-      "planPath": ".claude/temp/CANDID-010-plan.md"
+      "planPath": ".claude/temp/CANDID-010-plan.md",
+      "completedAt": "2026-05-23T23:01:25+09:00"
     },
     "CANDID-011": {
       "id": "CANDID-011",

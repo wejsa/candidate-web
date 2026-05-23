@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 13,
+    "version": 14,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-23T20:29:25+09:00"
+    "updatedAt": "2026-05-23T23:16:28+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -577,6 +577,22 @@
         28,
         29,
         30
+      ]
+    },
+    "CANDID-010": {
+      "id": "CANDID-010",
+      "title": "이메일 회원가입 API + 이메일 인증 메일 발송 (US-AUTH-001)",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "completedAt": "2026-05-23T23:01:25+09:00",
+      "steps": 3,
+      "totalLines": 2193,
+      "prNumbers": [
+        31,
+        32,
+        33,
+        34
       ]
     }
   }
