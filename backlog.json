@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 105,
+    "version": 106,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T19:16:19+09:00"
+    "updatedAt": "2026-05-23T19:23:33+09:00"
   },
   "summary": {
     "total": 35,
@@ -550,17 +550,94 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260523-191619",
-      "assignedAt": "2026-05-23T19:16:19+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-23T19:23:33+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        ".env.example",
+        "docs/security/security-controls.md",
+        "lib/env.ts",
+        "lib/errors/codes.ts",
+        "lib/security/cors.ts",
+        "lib/security/headers.ts",
+        "lib/security/origin.ts",
+        "lib/security/rate-limit.ts",
+        "lib/security/sanitize.ts",
+        "middleware.ts",
+        "package.json",
+        "tests/lib/errors/codes.test.ts",
+        "tests/lib/security/cors.test.ts",
+        "tests/lib/security/headers.test.ts",
+        "tests/lib/security/origin.test.ts",
+        "tests/lib/security/rate-limit.test.ts",
+        "tests/lib/security/sanitize.test.ts",
+        "tests/middleware.test.ts"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-23T19:16:19+09:00"
-      }
+        "updatedAt": "2026-05-23T19:23:33+09:00"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "title": "보안 헤더 + HTTPS 308 + CORS + middleware 골격",
+          "status": "pending",
+          "files": [
+            "middleware.ts",
+            "lib/security/headers.ts",
+            "lib/security/cors.ts",
+            "lib/env.ts",
+            ".env.example",
+            "tests/lib/security/headers.test.ts",
+            "tests/lib/security/cors.test.ts",
+            "tests/middleware.test.ts"
+          ],
+          "estimatedLines": 450,
+          "dependsOn": [],
+          "prNumber": null
+        },
+        {
+          "step": 2,
+          "title": "CSRF Origin 검증 + Rate Limit 카탈로그/리미터 + 에러 코드",
+          "status": "pending",
+          "files": [
+            "lib/security/origin.ts",
+            "lib/security/rate-limit.ts",
+            "lib/errors/codes.ts",
+            "middleware.ts",
+            "tests/lib/security/origin.test.ts",
+            "tests/lib/security/rate-limit.test.ts",
+            "tests/lib/errors/codes.test.ts"
+          ],
+          "estimatedLines": 500,
+          "prLineLimit": 600,
+          "dependsOn": [
+            1
+          ],
+          "prNumber": null
+        },
+        {
+          "step": 3,
+          "title": "XSS Sanitizer + 컨트롤 가이드 문서",
+          "status": "pending",
+          "files": [
+            "lib/security/sanitize.ts",
+            "docs/security/security-controls.md",
+            "package.json",
+            "tests/lib/security/sanitize.test.ts"
+          ],
+          "estimatedLines": 300,
+          "dependsOn": [
+            2
+          ],
+          "prNumber": null
+        }
+      ],
+      "currentStep": 1,
+      "planPath": ".claude/temp/CANDID-009-plan.md"
     },
     "CANDID-010": {
       "id": "CANDID-010",
