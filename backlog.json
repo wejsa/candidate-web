@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "lastTaskNumber": 35,
+    "lastTaskNumber": 36,
     "projectPrefix": "CANDID",
-    "version": 129,
+    "version": 130,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T23:16:28+09:00"
+    "updatedAt": "2026-05-23T23:19:08+09:00"
   },
   "summary": {
     "total": 35,
@@ -925,7 +925,7 @@
     "CANDID-026": {
       "id": "CANDID-026",
       "title": "감사 로그 AOP (로그인/제출/PII 조회) + traceId 전파",
-      "description": "audit_logs 테이블 + Next.js middleware/decorator 패턴으로 일괄 기록. 분산 추적 traceId 전 구간 전파(OpenTelemetry).",
+      "description": "audit_logs 테이블 + Next.js middleware/decorator 패턴으로 일괄 기록. 분산 추적 traceId 전 구간 전파(OpenTelemetry). [CANDID-010 FU 추가] consumeVerificationToken/resendVerificationEmail 호출에 EMAIL_VERIFIED/EMAIL_VERIFICATION_RESENT audit event 발행 — userId, verificationId, IP, lastSentAt 메타데이터 포함. 토큰/이메일 평문은 metadata에서 제외 (PR #33 H007).",
       "status": "todo",
       "type": "feature",
       "priority": "low",
@@ -965,7 +965,7 @@
     "CANDID-029": {
       "id": "CANDID-029",
       "title": "야간 배치: 30일 미제출 Draft 파일 정리 + ClamAV 스캔 골격",
-      "description": "30일 이상 미제출 Draft 및 첨부 파일 자동 삭제 배치. ClamAV 비동기 스캔 큐 + virus_scan_status 갱신. INFECTED 시 자동 삭제 + 사용자 알림.",
+      "description": "30일 이상 미제출 Draft 및 첨부 파일 자동 삭제 배치. ClamAV 비동기 스캔 큐 + virus_scan_status 갱신. INFECTED 시 자동 삭제 + 사용자 알림. [CANDID-010 FU 추가] email_verifications 테이블의 consumedAt 또는 expiresAt이 7일 이상 경과한 행 자동 삭제 — BR-PII-03(자동 파기)와 정합. user FK ON DELETE CASCADE도 함께 검증 (PR #33 H008).",
       "status": "todo",
       "type": "feature",
       "priority": "low",
@@ -1301,6 +1301,19 @@
         }
       ],
       "currentStep": 3
+    },
+    "CANDID-036": {
+      "id": "CANDID-036",
+      "title": "CANDID-010 FU1: 이메일 인증 보안 hardening (race + RL + 메일링크 + 회귀 가드)",
+      "status": "todo",
+      "type": "enhancement",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": [
+        "CANDID-010"
+      ],
+      "createdAt": "2026-05-23T23:19:08+09:00",
+      "description": "CANDID-010 회고에서 식별된 carry MAJOR/MINOR를 묶어 처리한다. (1) consumeVerificationToken FOR UPDATE 부재 → updateMany + where consumedAt=null 패턴 (H001/H009). (2) resend-verification에 userId-bucket RL 추가, verify-email에 RL 부착 (H004/H005). (3) 메일 링크의 GET query 평문 토큰을 URL fragment 또는 confirmation 페이지 패턴으로 재설계 (H006). (4) 테스트 가드: 트랜잭션 롤백, 동시 클릭 멱등성, BR-TX-02 회귀, verify-email/resend 7필드, user null 분기 (H010~H014). (5) lib/logging/pii-safe.ts 헬퍼 추출(summarizeError/emailDomainOf) — 정규식 IDN 강화, String(err) 비표준 throw 견고화, smtpResponseCode 분기 테스트, errSpy try/finally (M001~M006). 본 task는 CANDID-026(감사 로그)·CANDID-029(cleanup)·CANDID-020(비밀번호 재설정 메일 패턴)과 협업 가능 — 분리 또는 통합은 plan 단계에서 결정."
     }
   }
 }
