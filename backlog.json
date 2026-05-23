@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 117,
+    "version": 118,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T20:29:25+09:00"
+    "updatedAt": "2026-05-23T20:33:08+09:00"
   },
   "summary": {
     "total": 35,
@@ -627,7 +627,7 @@
       "id": "CANDID-010",
       "title": "이메일 회원가입 API + 이메일 인증 메일 발송 (US-AUTH-001)",
       "description": "이메일/비밀번호/이름/약관 동의 입력 → BCrypt(strength 12) 해시 저장 → 인증 메일 발송(24h 토큰, 60초 재발송 쿨다운). 중복 가입 409.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
@@ -636,7 +636,19 @@
         "CANDID-007",
         "CANDID-009"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "jaese@hoji-20260523-203308",
+      "assignedAt": "2026-05-23T20:33:08+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-23T20:33:08+09:00"
+      }
     },
     "CANDID-011": {
       "id": "CANDID-011",
