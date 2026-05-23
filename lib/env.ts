@@ -33,17 +33,44 @@ const envSchema = z
     PII_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, 'must be 64-char hex (32 bytes)'),
 
     // CANDID-009: CORS 화이트리스트 (BR-SEC-03) — CSV 형식, NEXT_PUBLIC_APP_URL의 origin이
-    // 항상 자동 포함되므로 단일 도메인이면 빈 값으로 두면 된다. `*`는 refine으로 차단.
+    // 항상 자동 포함되므로 단일 도메인이면 빈 값으로 두면 된다.
+    // Step 2 보강(H005): `*`/wildcard/null 거부 + 각 항목이 http(s):// URL인지 부팅 시 검증.
+    // 잘못된 값(오타 포함)은 silent drop 대신 부팅 차단 (fail-fast 운영성).
     CORS_ALLOWED_ORIGINS: z
       .string()
       .default('')
-      .refine((s) => !s.split(',').some((p) => p.trim() === '*'), {
-        message: 'CORS_ALLOWED_ORIGINS must not contain "*" — BR-SEC-03 wildcard ban',
-      }),
+      .refine(
+        (s) =>
+          s
+            .split(',')
+            .map((p) => p.trim())
+            .filter((p) => p !== '')
+            .every((p) => {
+              if (p === '*' || p === 'null' || p.includes('*')) return false;
+              try {
+                const u = new URL(p);
+                return (u.protocol === 'https:' || u.protocol === 'http:') && u.host !== '';
+              } catch {
+                return false;
+              }
+            }),
+        {
+          message:
+            'CORS_ALLOWED_ORIGINS must be comma-separated http(s) URLs — wildcards (*), "null", or invalid URLs are rejected (BR-SEC-03)',
+        },
+      ),
 
     // CANDID-009: HTTPS 강제 (BR-SEC-01) — production은 true 권장. 'true'/'1'만 활성으로 인정.
     // 빈 값/누락 시 false — z.coerce.boolean()은 'false' 문자열도 true로 변환되는 함정 회피.
     FORCE_HTTPS_REDIRECT: z
+      .string()
+      .optional()
+      .transform((v) => v === 'true' || v === '1'),
+
+    // CANDID-009 Step 2 보강(H001): X-Forwarded-Proto/For 헤더를 신뢰할지 여부.
+    // 신뢰된 LB/CDN/ingress 뒤에서만 true로 설정. 직접 노출 환경(localhost/dev)에서는 false 유지.
+    // false면 isSecureRequest는 nextUrl.protocol만 사용 — 클라이언트의 헤더 위조로 HTTPS 우회 차단.
+    TRUST_PROXY: z
       .string()
       .optional()
       .transform((v) => v === 'true' || v === '1'),

@@ -51,14 +51,19 @@ describe('getAllowedOrigins', () => {
     );
   });
 
-  it('빈 항목과 잘못된 URL은 무시한다 (이중 방어)', () => {
+  it('CSV 빈 항목과 공백은 정규화되어 무시 (잘못된 URL은 env.ts refine이 부팅 차단 — H005)', () => {
     vi.stubEnv('NEXT_PUBLIC_APP_URL', 'http://localhost:3000');
-    vi.stubEnv('CORS_ALLOWED_ORIGINS', 'https://ok.example.com,,not-a-url,   ');
+    vi.stubEnv('CORS_ALLOWED_ORIGINS', 'https://ok.example.com,,   ,   https://extra.example.com  ');
     __resetCachedEnvForTesting();
     __resetCorsCacheForTesting();
     expect(getAllowedOrigins()).toEqual(
-      new Set(['http://localhost:3000', 'https://ok.example.com']),
+      new Set([
+        'http://localhost:3000',
+        'https://ok.example.com',
+        'https://extra.example.com',
+      ]),
     );
+    // 'not-a-url' 같은 잘못된 URL은 tests/lib/env.test.ts에서 부팅 차단 검증.
   });
 
   it('반복 호출 시 캐시되고 동일 참조를 반환한다', () => {
