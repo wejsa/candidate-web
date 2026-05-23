@@ -119,8 +119,9 @@ describe('checkRateLimit — sliding window', () => {
 describe('POLICIES catalog (BR-SEC-04)', () => {
   it('정책 카탈로그 키 화이트리스트 — 신규 정책 추가는 의도적 변경 강제 (C001 회귀 가드)', () => {
     // FILE_UPLOAD는 (request, AuthContext) 시그니처 확장 후 CANDID-016에서 정의.
+    // VERIFY_EMAIL — CANDID-036에서 추가 (PR #33 H005, 무제한 POST DoS 차단).
     // 본 테스트가 fail하면: 신규 정책 정당하면 화이트리스트 갱신, FILE_UPLOAD라면 시그니처 확장 동반 필수.
-    expect(Object.keys(POLICIES).sort()).toEqual(['LOGIN', 'SIGNUP']);
+    expect(Object.keys(POLICIES).sort()).toEqual(['LOGIN', 'SIGNUP', 'VERIFY_EMAIL']);
   });
 
   it('정책 카탈로그는 BR-SEC-04 사양(LOGIN/SIGNUP)과 정합', () => {
@@ -194,5 +195,110 @@ describe('__resetRateLimitStateForTesting (L-002 패턴)', () => {
   it('production 환경에서 호출 시 throw (운영 안전 가드)', () => {
     vi.stubEnv('NODE_ENV', 'production');
     expect(() => __resetRateLimitStateForTesting()).toThrow(/must not be called in production/);
+  });
+});
+
+// =====================================================================
+// CANDID-036 추가 — VERIFY_EMAIL IP 정책 + USER_POLICIES + withUserRateLimit
+// =====================================================================
+
+describe('CANDID-036 — POLICIES.VERIFY_EMAIL (IP 30회/분)', () => {
+  beforeEach(() => {
+    vi.stubEnv('TRUST_PROXY', 'true');
+    __resetCachedEnvForTesting();
+  });
+
+  it('정의 검증 — 30회/분/IP, IP keyExtractor', async () => {
+    const { POLICIES: pol } = await import('@/lib/security/rate-limit');
+    expect(pol.VERIFY_EMAIL.name).toBe('verify_email');
+    expect(pol.VERIFY_EMAIL.windowMs).toBe(60_000);
+    expect(pol.VERIFY_EMAIL.maxRequests).toBe(30);
+    expect(pol.VERIFY_EMAIL.keyExtractor).toBe(rateLimitKeyByIp);
+  });
+
+  it('30회까지 통과, 31회째 차단', () => {
+    const r = req({ 'x-forwarded-for': '203.0.113.99' });
+    for (let i = 0; i < 30; i++) {
+      const p = checkRateLimit(POLICIES.VERIFY_EMAIL, r, i);
+      expect(p.limited).toBe(false);
+    }
+    const blocked = checkRateLimit(POLICIES.VERIFY_EMAIL, r, 100);
+    expect(blocked.limited).toBe(true);
+  });
+});
+
+describe('CANDID-036 — USER_POLICIES.RESEND_VERIFICATION_USER (user 3회/시간)', () => {
+  it('정의 검증 — 3회/시간/user, keyExtractor 없음', async () => {
+    const { USER_POLICIES } = await import('@/lib/security/rate-limit');
+    expect(USER_POLICIES.RESEND_VERIFICATION_USER.name).toBe('resend_verification_user');
+    expect(USER_POLICIES.RESEND_VERIFICATION_USER.windowMs).toBe(3_600_000);
+    expect(USER_POLICIES.RESEND_VERIFICATION_USER.maxRequests).toBe(3);
+    expect('keyExtractor' in USER_POLICIES.RESEND_VERIFICATION_USER).toBe(false);
+  });
+});
+
+describe('CANDID-036 — checkUserRateLimit', () => {
+  it('3회 통과, 4회째 차단 (동일 userId)', async () => {
+    const { USER_POLICIES, checkUserRateLimit } = await import('@/lib/security/rate-limit');
+    const policy = USER_POLICIES.RESEND_VERIFICATION_USER;
+    for (let i = 0; i < 3; i++) {
+      expect(checkUserRateLimit(policy, 42, i).limited).toBe(false);
+    }
+    const blocked = checkUserRateLimit(policy, 42, 100);
+    expect(blocked.limited).toBe(true);
+    expect(blocked.retryAfterMs).toBeGreaterThan(0);
+  });
+
+  it('다른 userId는 격리된 카운터', async () => {
+    const { USER_POLICIES, checkUserRateLimit } = await import('@/lib/security/rate-limit');
+    const policy = USER_POLICIES.RESEND_VERIFICATION_USER;
+    // user A가 한도 채움
+    for (let i = 0; i < 3; i++) checkUserRateLimit(policy, 'A', i);
+    expect(checkUserRateLimit(policy, 'A', 100).limited).toBe(true);
+    // user B는 영향 없음
+    expect(checkUserRateLimit(policy, 'B', 100).limited).toBe(false);
+  });
+
+  it('윈도우 경과 후 카운터 초기화', async () => {
+    const { USER_POLICIES, checkUserRateLimit } = await import('@/lib/security/rate-limit');
+    const policy = USER_POLICIES.RESEND_VERIFICATION_USER;
+    const W = policy.windowMs;
+    for (let i = 0; i < 3; i++) checkUserRateLimit(policy, 99, i);
+    expect(checkUserRateLimit(policy, 99, 10).limited).toBe(true);
+    // windowMs + 1ms 경과 → 전부 prune
+    expect(checkUserRateLimit(policy, 99, W + 100).limited).toBe(false);
+  });
+});
+
+describe('CANDID-036 — withUserRateLimit', () => {
+  it('한도 내 — handler 호출 + 200 + X-RateLimit-* 헤더 부착', async () => {
+    const { USER_POLICIES, withUserRateLimit } = await import('@/lib/security/rate-limit');
+    const handler = vi.fn(async () => NextResponse.json({ ok: true }, { status: 200 }));
+    const wrapped = withUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, 42, handler);
+
+    const response = await wrapped(req(), undefined);
+    expect(response.status).toBe(200);
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(response.headers.get('X-RateLimit-Limit')).toBe('3');
+    expect(response.headers.get('X-RateLimit-Policy')).toBe('resend_verification_user');
+  });
+
+  it('한도 초과 — handler 미호출 + 429 + Retry-After', async () => {
+    const { USER_POLICIES, withUserRateLimit, checkUserRateLimit } =
+      await import('@/lib/security/rate-limit');
+    // 한도 사전 소진
+    for (let i = 0; i < 3; i++) checkUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, 7);
+
+    const handler = vi.fn(async () => NextResponse.json({ ok: true }, { status: 200 }));
+    const wrapped = withUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, 7, handler);
+
+    const response = await wrapped(req(), undefined);
+    expect(response.status).toBe(429);
+    expect(handler).not.toHaveBeenCalled();
+    expect(response.headers.get('Retry-After')).not.toBeNull();
+    expect(response.headers.get('X-RateLimit-Policy')).toBe('resend_verification_user');
+    expect(response.headers.get('X-RateLimit-Remaining')).toBe('0');
+    const body = await response.json();
+    expect(body.code).toBe('SYS_RATE_LIMITED');
   });
 });
