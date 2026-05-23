@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 12,
+    "version": 13,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-21T00:00:31+09:00"
+    "updatedAt": "2026-05-23T20:29:25+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -502,7 +502,9 @@
         }
       ],
       "summary": "CANDID-006 완료 — 4-step JWT 인증 미들웨어. jose HS512 Access(30분)/Refresh(14일·상태유지 미체크 시 1일) 발급·검증, Access/Refresh 분리 secret + tokenType claim 교차사용 차단. Refresh Token DB 화이트리스트(sha256 해시 저장 — 원문 미저장) + rotation(familyId 승계/rotationCounter). HttpOnly+Secure(prod)+SameSite=Lax Cookie 입출력. Route Handler 인증 헬퍼(requireAuth/getOptionalAuth)와 POST /api/v1/auth/refresh 엔드포인트. Node/Edge 런타임 격리(계획서 R6) 정확 구현 — middleware는 jose verify만, refresh route는 runtime=nodejs. 전체 +1271 LOC, 단위 테스트 199→258(+59). skill-fix 2회(Step 1 C001 migration guard / Step 3 C001 rotation TOCTOU — 조건부 updateMany로 한 family 활성 토큰 1개 불변식 확보). 라인 추정 vs 실제: Step 1(140→100), Step 2(400→497), Step 3(350→369), Step 4(350→305) — 새 도메인(인증) 첫 진입이라 변동폭 컸으나 L-010 v2 보정 prLineLimit 내 수렴.",
-      "dependencies": ["CANDID-003"],
+      "dependencies": [
+        "CANDID-003"
+      ],
       "specFile": "docs/sample-requirement.md",
       "followUpTasksRecommended": [
         "(CANDID-006-FU1) lib/auth/session.ts 실 PrismaClient 통합 테스트 — 동시 rotation TOCTOU 시나리오(병렬 Promise.all) + UNIQUE/FK 제약 검증 (계획서 A1, CANDID-035 패턴 미러)",
@@ -549,7 +551,9 @@
         }
       ],
       "summary": "전역 에러 핸들러 + 에러 코드 체계 완료 — 3-step. lib/errors/ 신설: codes.ts(ERROR_CATALOG 22종 SSOT + ErrorCode), app-error.ts(AppError 도메인 예외 + isAppError), response.ts(errorResponse 빌더 + handleApiError 전역 핸들러 + withErrorHandler HOF), index.ts barrel. 표준 7필드 응답 {timestamp,status,code,message,path,traceId,details}, AppError→카탈로그 / ZodError→400 SYS_VALIDATION_FAILED / unknown→500 SYS_INTERNAL_ERROR(운영 스택 비노출 + console.error). CANDID-006 authErrorResponse 제거 + requireAuth(AppError throw)/refresh route(withErrorHandler) 이관. 전체 +676/-84 LOC, 단위 테스트 258→296(+38, 회귀 0). skill-fix 0회(전 PR CRITICAL 0). L-019 in-task self-correction 1회(PR #25 리뷰 → PR #26 동반 보강). 라인 추정 vs 실제: Step1(290→234), Step2(360→385), Step3(240→137). CANDID-010(회원가입)·CANDID-027(메트릭) 다운스트림 언블록.",
-      "dependencies": ["CANDID-001"],
+      "dependencies": [
+        "CANDID-001"
+      ],
       "specFile": "docs/sample-requirement.md",
       "followUpTasksRecommended": [
         "(CANDID-007-FU1) lib/errors/response.ts·response.test.ts 리뷰 보강 — PR #26 H001~H005 (withErrorHandler sync-throw 불변식 주석, async throw / Promise.reject / traceId 응답 전파 / AppError details-undefined / 중첩 ZodError path 테스트)",
@@ -558,6 +562,21 @@
         "(별도) _base/conventions/api-design.md 에러 응답 포맷 5필드 detail → 7필드 details[] 정합 (PR #26부터 미해결 docs 부채)",
         "(별도) docs/api-specs/ 신설 — /api/v1/auth/refresh OpenAPI 명세 + 표준 에러 포맷",
         "(micro) PRD §4.1.2/§4.1.3 코드 네이밍 APPLICATION_* → APP_* 정정 (CLAUDE.md/codes.ts SSOT 우선이라 코드는 정상 — PR #25 H001)"
+      ]
+    },
+    "CANDID-009": {
+      "id": "CANDID-009",
+      "title": "Rate Limit + Security 헤더 (CSRF/CORS/XSS sanitizer)",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "completedAt": "2026-05-23T20:29:25+09:00",
+      "steps": 3,
+      "totalLines": 2208,
+      "prNumbers": [
+        28,
+        29,
+        30
       ]
     }
   }

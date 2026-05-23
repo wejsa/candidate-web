@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 116,
+    "version": 117,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T20:27:51+09:00"
+    "updatedAt": "2026-05-23T20:29:25+09:00"
   },
   "summary": {
     "total": 35,
@@ -541,7 +541,7 @@
       "id": "CANDID-009",
       "title": "Rate Limit + Security 헤더 (CSRF/CORS/XSS sanitizer)",
       "description": "Rate Limit(로그인 10/분/IP, 회원가입 5/시간/IP, 파일 30/시간/사용자). CSRF(SameSite+Origin), CORS 화이트리스트, XSS sanitizer(DOMPurify). HTTPS 강제 308.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 1,
@@ -549,23 +549,11 @@
         "CANDID-006"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260523-191619",
-      "assignedAt": "2026-05-23T20:21:41+09:00",
-      "lockTTL": 10800,
-      "lockedFiles": [
-        "docs/security/security-controls.md",
-        "lib/security/sanitize.ts",
-        "package.json",
-        "tests/lib/security/sanitize.test.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 30,
-        "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-23T20:27:51+09:00"
-      },
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": null,
+      "lockedFiles": [],
+      "workflowState": null,
       "steps": [
         {
           "step": 1,
@@ -614,7 +602,7 @@
         {
           "step": 3,
           "title": "XSS Sanitizer + 컨트롤 가이드 문서",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/security/sanitize.ts",
             "docs/security/security-controls.md",
@@ -627,11 +615,13 @@
           ],
           "prNumber": 30,
           "branch": "feature/CANDID-009-step3",
-          "mergedLines": 781
+          "mergedLines": 781,
+          "mergedAt": "2026-05-23T20:29:25+09:00"
         }
       ],
       "currentStep": 3,
-      "planPath": ".claude/temp/CANDID-009-plan.md"
+      "planPath": ".claude/temp/CANDID-009-plan.md",
+      "completedAt": "2026-05-23T20:29:25+09:00"
     },
     "CANDID-010": {
       "id": "CANDID-010",
