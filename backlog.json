@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 121,
+    "version": 122,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T20:53:37+09:00"
+    "updatedAt": "2026-05-23T20:58:52+09:00"
   },
   "summary": {
     "total": 35,
@@ -671,12 +671,12 @@
         "tests/lib/errors/codes.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-fix",
-        "lastCompletedSkill": "skill-review-pr",
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-fix",
         "prNumber": 31,
         "fixLoopCount": 1,
-        "autoChainArgs": "31",
-        "updatedAt": "2026-05-23T20:53:37+09:00"
+        "autoChainArgs": "31 --auto-fix",
+        "updatedAt": "2026-05-23T20:58:52+09:00"
       },
       "steps": [
         {
