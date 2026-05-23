@@ -43,8 +43,9 @@ export const POST = withErrorHandler(
     const response = NextResponse.json(
       {
         user: result.user,
-        // BR-AUTH-04: 미인증 상태로도 자동 로그인 — 클라이언트가 UI 안내.
-        verificationEmailSent: true,
+        // Step 3 fix(Step 2 review D2): 응답 시점에는 메일 발송 *시도*만 완료(fire-and-forget).
+        // 발송 결과(성공/실패)는 응답에 포함되지 않음. 미수신 시 재발송 API(/resend-verification).
+        verificationEmailQueued: true,
       },
       { status: 201 },
     );

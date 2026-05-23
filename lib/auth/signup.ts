@@ -1,5 +1,5 @@
 import 'server-only';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { issueAccessToken } from '@/lib/auth/jwt';
@@ -122,12 +122,15 @@ export async function createUserAndIssueTokens(
   };
 }
 
-/** Prisma P2002 unique constraint 위반 + 대상 컬럼 검사. */
+/**
+ * Prisma P2002 unique constraint 위반 + 대상 컬럼 검사.
+ * Step 3 fix(Step 2 review D3): `as` 캐스팅 대신 instanceof로 타입 가드 강화 —
+ * 임의 객체에 `code: 'P2002'` 속성이 있더라도 Prisma 에러로 오인하지 않는다.
+ */
 function isUniqueConstraintError(err: unknown, column: string): boolean {
-  if (err === null || typeof err !== 'object') return false;
-  const e = err as Prisma.PrismaClientKnownRequestError;
-  if (e.code !== 'P2002') return false;
-  const target = e.meta?.target;
+  if (!(err instanceof Prisma.PrismaClientKnownRequestError)) return false;
+  if (err.code !== 'P2002') return false;
+  const target = err.meta?.target;
   if (Array.isArray(target)) return target.includes(column);
   if (typeof target === 'string') return target.includes(column);
   return false;
