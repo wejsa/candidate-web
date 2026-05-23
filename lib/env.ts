@@ -32,6 +32,22 @@ const envSchema = z
     // `openssl rand -hex 32`로 생성. AES-256-GCM 키 (32 bytes).
     PII_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, 'must be 64-char hex (32 bytes)'),
 
+    // CANDID-009: CORS 화이트리스트 (BR-SEC-03) — CSV 형식, NEXT_PUBLIC_APP_URL의 origin이
+    // 항상 자동 포함되므로 단일 도메인이면 빈 값으로 두면 된다. `*`는 refine으로 차단.
+    CORS_ALLOWED_ORIGINS: z
+      .string()
+      .default('')
+      .refine((s) => !s.split(',').some((p) => p.trim() === '*'), {
+        message: 'CORS_ALLOWED_ORIGINS must not contain "*" — BR-SEC-03 wildcard ban',
+      }),
+
+    // CANDID-009: HTTPS 강제 (BR-SEC-01) — production은 true 권장. 'true'/'1'만 활성으로 인정.
+    // 빈 값/누락 시 false — z.coerce.boolean()은 'false' 문자열도 true로 변환되는 함정 회피.
+    FORCE_HTTPS_REDIRECT: z
+      .string()
+      .optional()
+      .transform((v) => v === 'true' || v === '1'),
+
     GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
     GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
     GITHUB_OAUTH_CLIENT_ID: z.string().optional(),
