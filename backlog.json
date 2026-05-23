@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 107,
+    "version": 108,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T19:36:54+09:00"
+    "updatedAt": "2026-05-23T19:43:33+09:00"
   },
   "summary": {
     "total": 35,
@@ -573,12 +573,12 @@
         "tests/middleware.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 28,
         "fixLoopCount": 0,
-        "autoChainArgs": "--auto-fix",
-        "updatedAt": "2026-05-23T19:36:54+09:00"
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-23T19:43:33+09:00"
       },
       "steps": [
         {
