@@ -27,7 +27,8 @@ function getTransporter(): Transporter {
     secure: isImplicitTls,
     requireTLS: !isImplicitTls,
     tls: {
-      rejectUnauthorized: process.env.NODE_ENV === 'production',
+      // Step 2 fix(MINOR-SEC-1): NODE_ENV SSOT — env.ts의 zod-validated 값 사용.
+      rejectUnauthorized: env.NODE_ENV === 'production',
       minVersion: 'TLSv1.2',
     },
     connectionTimeout: 5_000,

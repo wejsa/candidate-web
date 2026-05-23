@@ -1,8 +1,9 @@
 import 'server-only';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import type { RefreshToken } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { issueRefreshToken, verifyRefreshToken } from '@/lib/auth/jwt';
+import { sha256Hex } from '@/lib/auth/token-hash';
 
 // CANDID-006 Step 3 — RefreshToken DB 세션 레이어.
 // jose 서명 토큰(jwt.ts)을 refresh_tokens 화이트리스트와 결합 — 서버측 즉시 무효화 가능.
@@ -39,10 +40,8 @@ export type RotateRefreshSessionResult =
   | { ok: true; session: RefreshSession }
   | { ok: false; reason: RefreshSessionError };
 
-/** refresh 토큰 원문 → sha256 hex(64자). refresh_tokens.token_hash 조회 키. */
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
+// Step 2 fix(H005): sha256 SSOT 통일 — `lib/auth/token-hash.ts:sha256Hex` 사용으로 일원화.
+// refresh_tokens.token_hash와 email_verifications.token_hash가 같은 헬퍼를 공유한다.
 
 /**
  * 신규 refresh 세션 발급 — jose 토큰 발급 + refresh_tokens INSERT.
@@ -59,7 +58,7 @@ export async function issueRefreshSession(
   await prisma.refreshToken.create({
     data: {
       userId,
-      tokenHash: hashToken(token),
+      tokenHash: sha256Hex(token),
       familyId,
       rotationCounter: 0,
       expiresAt,
@@ -80,7 +79,7 @@ export async function verifyRefreshSession(token: string): Promise<VerifyRefresh
     return { ok: false, reason: jwtResult.reason };
   }
   const row = await prisma.refreshToken.findUnique({
-    where: { tokenHash: hashToken(token) },
+    where: { tokenHash: sha256Hex(token) },
   });
   if (row === null) {
     return { ok: false, reason: 'not_found' };
@@ -137,7 +136,7 @@ export async function rotateRefreshSession(oldToken: string): Promise<RotateRefr
       await tx.refreshToken.create({
         data: {
           userId: old.userId,
-          tokenHash: hashToken(token),
+          tokenHash: sha256Hex(token),
           familyId: old.familyId,
           rotationCounter,
           expiresAt,
