@@ -4,6 +4,7 @@ import type { Mock } from 'vitest';
 import { AppError } from '@/lib/errors';
 import { __resetCachedEnvForTesting } from '@/lib/env';
 import { __resetCorsCacheForTesting } from '@/lib/security/cors';
+import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 
 vi.mock('@/lib/auth/email-verification', () => ({
   consumeVerificationToken: vi.fn(),
@@ -15,19 +16,23 @@ const { consumeVerificationToken } = (await import('@/lib/auth/email-verificatio
 const { POST } = await import('@/app/api/v1/auth/verify-email/route');
 
 beforeEach(() => {
+  // CANDID-036: VERIFY_EMAIL RL 부착됨 — TRUST_PROXY 활성화 + bucket 격리.
+  vi.stubEnv('TRUST_PROXY', 'true');
   __resetCachedEnvForTesting();
   __resetCorsCacheForTesting();
+  __resetRateLimitStateForTesting();
   vi.clearAllMocks();
 });
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  __resetRateLimitStateForTesting();
 });
 
-function postRequest(body: unknown): NextRequest {
+function postRequest(body: unknown, ip = '203.0.113.10'): NextRequest {
   return new NextRequest('https://candidate.example.com/api/v1/auth/verify-email', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'x-forwarded-for': ip },
     body: JSON.stringify(body),
   });
 }
@@ -90,5 +95,61 @@ describe('POST /api/v1/auth/verify-email', () => {
     expect(response.status).toBe(410);
     const body = await response.json();
     expect(body.code).toBe('AUTH_VERIFICATION_TOKEN_EXPIRED');
+  });
+
+  it('에러 응답 표준 7필드 회귀 가드 (PR #33 H014 — verify-email/resend 비대칭 해소)', async () => {
+    consumeVerificationToken.mockRejectedValueOnce(new AppError('AUTH_VERIFICATION_TOKEN_INVALID'));
+    const response = await POST(postRequest({ token: VALID_TOKEN }), undefined);
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body).toMatchObject({
+      code: 'AUTH_VERIFICATION_TOKEN_INVALID',
+      status: 400,
+      message: '유효하지 않은 이메일 인증 토큰입니다.',
+      path: '/api/v1/auth/verify-email',
+    });
+    expect(body.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(body.traceId).toMatch(/^[0-9a-f-]{36}$/i);
+  });
+});
+
+describe('POST /api/v1/auth/verify-email — CANDID-036 Rate Limit (PR #33 H005)', () => {
+  it('30회/분/IP 한도 초과 시 429 + X-RateLimit-* 헤더', async () => {
+    consumeVerificationToken.mockResolvedValue({
+      userId: 42,
+      emailVerifiedAt: new Date(),
+      alreadyVerified: false,
+    });
+
+    // 한도까지 30회 통과
+    for (let i = 0; i < 30; i++) {
+      const r = await POST(postRequest({ token: VALID_TOKEN }), undefined);
+      expect(r.status).toBe(200);
+    }
+
+    // 31번째 → 429
+    const blocked = await POST(postRequest({ token: VALID_TOKEN }), undefined);
+    expect(blocked.status).toBe(429);
+    expect(blocked.headers.get('X-RateLimit-Policy')).toBe('verify_email');
+    expect(blocked.headers.get('X-RateLimit-Limit')).toBe('30');
+    expect(blocked.headers.get('Retry-After')).not.toBeNull();
+    const body = await blocked.json();
+    expect(body.code).toBe('SYS_RATE_LIMITED');
+  });
+
+  it('다른 IP는 격리된 카운터 (NAT 환경 다수 사용자 보호)', async () => {
+    consumeVerificationToken.mockResolvedValue({
+      userId: 42,
+      emailVerifiedAt: new Date(),
+      alreadyVerified: false,
+    });
+    // IP A: 한도 소진
+    for (let i = 0; i < 30; i++)
+      await POST(postRequest({ token: VALID_TOKEN }, '1.1.1.1'), undefined);
+    const blockedA = await POST(postRequest({ token: VALID_TOKEN }, '1.1.1.1'), undefined);
+    expect(blockedA.status).toBe(429);
+    // IP B: 영향 없음
+    const okB = await POST(postRequest({ token: VALID_TOKEN }, '2.2.2.2'), undefined);
+    expect(okB.status).toBe(200);
   });
 });

@@ -148,6 +148,48 @@ describe('POST /api/v1/auth/signup — 정상', () => {
 
     errSpy.mockRestore();
   });
+
+  it('smtpResponseCode truthy 분기 — SMTPError-like err에서 추출 (PR #34 M004)', async () => {
+    createUserAndIssueTokens.mockResolvedValueOnce(successResult);
+    // nodemailer SMTPError 형태 — responseCode 부여
+    const smtpErr = Object.assign(new Error('Mailbox unavailable'), { responseCode: 550 });
+    sendMail.mockRejectedValueOnce(smtpErr);
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await POST(postRequest(validBody), undefined);
+      await new Promise((r) => setImmediate(r));
+      const ctxArg = errSpy.mock.calls[0]?.[1] as Record<string, unknown> | undefined;
+      expect(ctxArg).toBeDefined();
+      expect(ctxArg).toHaveProperty('smtpResponseCode', 550);
+    } finally {
+      errSpy.mockRestore();
+    }
+  });
+
+  it('비-Error throw fallback — <non-error-throw> 일괄 대체 (PR #34 M005)', async () => {
+    createUserAndIssueTokens.mockResolvedValueOnce(successResult);
+    // toString override로 PII 우회 시도하는 비표준 throw
+    const nasty = {
+      envelope: { to: 'attacker@example.com' },
+      toString() {
+        return `Mail to ${this.envelope.to} rejected`;
+      },
+    };
+    sendMail.mockRejectedValueOnce(nasty as unknown as Error);
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await POST(postRequest(validBody), undefined);
+      await new Promise((r) => setImmediate(r));
+      expect(JSON.stringify(errSpy.mock.calls)).not.toContain('attacker@example.com');
+      const ctxArg = errSpy.mock.calls[0]?.[1] as Record<string, unknown> | undefined;
+      expect(ctxArg).toMatchObject({
+        errName: 'Unknown',
+        errMessage: '<non-error-throw>',
+      });
+    } finally {
+      errSpy.mockRestore();
+    }
+  });
 });
 
 describe('POST /api/v1/auth/signup — 검증 실패', () => {
@@ -173,10 +215,7 @@ describe('POST /api/v1/auth/signup — 검증 실패', () => {
 
   it('IDN homograph 이메일 → 400 (Step 2 fix H002)', async () => {
     // 키릴 'а'(U+0430) 사칭 도메인 — `gmail.com` vs `gmаil.com`
-    const response = await POST(
-      postRequest({ ...validBody, email: 'admin@gmаіl.com' }),
-      undefined,
-    );
+    const response = await POST(postRequest({ ...validBody, email: 'admin@gmаіl.com' }), undefined);
     expect(response.status).toBe(400);
     expect(createUserAndIssueTokens).not.toHaveBeenCalled();
   });

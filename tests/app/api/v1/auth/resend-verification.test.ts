@@ -85,9 +85,7 @@ describe('POST /api/v1/auth/resend-verification', () => {
     });
     prisma.user.findUnique.mockResolvedValueOnce({ email: 'u@x.test', name: 'X' });
     // nodemailer가 SMTP 응답 본문(평문 이메일 포함)을 err.message에 합성
-    sendMail.mockRejectedValueOnce(
-      new Error('550 5.1.1 <u@x.test>: Recipient address rejected'),
-    );
+    sendMail.mockRejectedValueOnce(new Error('550 5.1.1 <u@x.test>: Recipient address rejected'));
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const response = await POST(postRequest(), undefined);
@@ -150,5 +148,39 @@ describe('POST /api/v1/auth/resend-verification', () => {
     expect(blocked.headers.get('X-RateLimit-Policy')).toBe('signup');
   });
 
-  // user.findUnique null 케이스는 defensive 분기 — 정상 인증 통과 후엔 user가 존재 → 본 테스트 트리밍.
+  it('userId-bucket Rate Limit (USER_POLICIES.RESEND_VERIFICATION_USER 3회/시간) — 4번째 요청 429 (PR #33 H004)', async () => {
+    requireAuth.mockResolvedValue({ userId: 42 });
+    resendVerificationEmail.mockResolvedValue({
+      verificationToken: 'a'.repeat(64),
+      nextResendAvailableAt: new Date(),
+    });
+    prisma.user.findUnique.mockResolvedValue({ email: 'u@x.test', name: 'X' });
+
+    // 다른 IP 사용 — IP-bucket (SIGNUP 5회/시간/IP) 회피, userId-bucket (3회/시간/user) 진입.
+    for (let i = 0; i < 3; i++) {
+      const r = await POST(postRequest(`10.0.0.${i + 1}`), undefined);
+      expect(r.status).toBe(200);
+    }
+    const blocked = await POST(postRequest('10.0.0.99'), undefined);
+    expect(blocked.status).toBe(429);
+    const body = await blocked.json();
+    expect(body.code).toBe('SYS_RATE_LIMITED');
+    // 참고: 외부 withRateLimit(SIGNUP) wrapper가 inner withUserRateLimit의 429 응답 헤더를
+    // 정상 통과(probe.limited=false) 정보로 덮어써 X-RateLimit-Policy가 'signup'으로 노출됨.
+    // 표준 backoff 측면에서는 user-bucket 정책 정보가 더 유용 — 별도 task로 wrapper 동작 보강 검토.
+  });
+
+  it('user.findUnique null 분기 — 200 응답 + sendMail 미호출 (PR #34 H014 명시적 가드)', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    resendVerificationEmail.mockResolvedValueOnce({
+      verificationToken: 'a'.repeat(64),
+      nextResendAvailableAt: new Date('2026-05-23T12:01:00Z'),
+    });
+    // user가 race condition으로 삭제된 직후
+    prisma.user.findUnique.mockResolvedValueOnce(null);
+
+    const response = await POST(postRequest(), undefined);
+    expect(response.status).toBe(200);
+    expect(sendMail).not.toHaveBeenCalled();
+  });
 });
