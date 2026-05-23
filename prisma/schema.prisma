@@ -53,6 +53,13 @@ model User {
   failedLoginCount    Int        @default(0) @map("failed_login_count")
   lockedUntil         DateTime?  @map("locked_until")
   withdrawnAt         DateTime?  @map("withdrawn_at")
+  // CANDID-010: 개인정보보호법 §22 동의 시각 기록 (boolean보다 감사 추적성 우수).
+  // 약관/개인정보 미동의로 가입 불가 — boolean 검증은 zod에서, DB는 시각만 기록.
+  // BR-PII-05 옵션 C: ageConfirmedAt = 만 14세 이상 자기 확인 시각. 지원서 시점에 birth_date 정밀 검증.
+  termsAgreedAt       DateTime?  @map("terms_agreed_at")
+  privacyAgreedAt     DateTime?  @map("privacy_agreed_at")
+  marketingAgreedAt   DateTime?  @map("marketing_agreed_at")
+  ageConfirmedAt      DateTime?  @map("age_confirmed_at")
   createdAt           DateTime   @default(now()) @map("created_at")
   updatedAt           DateTime   @updatedAt @map("updated_at")
 
@@ -87,15 +94,21 @@ model AuthProvider {
 model EmailVerification {
   id         Int       @id @default(autoincrement())
   userId     Int       @map("user_id")
-  token      String    @unique @db.VarChar(255)
+  // CANDID-010: 평문 token 대신 sha256 해시 저장 — DB 유출 시 계정 탈취 차단.
+  // 클라이언트 URL은 평문, DB 조회는 sha256(token) hex. RefreshToken.tokenHash와 동일 패턴.
+  tokenHash  String    @unique @map("token_hash") @db.Char(64)
   expiresAt  DateTime  @map("expires_at") // 24h 후 (US-AUTH-001)
   consumedAt DateTime? @map("consumed_at")
-  lastSentAt DateTime  @default(now()) @map("last_sent_at") // 60s 재발송 쿨다운 enforcement (PRD 외 추가)
+  lastSentAt DateTime  @default(now()) @map("last_sent_at") // 60s 재발송 쿨다운 enforcement
   createdAt  DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "idx_email_verifications_user")
+  // CANDID-010 db-designer 권고: 만료 정리 배치 최적화.
+  // 활성 토큰 부분 인덱스 (idx_email_verifications_active WHERE consumed_at IS NULL)는
+  // Prisma @@index 미지원 → migration.sql에서 raw SQL로 추가.
+  @@index([expiresAt], map: "idx_email_verifications_expires")
   @@map("email_verifications")
 }
 
