@@ -33,12 +33,20 @@ export const POST = withErrorHandler(
       token: result.verificationToken,
     });
     void sendMail(mailMsg).catch((err) => {
-      // PR #33 H003 fix: 평문 email은 PII — 도메인만 남겨 디버깅 충분성과 PII 보호를 양립.
+      // PR #33 H003 + PR #34 H001 fix: 평문 email은 PII —
+      // nodemailer는 SMTP 응답(`550 5.1.1 <user@example.com>: ...`)을 err.message에 합성하므로
+      // errName/errMessage 분리만으로는 우회 노출 가능. 정규식 기반 redact로 차단.
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      const safeMessage = rawMessage.replace(
+        /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
+        '<email-redacted>',
+      );
       console.error('[signup] verification email send failed', {
         userId: result.user.id,
-        emailDomain: result.user.email.split('@')[1],
+        emailDomain: result.user.email.split('@')[1] ?? 'unknown',
         errName: err instanceof Error ? err.name : 'Unknown',
-        errMessage: err instanceof Error ? err.message : String(err),
+        errMessage: safeMessage,
+        smtpResponseCode: (err as { responseCode?: number })?.responseCode ?? null,
       });
     });
 

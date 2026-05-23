@@ -31,7 +31,20 @@ export const POST = withErrorHandler(
       });
       // fire-and-forget (BR-TX-02) — 발송 실패는 가입 직후 재발송으로 회복.
       void sendMail(mailMsg).catch((err) => {
-        console.error('[resend-verification] email send failed', { userId, err });
+        // PR #34 H002: signup 라우터와 동일 — err 객체째 펼침 시 envelope/response에
+        // 평문 수신자 이메일 노출. errMessage도 nodemailer가 SMTP 응답 합성 가능.
+        const rawMessage = err instanceof Error ? err.message : String(err);
+        const safeMessage = rawMessage.replace(
+          /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
+          '<email-redacted>',
+        );
+        console.error('[resend-verification] email send failed', {
+          userId,
+          emailDomain: user.email.split('@')[1] ?? 'unknown',
+          errName: err instanceof Error ? err.name : 'Unknown',
+          errMessage: safeMessage,
+          smtpResponseCode: (err as { responseCode?: number })?.responseCode ?? null,
+        });
       });
     }
 
