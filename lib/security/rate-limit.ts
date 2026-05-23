@@ -58,15 +58,12 @@ export function rateLimitKeyByIp(request: NextRequest): string {
 /**
  * BR-SEC-04 정책 카탈로그 — 변경 시점이 곧 SSOT. 호출측은 import해서 사용.
  *
+ * CANDID-036에서 IP-기반 외에 **userId-bucket** 정책을 위한 별도 인터페이스
+ * (`UserRateLimitPolicy`)와 helper(`withUserRateLimit`)를 도입했다.
+ * IP-기반 정책은 본 `POLICIES`, userId-기반은 아래 `USER_POLICIES`에서 관리한다.
+ *
  * **누락 정책 — FILE_UPLOAD**:
- * BR-SEC-04는 "파일 30회/시간/**사용자**"를 요구하나, 사용자별 카운팅에는
- * `withRateLimit` 호출 *시점에 이미 인증이 완료*되어 userId가 알려져 있어야 한다.
- * 현재 keyExtractor 시그니처(`(request) => string`)는 인증 후 context를 받지 못하므로
- * 카탈로그에 잘못된 IP 기반 정책을 노출하면 후속 task(CANDID-016 파일 업로드)가
- * 그대로 import해 BR-SEC-04 위반(IP-NAT 공유 환경에서 합법 사용자 차단)이 silent로 일어난다.
- * 따라서 본 Step 2는 LOGIN/SIGNUP만 정의하고, FILE_UPLOAD는 CANDID-016에서
- * `withRateLimit` 시그니처를 (request, AuthContext) → string으로 확장하거나
- * `withUserRateLimit(policy, userId, handler)` 변형을 도입하면서 함께 정의한다.
+ * BR-SEC-04 "파일 30회/시간/**사용자**"는 CANDID-016에서 `USER_POLICIES`에 추가될 예정.
  */
 export const POLICIES = Object.freeze({
   LOGIN: Object.freeze({
@@ -81,6 +78,46 @@ export const POLICIES = Object.freeze({
     maxRequests: 5,
     keyExtractor: rateLimitKeyByIp,
   } satisfies RateLimitPolicy),
+  /**
+   * CANDID-036 (PR #33 H005): 무제한 POST DoS 차단.
+   * 256-bit entropy로 brute force는 무의미하나, DB lookup 폭주 + 로그 폭주 차단이 목적.
+   * NAT 환경 다수 사용자 동시 클릭 여유를 확보 (1분/30회 = 1초/0.5회).
+   */
+  VERIFY_EMAIL: Object.freeze({
+    name: 'verify_email',
+    windowMs: 60_000,
+    maxRequests: 30,
+    keyExtractor: rateLimitKeyByIp,
+  } satisfies RateLimitPolicy),
+});
+
+/**
+ * userId-기반 정책 — 인증된 라우터에서 사용자별 throttling.
+ * `keyExtractor` 없이 외부에서 userId를 직접 전달받는다 (`withUserRateLimit` helper).
+ */
+export interface UserRateLimitPolicy {
+  readonly name: string;
+  readonly windowMs: number;
+  readonly maxRequests: number;
+}
+
+/**
+ * CANDID-036 — userId-bucket 정책 카탈로그.
+ *
+ * `POLICIES`(IP-기반)와 분리: 같은 윈도우의 IP+userId 복합 키 구성이 가능해
+ * 향후 IP-회전 공격 + 정상 userId 매칭 시도를 이중 차단할 수 있다.
+ */
+export const USER_POLICIES = Object.freeze({
+  /**
+   * PR #33 H004: resend-verification user-bucket — 메일 폭주 차단.
+   * 60s DB 쿨다운(1분/1통 잠재 = 60통/시간)에 더해 시간당 3통으로 강제.
+   * IP 기반 SIGNUP(5회/시간/IP)과 병용 — IP-회전 공격에도 user 단위 제한 유지.
+   */
+  RESEND_VERIFICATION_USER: Object.freeze({
+    name: 'resend_verification_user',
+    windowMs: 3_600_000,
+    maxRequests: 3,
+  } satisfies UserRateLimitPolicy),
 });
 
 /** Map<`${policy}:${key}`, timestamps[]> — 모듈 lifetime 동안 in-memory 유지. */
@@ -175,6 +212,82 @@ export function withRateLimit<C = unknown>(
     }
     const response = await handler(request, context);
     applyRateLimitHeaders(response, policy, probe);
+    return response;
+  };
+}
+
+/**
+ * userId-기반 정책 검사 — 외부 호출용. handler 외부에서 직접 사용 가능.
+ *
+ * CANDID-036 — `checkRateLimit`의 IP-키 추출 단계 없이 userId를 키로 직접 사용.
+ * 한도 초과 여부와 retryAfter를 동일 `RateLimitProbe` 형태로 반환.
+ */
+export function checkUserRateLimit(
+  policy: UserRateLimitPolicy,
+  userId: number | string,
+  now: number = Date.now(),
+): RateLimitProbe {
+  const key = `${policy.name}:user:${userId}`;
+  const windowStart = now - policy.windowMs;
+  const existing = buckets.get(key) ?? [];
+  let pruneIdx = 0;
+  while (pruneIdx < existing.length && existing[pruneIdx]! <= windowStart) pruneIdx++;
+  const pruned = pruneIdx > 0 ? existing.slice(pruneIdx) : existing;
+
+  if (pruned.length >= policy.maxRequests) {
+    buckets.set(key, pruned);
+    const oldest = pruned[0] ?? now;
+    return {
+      count: pruned.length,
+      remaining: 0,
+      limited: true,
+      retryAfterMs: Math.max(0, oldest + policy.windowMs - now),
+    };
+  }
+  pruned.push(now);
+  buckets.set(key, pruned);
+  return {
+    count: pruned.length,
+    remaining: Math.max(0, policy.maxRequests - pruned.length),
+    limited: false,
+    retryAfterMs: 0,
+  };
+}
+
+/**
+ * 인증된 Route Handler를 감싸 userId-기반 정책을 강제한다.
+ *
+ * CANDID-036 — `withRateLimit`은 IP-키, 본 helper는 userId-키. 인증 미들웨어 통과 후
+ * userId가 결정된 시점에 호출. 한도 초과 시 표준 429 + X-RateLimit-* / Retry-After.
+ *
+ * 사용:
+ * ```typescript
+ * const { userId } = await requireAuth(request);
+ * return withUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, userId, async () => {
+ *   // ... handler body
+ * })(request, context);
+ * ```
+ */
+export function withUserRateLimit<C = unknown>(
+  policy: UserRateLimitPolicy,
+  userId: number | string,
+  handler: ApiRouteHandler<C>,
+): ApiRouteHandler<C> {
+  return async (request, context) => {
+    const probe = checkUserRateLimit(policy, userId);
+    if (probe.limited) {
+      const response = errorResponse(request, 'SYS_RATE_LIMITED');
+      // policy 이름 노출만 헤더로 — IP-기반 헬퍼와 동일 시맨틱.
+      response.headers.set('X-RateLimit-Limit', String(policy.maxRequests));
+      response.headers.set('X-RateLimit-Remaining', String(probe.remaining));
+      response.headers.set('X-RateLimit-Policy', policy.name);
+      response.headers.set('Retry-After', String(Math.ceil(probe.retryAfterMs / 1000)));
+      return response;
+    }
+    const response = await handler(request, context);
+    response.headers.set('X-RateLimit-Limit', String(policy.maxRequests));
+    response.headers.set('X-RateLimit-Remaining', String(probe.remaining));
+    response.headers.set('X-RateLimit-Policy', policy.name);
     return response;
   };
 }
