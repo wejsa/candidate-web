@@ -77,6 +77,38 @@ describe('POST /api/v1/auth/resend-verification', () => {
     expect(mailMsg.to).toBe('u@x.test');
   });
 
+  it('메일 발송 실패가 응답을 막지 않음 (BR-TX-02) + H001/H002/H003 PII 회귀 가드', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    resendVerificationEmail.mockResolvedValueOnce({
+      verificationToken: 'a'.repeat(64),
+      nextResendAvailableAt: new Date('2026-05-23T12:01:00Z'),
+    });
+    prisma.user.findUnique.mockResolvedValueOnce({ email: 'u@x.test', name: 'X' });
+    // nodemailer가 SMTP 응답 본문(평문 이메일 포함)을 err.message에 합성
+    sendMail.mockRejectedValueOnce(
+      new Error('550 5.1.1 <u@x.test>: Recipient address rejected'),
+    );
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await POST(postRequest(), undefined);
+    expect(response.status).toBe(200);
+    await new Promise((r) => setImmediate(r));
+    expect(errSpy).toHaveBeenCalled();
+
+    // 평문 email 로그 인자 어디에도 등장 금지
+    expect(JSON.stringify(errSpy.mock.calls)).not.toContain('u@x.test');
+
+    const ctxArg = errSpy.mock.calls[0]?.[1] as Record<string, unknown> | undefined;
+    expect(ctxArg).toBeDefined();
+    expect(ctxArg).not.toHaveProperty('email');
+    expect(ctxArg).not.toHaveProperty('err');
+    expect(ctxArg).toHaveProperty('emailDomain', 'x.test');
+    expect(ctxArg).toHaveProperty('errName');
+    expect(ctxArg).toMatchObject({ errMessage: expect.stringContaining('<email-redacted>') });
+
+    errSpy.mockRestore();
+  });
+
   it('인증 실패 — requireAuth가 AUTH_TOKEN_INVALID throw → 401', async () => {
     requireAuth.mockRejectedValueOnce(new AppError('AUTH_TOKEN_INVALID'));
     const response = await POST(postRequest(), undefined);

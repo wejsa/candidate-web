@@ -119,16 +119,33 @@ describe('POST /api/v1/auth/signup — 정상', () => {
     expect(mailMsg.subject).toContain('이메일 인증');
   });
 
-  it('메일 발송 실패가 가입을 막지 않음 (BR-TX-02)', async () => {
+  it('메일 발송 실패가 가입을 막지 않음 (BR-TX-02) + H001/H003 PII 회귀 가드', async () => {
     createUserAndIssueTokens.mockResolvedValueOnce(successResult);
-    sendMail.mockRejectedValueOnce(new Error('SMTP unreachable'));
-    // 콘솔 에러 출력 억제
+    // nodemailer가 SMTP 응답 본문(평문 이메일 포함)을 err.message에 합성하는 실제 시나리오 재현
+    sendMail.mockRejectedValueOnce(
+      new Error('550 5.1.1 <newuser@example.com>: Recipient address rejected'),
+    );
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const response = await POST(postRequest(validBody), undefined);
     expect(response.status).toBe(201);
-    // catch가 실행될 시간 확보
     await new Promise((r) => setImmediate(r));
     expect(errSpy).toHaveBeenCalled();
+
+    // H003 회귀 가드: 평문 email/비밀번호가 로그 인자 어디에도 등장 금지
+    const serialized = JSON.stringify(errSpy.mock.calls);
+    expect(serialized).not.toContain('newuser@example.com');
+    expect(serialized).not.toContain('CorrectHorse!23');
+
+    // H001 회귀 가드: errMessage가 SMTP 응답 본문의 이메일을 redact했어야 함
+    const ctxArg = errSpy.mock.calls[0]?.[1] as Record<string, unknown> | undefined;
+    expect(ctxArg).toBeDefined();
+    expect(ctxArg).not.toHaveProperty('email');
+    expect(ctxArg).not.toHaveProperty('err'); // err 객체째 펼침 금지
+    expect(ctxArg).toHaveProperty('emailDomain', 'example.com');
+    expect(ctxArg).toHaveProperty('errName');
+    expect(ctxArg).toMatchObject({ errMessage: expect.stringContaining('<email-redacted>') });
+
     errSpy.mockRestore();
   });
 });
