@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 123,
+    "version": 124,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T21:03:22+09:00"
+    "updatedAt": "2026-05-23T21:04:14+09:00"
   },
   "summary": {
     "total": 35,
@@ -638,51 +638,35 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260523-203308",
-      "assignedAt": "2026-05-23T20:48:17+09:00",
+      "assignedAt": "2026-05-23T21:04:14+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        ".env.example",
         "app/api/v1/auth/resend-verification/route.ts",
         "app/api/v1/auth/signup/route.ts",
         "app/api/v1/auth/verify-email/route.ts",
         "lib/auth/email-verification.ts",
-        "lib/auth/password.ts",
         "lib/auth/signup.ts",
-        "lib/auth/token-hash.ts",
-        "lib/auth/validation.ts",
-        "lib/email/templates/verify-email.ts",
-        "lib/email/transport.ts",
-        "lib/env.ts",
         "lib/errors/codes.ts",
-        "package.json",
-        "pnpm-lock.yaml",
-        "prisma/migrations/20260523_candid_010_signup/migration.sql",
-        "prisma/schema.prisma",
         "tests/app/api/v1/auth/resend-verification.test.ts",
         "tests/app/api/v1/auth/signup.test.ts",
         "tests/app/api/v1/auth/verify-email.test.ts",
         "tests/lib/auth/email-verification.test.ts",
-        "tests/lib/auth/password.test.ts",
         "tests/lib/auth/signup.test.ts",
-        "tests/lib/auth/token-hash.test.ts",
-        "tests/lib/auth/validation.test.ts",
-        "tests/lib/email/transport.test.ts",
-        "tests/lib/email/verify-email.test.ts",
         "tests/lib/errors/codes.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 31,
-        "fixLoopCount": 1,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-23T21:03:22+09:00"
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-23T21:04:14+09:00"
       },
       "steps": [
         {
           "step": 1,
           "title": "DB 마이그레이션 + 비밀번호 + 검증 스키마 + SMTP 인프라",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "prisma/schema.prisma",
             "prisma/migrations/20260523_candid_010_signup/migration.sql",
@@ -706,7 +690,8 @@
           "dependsOn": [],
           "prNumber": 31,
           "branch": "feature/CANDID-010-step1",
-          "mergedLines": 718
+          "mergedLines": 854,
+          "mergedAt": "2026-05-23T21:04:14+09:00"
         },
         {
           "step": 2,
@@ -746,7 +731,7 @@
           "prNumber": null
         }
       ],
-      "currentStep": 1,
+      "currentStep": 2,
       "planPath": ".claude/temp/CANDID-010-plan.md"
     },
     "CANDID-011": {
