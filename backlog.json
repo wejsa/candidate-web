@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 108,
+    "version": 109,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T19:43:33+09:00"
+    "updatedAt": "2026-05-23T19:44:37+09:00"
   },
   "summary": {
     "total": 35,
@@ -550,41 +550,34 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260523-191619",
-      "assignedAt": "2026-05-23T19:36:54+09:00",
+      "assignedAt": "2026-05-23T19:44:37+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        ".env.example",
         "docs/security/security-controls.md",
-        "lib/env.ts",
         "lib/errors/codes.ts",
-        "lib/security/cors.ts",
-        "lib/security/headers.ts",
         "lib/security/origin.ts",
         "lib/security/rate-limit.ts",
         "lib/security/sanitize.ts",
         "middleware.ts",
         "package.json",
         "tests/lib/errors/codes.test.ts",
-        "tests/lib/security/cors.test.ts",
-        "tests/lib/security/headers.test.ts",
         "tests/lib/security/origin.test.ts",
         "tests/lib/security/rate-limit.test.ts",
-        "tests/lib/security/sanitize.test.ts",
-        "tests/middleware.test.ts"
+        "tests/lib/security/sanitize.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 28,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-23T19:43:33+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-23T19:44:37+09:00"
       },
       "steps": [
         {
           "step": 1,
           "title": "보안 헤더 + HTTPS 308 + CORS + middleware 골격",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "middleware.ts",
             "lib/security/headers.ts",
@@ -599,7 +592,8 @@
           "dependsOn": [],
           "prNumber": 28,
           "branch": "feature/CANDID-009-step1",
-          "mergedLines": 695
+          "mergedLines": 695,
+          "mergedAt": "2026-05-23T19:44:37+09:00"
         },
         {
           "step": 2,
@@ -638,7 +632,7 @@
           "prNumber": null
         }
       ],
-      "currentStep": 1,
+      "currentStep": 2,
       "planPath": ".claude/temp/CANDID-009-plan.md"
     },
     "CANDID-010": {
