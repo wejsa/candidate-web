@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 111,
+    "version": 112,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T20:02:46+09:00"
+    "updatedAt": "2026-05-23T20:05:58+09:00"
   },
   "summary": {
     "total": 35,
@@ -566,12 +566,12 @@
         "tests/lib/security/sanitize.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-fix",
-        "lastCompletedSkill": "skill-review-pr",
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-fix",
         "prNumber": 29,
         "fixLoopCount": 1,
-        "autoChainArgs": "29",
-        "updatedAt": "2026-05-23T20:02:46+09:00"
+        "autoChainArgs": "29 --auto-fix",
+        "updatedAt": "2026-05-23T20:05:58+09:00"
       },
       "steps": [
         {
