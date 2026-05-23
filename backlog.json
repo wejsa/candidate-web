@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 35,
     "projectPrefix": "CANDID",
-    "version": 126,
+    "version": 127,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-23T21:16:45+09:00"
+    "updatedAt": "2026-05-23T21:17:27+09:00"
   },
   "summary": {
     "total": 35,
@@ -638,29 +638,25 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260523-203308",
-      "assignedAt": "2026-05-23T21:10:37+09:00",
+      "assignedAt": "2026-05-23T21:17:27+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/resend-verification/route.ts",
-        "app/api/v1/auth/signup/route.ts",
         "app/api/v1/auth/verify-email/route.ts",
         "lib/auth/email-verification.ts",
-        "lib/auth/signup.ts",
         "lib/errors/codes.ts",
         "tests/app/api/v1/auth/resend-verification.test.ts",
-        "tests/app/api/v1/auth/signup.test.ts",
         "tests/app/api/v1/auth/verify-email.test.ts",
         "tests/lib/auth/email-verification.test.ts",
-        "tests/lib/auth/signup.test.ts",
         "tests/lib/errors/codes.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 32,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-23T21:16:45+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-23T21:17:27+09:00"
       },
       "steps": [
         {
@@ -696,7 +692,7 @@
         {
           "step": 2,
           "title": "회원가입 API (POST /signup) — 핵심 비즈니스 + 자동 로그인 + 인증 메일 발송",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/auth/signup.ts",
             "app/api/v1/auth/signup/route.ts",
@@ -710,7 +706,8 @@
           ],
           "prNumber": 32,
           "branch": "feature/CANDID-010-step2",
-          "mergedLines": 566
+          "mergedLines": 566,
+          "mergedAt": "2026-05-23T21:17:27+09:00"
         },
         {
           "step": 3,
@@ -733,7 +730,7 @@
           "prNumber": null
         }
       ],
-      "currentStep": 2,
+      "currentStep": 3,
       "planPath": ".claude/temp/CANDID-010-plan.md"
     },
     "CANDID-011": {
