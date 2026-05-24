@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 152,
+    "version": 153,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T12:10:00+09:00"
+    "updatedAt": "2026-05-24T12:18:00+09:00"
   },
   "summary": {
     "total": 35,
-    "done": 13,
-    "inProgress": 1,
+    "done": 14,
+    "inProgress": 0,
     "review": 0,
     "todo": 21
   },
@@ -725,24 +725,16 @@
       "id": "CANDID-011",
       "title": "이메일 로그인 + 5회 실패 잠금/15분 (US-AUTH-002)",
       "description": "이메일/비밀번호 검증 + 5회 실패 시 15분 잠금(429). 계정 열거 방지(어느 쪽이 틀렸는지 비노출). 로그인 직전 URL 복귀.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "assignee": "wejsa-u@WSL-20260524-114000",
-      "assignedAt": "2026-05-24T12:05:00+09:00",
-      "lockTTL": 3600,
-      "lockedFiles": [
-        "app/api/v1/auth/login/route.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 42,
-        "fixLoopCount": 0,
-        "autoChainArgs": "42 --auto-fix",
-        "updatedAt": "2026-05-24T12:10:00+09:00"
-      },
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": null,
+      "lockedFiles": [],
+      "workflowState": null,
+      "completedAt": "2026-05-24T12:18:00+09:00",
       "planPath": ".claude/temp/CANDID-011-plan.md",
       "currentStep": 2,
       "steps": [
@@ -768,17 +760,20 @@
         {
           "step": 2,
           "title": "라우터 + 통합 테스트 (POST /api/v1/auth/login)",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-011-step2",
           "prNumber": 42,
+          "mergedAt": "2026-05-24T12:18:00+09:00",
           "files": [
             "app/api/v1/auth/login/route.ts",
             "tests/app/api/v1/auth/login.test.ts"
           ],
           "estimatedLines": 300,
           "actualLines": 282,
+          "mergedLines": 318,
           "prLineLimit": 400,
-          "dependsOn": [1]
+          "dependsOn": [1],
+          "reviewSummary": "CRITICAL 0 / MAJOR 2 (test 회귀 가드 in-task fix 완료) / MINOR 5 (모두 별도 task). 보안 결함 0. L-019 적용 + L-027 가설 부분 검증 (282 LOC ≈ 1.4×200)."
         }
       ],
       "dependencies": [

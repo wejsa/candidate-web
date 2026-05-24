@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 16,
+    "version": 17,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-24T11:28:00+09:00"
+    "updatedAt": "2026-05-24T12:18:00+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -623,6 +623,20 @@
         38,
         39,
         40
+      ]
+    },
+    "CANDID-011": {
+      "id": "CANDID-011",
+      "title": "이메일 로그인 + 5회 실패 잠금/15분 (US-AUTH-002)",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "completedAt": "2026-05-24T12:18:00+09:00",
+      "steps": 2,
+      "totalLines": 935,
+      "prNumbers": [
+        41,
+        42
       ]
     }
   }
