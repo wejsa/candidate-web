@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 186,
+    "version": 187,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T18:51:41+09:00"
+    "updatedAt": "2026-05-24T19:00:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1085,21 +1085,118 @@
       "priority": "high",
       "phase": 2,
       "assignee": "jaese@hoji-20260524-185141",
-      "assignedAt": "2026-05-24T18:51:41+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-24T19:00:00+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "lib/drafts/types.ts",
+        "lib/drafts/schema.ts",
+        "lib/drafts/age.ts",
+        "lib/drafts/service.ts",
+        "lib/drafts/user-prefill.ts",
+        "lib/drafts/use-auto-save.ts",
+        "lib/validation/age.ts",
+        "lib/errors/codes.ts",
+        "lib/pii/mask.ts",
+        "app/api/v1/drafts/[jobPostingId]/route.ts",
+        "app/jobs/[id]/apply/page.tsx",
+        "app/jobs/[id]/apply/not-found.tsx",
+        "app/jobs/[id]/apply/_components/ApplicationFormShell.tsx",
+        "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
+        "app/jobs/[id]/apply/_components/StepNavigation.tsx",
+        "app/jobs/[id]/apply/_components/AutoSaveIndicator.tsx",
+        "vitest.config.ts",
+        "tests/lib/drafts/age.test.ts",
+        "tests/lib/drafts/schema.test.ts",
+        "tests/lib/drafts/service.test.ts",
+        "tests/lib/drafts/user-prefill.test.ts",
+        "tests/lib/drafts/use-auto-save.test.ts",
+        "tests/app/api/v1/drafts/[jobPostingId]/route.test.ts",
+        "tests/integration/drafts-prefill-roundtrip.test.ts"
+      ],
       "workflowState": {
         "currentSkill": "skill-plan",
         "lastCompletedSkill": null,
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T18:51:41+09:00"
+        "updatedAt": "2026-05-24T19:00:00+09:00"
       },
       "dependencies": [
         "CANDID-005",
         "CANDID-008",
         "CANDID-014"
+      ],
+      "planPath": ".claude/temp/CANDID-015-plan.md",
+      "specFile": "docs/sample-requirement.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "Draft 서비스 + GET/PUT API + 만 14세 + 에러 코드",
+          "status": "pending",
+          "files": [
+            "lib/drafts/types.ts",
+            "lib/drafts/schema.ts",
+            "lib/drafts/age.ts",
+            "lib/drafts/service.ts",
+            "lib/validation/age.ts",
+            "lib/errors/codes.ts",
+            "app/api/v1/drafts/[jobPostingId]/route.ts",
+            "tests/lib/drafts/age.test.ts",
+            "tests/lib/drafts/schema.test.ts",
+            "tests/lib/drafts/service.test.ts",
+            "tests/app/api/v1/drafts/[jobPostingId]/route.test.ts"
+          ],
+          "estimatedLines": 700,
+          "prLineLimit": 750,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "User PII lazy prefill + 응답 마스킹 + 통합 테스트",
+          "status": "pending",
+          "files": [
+            "lib/drafts/user-prefill.ts",
+            "lib/drafts/service.ts",
+            "lib/pii/mask.ts",
+            "tests/lib/drafts/user-prefill.test.ts",
+            "tests/integration/drafts-prefill-roundtrip.test.ts"
+          ],
+          "estimatedLines": 370,
+          "prLineLimit": 450,
+          "dependsOn": [1]
+        },
+        {
+          "step": 3,
+          "title": "/jobs/[id]/apply RSC + 3-step shell + PersonalInfoStep 폼",
+          "status": "pending",
+          "files": [
+            "app/jobs/[id]/apply/page.tsx",
+            "app/jobs/[id]/apply/not-found.tsx",
+            "app/jobs/[id]/apply/_components/ApplicationFormShell.tsx",
+            "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
+            "app/jobs/[id]/apply/_components/StepNavigation.tsx",
+            "tests/lib/drafts/schema.test.ts"
+          ],
+          "estimatedLines": 520,
+          "prLineLimit": 600,
+          "dependsOn": [1, 2]
+        },
+        {
+          "step": 4,
+          "title": "자동 저장 hook + beforeunload + 토스트 + jsdom 인프라",
+          "status": "pending",
+          "files": [
+            "lib/drafts/use-auto-save.ts",
+            "app/jobs/[id]/apply/_components/AutoSaveIndicator.tsx",
+            "app/jobs/[id]/apply/_components/ApplicationFormShell.tsx",
+            "vitest.config.ts",
+            "tests/lib/drafts/use-auto-save.test.ts"
+          ],
+          "estimatedLines": 440,
+          "prLineLimit": 550,
+          "dependsOn": [1, 2, 3]
+        }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00"
     },
