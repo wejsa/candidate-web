@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 181,
+    "version": 182,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T17:55:00+09:00"
+    "updatedAt": "2026-05-24T18:05:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1001,12 +1001,12 @@
         "tests/lib/auth/server-cookies.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 50,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": 51,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T17:55:00+09:00"
+        "updatedAt": "2026-05-24T18:05:00+09:00"
       },
       "dependencies": [
         "CANDID-013"
@@ -1041,9 +1041,14 @@
         {
           "step": 2,
           "title": "페이지 RSC + 메타데이터 + 표시 컴포넌트 + 공유 버튼",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-014-step2",
+          "prNumber": 51,
           "files": [
+            "lib/jobs/dday.ts",
             "lib/jobs/detail-metadata.ts",
+            "lib/jobs/list.ts",
+            "lib/jobs/detail.ts",
             "app/jobs/[id]/page.tsx",
             "app/jobs/[id]/loading.tsx",
             "app/jobs/[id]/not-found.tsx",
@@ -1053,8 +1058,10 @@
             "tests/lib/jobs/detail-metadata.test.ts"
           ],
           "estimatedLines": 545,
+          "actualLines": 462,
           "prLineLimit": 600,
-          "dependsOn": [1]
+          "dependsOn": [1],
+          "note": "L-019 in-task self-correction 적용: Step 1 D-MAJOR-2(computeDDay 추출 → lib/jobs/dday.ts) + D-MAJOR-1(unstable_cache 키 배열 id 명시) 해소. ShareButton의 execCommand fallback에 lint disable 대신 일반 주석 사용."
         },
         {
           "step": 3,
