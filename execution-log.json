@@ -617,5 +617,20 @@
     "mergeMethod": "squash",
     "mergedLines": 560,
     "timestamp": "2026-05-24T12:52:27+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-012",
+    "stepNumber": 2,
+    "prNumber": 44,
+    "branch": "feature/CANDID-012-step2",
+    "actualLines": 911,
+    "prLineLimit": 700,
+    "vitest": {
+      "passed": 674,
+      "added": 25
+    },
+    "note": "plan estimate 500 → actual 911 (1.82× inflation). http.ts SSRF helper + GitHub 2-call 미반영. 회고 학습.",
+    "timestamp": "2026-05-24T13:05:00+09:00"
   }
 ]
