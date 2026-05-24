@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 160,
+    "version": 161,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T13:17:00+09:00"
+    "updatedAt": "2026-05-24T13:18:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -791,7 +791,7 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260524-122713",
-      "assignedAt": "2026-05-24T13:05:00+09:00",
+      "assignedAt": "2026-05-24T13:18:00+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "lib/auth/oauth/link.ts",
@@ -799,19 +799,19 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 44,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "44",
-        "updatedAt": "2026-05-24T13:17:00+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-24T13:18:00+09:00"
       },
       "dependencies": [
         "CANDID-006"
       ],
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-012-plan.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -838,25 +838,30 @@
         {
           "step": 2,
           "title": "Provider 인터페이스 + Google + GitHub 구현 + 단위 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-012-step2",
           "prNumber": 44,
+          "mergedAt": "2026-05-24T13:17:49+09:00",
           "files": [
             "lib/auth/oauth/index.ts",
             "lib/auth/oauth/http.ts",
             "lib/auth/oauth/google.ts",
             "lib/auth/oauth/github.ts",
+            "lib/auth/oauth/normalize.ts",
             "tests/lib/auth/oauth/__test-helpers.ts",
             "tests/lib/auth/oauth/http.test.ts",
             "tests/lib/auth/oauth/google.test.ts",
-            "tests/lib/auth/oauth/github.test.ts"
+            "tests/lib/auth/oauth/github.test.ts",
+            "tests/lib/auth/oauth/index.test.ts"
           ],
           "estimatedLines": 500,
           "actualLines": 1035,
+          "mergedLines": 1035,
           "prLineLimit": 750,
           "originalPrLineLimit": 600,
           "prLineLimitAdjustedReason": "http.ts SSRF helper(76) + GitHub 2-call 패턴(80) + 4 테스트 파일 + in-task fix(normalize.ts + index.test.ts + 보강) 124 추가 → 1035 LOC. 1.4×750=1050 > 1035.",
-          "dependsOn": [1]
+          "dependsOn": [1],
+          "reviewSummary": "CRITICAL 0 / MAJOR 10 (in-task fix 4건: T-MAJOR-1 index.test, D-MAJOR-2/1 normalizeOAuthName, D-MAJOR-3 safeHttpsUrl, T-MAJOR-2 redirect 회귀 + 보강 2건; carry 6건) / MINOR 12 / INFO 8. L-019 적용."
         },
         {
           "step": 3,

@@ -647,5 +647,14 @@
     "carryCount": 6,
     "finalLines": 1035,
     "timestamp": "2026-05-24T13:17:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-012",
+    "stepNumber": 2,
+    "prNumber": 44,
+    "mergeMethod": "squash",
+    "mergedLines": 1035,
+    "timestamp": "2026-05-24T13:17:49+09:00"
   }
 ]
