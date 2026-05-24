@@ -708,5 +708,31 @@
     "carryMajor": 13,
     "note": "회차 1 fix 적용 후 재리뷰. C001 + 3 MAJOR 해소 확인. APPROVED → 머지 진행.",
     "timestamp": "2026-05-24T13:45:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-012",
+    "stepNumber": 3,
+    "prNumber": 45,
+    "mergeMethod": "squash",
+    "mergedLines": 1072,
+    "isLastStep": true,
+    "timestamp": "2026-05-24T13:44:03+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-012",
+    "totalSteps": 3,
+    "totalAdditions": 2667,
+    "totalDeletions": 3,
+    "prNumbers": [43, 44, 45],
+    "fixLoopTotal": 1,
+    "vitest": {
+      "passed": 736,
+      "added": 87
+    },
+    "carryMajorTotal": 29,
+    "note": "US-AUTH-003 완성. Step 1(560 LOC) + Step 2(1035 LOC) + Step 3(1072 LOC). 회차 1 fix 1회. 27 carry MAJOR (Step 1: 10, Step 2: 6, Step 3: 13) → 회고에서 follow-up task 분리 예정.",
+    "timestamp": "2026-05-24T13:46:00+09:00"
   }
 ]

@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 17,
+    "version": 18,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-24T12:18:00+09:00"
+    "updatedAt": "2026-05-24T13:46:00+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -638,6 +638,23 @@
         41,
         42
       ]
+    },
+    "CANDID-012": {
+      "id": "CANDID-012",
+      "title": "OAuth2 소셜 로그인 Google/GitHub + 계정 연결 정책 (US-AUTH-003)",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "completedAt": "2026-05-24T13:46:00+09:00",
+      "steps": 3,
+      "totalLines": 2667,
+      "prNumbers": [
+        43,
+        44,
+        45
+      ],
+      "fixLoop": 1,
+      "note": "US-AUTH-003 완성. Step 1(state·PKCE) + Step 2(Google/GitHub provider) + Step 3(link 트랜잭션 + 라우터 + C001 open-redirect fix). 회차 1 fix로 CRITICAL 해소. 736 tests passed."
     }
   }
 }

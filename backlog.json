@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 165,
+    "version": 166,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T13:45:00+09:00"
+    "updatedAt": "2026-05-24T13:46:00+09:00"
   },
   "summary": {
     "total": 35,
-    "done": 14,
-    "inProgress": 1,
+    "done": 15,
+    "inProgress": 0,
     "review": 0,
     "todo": 20
   },
@@ -786,26 +786,16 @@
       "id": "CANDID-012",
       "title": "OAuth2 소셜 로그인 Google/GitHub + 계정 연결 정책 (US-AUTH-003)",
       "description": "OAuth2 Authorization Code + PKCE. Google(profile,email)/GitHub(read:user,user:email). 동일 이메일 자동 연결 차단(명시적 연결 안내). 미인증 이메일 별도 인증.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "assignee": "wejsa-u@hoji-20260524-122713",
-      "assignedAt": "2026-05-24T13:18:00+09:00",
-      "lockTTL": 7200,
-      "lockedFiles": [
-        "lib/auth/oauth/link.ts",
-        "app/api/v1/auth/oauth/[provider]/route.ts",
-        "app/api/v1/auth/oauth/[provider]/callback/route.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 45,
-        "fixLoopCount": 1,
-        "autoChainArgs": "45",
-        "updatedAt": "2026-05-24T13:45:00+09:00"
-      },
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": null,
+      "lockedFiles": [],
+      "workflowState": null,
+      "completedAt": "2026-05-24T13:46:00+09:00",
       "dependencies": [
         "CANDID-006"
       ],
@@ -866,21 +856,27 @@
         {
           "step": 3,
           "title": "link 비즈니스 + start/callback 라우터 + 통합 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-012-step3",
           "prNumber": 45,
+          "mergedAt": "2026-05-24T13:44:03+09:00",
           "files": [
             "lib/auth/oauth/link.ts",
+            "lib/auth/oauth/redirect.ts",
             "app/api/v1/auth/oauth/[provider]/route.ts",
             "app/api/v1/auth/oauth/[provider]/callback/route.ts",
             "tests/lib/auth/oauth/link.test.ts",
+            "tests/lib/auth/oauth/redirect.test.ts",
             "tests/app/api/v1/auth/oauth/start.test.ts",
             "tests/app/api/v1/auth/oauth/callback.test.ts"
           ],
           "estimatedLines": 600,
           "actualLines": 942,
+          "mergedLines": 1072,
           "prLineLimit": 750,
-          "dependsOn": [1, 2]
+          "dependsOn": [1, 2],
+          "fixLoop": 1,
+          "reviewSummary": "회차 1: CRITICAL 1 (C001 callback open-redirect) + MAJOR 18. 회차 1 fix: C001 + S-MAJOR-4.1(sanitize tab 우회) + S-MAJOR-4.2(origin 재검증) + S-MAJOR-1.2(ageConfirmedAt) 해소. 재리뷰: CRITICAL 0, MAJOR 0 신규. Carry 13 MAJOR (회고 follow-up). L-019 + L-022 적용."
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
