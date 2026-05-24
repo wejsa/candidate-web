@@ -1,0 +1,73 @@
+// CANDID-014 Step 2 — URL 복사 공유 버튼 (client).
+// navigator.clipboard.writeText 우선 + document.execCommand('copy') fallback.
+// 카카오톡/링크드인 SDK는 P2 후속 task.
+
+'use client';
+
+import { useState } from 'react';
+
+interface Props {
+  title: string;
+}
+
+type Status = 'idle' | 'copied' | 'failed';
+
+async function copyToClipboard(text: string): Promise<boolean> {
+  // Clipboard API (HTTPS + 권한)
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // 권한 거부 등 — fallback 시도
+    }
+  }
+  // Legacy fallback — Safari iOS 13 이하 등
+  if (typeof document === 'undefined') return false;
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'absolute';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    // document.execCommand는 deprecated이나 Safari iOS<14 fallback용 의도적 사용.
+    const ok = document.execCommand('copy');
+    return ok;
+  } catch {
+    return false;
+  } finally {
+    document.body.removeChild(textarea);
+  }
+}
+
+export function ShareButton({ title }: Props) {
+  const [status, setStatus] = useState<Status>('idle');
+
+  const handleClick = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const ok = await copyToClipboard(url);
+    setStatus(ok ? 'copied' : 'failed');
+    // 토스트 3초 후 초기화
+    setTimeout(() => setStatus('idle'), 3000);
+  };
+
+  return (
+    <div>
+      <button type="button" onClick={handleClick} aria-label={`${title} URL 복사`}>
+        URL 복사
+      </button>
+      {status === 'copied' && (
+        <span role="status" aria-live="polite">
+          복사 완료
+        </span>
+      )}
+      {status === 'failed' && (
+        <span role="status" aria-live="assertive">
+          복사 실패 — 직접 URL을 복사하세요
+        </span>
+      )}
+    </div>
+  );
+}
