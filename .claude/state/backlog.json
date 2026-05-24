@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 190,
+    "version": 191,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T19:30:00+09:00"
+    "updatedAt": "2026-05-24T19:45:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1107,12 +1107,12 @@
         "tests/integration/drafts-prefill-roundtrip.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 54,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T19:30:00+09:00"
+        "updatedAt": "2026-05-24T19:45:00+09:00"
       },
       "dependencies": [
         "CANDID-005",
@@ -1121,7 +1121,7 @@
       ],
       "planPath": ".claude/temp/CANDID-015-plan.md",
       "specFile": "docs/sample-requirement.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -1155,9 +1155,10 @@
         {
           "step": 2,
           "title": "User PII lazy prefill + 응답 마스킹 + Step 1 carry fix",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-015-step2",
           "prNumber": 54,
+          "mergedAt": "2026-05-24T19:45:00+09:00",
           "files": [
             "lib/drafts/user-prefill.ts",
             "lib/drafts/service.ts",
@@ -1169,9 +1170,11 @@
           ],
           "estimatedLines": 370,
           "actualLines": 244,
+          "mergedLines": 244,
           "prLineLimit": 450,
           "dependsOn": [1],
-          "note": "L-019 Step 1 carry 4건 fix 통합: D-MAJOR-2 dead export 제거 + T-MAJOR-4 14세 라벨 + S-MAJOR-1/2 정책 헤더 + Cache-Control. 통합 테스트(drafts-prefill-roundtrip)는 vitest.config.integration.ts 추가 비용으로 CANDID-015-FU1 위임."
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 8 / MINOR 9 / INFO 9. L-019 Step 1 carry 4건 검증 완료. 본 PR carry: Step 3 in-task 3건(D-MAJOR-1 Promise.all, S-MAJOR-3 wire-up, T-MAJOR-2 wire-up 가드) + CANDID-015-FU1 5건. 테스트 936→947(+11).",
+          "note": "L-019 Step 1 carry 4건 fix 통합."
         },
         {
           "step": 3,
