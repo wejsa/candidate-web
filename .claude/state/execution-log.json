@@ -1001,5 +1001,13 @@
     "testCountBefore": 987,
     "testCountAfter": 1007,
     "timestamp": "2026-05-24T20:55:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-016",
+    "stepNumber": 1,
+    "prNumber": 57,
+    "mergeCommit": "e3d161feaa8d9f63a9f81b541c3aef7d6d401ac6",
+    "timestamp": "2026-05-24T23:42:36+09:00"
   }
 ]
