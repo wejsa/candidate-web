@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 15,
+    "version": 16,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-24T00:38:26+09:00"
+    "updatedAt": "2026-05-24T11:28:00+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -608,6 +608,21 @@
         35,
         36,
         37
+      ]
+    },
+    "CANDID-037": {
+      "id": "CANDID-037",
+      "title": "CANDID-036 FU: RL wrapper 합성 + P2002 정밀 매핑 + 테스트 강화",
+      "type": "enhancement",
+      "priority": "high",
+      "phase": 2,
+      "completedAt": "2026-05-24T11:28:00+09:00",
+      "steps": 3,
+      "totalLines": 953,
+      "prNumbers": [
+        38,
+        39,
+        40
       ]
     }
   }

@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 146,
+    "version": 147,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T11:20:00+09:00"
+    "updatedAt": "2026-05-24T11:28:00+09:00"
   },
   "summary": {
     "total": 35,
-    "done": 12,
-    "inProgress": 1,
+    "done": 13,
+    "inProgress": 0,
     "review": 0,
     "todo": 22
   },
@@ -1388,24 +1388,16 @@
     "CANDID-037": {
       "id": "CANDID-037",
       "title": "CANDID-036 FU: RL wrapper 합성 + P2002 정밀 매핑 + 테스트 강화",
-      "status": "in_progress",
+      "status": "done",
       "type": "enhancement",
       "priority": "high",
       "phase": 2,
-      "assignee": "wejsa-u@WSL-20260524-103200",
-      "assignedAt": "2026-05-24T11:12:00+09:00",
-      "lockTTL": 7200,
-      "lockedFiles": [
-        "app/api/v1/auth/resend-verification/route.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 40,
-        "fixLoopCount": 0,
-        "autoChainArgs": "40 --auto-fix",
-        "updatedAt": "2026-05-24T11:20:00+09:00"
-      },
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": null,
+      "lockedFiles": [],
+      "workflowState": null,
+      "completedAt": "2026-05-24T11:28:00+09:00",
       "planPath": ".claude/temp/CANDID-037-plan.md",
       "currentStep": 3,
       "steps": [
@@ -1452,9 +1444,10 @@
         {
           "step": 3,
           "title": "라우터 일관화 (enforceUserRateLimit 적용) + 회귀 어설션 강화 + 매직 넘버 제거",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-037-step3",
           "prNumber": 40,
+          "mergedAt": "2026-05-24T11:28:00+09:00",
           "files": [
             "app/api/v1/auth/resend-verification/route.ts",
             "tests/app/api/v1/auth/resend-verification.test.ts",
@@ -1463,8 +1456,10 @@
           ],
           "estimatedLines": 85,
           "actualLines": 258,
+          "mergedLines": 258,
           "prLineLimit": 300,
-          "dependsOn": [1, 2]
+          "dependsOn": [1, 2],
+          "reviewSummary": "CRITICAL 0 / MAJOR 1 (별도 task) / MINOR 6 / INFO 7 (full mode 3-agent). 보안 결함 0. 자기 PR COMMENT."
         }
       ],
       "dependencies": [
