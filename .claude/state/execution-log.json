@@ -787,5 +787,17 @@
     "carryMajor": 11,
     "note": "CRITICAL 0. S-1(category slug regex) + T-1(D-Day 경계) in-task fix. 11 MAJOR carry → 회고 follow-up. 테스트 770/770 (+9).",
     "timestamp": "2026-05-24T16:42:09+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-013",
+    "stepNumber": 1,
+    "prNumber": 47,
+    "mergeMethod": "squash",
+    "mergedLines": 668,
+    "branchDeleted": true,
+    "isLastStep": false,
+    "note": "PR #47 squash 머지 → develop. Step 2 진행 (페이지 RSC + 카드 + 페이지네이션).",
+    "timestamp": "2026-05-24T16:45:14+09:00"
   }
 ]
