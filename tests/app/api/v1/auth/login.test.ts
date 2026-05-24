@@ -116,11 +116,28 @@ describe('POST /api/v1/auth/login — 정상', () => {
     expect(opts).toMatchObject({ userAgent: 'vitest', ipAddress: null });
   });
 
-  it('rememberMe=true 전달 → signin input.rememberMe 그대로', async () => {
-    signin.mockResolvedValueOnce(successResult);
-    await POST(postRequest({ ...validBody, rememberMe: true }), undefined);
+  it('rememberMe=true 전달 → signin input.rememberMe 그대로 + refresh Expires 14일 회귀 가드 (test MAJOR H001)', async () => {
+    // rememberMe=true 시 signin이 14일 만료 Refresh를 발급 → 라우터가 그대로 Set-Cookie에 반영해야 함.
+    // signin 정책 변경 시 라우터 회귀 감지 가드.
+    const refreshExpires14d = new Date('2026-06-07T00:00:00Z'); // 14일 후 가정
+    signin.mockResolvedValueOnce({
+      ...successResult,
+      tokens: { ...successResult.tokens, refreshExpiresAt: refreshExpires14d },
+    });
+
+    const response = await POST(postRequest({ ...validBody, rememberMe: true }), undefined);
+    expect(response.status).toBe(200);
+
     const [input] = signin.mock.calls[0] ?? [];
     expect(input).toMatchObject({ rememberMe: true });
+
+    // refresh Cookie 만료가 signin 반환값 그대로 반영되는지 검증 (라우터가 expiresAt 누락/임의 변경 시 차단)
+    const setCookies = response.headers.getSetCookie();
+    const refreshCookie = setCookies.find((c) => c.startsWith('refresh_token='));
+    expect(refreshCookie).toBeDefined();
+    expect(refreshCookie).toContain('Expires=');
+    // Date.toUTCString() 형식 — refreshExpires14d ISO를 라우터가 그대로 사용했는지 확인
+    expect(refreshCookie).toContain(refreshExpires14d.toUTCString());
   });
 });
 
@@ -195,6 +212,25 @@ describe('POST /api/v1/auth/login — 비즈니스 에러 (계정 열거 방지)
     });
     const setCookies = response.headers.getSetCookie();
     expect(setCookies).toHaveLength(0);
+
+    // 에러 응답 본문에 평문 토큰 미노출 (로거 leak 회귀 가드)
+    expect(JSON.stringify(body)).not.toContain('access-jwt');
+    expect(JSON.stringify(body)).not.toContain('refresh-jwt');
+  });
+
+  it('rememberMe=true + signin throw 결합 → 401 + Set-Cookie 미부착 (test MAJOR H002)', async () => {
+    // rememberMe와 catch 분기가 곱해진 회귀 경로 가드 — 라우터가 catch 전 쿠키 부착하지 않는지 확인.
+    signin.mockRejectedValueOnce(new AppError('AUTH_INVALID_CREDENTIALS'));
+    const response = await POST(postRequest({ ...validBody, rememberMe: true }), undefined);
+    expect(response.status).toBe(401);
+
+    const setCookies = response.headers.getSetCookie();
+    expect(setCookies).toHaveLength(0);
+
+    // 에러 응답에 평문 토큰 미노출
+    const body = await response.json();
+    expect(JSON.stringify(body)).not.toContain('access-jwt');
+    expect(JSON.stringify(body)).not.toContain('refresh-jwt');
   });
 });
 
