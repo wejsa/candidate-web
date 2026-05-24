@@ -6,59 +6,28 @@
 
 import 'server-only';
 import { unstable_cache } from 'next/cache';
-import { CareerLevel, EmploymentType, JobStatus, type Prisma } from '@prisma/client';
-import { z } from 'zod';
+import { JobStatus, type Prisma } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
-import type {
-  JobListItem,
-  JobListPagination,
-  JobListResponse,
-  SortKey,
-} from '@/lib/jobs/types';
+import {
+  CACHE_TAG,
+  CACHE_TTL_SECONDS,
+  CLOSED_PREVIEW_COUNT,
+  PER_PAGE,
+  type ParsedJobListQuery,
+} from '@/lib/jobs/schema';
+import type { JobListItem, JobListPagination, JobListResponse, SortKey } from '@/lib/jobs/types';
 
-export const PER_PAGE = 20;
-export const MAX_PAGE = 50; // offset deep page 차단 (1000건 상한 — F-2 무한 스크롤은 후속 task)
-export const CLOSED_PREVIEW_COUNT = 5;
-export const CACHE_TTL_SECONDS = 60;
-export const CACHE_TAG = 'jobs-list';
-
-// 빈 문자열을 undefined로 변환 (URLSearchParams.get은 '' 반환 가능 — zod optional 통과시킴)
-const blankToUndef = z
-  .string()
-  .transform((v) => (v.trim() === '' ? undefined : v))
-  .optional();
-
-const sortSchema = z
-  .enum(['latest', 'deadline'])
-  .optional()
-  .default('latest');
-
-// 'true'/'false' 문자열도 허용 (URLSearchParams에서 옴). 기본 true.
-const includeClosedSchema = z
-  .union([z.boolean(), z.enum(['true', 'false'])])
-  .optional()
-  .default(true)
-  .transform((v) => (typeof v === 'string' ? v === 'true' : v));
-
-// PR #47 보안 리뷰 S-1: category 자유 문자열은 unstable_cache 키 폭증 표면 →
-// JobCategory.slug 실제 형식과 동일한 [a-z0-9-]+ regex로 좁힘.
-// 미매칭 입력은 400 SYS_VALIDATION_FAILED로 거부 → 캐시 오염 차단.
-const slugSchema = z
-  .string()
-  .min(1)
-  .max(80)
-  .regex(/^[a-z0-9-]+$/, 'invalid slug format');
-
-export const JobListQuerySchema = z.object({
-  category: blankToUndef.pipe(slugSchema.optional()),
-  employment: blankToUndef.pipe(z.nativeEnum(EmploymentType).optional()),
-  career: blankToUndef.pipe(z.nativeEnum(CareerLevel).optional()),
-  sort: sortSchema,
-  page: z.coerce.number().int().min(1).max(MAX_PAGE).optional().default(1),
-  includeClosed: includeClosedSchema,
-});
-
-export type ParsedJobListQuery = z.infer<typeof JobListQuerySchema>;
+// 본 모듈 사용자가 단일 경로(`@/lib/jobs/list`)로 schema를 가져올 수 있도록 re-export.
+// 신규 client-only 코드는 직접 `@/lib/jobs/schema` import 권장 (server-only chain 차단).
+export {
+  CACHE_TAG,
+  CACHE_TTL_SECONDS,
+  CLOSED_PREVIEW_COUNT,
+  JobListQuerySchema,
+  MAX_PAGE,
+  PER_PAGE,
+} from '@/lib/jobs/schema';
+export type { ParsedJobListQuery } from '@/lib/jobs/schema';
 
 const cardSelect = {
   id: true,
