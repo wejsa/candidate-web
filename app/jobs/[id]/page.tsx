@@ -7,10 +7,13 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { getJobDetail } from '@/lib/jobs/detail';
 import { buildJobDetailMetadata } from '@/lib/jobs/detail-metadata';
+import { resolveApplyCta } from '@/lib/jobs/apply-cta';
+import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
 import { AppError } from '@/lib/errors';
 import { JobDetailHeader } from '@/app/jobs/[id]/_components/JobDetailHeader';
 import { JobDetailBody } from '@/app/jobs/[id]/_components/JobDetailBody';
 import { ShareButton } from '@/app/jobs/[id]/_components/ShareButton';
+import { ApplyCta } from '@/app/jobs/[id]/_components/ApplyCta';
 
 const ParamsSchema = z.object({
   id: z.coerce.number().int().positive(),
@@ -59,10 +62,20 @@ export default async function JobDetailPage({ params }: PageProps) {
     throw err;
   }
 
+  // CTA 분기 — 비로그인은 DB 조회 회피, 로그인은 application/draft 1쌍 병렬.
+  const auth = await getOptionalAuthFromCookies();
+  const cta = await resolveApplyCta({
+    userId: auth?.userId ?? null,
+    job: { id: job.id, isClosed: job.isClosed },
+  });
+
   return (
     <main>
       <JobDetailHeader job={job} />
       <JobDetailBody job={job} />
+      <section aria-label="지원하기">
+        <ApplyCta jobId={job.id} state={cta.state} applicationNumber={cta.applicationNumber} />
+      </section>
       <section aria-label="공유">
         <ShareButton title={job.title} />
       </section>

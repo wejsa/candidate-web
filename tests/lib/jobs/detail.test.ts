@@ -4,8 +4,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
+// CANDID-014 Step 3 L-019 (T-MAJOR-1): unstable_cache 키/옵션 spy로 회귀 가드.
+const unstableCacheSpy = vi.fn();
 vi.mock('next/cache', () => ({
-  unstable_cache: <T extends (...args: unknown[]) => unknown>(fn: T) => fn,
+  unstable_cache: <T extends (...args: unknown[]) => unknown>(
+    fn: T,
+    keys?: unknown,
+    opts?: unknown,
+  ) => {
+    unstableCacheSpy(fn, keys, opts);
+    return fn;
+  },
   revalidateTag: vi.fn(),
 }));
 
@@ -41,6 +50,7 @@ function row(overrides: Partial<Record<string, unknown>> = {}) {
 
 beforeEach(() => {
   basePrisma.jobPosting.findUnique.mockReset();
+  unstableCacheSpy.mockReset();
   vi.useRealTimers();
 });
 
@@ -48,6 +58,27 @@ describe('detailCacheTag', () => {
   it('id별 독립 태그', () => {
     expect(detailCacheTag(1)).toBe('jobs-detail-1');
     expect(detailCacheTag(42)).toBe('jobs-detail-42');
+  });
+});
+
+describe('getJobDetail — unstable_cache 키/옵션 회귀 가드 (T-MAJOR-1)', () => {
+  it('키 배열은 [prefix, String(id)] + revalidate=60 + tags=[detailCacheTag(id)]', async () => {
+    basePrisma.jobPosting.findUnique.mockResolvedValueOnce(row({ id: 42 }));
+    await getJobDetail(42);
+    expect(unstableCacheSpy).toHaveBeenCalledWith(
+      expect.any(Function),
+      ['jobs-detail', '42'],
+      expect.objectContaining({ revalidate: 60, tags: ['jobs-detail-42'] }),
+    );
+  });
+
+  it('id별 키 분리 — 다른 id는 다른 키 배열', async () => {
+    basePrisma.jobPosting.findUnique.mockResolvedValueOnce(row({ id: 1 }));
+    await getJobDetail(1);
+    basePrisma.jobPosting.findUnique.mockResolvedValueOnce(row({ id: 2 }));
+    await getJobDetail(2);
+    expect(unstableCacheSpy.mock.calls[0]![1]).toEqual(['jobs-detail', '1']);
+    expect(unstableCacheSpy.mock.calls[1]![1]).toEqual(['jobs-detail', '2']);
   });
 });
 

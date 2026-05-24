@@ -15,6 +15,8 @@ import {
   PER_PAGE,
   type ParsedJobListQuery,
 } from '@/lib/jobs/schema';
+// CANDID-014 Step 3 L-019 (D-MAJOR-3): 단일 import로 통합 (re-export + internal 중복 제거).
+import { computeDDay } from '@/lib/jobs/dday';
 import type { JobListItem, JobListPagination, JobListResponse, SortKey } from '@/lib/jobs/types';
 
 // 본 모듈 사용자가 단일 경로(`@/lib/jobs/list`)로 schema를 가져올 수 있도록 re-export.
@@ -30,7 +32,7 @@ export {
 export type { ParsedJobListQuery } from '@/lib/jobs/schema';
 // CANDID-014 Step 2 L-019 (D-MAJOR-2): computeDDay는 lib/jobs/dday.ts SSOT.
 // 본 모듈 기존 사용자가 깨지지 않도록 re-export 유지.
-export { computeDDay } from '@/lib/jobs/dday';
+export { computeDDay };
 
 const cardSelect = {
   id: true,
@@ -64,9 +66,6 @@ function buildOrderBy(sort: SortKey): Prisma.JobPostingOrderByWithRelationInput[
   }
   return [{ opensAt: 'desc' }, { id: 'desc' }];
 }
-
-// computeDDay는 lib/jobs/dday.ts SSOT → 위 re-export로 유지 (CANDID-014 Step 2 L-019).
-import { computeDDay } from '@/lib/jobs/dday';
 
 function toCard(row: CardRow, now: Date): JobListItem {
   return {
