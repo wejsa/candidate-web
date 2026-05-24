@@ -43,6 +43,11 @@ export const ERROR_CATALOG = {
     status: 429,
     message: '재발송 요청이 너무 빠릅니다. 60초 후 다시 시도해 주세요.',
   },
+  // CANDID-037 Step 2 — 이미 인증된 사용자의 재발송 시도 (멱등 응답이 아닌 명시적 분기)
+  AUTH_EMAIL_ALREADY_VERIFIED: {
+    status: 409,
+    message: '이미 인증된 이메일입니다. 재발송이 필요하지 않습니다.',
+  },
 
   // 사용자 — USER_
   USER_EMAIL_DUPLICATED: { status: 409, message: '이미 가입된 이메일입니다.' },
