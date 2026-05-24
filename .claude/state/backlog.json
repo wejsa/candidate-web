@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 192,
+    "version": 193,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T19:55:00+09:00"
+    "updatedAt": "2026-05-24T20:05:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1107,12 +1107,12 @@
         "tests/integration/drafts-prefill-roundtrip.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 55,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T19:55:00+09:00"
+        "updatedAt": "2026-05-24T20:05:00+09:00"
       },
       "dependencies": [
         "CANDID-005",
@@ -1121,7 +1121,7 @@
       ],
       "planPath": ".claude/temp/CANDID-015-plan.md",
       "specFile": "docs/sample-requirement.md",
-      "currentStep": 3,
+      "currentStep": 4,
       "steps": [
         {
           "step": 1,
@@ -1179,9 +1179,10 @@
         {
           "step": 3,
           "title": "/jobs/[id]/apply RSC + 3-step shell + PersonalInfoStep 폼 + Step 2 carry fix",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-015-step3",
           "prNumber": 55,
+          "mergedAt": "2026-05-24T20:05:00+09:00",
           "files": [
             "app/jobs/[id]/apply/page.tsx",
             "app/jobs/[id]/apply/not-found.tsx",
@@ -1193,9 +1194,11 @@
           ],
           "estimatedLines": 520,
           "actualLines": 448,
+          "mergedLines": 448,
           "prLineLimit": 600,
           "dependsOn": [1, 2],
-          "note": "L-019 Step 2 carry 3건 fix: D-MAJOR-1 Promise.all → 순차 / S-MAJOR-3 assertUserMinAge wire-up / T-MAJOR-2 회귀 가드 2 케이스."
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 7 / MINOR 7 / INFO 9. self-PR COMMENT. L-019 Step 2 carry 3건(D-MAJOR-1, S-MAJOR-3, T-MAJOR-2) 검증 완료. 본 PR carry: Step 4 in-task 3건(D-MAJOR-1 onChange 비차단, D-MAJOR-2 completedSteps, T-MAJOR-2 순차 호출 가드) + CANDID-015-FU1 4건(RSC Cache-Control, sanitizeRedirect, RTL 인프라, 등). 테스트 947→949(+2).",
+          "note": "L-019 Step 2 carry 3건 fix 통합."
         },
         {
           "step": 4,
