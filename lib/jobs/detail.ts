@@ -12,7 +12,7 @@ import { JobStatus, type Prisma } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { sanitizeHtml } from '@/lib/security/sanitize';
-import { computeDDay } from '@/lib/jobs/list';
+import { computeDDay } from '@/lib/jobs/dday';
 import type { JobDetail, JobQuestion } from '@/lib/jobs/types';
 
 const DETAIL_CACHE_TAG_PREFIX = 'jobs-detail';
@@ -109,7 +109,9 @@ async function fetchDetailData(id: number): Promise<CachedDetailData | null> {
  */
 export async function getJobDetail(id: number): Promise<JobDetail> {
   const tag = detailCacheTag(id);
-  const cachedFetch = unstable_cache(() => fetchDetailData(id), [tag], {
+  // CANDID-014 Step 2 L-019 (D-MAJOR-1): 키 배열에 id를 명시 — list.ts 패턴과 일관화.
+  // 향후 시그니처 확장(locale 등) 시 키 누락 회귀 가드.
+  const cachedFetch = unstable_cache(() => fetchDetailData(id), [DETAIL_CACHE_TAG_PREFIX, String(id)], {
     revalidate: DETAIL_CACHE_TTL_SECONDS,
     tags: [tag],
   });

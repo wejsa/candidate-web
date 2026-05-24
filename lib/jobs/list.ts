@@ -28,6 +28,9 @@ export {
   PER_PAGE,
 } from '@/lib/jobs/schema';
 export type { ParsedJobListQuery } from '@/lib/jobs/schema';
+// CANDID-014 Step 2 L-019 (D-MAJOR-2): computeDDay는 lib/jobs/dday.ts SSOT.
+// 본 모듈 기존 사용자가 깨지지 않도록 re-export 유지.
+export { computeDDay } from '@/lib/jobs/dday';
 
 const cardSelect = {
   id: true,
@@ -62,24 +65,8 @@ function buildOrderBy(sort: SortKey): Prisma.JobPostingOrderByWithRelationInput[
   return [{ opensAt: 'desc' }, { id: 'desc' }];
 }
 
-/**
- * 마감일 라벨 — 24시간 단위 floor.
- * - closesAt = null → '상시모집'
- * - closesAt < now → null (이미 마감)
- * - 0~24h → '오늘 마감'
- * - 24~48h → 'D-1'
- * - N*24 ~ (N+1)*24h → `D-${N}`
- *
- * 서버 시간대 차이(UTC vs KST 등) refinement는 F-1 자동 전이 cron과 함께 후속 task.
- */
-export function computeDDay(closesAt: Date | null, now: Date): string | null {
-  if (closesAt === null) return '상시모집';
-  const diffMs = closesAt.getTime() - now.getTime();
-  if (diffMs < 0) return null;
-  const days = Math.floor(diffMs / 86_400_000);
-  if (days === 0) return '오늘 마감';
-  return `D-${days}`;
-}
+// computeDDay는 lib/jobs/dday.ts SSOT → 위 re-export로 유지 (CANDID-014 Step 2 L-019).
+import { computeDDay } from '@/lib/jobs/dday';
 
 function toCard(row: CardRow, now: Date): JobListItem {
   return {
