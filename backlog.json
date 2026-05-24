@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 154,
+    "version": 155,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T12:27:13+09:00"
+    "updatedAt": "2026-05-24T12:35:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -791,23 +791,83 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260524-122713",
-      "assignedAt": "2026-05-24T12:27:13+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-24T12:35:00+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "lib/env.ts",
+        "lib/errors/codes.ts",
+        "lib/auth/oauth/state.ts",
+        "lib/auth/oauth/index.ts",
+        "lib/auth/oauth/google.ts",
+        "lib/auth/oauth/github.ts",
+        "lib/auth/oauth/link.ts",
+        "app/api/v1/auth/oauth/[provider]/route.ts",
+        "app/api/v1/auth/oauth/[provider]/callback/route.ts"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T12:27:13+09:00"
+        "updatedAt": "2026-05-24T12:35:00+09:00"
       },
       "dependencies": [
         "CANDID-006"
       ],
       "specFile": "docs/sample-requirement.md",
+      "planPath": ".claude/temp/CANDID-012-plan.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "env refine + 4 에러 코드 + state 쿠키 헬퍼 + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "lib/env.ts",
+            "lib/errors/codes.ts",
+            "lib/auth/oauth/state.ts",
+            "tests/lib/auth/oauth/state.test.ts",
+            "tests/lib/errors/codes.test.ts"
+          ],
+          "estimatedLines": 350,
+          "prLineLimit": 450,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "Provider 인터페이스 + Google + GitHub 구현 + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "lib/auth/oauth/index.ts",
+            "lib/auth/oauth/google.ts",
+            "lib/auth/oauth/github.ts",
+            "tests/lib/auth/oauth/google.test.ts",
+            "tests/lib/auth/oauth/github.test.ts"
+          ],
+          "estimatedLines": 500,
+          "prLineLimit": 600,
+          "dependsOn": [1]
+        },
+        {
+          "step": 3,
+          "title": "link 비즈니스 + start/callback 라우터 + 통합 테스트",
+          "status": "pending",
+          "files": [
+            "lib/auth/oauth/link.ts",
+            "app/api/v1/auth/oauth/[provider]/route.ts",
+            "app/api/v1/auth/oauth/[provider]/callback/route.ts",
+            "tests/lib/auth/oauth/link.test.ts",
+            "tests/app/api/v1/auth/oauth/start.test.ts",
+            "tests/app/api/v1/auth/oauth/callback.test.ts"
+          ],
+          "estimatedLines": 600,
+          "prLineLimit": 750,
+          "dependsOn": [1, 2]
+        }
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-24T12:27:13+09:00"
+      "updatedAt": "2026-05-24T12:35:00+09:00"
     },
     "CANDID-013": {
       "id": "CANDID-013",
