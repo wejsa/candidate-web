@@ -2,15 +2,15 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 176,
+    "version": 177,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T17:15:25+09:00"
+    "updatedAt": "2026-05-24T17:17:14+09:00"
   },
   "summary": {
     "total": 35,
-    "done": 15,
+    "done": 16,
     "inProgress": 0,
-    "review": 1,
+    "review": 0,
     "todo": 19
   },
   "phases": {
@@ -886,32 +886,16 @@
       "id": "CANDID-013",
       "title": "공고 목록 조회 + 필터/정렬/페이징 + URL 쿼리 상태 (US-JOB-001)",
       "description": "직군/고용형태/경력 필터, 최신순/마감임박순 정렬, 페이지네이션(20건). URL 쿼리 상태 유지. 메타 태그(title/description/OG) 동적 생성.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "assignee": "jaese@hoji-20260524-161015",
-      "assignedAt": "2026-05-24T17:15:25+09:00",
-      "lockTTL": 7200,
-      "lockedFiles": [
-        "lib/jobs/schema.ts",
-        "lib/jobs/list.ts",
-        "lib/jobs/pagination-url.ts",
-        "lib/jobs/filter-changes.ts",
-        "app/jobs/_components/JobFilters.tsx",
-        "app/jobs/_components/ClosedJobsSection.tsx",
-        "app/jobs/page.tsx",
-        "tests/lib/jobs/filter-changes.test.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 49,
-        "fixLoopCount": 0,
-        "autoChainArgs": "49",
-        "updatedAt": "2026-05-24T17:15:25+09:00"
-      },
-      "planPath": ".claude/temp/CANDID-013-plan.md",
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": null,
+      "lockedFiles": [],
+      "workflowState": null,
+      "completedAt": "2026-05-24T17:17:14+09:00",
       "currentStep": 3,
       "steps": [
         {
@@ -963,8 +947,9 @@
         {
           "step": 3,
           "title": "필터 Client + 마감 섹션 + URL 동기화",
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 49,
+          "mergedAt": "2026-05-24T17:17:14+09:00",
           "files": [
             "lib/jobs/schema.ts",
             "lib/jobs/list.ts",
@@ -976,10 +961,12 @@
             "tests/lib/jobs/filter-changes.test.ts"
           ],
           "actualLines": 410,
+          "mergedLines": 372,
           "note": "schema.ts 분리 추가 — JobFilters('use client')가 list.ts('server-only') chain 위반으로 빌드 실패 → 별도 schema 모듈로 추출. plan과 차이: tests/app/jobs/* 대신 lib/jobs/filter-changes unit 테스트로 대체 (F-5 carry).",
           "estimatedLines": 390,
           "prLineLimit": 500,
-          "dependsOn": [1, 2]
+          "dependsOn": [1, 2],
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 7 / MINOR 7. in-task fix: T-fix(filter-changes undefined/string-boolean 3 케이스). carry 6 MAJOR: A-1 list.ts re-export 가드, T 3건(F-5 RSC 인프라), D minor + S minor. 테스트 798→812(+14)."
         }
       ],
       "dependencies": [

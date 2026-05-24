@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": 18,
+    "version": 19,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
     "updatedAt": "2026-05-24T13:46:00+09:00"
@@ -655,6 +655,19 @@
       ],
       "fixLoop": 1,
       "note": "US-AUTH-003 완성. Step 1(state·PKCE) + Step 2(Google/GitHub provider) + Step 3(link 트랜잭션 + 라우터 + C001 open-redirect fix). 회차 1 fix로 CRITICAL 해소. 736 tests passed."
+    },
+    "CANDID-013": {
+      "id": "CANDID-013",
+      "title": "공고 목록 조회 + 필터/정렬/페이징 + URL 쿼리 상태 (US-JOB-001)",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "completedAt": "2026-05-24T17:17:14+09:00",
+      "steps": 3,
+      "totalLines": 1591,
+      "prNumbers": [47, 48, 49],
+      "fixLoop": 0,
+      "note": "US-JOB-001 완성. Step 1(partial index 4종 + 서비스/API) + Step 2(RSC + 메타데이터 + 카드/페이지네이션) + Step 3(JobFilters client + ClosedJobsSection + schema 분리). 자기 PR 3건 모두 CRITICAL 0 / fix loop 0. 테스트 752→812 (+60). carry MAJOR 17(Step1:11 + Step2:5 + Step3:6) → 회고에서 F-1~F-9 follow-up task 분리 예정."
     }
   }
 }

@@ -880,5 +880,28 @@
     "carryMajor": 6,
     "note": "CRITICAL 0. T-fix(filter-changes undefined/string-boolean 3 케이스) in-task. carry 6 MAJOR: A-1 list.ts re-export 가드, T 3건(F-5 RSC 인프라), D minor + S minor. 테스트 812(+3).",
     "timestamp": "2026-05-24T17:15:25+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-013",
+    "stepNumber": 3,
+    "prNumber": 49,
+    "mergeMethod": "squash",
+    "mergedLines": 372,
+    "branchDeleted": true,
+    "isLastStep": true,
+    "timestamp": "2026-05-24T17:17:14+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-013",
+    "totalSteps": 3,
+    "totalAdditions": 1591,
+    "prNumbers": [47, 48, 49],
+    "fixLoopTotal": 0,
+    "vitest": { "passed": 812, "added": 60 },
+    "carryMajorTotal": 17,
+    "note": "US-JOB-001 완성. Step 1(668 LOC) + Step 2(551 LOC) + Step 3(372 LOC). fix loop 0회 (CRITICAL 0). carry MAJOR 17(Step1:11 + Step2:5 + Step3:6) → 회고에서 F-1~F-9 follow-up task 분리 예정. 자기 PR 3건 모두 COMMENT 모드. Phase 2 진행률 향상.",
+    "timestamp": "2026-05-24T17:17:14+09:00"
   }
 ]
