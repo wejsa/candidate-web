@@ -580,5 +580,19 @@
       "added": 38
     },
     "timestamp": "2026-05-21T00:00:31+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-012",
+    "stepNumber": 1,
+    "prNumber": 43,
+    "branch": "feature/CANDID-012-step1",
+    "actualLines": 508,
+    "prLineLimit": 450,
+    "vitest": {
+      "passed": 642,
+      "added": 23
+    },
+    "timestamp": "2026-05-24T12:40:00+09:00"
   }
 ]
