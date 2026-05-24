@@ -80,10 +80,15 @@ const envSchema = z
     GITHUB_OAUTH_CLIENT_ID: z.string().optional(),
     GITHUB_OAUTH_CLIENT_SECRET: z.string().optional(),
 
+    // CANDID-016: 이력서 첨부용 S3/MinIO presigned URL 발급.
+    // 4개 모두 set 또는 모두 unset 두 상태만 허용 (아래 superRefine에서 강제).
+    // dev: docker-compose minio 서비스가 채움. 운영: 관리형 S3 또는 호환 스토리지 endpoint.
     S3_ENDPOINT: z.string().url().optional(),
     S3_BUCKET: z.string().optional(),
     S3_ACCESS_KEY: z.string().optional(),
     S3_SECRET_KEY: z.string().optional(),
+    // BR-FILE-05: presigned URL 유효기간 5분 (300초) — 기본값 고정, 운영 조정 가능.
+    S3_PRESIGN_TTL_SEC: z.coerce.number().int().positive().max(900).default(300),
 
     // CANDID-010에서 required로 격상 — 회원가입 인증 메일 발송에 SMTP 필수.
     // dev/test: Mailtrap(sandbox.smtp.mailtrap.io:2525) 또는 ethereal.email.
@@ -115,6 +120,23 @@ const envSchema = z
           code: z.ZodIssueCode.custom,
           path: [idSet ? secretKey : idKey],
           message: `${idKey} and ${secretKey} must both be set or both empty (partial OAuth credentials forbidden)`,
+        });
+      }
+    }
+  })
+  // CANDID-016: S3 4변수 strong-tuple — 부분 구성 차단.
+  // 일부만 설정된 상태로 부팅하면 presign 호출 시 SDK가 runtime 5xx로 노출되므로 부팅 차단.
+  // 모두 set(저장소 활성) 또는 모두 unset(저장소 비활성 — 파일 API는 호출 시 FILE_UPLOAD_FAILED).
+  .superRefine((e, ctx) => {
+    const s3Keys = ['S3_ENDPOINT', 'S3_BUCKET', 'S3_ACCESS_KEY', 'S3_SECRET_KEY'] as const;
+    const setKeys = s3Keys.filter((k) => typeof e[k] === 'string' && e[k] !== '');
+    if (setKeys.length !== 0 && setKeys.length !== s3Keys.length) {
+      const missing = s3Keys.filter((k) => !setKeys.includes(k));
+      for (const k of missing) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [k],
+          message: `S3 credentials must be fully set or fully empty (partial S3 config forbidden): missing ${k}`,
         });
       }
     }

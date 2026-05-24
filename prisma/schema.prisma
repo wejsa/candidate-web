@@ -414,6 +414,11 @@ model ResumeFile {
 
   // "At most one" CHECK (application_id, draft_id 동시 NOT NULL 금지) — migration.sql에서 정의.
   // C001 fix: 기존 XOR CHECK는 FK SET NULL과 충돌하여 BR-FILE-06 batch failure 유발 → "at most one"으로 완화.
+  //
+  // CANDID-016 Step 1 — partial UNIQUE 2개를 migration.sql에서 raw SQL로 정의 (Prisma @@unique partial 미지원).
+  //   uk_resume_files_one_per_draft (draft_id) WHERE draft_id IS NOT NULL
+  //   uk_resume_files_one_per_app   (application_id) WHERE application_id IS NOT NULL
+  // 효과: 동일 draft/application 당 활성 첨부 최대 1건 DB 강제 (US-APP-003 "최대 첨부 1개" + 동시 탭 race 차단).
   @@map("resume_files")
 }
 

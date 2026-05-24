@@ -128,3 +128,48 @@ describe('OAuth pair superRefine (CANDID-012)', () => {
     expect(() => getEnv()).not.toThrow();
   });
 });
+
+// CANDID-016 Step 1 — S3 4-tuple strong-pair superRefine.
+// S3_ENDPOINT/BUCKET/ACCESS_KEY/SECRET_KEY 4개는 모두 set 또는 모두 unset 두 상태만 허용.
+// 부분 설정으로 부팅하면 presign 호출 시 SDK가 5xx로 노출되는 사고를 방지.
+describe('S3 tuple superRefine (CANDID-016)', () => {
+  it('4개 모두 unset — 통과 (저장소 비활성 모드)', () => {
+    // setup.ts에서 delete 처리되어 기본 상태가 모두 unset.
+    expect(() => getEnv()).not.toThrow();
+  });
+
+  it('4개 모두 set — 통과', () => {
+    vi.stubEnv('S3_ENDPOINT', 'http://localhost:9000');
+    vi.stubEnv('S3_BUCKET', 'candidate-web-resumes');
+    vi.stubEnv('S3_ACCESS_KEY', 'candidate');
+    vi.stubEnv('S3_SECRET_KEY', 'candidate-dev-secret');
+    expect(() => getEnv()).not.toThrow();
+  });
+
+  it.each([
+    ['S3_BUCKET 누락', { S3_ENDPOINT: 'http://localhost:9000', S3_ACCESS_KEY: 'k', S3_SECRET_KEY: 's' }, /S3_BUCKET.*partial S3 config/],
+    ['S3_SECRET_KEY 누락', { S3_ENDPOINT: 'http://localhost:9000', S3_BUCKET: 'b', S3_ACCESS_KEY: 'k' }, /S3_SECRET_KEY.*partial S3 config/],
+    ['S3_ENDPOINT만 set', { S3_ENDPOINT: 'http://localhost:9000' }, /partial S3 config/],
+    ['S3_BUCKET만 set', { S3_BUCKET: 'b' }, /partial S3 config/],
+  ])('부분 설정 → 부팅 차단: %s', (_label, partial, pattern) => {
+    for (const [k, v] of Object.entries(partial)) vi.stubEnv(k, v);
+    expect(() => getEnv()).toThrow(pattern);
+  });
+});
+
+// CANDID-016 Step 1 — S3_PRESIGN_TTL_SEC 기본/경계.
+describe('S3_PRESIGN_TTL_SEC (CANDID-016)', () => {
+  it('미설정 시 기본 300', () => {
+    expect(getEnv().S3_PRESIGN_TTL_SEC).toBe(300);
+  });
+
+  it('유효 범위 안 통과', () => {
+    vi.stubEnv('S3_PRESIGN_TTL_SEC', '600');
+    expect(getEnv().S3_PRESIGN_TTL_SEC).toBe(600);
+  });
+
+  it('900 초과는 부팅 차단 (BR-FILE-05 운영 안전)', () => {
+    vi.stubEnv('S3_PRESIGN_TTL_SEC', '901');
+    expect(() => getEnv()).toThrow();
+  });
+});
