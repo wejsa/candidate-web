@@ -91,3 +91,21 @@ export const VerifyEmailInputSchema = z.object({
 });
 
 export type VerifyEmailInput = z.infer<typeof VerifyEmailInputSchema>;
+
+// CANDID-011 — 이메일 로그인 입력 스키마 (US-AUTH-002).
+// 회원가입과 달리 password는 길이/강도 검증을 *생략*한다 — 정책이 시점에 따라 달라질 수 있고
+// (과거 회원이 약한 비밀번호로 가입한 경우 차단되면 안 됨), DB의 bcrypt 해시와 매칭만 수행한다.
+// email은 SignupInputSchema와 동일하게 trim + 소문자 정규화 + IDN homograph 차단.
+export const LoginInputSchema = z.object({
+  email: EMAIL_FIELD,
+  password: z
+    .string()
+    .min(1, '비밀번호를 입력해 주세요')
+    // 길이 상한은 bcrypt 72 bytes + UTF-8 여유: hashPassword와 일관성 유지를 위해 동일 한도.
+    .refine((s) => Buffer.byteLength(s, 'utf8') <= 72, {
+      message: '비밀번호가 너무 깁니다 (UTF-8 72바이트 이내)',
+    }),
+  rememberMe: z.boolean().optional().default(false),
+});
+
+export type LoginInput = z.infer<typeof LoginInputSchema>;
