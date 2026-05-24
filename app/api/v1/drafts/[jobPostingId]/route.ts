@@ -15,12 +15,8 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { withErrorHandler } from '@/lib/errors';
 import { JobPostingIdParamSchema, DraftPutRequestSchema } from '@/lib/drafts/schema';
 import { getOrInitDraft, upsertDraft } from '@/lib/drafts/service';
-import type {
-  DraftGetResponse,
-  DraftPayloadV1,
-  DraftPrefill,
-  DraftPutResponse,
-} from '@/lib/drafts/types';
+import { loadUserPrefill } from '@/lib/drafts/user-prefill';
+import type { DraftGetResponse, DraftPayloadV1, DraftPutResponse } from '@/lib/drafts/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,28 +25,28 @@ interface RouteCtx {
   params: Promise<{ jobPostingId: string }> | { jobPostingId: string };
 }
 
-// Step 2에서 User PII 복호화 + 마스킹 통합. 본 step에서는 빈 prefill 반환.
-const EMPTY_PREFILL: DraftPrefill = {
-  email: '',
-  name: null,
-  phone: null,
-  birthDate: null,
-};
-
 export const GET = withErrorHandler(async (request: NextRequest, ctx: RouteCtx) => {
   const auth = await requireAuth(request);
   const raw = await ctx.params;
   const { jobPostingId } = JobPostingIdParamSchema.parse(raw);
 
-  const { draft } = await getOrInitDraft(auth.userId, jobPostingId);
+  // 병렬: Draft 진입 + User PII 복호화 (CANDID-015 Step 2)
+  const [{ draft }, prefill] = await Promise.all([
+    getOrInitDraft(auth.userId, jobPostingId),
+    loadUserPrefill(auth.userId),
+  ]);
 
   const body: DraftGetResponse = {
     payload: draft.payloadJson as unknown as DraftPayloadV1,
-    prefill: EMPTY_PREFILL, // Step 2에서 User PII 복호화 결과로 대체
+    prefill,
     version: draft.version,
     lastSavedAt: draft.lastSavedAt.toISOString(),
   };
-  return NextResponse.json(body, { status: 200 });
+  // SECURITY (S-MAJOR-2 fix): prefill 평문 PII → 중간 캐싱 차단.
+  return NextResponse.json(body, {
+    status: 200,
+    headers: { 'Cache-Control': 'private, no-store' },
+  });
 });
 
 export const PUT = withErrorHandler(async (request: NextRequest, ctx: RouteCtx) => {

@@ -12,6 +12,9 @@ vi.mock('@/lib/drafts/service', async () => {
   );
   return { ...actual, getOrInitDraft: vi.fn(), upsertDraft: vi.fn() };
 });
+vi.mock('@/lib/drafts/user-prefill', () => ({
+  loadUserPrefill: vi.fn(),
+}));
 vi.mock('@/lib/auth/middleware', () => ({
   requireAuth: vi.fn(),
 }));
@@ -19,6 +22,9 @@ vi.mock('@/lib/auth/middleware', () => ({
 const { getOrInitDraft, upsertDraft } = (await import('@/lib/drafts/service')) as unknown as {
   getOrInitDraft: Mock;
   upsertDraft: Mock;
+};
+const { loadUserPrefill } = (await import('@/lib/drafts/user-prefill')) as unknown as {
+  loadUserPrefill: Mock;
 };
 const { requireAuth } = (await import('@/lib/auth/middleware')) as unknown as {
   requireAuth: Mock;
@@ -65,7 +71,7 @@ describe('runtime', () => {
 });
 
 describe('GET /api/v1/drafts/[jobPostingId]', () => {
-  it('200 + payload + version + lastSavedAt + prefill (Step 2 빈 prefill)', async () => {
+  it('200 + payload + version + lastSavedAt + prefill (Step 2 User PII 복호화)', async () => {
     requireAuth.mockResolvedValueOnce({ userId: 100 });
     getOrInitDraft.mockResolvedValueOnce({
       draft: {
@@ -76,14 +82,52 @@ describe('GET /api/v1/drafts/[jobPostingId]', () => {
       },
       created: true,
     });
+    loadUserPrefill.mockResolvedValueOnce({
+      email: 'alice@example.com',
+      name: '홍길동',
+      phone: '010-1234-5678',
+      birthDate: '1995-03-15',
+    });
     const res = await GET(getRequest('42'), { params: { jobPostingId: '42' } });
     expect(res.status).toBe(200);
+    // SECURITY (S-MAJOR-2): Cache-Control private, no-store 부착
+    expect(res.headers.get('Cache-Control')).toBe('private, no-store');
     const body = await res.json();
     expect(body.version).toBe(1);
     expect(body.payload).toEqual(initialPayload());
     expect(body.lastSavedAt).toBe('2026-05-24T00:00:00.000Z');
-    expect(body.prefill).toEqual({ email: '', name: null, phone: null, birthDate: null });
+    expect(body.prefill).toEqual({
+      email: 'alice@example.com',
+      name: '홍길동',
+      phone: '010-1234-5678',
+      birthDate: '1995-03-15',
+    });
     expect(getOrInitDraft).toHaveBeenCalledWith(100, 42);
+    expect(loadUserPrefill).toHaveBeenCalledWith(100);
+  });
+
+  it('User PII null (소셜) → prefill에 null 반환', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 200 });
+    getOrInitDraft.mockResolvedValueOnce({
+      draft: {
+        id: 2,
+        payloadJson: initialPayload(),
+        version: 1,
+        lastSavedAt: new Date('2026-05-24T00:00:00Z'),
+      },
+      created: false,
+    });
+    loadUserPrefill.mockResolvedValueOnce({
+      email: 'social@example.com',
+      name: '김소셜',
+      phone: null,
+      birthDate: null,
+    });
+    const res = await GET(getRequest('1'), { params: { jobPostingId: '1' } });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.prefill.phone).toBeNull();
+    expect(body.prefill.birthDate).toBeNull();
   });
 
   it('401 → AUTH_TOKEN_INVALID', async () => {

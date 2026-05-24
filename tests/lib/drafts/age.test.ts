@@ -46,19 +46,21 @@ describe('calculateAge', () => {
   });
 });
 
-describe('validateMinAge — 만 14세 (기본값)', () => {
+describe('validateMinAge — 만 14세 (기본값, CANDID-015 Step 2 T-MAJOR-4 경계 라벨 수정)', () => {
   const NOW = new Date('2026-05-24T00:00:00Z');
 
-  it('정확히 만 14세 (14년 + 1일 전 생일) → true', () => {
-    expect(validateMinAge('2012-05-23', 14, NOW)).toBe(true);
-  });
-
-  it('정확히 만 14세 (생일 당일) → true', () => {
+  it('정확히 14년 전 동일자 (만 14세 생일 당일) → true', () => {
+    // 정확한 만 14세 경계: 동일 월/일
     expect(validateMinAge('2012-05-24', 14, NOW)).toBe(true);
   });
 
-  it('만 14세 - 1일 (생일 미도래) → false', () => {
+  it('14년 전 - 1일 (만 13세 364일) → false', () => {
+    // 진짜 경계 — 생일 미도래
     expect(validateMinAge('2012-05-25', 14, NOW)).toBe(false);
+  });
+
+  it('14년 전 + 1일 (만 14세 1일) → true', () => {
+    expect(validateMinAge('2012-05-23', 14, NOW)).toBe(true);
   });
 
   it('만 13세 → false', () => {
