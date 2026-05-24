@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 157,
+    "version": 158,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T12:51:00+09:00"
+    "updatedAt": "2026-05-24T12:53:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -791,12 +791,9 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260524-122713",
-      "assignedAt": "2026-05-24T12:40:00+09:00",
+      "assignedAt": "2026-05-24T12:53:00+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "lib/env.ts",
-        "lib/errors/codes.ts",
-        "lib/auth/oauth/state.ts",
         "lib/auth/oauth/index.ts",
         "lib/auth/oauth/google.ts",
         "lib/auth/oauth/github.ts",
@@ -805,37 +802,41 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 43,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "43",
-        "updatedAt": "2026-05-24T12:51:00+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-24T12:53:00+09:00"
       },
       "dependencies": [
         "CANDID-006"
       ],
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-012-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "steps": [
         {
           "step": 1,
           "title": "env refine + 4 에러 코드 + state 쿠키 헬퍼 + 단위 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-012-step1",
           "prNumber": 43,
+          "mergedAt": "2026-05-24T12:52:27+09:00",
           "files": [
             "lib/env.ts",
             "lib/errors/codes.ts",
             "lib/auth/oauth/state.ts",
             "tests/lib/auth/oauth/state.test.ts",
+            "tests/lib/env.test.ts",
             "tests/lib/errors/codes.test.ts"
           ],
           "estimatedLines": 350,
-          "actualLines": 508,
+          "actualLines": 565,
+          "mergedLines": 560,
           "prLineLimit": 450,
-          "dependsOn": []
+          "dependsOn": [],
+          "reviewSummary": "CRITICAL 0 / MAJOR 13 (in-task fix 3건: D-MAJOR-2 TTL export, D-MAJOR-1 USER_DENIED 400→422, T-MAJOR-1 env.superRefine 4 케이스 테스트; carry 10건) / MINOR 12 / INFO 7. L-019 in-task self-correction 적용."
         },
         {
           "step": 2,
