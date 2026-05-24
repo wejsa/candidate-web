@@ -695,5 +695,18 @@
     "deletedLines": 16,
     "vitest": {"passed": 736, "added": 26},
     "timestamp": "2026-05-24T13:40:00+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-012",
+    "stepNumber": 3,
+    "prNumber": 45,
+    "reviewState": "COMMENTED",
+    "reviewRound": 2,
+    "critical": 0,
+    "major": 0,
+    "carryMajor": 13,
+    "note": "회차 1 fix 적용 후 재리뷰. C001 + 3 MAJOR 해소 확인. APPROVED → 머지 진행.",
+    "timestamp": "2026-05-24T13:45:00+09:00"
   }
 ]
