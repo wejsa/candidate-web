@@ -861,5 +861,24 @@
     "isLastStep": true,
     "note": "Step 3 (마지막) — JobFilters(client) + ClosedJobsSection + schema.ts 분리 (server-only chain 위반 빌드 실패 → 구조 개선). US-JOB-001 완성.",
     "timestamp": "2026-05-24T17:10:19+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-013",
+    "stepNumber": 3,
+    "prNumber": 49,
+    "reviewState": "COMMENTED",
+    "mode": "full",
+    "agents": ["domain", "security", "test"],
+    "critical": 0,
+    "major": 7,
+    "minor": 7,
+    "info": 6,
+    "selfPr": true,
+    "isLastStep": true,
+    "inTaskFix": ["T-fix-filter-changes-3-cases"],
+    "carryMajor": 6,
+    "note": "CRITICAL 0. T-fix(filter-changes undefined/string-boolean 3 케이스) in-task. carry 6 MAJOR: A-1 list.ts re-export 가드, T 3건(F-5 RSC 인프라), D minor + S minor. 테스트 812(+3).",
+    "timestamp": "2026-05-24T17:15:25+09:00"
   }
 ]
