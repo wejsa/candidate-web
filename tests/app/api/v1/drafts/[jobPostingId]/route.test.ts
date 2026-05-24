@@ -14,6 +14,7 @@ vi.mock('@/lib/drafts/service', async () => {
 });
 vi.mock('@/lib/drafts/user-prefill', () => ({
   loadUserPrefill: vi.fn(),
+  assertUserMinAge: vi.fn(),
 }));
 vi.mock('@/lib/auth/middleware', () => ({
   requireAuth: vi.fn(),
@@ -23,8 +24,9 @@ const { getOrInitDraft, upsertDraft } = (await import('@/lib/drafts/service')) a
   getOrInitDraft: Mock;
   upsertDraft: Mock;
 };
-const { loadUserPrefill } = (await import('@/lib/drafts/user-prefill')) as unknown as {
+const { loadUserPrefill, assertUserMinAge } = (await import('@/lib/drafts/user-prefill')) as unknown as {
   loadUserPrefill: Mock;
+  assertUserMinAge: Mock;
 };
 const { requireAuth } = (await import('@/lib/auth/middleware')) as unknown as {
   requireAuth: Mock;
@@ -183,7 +185,7 @@ describe('GET /api/v1/drafts/[jobPostingId]', () => {
 });
 
 describe('PUT /api/v1/drafts/[jobPostingId]', () => {
-  it('200 → upsertDraft 호출 + version+1 + lastSavedAt 반환', async () => {
+  it('200 → upsertDraft 호출 + version+1 + lastSavedAt 반환 (step1_personal 미포함 시 assertUserMinAge 호출 안 됨)', async () => {
     requireAuth.mockResolvedValueOnce({ userId: 100 });
     upsertDraft.mockResolvedValueOnce({
       version: 6,
@@ -203,6 +205,58 @@ describe('PUT /api/v1/drafts/[jobPostingId]', () => {
       payload: initialPayload(),
       expectedVersion: 5,
     });
+    // step1_personal 미포함 → assertUserMinAge 호출 회피 (불필요한 DB hit 절감)
+    expect(assertUserMinAge).not.toHaveBeenCalled();
+  });
+
+  // CANDID-015 Step 3 L-019 (S-MAJOR-3, T-MAJOR-2): assertUserMinAge wire-up 회귀 가드
+  it('step1_personal 포함 → assertUserMinAge(userId) 호출 후 upsertDraft', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 100 });
+    assertUserMinAge.mockResolvedValueOnce(undefined);
+    upsertDraft.mockResolvedValueOnce({
+      version: 2,
+      lastSavedAt: new Date('2026-05-24T00:00:01Z'),
+    });
+    const payloadWithPersonal = {
+      schemaVersion: 1 as const,
+      meta: { currentStep: 1 as const, completedSteps: [] },
+      step1_personal: {
+        name: '홍길동',
+        phone: '010-1234-5678',
+        birthDate: '2000-01-01',
+        careerLevel: 'NEW' as const,
+      },
+    };
+    const res = await PUT(
+      putRequest('42', { payload: payloadWithPersonal, version: 1 }),
+      { params: { jobPostingId: '42' } },
+    );
+    expect(res.status).toBe(200);
+    expect(assertUserMinAge).toHaveBeenCalledWith(100);
+    expect(upsertDraft).toHaveBeenCalled();
+  });
+
+  it('step1_personal 포함 + assertUserMinAge throw (만 14세 미만 User) → 422 APP_USER_UNDER_MIN_AGE, upsertDraft 호출 안 됨', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 100 });
+    assertUserMinAge.mockRejectedValueOnce(new AppError('APP_USER_UNDER_MIN_AGE'));
+    const payloadWithPersonal = {
+      schemaVersion: 1 as const,
+      meta: { currentStep: 1 as const, completedSteps: [] },
+      step1_personal: {
+        name: '홍길동',
+        phone: '010-1234-5678',
+        birthDate: '2000-01-01',
+        careerLevel: 'NEW' as const,
+      },
+    };
+    const res = await PUT(
+      putRequest('42', { payload: payloadWithPersonal, version: 1 }),
+      { params: { jobPostingId: '42' } },
+    );
+    expect(res.status).toBe(422);
+    const body = await res.json();
+    expect(body.code).toBe('APP_USER_UNDER_MIN_AGE');
+    expect(upsertDraft).not.toHaveBeenCalled();
   });
 
   it('400 → body schema 실패 (version 누락)', async () => {

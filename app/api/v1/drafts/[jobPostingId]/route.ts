@@ -15,7 +15,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { withErrorHandler } from '@/lib/errors';
 import { JobPostingIdParamSchema, DraftPutRequestSchema } from '@/lib/drafts/schema';
 import { getOrInitDraft, upsertDraft } from '@/lib/drafts/service';
-import { loadUserPrefill } from '@/lib/drafts/user-prefill';
+import { loadUserPrefill, assertUserMinAge } from '@/lib/drafts/user-prefill';
 import type { DraftGetResponse, DraftPayloadV1, DraftPutResponse } from '@/lib/drafts/types';
 
 export const runtime = 'nodejs';
@@ -30,11 +30,11 @@ export const GET = withErrorHandler(async (request: NextRequest, ctx: RouteCtx) 
   const raw = await ctx.params;
   const { jobPostingId } = JobPostingIdParamSchema.parse(raw);
 
-  // 병렬: Draft 진입 + User PII 복호화 (CANDID-015 Step 2)
-  const [{ draft }, prefill] = await Promise.all([
-    getOrInitDraft(auth.userId, jobPostingId),
-    loadUserPrefill(auth.userId),
-  ]);
+  // CANDID-015 Step 3 L-019 (D-MAJOR-1): User 존재 선검증 → Draft 진입 순차 호출.
+  // Promise.all 병렬 시 loadUserPrefill 실패 + getOrInitDraft INSERT 부수효과로 고아 Draft 잔존
+  // (idempotent 자가 치유이지만 운영 디버그 비용). 5ms 손실 trade-off 수용.
+  const prefill = await loadUserPrefill(auth.userId);
+  const { draft } = await getOrInitDraft(auth.userId, jobPostingId);
 
   const body: DraftGetResponse = {
     payload: draft.payloadJson as unknown as DraftPayloadV1,
@@ -56,6 +56,12 @@ export const PUT = withErrorHandler(async (request: NextRequest, ctx: RouteCtx) 
 
   const rawBody = (await request.json()) as unknown;
   const { payload, version } = DraftPutRequestSchema.parse(rawBody);
+
+  // CANDID-015 Step 3 L-019 (S-MAJOR-3, T-MAJOR-2): step1_personal 포함 시 만 14세 server-side
+  // cross-check (BR-PII-05 3-layer). zod refine(Draft 입력)에 더해 User 원본 birthDate와 교차.
+  if (payload.step1_personal !== undefined) {
+    await assertUserMinAge(auth.userId);
+  }
 
   const result = await upsertDraft({
     userId: auth.userId,
