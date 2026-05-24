@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 167,
+    "version": 168,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T16:10:15+09:00"
+    "updatedAt": "2026-05-24T16:24:46+09:00"
   },
   "summary": {
     "total": 35,
@@ -891,17 +891,74 @@
       "priority": "high",
       "phase": 2,
       "assignee": "jaese@hoji-20260524-161015",
-      "assignedAt": "2026-05-24T16:10:15+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-24T16:24:46+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "prisma/migrations",
+        "lib/jobs/types.ts",
+        "lib/jobs/list.ts",
+        "app/api/v1/jobs/route.ts",
+        "tests/lib/jobs/list.test.ts",
+        "tests/app/api/v1/jobs/route.test.ts"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T16:10:15+09:00"
+        "updatedAt": "2026-05-24T16:24:46+09:00"
       },
+      "planPath": ".claude/temp/CANDID-013-plan.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "DB 마이그(4 partial index) + 서비스 + API + 테스트",
+          "status": "pending",
+          "files": [
+            "prisma/migrations/{ts}_candid-013-jobposting-list-indexes/migration.sql",
+            "lib/jobs/types.ts",
+            "lib/jobs/list.ts",
+            "app/api/v1/jobs/route.ts",
+            "tests/lib/jobs/list.test.ts",
+            "tests/app/api/v1/jobs/route.test.ts"
+          ],
+          "estimatedLines": 570,
+          "prLineLimit": 700,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "페이지 RSC + 메타데이터 + 카드 + 페이지네이션",
+          "status": "pending",
+          "files": [
+            "app/jobs/page.tsx",
+            "app/jobs/_components/JobCard.tsx",
+            "app/jobs/_components/Pagination.tsx",
+            "app/jobs/loading.tsx",
+            "tests/app/jobs/page.test.tsx",
+            "tests/app/jobs/JobCard.test.tsx"
+          ],
+          "estimatedLines": 530,
+          "prLineLimit": 700,
+          "dependsOn": [1]
+        },
+        {
+          "step": 3,
+          "title": "필터 Client + 마감 섹션 + URL 동기화",
+          "status": "pending",
+          "files": [
+            "app/jobs/_components/JobFilters.tsx",
+            "app/jobs/_components/ClosedJobsSection.tsx",
+            "tests/app/jobs/JobFilters.test.tsx",
+            "tests/app/jobs/ClosedJobsSection.test.tsx"
+          ],
+          "estimatedLines": 390,
+          "prLineLimit": 500,
+          "dependsOn": [1, 2]
+        }
+      ],
       "dependencies": [
         "CANDID-004"
       ],
