@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 179,
+    "version": 180,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T17:25:00+09:00"
+    "updatedAt": "2026-05-24T17:38:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1006,12 +1006,12 @@
         "tests/app/api/v1/job-postings/[id]/route.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
-        "prNumber": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": 50,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T17:25:00+09:00"
+        "updatedAt": "2026-05-24T17:38:00+09:00"
       },
       "dependencies": [
         "CANDID-013"
@@ -1023,17 +1023,22 @@
         {
           "step": 1,
           "title": "Service + API + 단위 테스트 (lib/jobs/detail.ts + GET /api/v1/job-postings/[id])",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-014-step1",
+          "prNumber": 50,
           "files": [
             "lib/jobs/detail.ts",
             "lib/jobs/types.ts",
             "app/api/v1/job-postings/[id]/route.ts",
+            "next.config.mjs",
             "tests/lib/jobs/detail.test.ts",
             "tests/app/api/v1/job-postings/[id]/route.test.ts"
           ],
           "estimatedLines": 565,
+          "actualLines": 539,
           "prLineLimit": 650,
-          "dependsOn": []
+          "dependsOn": [],
+          "note": "next.config.mjs serverComponentsExternalPackages=['isomorphic-dompurify'] 추가 — collect-page-data 단계 jsdom ENOENT 우회 (Route Handler가 sanitize.ts를 transitive import하면서 노출)."
         },
         {
           "step": 2,
