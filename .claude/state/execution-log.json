@@ -832,5 +832,17 @@
     "carryMajor": 5,
     "note": "CRITICAL 0. D-2(labels.ts SSOT) + T-fix(buildPageUrl 경계) in-task fix. carry 5 MAJOR: D-1 URL중복, D-3 React.cache, D-4 zod이중, T 3건(RSC 인프라). 테스트 798(+2).",
     "timestamp": "2026-05-24T16:58:59+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-013",
+    "stepNumber": 2,
+    "prNumber": 48,
+    "mergeMethod": "squash",
+    "mergedLines": 551,
+    "branchDeleted": true,
+    "isLastStep": false,
+    "note": "PR #48 squash 머지 → develop. Step 3 진행 (필터 Client + 마감 섹션).",
+    "timestamp": "2026-05-24T17:00:49+09:00"
   }
 ]

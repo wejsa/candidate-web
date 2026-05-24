@@ -2,15 +2,15 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 173,
+    "version": 174,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T16:58:59+09:00"
+    "updatedAt": "2026-05-24T17:00:49+09:00"
   },
   "summary": {
     "total": 35,
     "done": 15,
-    "inProgress": 0,
-    "review": 1,
+    "inProgress": 1,
+    "review": 0,
     "todo": 19
   },
   "phases": {
@@ -891,29 +891,23 @@
       "priority": "high",
       "phase": 2,
       "assignee": "jaese@hoji-20260524-161015",
-      "assignedAt": "2026-05-24T16:58:59+09:00",
-      "lockTTL": 7200,
+      "assignedAt": "2026-05-24T17:00:49+09:00",
+      "lockTTL": 3600,
       "lockedFiles": [
-        "lib/jobs/labels.ts",
-        "lib/jobs/metadata.ts",
-        "lib/jobs/pagination-url.ts",
-        "app/jobs/page.tsx",
-        "app/jobs/_components/JobCard.tsx",
-        "app/jobs/_components/Pagination.tsx",
-        "app/jobs/loading.tsx",
-        "tests/lib/jobs/metadata.test.ts",
-        "tests/lib/jobs/pagination-url.test.ts"
+        "app/jobs/_components/JobFilters.tsx",
+        "app/jobs/_components/ClosedJobsSection.tsx",
+        "app/jobs/page.tsx"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 48,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "48",
-        "updatedAt": "2026-05-24T16:58:59+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-24T17:00:49+09:00"
       },
       "planPath": ".claude/temp/CANDID-013-plan.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -939,9 +933,11 @@
         {
           "step": 2,
           "title": "페이지 RSC + 메타데이터 + 카드 + 페이지네이션",
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 48,
+          "mergedAt": "2026-05-24T17:00:41+09:00",
           "files": [
+            "lib/jobs/labels.ts",
             "lib/jobs/metadata.ts",
             "lib/jobs/pagination-url.ts",
             "app/jobs/page.tsx",
@@ -952,10 +948,12 @@
             "tests/lib/jobs/pagination-url.test.ts"
           ],
           "actualLines": 520,
+          "mergedLines": 551,
           "note": "plan과 차이: tests/app/jobs/* 대신 lib helper(metadata, pagination-url)로 분리하여 lib unit 테스트로 대체. React 테스트 인프라(jsdom + @testing-library) 부재 — F-5 follow-up.",
           "estimatedLines": 530,
           "prLineLimit": 700,
-          "dependsOn": [1]
+          "dependsOn": [1],
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 7 / MINOR 7. in-task fix: D-2(labels.ts SSOT) + T-fix(buildPageUrl 경계). carry 5 MAJOR: D-1(URL빌더중복) / D-3(React.cache total 공유) / D-4(zod 이중 호출) / T 3건(RSC 인프라 부재). 테스트 770→798(+28)."
         },
         {
           "step": 3,
