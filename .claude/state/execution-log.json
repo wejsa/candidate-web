@@ -605,7 +605,11 @@
     "major": 13,
     "minor": 12,
     "info": 7,
-    "inTaskFixes": ["D-MAJOR-2 OAUTH_STATE_TTL_MS export", "D-MAJOR-1 USER_DENIED 400→422", "T-MAJOR-1 env.superRefine 4 케이스 테스트"],
+    "inTaskFixes": [
+      "D-MAJOR-2 OAUTH_STATE_TTL_MS export",
+      "D-MAJOR-1 USER_DENIED 400→422",
+      "T-MAJOR-1 env.superRefine 4 케이스 테스트"
+    ],
     "carryCount": 10,
     "timestamp": "2026-05-24T12:50:55+09:00"
   },
@@ -643,7 +647,12 @@
     "major": 10,
     "minor": 12,
     "info": 8,
-    "inTaskFixes": ["T-MAJOR-1 index.ts 단위 테스트", "D-MAJOR-2/1 normalizeOAuthName + 소셜 사용자 fallback", "D-MAJOR-3 safeHttpsUrl", "T-MAJOR-2 redirect='error' 회귀 가드"],
+    "inTaskFixes": [
+      "T-MAJOR-1 index.ts 단위 테스트",
+      "D-MAJOR-2/1 normalizeOAuthName + 소셜 사용자 fallback",
+      "D-MAJOR-3 safeHttpsUrl",
+      "T-MAJOR-2 redirect='error' 회귀 가드"
+    ],
     "carryCount": 6,
     "finalLines": 1035,
     "timestamp": "2026-05-24T13:17:00+09:00"
@@ -680,7 +689,9 @@
     "critical": 1,
     "major": 18,
     "minor": 10,
-    "criticalIssues": ["C001 callback open-redirect (sanitizeRedirect 우회 + base URL origin 재검증 부재)"],
+    "criticalIssues": [
+      "C001 callback open-redirect (sanitizeRedirect 우회 + base URL origin 재검증 부재)"
+    ],
     "timestamp": "2026-05-24T13:35:00+09:00"
   },
   {
@@ -689,11 +700,19 @@
     "stepNumber": 3,
     "prNumber": 45,
     "issueCount": 4,
-    "issues": ["C001", "S-MAJOR-4.1", "S-MAJOR-4.2", "S-MAJOR-1.2"],
+    "issues": [
+      "C001",
+      "S-MAJOR-4.1",
+      "S-MAJOR-4.2",
+      "S-MAJOR-1.2"
+    ],
     "fixLoop": 1,
     "addedLines": 146,
     "deletedLines": 16,
-    "vitest": {"passed": 736, "added": 26},
+    "vitest": {
+      "passed": 736,
+      "added": 26
+    },
     "timestamp": "2026-05-24T13:40:00+09:00"
   },
   {
@@ -725,7 +744,11 @@
     "totalSteps": 3,
     "totalAdditions": 2667,
     "totalDeletions": 3,
-    "prNumbers": [43, 44, 45],
+    "prNumbers": [
+      43,
+      44,
+      45
+    ],
     "fixLoopTotal": 1,
     "vitest": {
       "passed": 736,
@@ -777,13 +800,21 @@
     "prNumber": 47,
     "reviewState": "COMMENTED",
     "mode": "full",
-    "agents": ["domain", "security", "test"],
+    "agents": [
+      "domain",
+      "security",
+      "test"
+    ],
     "critical": 0,
     "major": 12,
     "minor": 6,
     "info": 6,
     "selfPr": true,
-    "inTaskFix": ["S-1", "T-1", "T-2-partial"],
+    "inTaskFix": [
+      "S-1",
+      "T-1",
+      "T-2-partial"
+    ],
     "carryMajor": 11,
     "note": "CRITICAL 0. S-1(category slug regex) + T-1(D-Day 경계) in-task fix. 11 MAJOR carry → 회고 follow-up. 테스트 770/770 (+9).",
     "timestamp": "2026-05-24T16:42:09+09:00"
@@ -808,7 +839,10 @@
     "branch": "feature/CANDID-013-step2",
     "filesChanged": 8,
     "additions": 520,
-    "vitest": { "passed": 796, "added": 26 },
+    "vitest": {
+      "passed": 796,
+      "added": 26
+    },
     "build": "ok",
     "lint": "ok",
     "typecheck": "ok",
@@ -822,13 +856,20 @@
     "prNumber": 48,
     "reviewState": "COMMENTED",
     "mode": "full",
-    "agents": ["domain", "security", "test"],
+    "agents": [
+      "domain",
+      "security",
+      "test"
+    ],
     "critical": 0,
     "major": 7,
     "minor": 7,
     "info": 6,
     "selfPr": true,
-    "inTaskFix": ["D-2", "T-fix-pagination"],
+    "inTaskFix": [
+      "D-2",
+      "T-fix-pagination"
+    ],
     "carryMajor": 5,
     "note": "CRITICAL 0. D-2(labels.ts SSOT) + T-fix(buildPageUrl 경계) in-task fix. carry 5 MAJOR: D-1 URL중복, D-3 React.cache, D-4 zod이중, T 3건(RSC 인프라). 테스트 798(+2).",
     "timestamp": "2026-05-24T16:58:59+09:00"
@@ -854,7 +895,10 @@
     "filesChanged": 8,
     "additions": 410,
     "deletions": 58,
-    "vitest": { "passed": 809, "added": 11 },
+    "vitest": {
+      "passed": 809,
+      "added": 11
+    },
     "build": "ok",
     "lint": "ok",
     "typecheck": "ok",
@@ -869,14 +913,20 @@
     "prNumber": 49,
     "reviewState": "COMMENTED",
     "mode": "full",
-    "agents": ["domain", "security", "test"],
+    "agents": [
+      "domain",
+      "security",
+      "test"
+    ],
     "critical": 0,
     "major": 7,
     "minor": 7,
     "info": 6,
     "selfPr": true,
     "isLastStep": true,
-    "inTaskFix": ["T-fix-filter-changes-3-cases"],
+    "inTaskFix": [
+      "T-fix-filter-changes-3-cases"
+    ],
     "carryMajor": 6,
     "note": "CRITICAL 0. T-fix(filter-changes undefined/string-boolean 3 케이스) in-task. carry 6 MAJOR: A-1 list.ts re-export 가드, T 3건(F-5 RSC 인프라), D minor + S minor. 테스트 812(+3).",
     "timestamp": "2026-05-24T17:15:25+09:00"
@@ -897,11 +947,26 @@
     "taskId": "CANDID-013",
     "totalSteps": 3,
     "totalAdditions": 1591,
-    "prNumbers": [47, 48, 49],
+    "prNumbers": [
+      47,
+      48,
+      49
+    ],
     "fixLoopTotal": 0,
-    "vitest": { "passed": 812, "added": 60 },
+    "vitest": {
+      "passed": 812,
+      "added": 60
+    },
     "carryMajorTotal": 17,
     "note": "US-JOB-001 완성. Step 1(668 LOC) + Step 2(551 LOC) + Step 3(372 LOC). fix loop 0회 (CRITICAL 0). carry MAJOR 17(Step1:11 + Step2:5 + Step3:6) → 회고에서 F-1~F-9 follow-up task 분리 예정. 자기 PR 3건 모두 COMMENT 모드. Phase 2 진행률 향상.",
     "timestamp": "2026-05-24T17:17:14+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-016",
+    "stepNumber": 1,
+    "prNumber": 57,
+    "branch": "feature/CANDID-016-step1",
+    "timestamp": "2026-05-24T20:35:00+09:00"
   }
 ]

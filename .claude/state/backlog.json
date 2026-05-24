@@ -2,15 +2,15 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 197,
+    "version": 198,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T20:25:00+09:00"
+    "updatedAt": "2026-05-24T20:35:00+09:00"
   },
   "summary": {
     "total": 35,
     "done": 18,
     "inProgress": 1,
-    "review": 0,
+    "review": 1,
     "todo": 16
   },
   "phases": {
@@ -1242,7 +1242,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260524-202030",
-      "assignedAt": "2026-05-24T20:25:00+09:00",
+      "assignedAt": "2026-05-24T20:35:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
@@ -1265,14 +1265,14 @@
         "pnpm-lock.yaml"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 57,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T20:25:00+09:00"
+        "updatedAt": "2026-05-24T20:35:00+09:00"
       },
-      "updatedAt": "2026-05-24T20:25:00+09:00",
+      "updatedAt": "2026-05-24T20:35:00+09:00",
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-016-plan.md",
       "currentStep": 1,
@@ -1280,7 +1280,7 @@
         {
           "step": 1,
           "title": "인프라 — DB partial UNIQUE + S3 SDK + MinIO docker-compose + ENV",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "prisma/migrations/_candid_016_resume_unique/migration.sql",
             "prisma/schema.prisma",
@@ -1295,7 +1295,10 @@
           ],
           "estimatedLines": 300,
           "prLineLimit": 500,
-          "dependsOn": []
+          "dependsOn": [],
+          "branch": "feature/CANDID-016-step1",
+          "prNumber": 57,
+          "actualLines": 500
         },
         {
           "step": 2,
