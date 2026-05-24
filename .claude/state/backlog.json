@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 177,
+    "version": 178,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T17:17:14+09:00"
+    "updatedAt": "2026-05-24T17:21:29+09:00"
   },
   "summary": {
     "total": 35,
     "done": 16,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 19
+    "todo": 18
   },
   "phases": {
     "1": {
@@ -978,10 +978,22 @@
       "id": "CANDID-014",
       "title": "공고 상세 + sanitized HTML 렌더링 + 공유 기능 (US-JOB-002)",
       "description": "공고 상세 페이지. content_html은 DOMPurify 화이트리스트 sanitize. 지원하기 CTA(비로그인/로그인/이미 지원/임시저장/마감 분기). URL 복사/공유.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
+      "assignee": "jaese@hoji-20260524-172129",
+      "assignedAt": "2026-05-24T17:21:29+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-24T17:21:29+09:00"
+      },
       "dependencies": [
         "CANDID-013"
       ],
