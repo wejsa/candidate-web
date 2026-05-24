@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 148,
+    "version": 149,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T11:40:00+09:00"
+    "updatedAt": "2026-05-24T11:44:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -730,17 +730,50 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@WSL-20260524-114000",
-      "assignedAt": "2026-05-24T11:40:00+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-24T11:44:00+09:00",
+      "lockTTL": 3600,
+      "lockedFiles": [
+        "lib/auth/login.ts",
+        "lib/auth/validation.ts",
+        "app/api/v1/auth/login/route.ts"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T11:40:00+09:00"
+        "updatedAt": "2026-05-24T11:44:00+09:00"
       },
+      "planPath": ".claude/temp/CANDID-011-plan.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "핵심 비즈니스 로직: lib/auth/login.ts (signin) + LoginInputSchema + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "lib/auth/login.ts",
+            "lib/auth/validation.ts",
+            "tests/lib/auth/login.test.ts"
+          ],
+          "estimatedLines": 450,
+          "prLineLimit": 500,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "라우터 + 통합 테스트 (POST /api/v1/auth/login)",
+          "status": "pending",
+          "files": [
+            "app/api/v1/auth/login/route.ts",
+            "tests/app/api/v1/auth/login.test.ts"
+          ],
+          "estimatedLines": 300,
+          "prLineLimit": 400,
+          "dependsOn": [1]
+        }
+      ],
       "dependencies": [
         "CANDID-006",
         "CANDID-009"
