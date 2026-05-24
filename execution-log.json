@@ -656,5 +656,20 @@
     "mergeMethod": "squash",
     "mergedLines": 1035,
     "timestamp": "2026-05-24T13:17:49+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-012",
+    "stepNumber": 3,
+    "prNumber": 45,
+    "branch": "feature/CANDID-012-step3",
+    "actualLines": 942,
+    "prLineLimit": 750,
+    "isLastStep": true,
+    "vitest": {
+      "passed": 710,
+      "added": 25
+    },
+    "timestamp": "2026-05-24T13:27:00+09:00"
   }
 ]

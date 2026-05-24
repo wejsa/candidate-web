@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 161,
+    "version": 162,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T13:18:00+09:00"
+    "updatedAt": "2026-05-24T13:27:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -799,12 +799,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 45,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-24T13:18:00+09:00"
+        "autoChainArgs": "45 --auto-fix",
+        "updatedAt": "2026-05-24T13:27:00+09:00"
       },
       "dependencies": [
         "CANDID-006"
@@ -866,7 +866,9 @@
         {
           "step": 3,
           "title": "link 비즈니스 + start/callback 라우터 + 통합 테스트",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-012-step3",
+          "prNumber": 45,
           "files": [
             "lib/auth/oauth/link.ts",
             "app/api/v1/auth/oauth/[provider]/route.ts",
@@ -876,6 +878,7 @@
             "tests/app/api/v1/auth/oauth/callback.test.ts"
           ],
           "estimatedLines": 600,
+          "actualLines": 942,
           "prLineLimit": 750,
           "dependsOn": [1, 2]
         }
