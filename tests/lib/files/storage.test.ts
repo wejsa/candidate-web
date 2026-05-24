@@ -128,14 +128,24 @@ describe('presignResumeUpload', () => {
     getSignedUrlMock.mockResolvedValue('https://minio.local/upload?sig=abc');
     const now = new Date(Date.UTC(2026, 4, 24, 10, 30, 0));
 
+    const callStart = Date.now();
     const result = await presignResumeUpload('이력서.pdf', 'application/pdf', now);
+    const callEnd = Date.now();
 
     expect(result.uploadUrl).toBe('https://minio.local/upload?sig=abc');
     expect(result.storedPath).toMatch(/^resumes\/2026\/05\/.+\.pdf$/);
     expect(result.headers).toEqual({ 'Content-Type': 'application/pdf' });
-    // 기본 TTL 300초.
-    expect(result.expiresAt.getTime() - now.getTime()).toBe(300_000);
+    // D-MAJOR-3 fix: expiresAt = signedAt(call 진입 직후) + 300_000 - SAFETY_MARGIN(5_000).
+    // 호출자 `now`가 아닌 함수 진입 직후 시각 기준이므로 범위 어설션 (call 구간 + ±50ms 흡수).
+    expect(result.expiresAt.getTime()).toBeGreaterThanOrEqual(callStart + 300_000 - 5_000 - 50);
+    expect(result.expiresAt.getTime()).toBeLessThanOrEqual(callEnd + 300_000 - 5_000 + 50);
+    // T-MINOR: ttlSec를 expiresIn으로 전달했는지 검증 (BR-FILE-05 회귀 가드).
     expect(getSignedUrlMock).toHaveBeenCalledTimes(1);
+    expect(getSignedUrlMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ expiresIn: 300 }),
+    );
   });
 
   it('getSignedUrl throw → AppError FILE_UPLOAD_FAILED로 래핑', async () => {
@@ -192,5 +202,43 @@ describe('deleteResumeObject', () => {
     await expect(deleteResumeObject(validPath)).rejects.toMatchObject({
       code: 'FILE_UPLOAD_FAILED',
     });
+  });
+});
+
+// T-MAJOR-1 fix (PR #57 in-PR): 라운드 트립 invariant.
+// buildResumeKey / presignResumeUpload가 만든 키는 반드시 isValidResumeStoredPath()를 통과해야 한다.
+// Step 2 confirm 단계의 storedPath 위변조 가드 정합성을 회귀로부터 잠근다.
+describe('storedPath round-trip invariant (T-MAJOR-1 fix)', () => {
+  const fixed = new Date(Date.UTC(2026, 4, 24, 10, 30, 0));
+
+  it.each([
+    'a.pdf',
+    'b.PDF',
+    'noext',
+    'shell.exe.malicious',
+    '../etc/passwd',
+    'report.v1.docx',
+    '이력서.pdf',
+    'CV.HWPx',
+  ])('buildResumeKey(%s) → isValidResumeStoredPath true', (input) => {
+    const key = buildResumeKey(input, fixed);
+    expect(isValidResumeStoredPath(key)).toBe(true);
+  });
+
+  it('presignResumeUpload result.storedPath → isValidResumeStoredPath true', async () => {
+    stubS3Env();
+    getSignedUrlMock.mockResolvedValue('https://x');
+    const { storedPath } = await presignResumeUpload('a.pdf', 'application/pdf');
+    expect(isValidResumeStoredPath(storedPath)).toBe(true);
+  });
+
+  // T-MAJOR-10 보강: 월 경계 (12월 → 익년 1월) UTC 케이스.
+  it('월 경계 — 12월/익년 1월 키 경로 정합', () => {
+    expect(
+      buildResumeKey('a.pdf', new Date(Date.UTC(2026, 11, 31, 23, 59, 59))),
+    ).toMatch(/^resumes\/2026\/12\/.+\.pdf$/);
+    expect(buildResumeKey('a.pdf', new Date(Date.UTC(2027, 0, 1, 0, 0, 0)))).toMatch(
+      /^resumes\/2027\/01\/.+\.pdf$/,
+    );
   });
 });

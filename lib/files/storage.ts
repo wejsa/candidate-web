@@ -86,6 +86,11 @@ export interface PresignedPutResult {
   expiresAt: Date;
 }
 
+// D-MAJOR-3 fix (PR #57 in-PR): 클럭 스큐 + 함수 호출~서명 발급 사이 지연을 흡수하는 안전 마진.
+// 클라이언트가 expiresAt - 수 초 시점에 PUT 시작해도 서명 만료 직전이 아닌 명확히 만료 전임을
+// 보장. 5s는 일반 환경의 시계 스큐 + 짧은 네트워크 지연 합 추정. SDK 서명의 X-Amz-Date 기준.
+const PRESIGN_SAFETY_MARGIN_MS = 5_000;
+
 export async function presignResumeUpload(
   originalFilename: string,
   contentType: string,
@@ -98,13 +103,16 @@ export async function presignResumeUpload(
     Key: storedPath,
     ContentType: contentType,
   });
+  // D-MAJOR-3 fix: getSignedUrl 직전 시각 캡처. 호출자 `now`(검증/DB 조회 등 거친 stale 시점)와
+  // SDK 내부 서명 시점 사이 지연으로 인한 expiresAt 과대표시를 차단.
+  const signedAt = new Date();
   try {
     const uploadUrl = await getSignedUrl(client, command, { expiresIn: ttlSec });
     return {
       uploadUrl,
       storedPath,
       headers: { 'Content-Type': contentType },
-      expiresAt: new Date(now.getTime() + ttlSec * 1000),
+      expiresAt: new Date(signedAt.getTime() + ttlSec * 1000 - PRESIGN_SAFETY_MARGIN_MS),
     };
   } catch (cause) {
     throw new AppError('FILE_UPLOAD_FAILED', {

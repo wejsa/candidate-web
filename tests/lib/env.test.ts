@@ -157,6 +157,53 @@ describe('S3 tuple superRefine (CANDID-016)', () => {
   });
 });
 
+// CANDID-016 Step 1 PR #57 in-PR fix (S-MAJOR-1) — S3_ENDPOINT URL 검증 강화.
+// 운영 HTTPS 강제 + 사설/메타데이터/loopback IP 차단. dev http는 localhost만 예외.
+describe('S3_ENDPOINT URL guard (CANDID-016 S-MAJOR-1 fix)', () => {
+  function stubS3Pair(): void {
+    vi.stubEnv('S3_BUCKET', 'b');
+    vi.stubEnv('S3_ACCESS_KEY', 'k');
+    vi.stubEnv('S3_SECRET_KEY', 's');
+  }
+
+  it('https + 공인 도메인 통과', () => {
+    stubS3Pair();
+    vi.stubEnv('S3_ENDPOINT', 'https://s3.ap-northeast-2.amazonaws.com');
+    expect(() => getEnv()).not.toThrow();
+  });
+
+  it('dev — http://localhost:9000 통과 (NODE_ENV=test)', () => {
+    stubS3Pair();
+    vi.stubEnv('S3_ENDPOINT', 'http://localhost:9000');
+    expect(() => getEnv()).not.toThrow();
+  });
+
+  it('dev — http://127.0.0.1:9000 통과 (NODE_ENV=test)', () => {
+    stubS3Pair();
+    vi.stubEnv('S3_ENDPOINT', 'http://127.0.0.1:9000');
+    expect(() => getEnv()).not.toThrow();
+  });
+
+  it.each([
+    ['cloud metadata', 'http://169.254.169.254'],
+    ['RFC1918 10.x', 'http://10.0.0.1'],
+    ['RFC1918 172.20.x', 'http://172.20.0.1'],
+    ['RFC1918 192.168.x', 'http://192.168.1.1'],
+    ['ftp 프로토콜', 'ftp://example.com'],
+    ['dev http + 임의 호스트', 'http://internal-admin:8080'],
+  ])('차단: %s — %s', (_label, url) => {
+    stubS3Pair();
+    vi.stubEnv('S3_ENDPOINT', url);
+    expect(() => getEnv()).toThrow(/S3_ENDPOINT/);
+  });
+
+  it('https + 사설 IP — HTTPS여도 차단', () => {
+    stubS3Pair();
+    vi.stubEnv('S3_ENDPOINT', 'https://10.0.0.1');
+    expect(() => getEnv()).toThrow(/S3_ENDPOINT/);
+  });
+});
+
 // CANDID-016 Step 1 — S3_PRESIGN_TTL_SEC 기본/경계.
 describe('S3_PRESIGN_TTL_SEC (CANDID-016)', () => {
   it('미설정 시 기본 300', () => {

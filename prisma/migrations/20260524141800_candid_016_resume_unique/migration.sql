@@ -14,14 +14,19 @@
 -- L-016: WHERE 조건의 NULL semantics — `IS NOT NULL` 명시. partial UNIQUE는 인덱스 entry 자체가
 -- 만들어지지 않으므로 NULL row 다중 허용은 자동 (NULL=NULL이 UNKNOWN인 SQL semantics와 호환).
 
--- CONCURRENTLY: 운영 적용 시 ACCESS EXCLUSIVE 락 회피 (Prisma migrate deploy는 마이그를
--- 트랜잭션으로 wrap하지 않으므로 CONCURRENTLY 사용 가능 — CANDID-013 마이그와 동일 패턴).
--- IF NOT EXISTS: 재실행 안전 (idempotent).
+-- D-MAJOR-1 fix (PR #57 in-PR fix): CONCURRENTLY 제거. Prisma migrate deploy는 마이그 파일을
+-- BEGIN..COMMIT 트랜잭션으로 자동 wrap하며 (Prisma issue #11164), CONCURRENTLY는 트랜잭션
+-- 블록 안에서 실행 불가 (`cannot run inside a transaction block`). 본 마이그는 resume_files가
+-- 운영 초기 소량(<1k rows 예상)이라 일반 CREATE UNIQUE INDEX의 ACCESS EXCLUSIVE 락 시간이
+-- ms 수준 — 운영 적용 안전. 향후 row 수가 100k+ 규모로 커지면 별도 runbook으로 CONCURRENTLY를
+-- 사전 실행 후 마이그가 IF NOT EXISTS로 no-op 되도록 운용 (현 마이그는 IF NOT EXISTS 유지).
+--
+-- CANDID-013 마이그(20260524072500)도 동일 CONCURRENTLY 패턴 — 별도 follow-up task로 carry.
 
-CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "uk_resume_files_one_per_draft"
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_resume_files_one_per_draft"
   ON "resume_files"("draft_id")
   WHERE "draft_id" IS NOT NULL;
 
-CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "uk_resume_files_one_per_app"
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_resume_files_one_per_app"
   ON "resume_files"("application_id")
   WHERE "application_id" IS NOT NULL;
