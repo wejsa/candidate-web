@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 147,
+    "version": 148,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T11:28:00+09:00"
+    "updatedAt": "2026-05-24T11:40:00+09:00"
   },
   "summary": {
     "total": 35,
     "done": 13,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 22
+    "todo": 21
   },
   "phases": {
     "1": {
@@ -725,10 +725,22 @@
       "id": "CANDID-011",
       "title": "이메일 로그인 + 5회 실패 잠금/15분 (US-AUTH-002)",
       "description": "이메일/비밀번호 검증 + 5회 실패 시 15분 잠금(429). 계정 열거 방지(어느 쪽이 틀렸는지 비노출). 로그인 직전 URL 복귀.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
+      "assignee": "wejsa-u@WSL-20260524-114000",
+      "assignedAt": "2026-05-24T11:40:00+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-24T11:40:00+09:00"
+      },
       "dependencies": [
         "CANDID-006",
         "CANDID-009"
