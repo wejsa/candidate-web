@@ -5,7 +5,10 @@
 
 import 'server-only';
 import { JobStatus, Prisma } from '@prisma/client';
-import { prisma, basePrisma } from '@/lib/prisma';
+// CANDID-015 Step 2 L-019 (D-MAJOR-2): wrapped `prisma` import 제거 — service.ts는
+// applicationDraft만 다루고 piiExtension 대상 아니므로 basePrisma만 사용. PII wrapper
+// 우회 안티패턴 진입점 차단.
+import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { initialPayload } from '@/lib/drafts/schema';
 import type { DraftPayloadV1 } from '@/lib/drafts/types';
@@ -176,5 +179,3 @@ export async function upsertDraft({
   return updated;
 }
 
-// prisma 변수 export — 테스트에서 mock 가능성 확보 (사용 안 하면 tree-shake)
-export { prisma };
