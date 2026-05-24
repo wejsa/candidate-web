@@ -3,10 +3,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ApplicationStep, DraftPayloadV1, DraftPrefill } from '@/lib/drafts/types';
+import { useAutoSave } from '@/lib/drafts/use-auto-save';
 import { PersonalInfoStep } from './PersonalInfoStep';
 import { StepNavigation } from './StepNavigation';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 
 interface Props {
   jobId: number;
@@ -35,13 +37,36 @@ export function ApplicationFormShell({
   );
   const progress = Math.round((currentStep / 3) * 100);
 
+  // CANDID-015 Step 4: 자동 저장 hook 통합
+  const autoSave = useAutoSave({
+    jobPostingId: jobId,
+    initialVersion,
+    initialLastSavedAt,
+  });
+
+  // payload 변경 시 hook에 알림 (debounce 3s + interval 30s 자동 트리거)
+  useEffect(() => {
+    autoSave.notifyChange(payload);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payload]);
+
   const handleStep1Change = (step1: DraftPayloadV1['step1_personal']) => {
     setPayload((p) => ({ ...p, step1_personal: step1 }));
   };
 
+  // CANDID-015 Step 4 L-019 (D-MAJOR-2): stepper completedSteps 갱신.
+  // 앞으로 이동 시 현재 step을 completedSteps에 추가 — 뒤로 갔다가 다시 앞으로 가능.
+  // 스텝 이동 시 강제 저장 (US-APP-005 "스텝 이동 시 강제 저장").
   const handleStepMove = (next: ApplicationStep) => {
     setCurrentStep(next);
-    setPayload((p) => ({ ...p, meta: { ...p.meta, currentStep: next } }));
+    setPayload((p) => {
+      const isAdvancing = next > p.meta.currentStep;
+      const completedSteps = isAdvancing
+        ? Array.from(new Set([...p.meta.completedSteps, p.meta.currentStep])).sort() as ApplicationStep[]
+        : p.meta.completedSteps;
+      return { ...p, meta: { ...p.meta, currentStep: next, completedSteps } };
+    });
+    void autoSave.saveNow();
   };
 
   return (
@@ -87,10 +112,13 @@ export function ApplicationFormShell({
         onPrev={() => handleStepMove(Math.max(1, currentStep - 1) as ApplicationStep)}
         onNext={() => handleStepMove(Math.min(3, currentStep + 1) as ApplicationStep)}
       />
-      {/* CANDID-015 Step 4: 자동 저장 hook + AutoSaveIndicator 통합 예정 */}
-      <small aria-live="polite">
-        마지막 저장: {new Date(initialLastSavedAt).toLocaleString('ko-KR')} · v{initialVersion} · jobId={jobId}
-      </small>
+      <AutoSaveIndicator
+        status={autoSave.status}
+        lastSavedAt={autoSave.lastSavedAt}
+        version={autoSave.version}
+        errorMessage={autoSave.errorMessage}
+        onSaveNow={() => void autoSave.saveNow()}
+      />
     </article>
   );
 }

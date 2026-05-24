@@ -73,6 +73,33 @@ describe('runtime', () => {
 });
 
 describe('GET /api/v1/drafts/[jobPostingId]', () => {
+  // CANDID-015 Step 4 L-019 (T-MAJOR-2): Promise.all → 순차 호출 회귀 가드
+  it('loadUserPrefill이 getOrInitDraft보다 먼저 호출됨 (고아 Draft 방지)', async () => {
+    const callOrder: string[] = [];
+    requireAuth.mockResolvedValueOnce({ userId: 100 });
+    loadUserPrefill.mockImplementationOnce(async () => {
+      callOrder.push('prefill');
+      return { email: 'a@b.c', name: null, phone: null, birthDate: null };
+    });
+    getOrInitDraft.mockImplementationOnce(async () => {
+      callOrder.push('draft');
+      return {
+        draft: { id: 1, payloadJson: initialPayload(), version: 1, lastSavedAt: new Date('2026-05-24T00:00:00Z') },
+        created: true,
+      };
+    });
+    await GET(getRequest('42'), { params: { jobPostingId: '42' } });
+    expect(callOrder).toEqual(['prefill', 'draft']);
+  });
+
+  it('loadUserPrefill 실패 시 getOrInitDraft 호출 안 됨 (고아 Draft 차단)', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 100 });
+    loadUserPrefill.mockRejectedValueOnce(new AppError('USER_NOT_FOUND'));
+    const res = await GET(getRequest('42'), { params: { jobPostingId: '42' } });
+    expect(res.status).toBe(404);
+    expect(getOrInitDraft).not.toHaveBeenCalled();
+  });
+
   it('200 + payload + version + lastSavedAt + prefill (Step 2 User PII 복호화)', async () => {
     requireAuth.mockResolvedValueOnce({ userId: 100 });
     getOrInitDraft.mockResolvedValueOnce({
