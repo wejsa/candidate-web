@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 183,
+    "version": 184,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T18:25:00+09:00"
+    "updatedAt": "2026-05-24T18:35:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -998,12 +998,12 @@
         "tests/lib/jobs/detail.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 51,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": 52,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T18:25:00+09:00"
+        "updatedAt": "2026-05-24T18:35:00+09:00"
       },
       "dependencies": [
         "CANDID-013"
@@ -1065,19 +1065,27 @@
         },
         {
           "step": 3,
-          "title": "ApplyCta 5-state + RSC auth helper + page 통합",
-          "status": "pending",
+          "title": "ApplyCta 5-state + RSC auth helper + page 통합 + Step 2 carry fix",
+          "status": "pr_created",
+          "branch": "feature/CANDID-014-step3",
+          "prNumber": 52,
           "files": [
             "lib/jobs/apply-cta.ts",
             "lib/auth/server-cookies.ts",
+            "lib/jobs/list.ts",
             "app/jobs/[id]/_components/ApplyCta.tsx",
+            "app/jobs/[id]/_components/ShareButton.tsx",
             "app/jobs/[id]/page.tsx",
+            "app/jobs/[id]/not-found.tsx",
             "tests/lib/jobs/apply-cta.test.ts",
-            "tests/lib/auth/server-cookies.test.ts"
+            "tests/lib/auth/server-cookies.test.ts",
+            "tests/lib/jobs/detail.test.ts"
           ],
           "estimatedLines": 480,
+          "actualLines": 478,
           "prLineLimit": 550,
-          "dependsOn": [1, 2]
+          "dependsOn": [1, 2],
+          "note": "L-019 in-task self-correction: Step 2 carry 4건(D-MAJOR-3 list.ts 중복 import / D-MAJOR-5 ShareButton cleanup+URL strip+aria / S-MINOR-1 not-found 단서 / T-MAJOR-1 cache 키 회귀 가드) 해소. 나머지 carry 5건(D-MAJOR-1/2/4/6 + T-MAJOR-2)은 CANDID-014-FU1로 분리 예정."
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00"
