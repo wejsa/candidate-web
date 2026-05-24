@@ -734,5 +734,40 @@
     "carryMajorTotal": 29,
     "note": "US-AUTH-003 완성. Step 1(560 LOC) + Step 2(1035 LOC) + Step 3(1072 LOC). 회차 1 fix 1회. 27 carry MAJOR (Step 1: 10, Step 2: 6, Step 3: 13) → 회고에서 follow-up task 분리 예정.",
     "timestamp": "2026-05-24T13:46:00+09:00"
+  },
+  {
+    "event": "task_started",
+    "taskId": "CANDID-013",
+    "title": "공고 목록 조회 + 필터/정렬/페이징 + URL 쿼리 상태 (US-JOB-001)",
+    "priority": "high",
+    "phase": 2,
+    "steps": 3,
+    "estimatedLines": 1490,
+    "timestamp": "2026-05-24T16:10:15+09:00"
+  },
+  {
+    "event": "plan_approved",
+    "taskId": "CANDID-013",
+    "stepCount": 3,
+    "note": "3 step: 마이그+백엔드(prLimit 700) / 페이지+카드(700) / 필터+마감(500). DB-designer 권고 반영(4 partial index, hybrid offset paging, 60s cache).",
+    "timestamp": "2026-05-24T16:24:46+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-013",
+    "stepNumber": 1,
+    "prNumber": 47,
+    "branch": "feature/CANDID-013-step1",
+    "filesChanged": 6,
+    "additions": 628,
+    "vitest": {
+      "passed": 761,
+      "added": 28
+    },
+    "build": "ok",
+    "lint": "ok",
+    "typecheck": "ok",
+    "note": "Step 1 — partial index 4종 + types + listJobs 서비스 + GET /api/v1/jobs. 회귀 752→761(+28건).",
+    "timestamp": "2026-05-24T16:34:52+09:00"
   }
 ]
