@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 184,
+    "version": 185,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T18:35:00+09:00"
+    "updatedAt": "2026-05-24T18:55:00+09:00"
   },
   "summary": {
     "total": 35,
-    "done": 16,
-    "inProgress": 1,
+    "done": 17,
+    "inProgress": 0,
     "review": 0,
     "todo": 18
   },
@@ -978,33 +978,16 @@
       "id": "CANDID-014",
       "title": "공고 상세 + sanitized HTML 렌더링 + 공유 기능 (US-JOB-002)",
       "description": "공고 상세 페이지. content_html은 DOMPurify 화이트리스트 sanitize. 지원하기 CTA(비로그인/로그인/이미 지원/임시저장/마감 분기). URL 복사/공유.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "assignee": "jaese@hoji-20260524-172129",
-      "assignedAt": "2026-05-24T18:25:00+09:00",
-      "lockTTL": 7200,
-      "lockedFiles": [
-        "lib/jobs/apply-cta.ts",
-        "lib/auth/server-cookies.ts",
-        "lib/jobs/list.ts",
-        "app/jobs/[id]/page.tsx",
-        "app/jobs/[id]/not-found.tsx",
-        "app/jobs/[id]/_components/ShareButton.tsx",
-        "app/jobs/[id]/_components/ApplyCta.tsx",
-        "tests/lib/jobs/apply-cta.test.ts",
-        "tests/lib/auth/server-cookies.test.ts",
-        "tests/lib/jobs/detail.test.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": 52,
-        "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-24T18:35:00+09:00"
-      },
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": null,
+      "lockedFiles": [],
+      "workflowState": null,
+      "completedAt": "2026-05-24T18:55:00+09:00",
       "dependencies": [
         "CANDID-013"
       ],
@@ -1066,9 +1049,10 @@
         {
           "step": 3,
           "title": "ApplyCta 5-state + RSC auth helper + page 통합 + Step 2 carry fix",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-014-step3",
           "prNumber": 52,
+          "mergedAt": "2026-05-24T18:55:00+09:00",
           "files": [
             "lib/jobs/apply-cta.ts",
             "lib/auth/server-cookies.ts",
@@ -1082,6 +1066,8 @@
             "tests/lib/jobs/detail.test.ts"
           ],
           "estimatedLines": 480,
+          "mergedLines": 478,
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 6 / MINOR 13 / INFO 15. self-PR COMMENT. L-019 Step 2 carry 4건(D-MAJOR-3/5, S-MINOR-1, T-MAJOR-1) 검증 완료. 본 PR carry 6건 + 누적 17건 → CANDID-014-FU1 통합 분리 (L-022 임계 초과). 테스트 848→868(+20).",
           "actualLines": 478,
           "prLineLimit": 550,
           "dependsOn": [1, 2],

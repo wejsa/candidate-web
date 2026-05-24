@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 19,
+    "version": 20,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-24T13:46:00+09:00"
+    "updatedAt": "2026-05-24T18:55:00+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -668,6 +668,20 @@
       "prNumbers": [47, 48, 49],
       "fixLoop": 0,
       "note": "US-JOB-001 완성. Step 1(partial index 4종 + 서비스/API) + Step 2(RSC + 메타데이터 + 카드/페이지네이션) + Step 3(JobFilters client + ClosedJobsSection + schema 분리). 자기 PR 3건 모두 CRITICAL 0 / fix loop 0. 테스트 752→812 (+60). carry MAJOR 17(Step1:11 + Step2:5 + Step3:6) → 회고에서 F-1~F-9 follow-up task 분리 예정."
+    },
+    "CANDID-014": {
+      "id": "CANDID-014",
+      "title": "공고 상세 + sanitized HTML 렌더링 + 공유 기능 (US-JOB-002)",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "completedAt": "2026-05-24T18:55:00+09:00",
+      "assignee": "jaese@hoji-20260524-172129",
+      "steps": 3,
+      "totalLines": 1479,
+      "prNumbers": [50, 51, 52],
+      "fixLoop": 0,
+      "note": "US-JOB-002 완성. Step 1(getJobDetail 서비스 + GET /api/v1/job-postings/[id] + serverComponentsExternalPackages: ['isomorphic-dompurify']) + Step 2(RSC 페이지 + 메타데이터 + JobDetailHeader/Body + ShareButton + L-019 D-MAJOR-1/2 fix) + Step 3(ApplyCta 5-state + RSC auth helper getOptionalAuthFromCookies + L-019 Step2 carry 4건 fix). 자기 PR 3건 모두 CRITICAL 0 / fix loop 0. 테스트 833→868 (+35). 핵심 설계: DRAFT 서비스 레이어 분기 / sanitize unstable_cache 내부 / isClosed 동적 계산 / view_count CANDID-027 위임 / 5-state CTA Promise.all 병렬. carry MAJOR 23 누적(Step1:9 + Step2:8 + Step3:6) → CANDID-014-FU1로 통합 분리 예정 (L-022 임계 초과)."
     }
   }
 }
