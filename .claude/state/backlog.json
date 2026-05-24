@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 185,
+    "version": 186,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T18:55:00+09:00"
+    "updatedAt": "2026-05-24T18:51:41+09:00"
   },
   "summary": {
     "total": 35,
     "done": 17,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 18
+    "todo": 17
   },
   "phases": {
     "1": {
@@ -1080,10 +1080,22 @@
       "id": "CANDID-015",
       "title": "지원서 3단계 작성 폼 + 인적사항 + 자동 임시저장 (US-APP-001/002/005)",
       "description": "3단계 스텝 UI(인적사항/이력서·포트폴리오/자기소개·커스텀 질문). 진행률 33/66/100. 자동 임시저장(3초 debounce or 30초 주기). 스텝 이동 시 강제 저장. beforeunload 경고. 만 14세 검증.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
+      "assignee": "jaese@hoji-20260524-185141",
+      "assignedAt": "2026-05-24T18:51:41+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-24T18:51:41+09:00"
+      },
       "dependencies": [
         "CANDID-005",
         "CANDID-008",
