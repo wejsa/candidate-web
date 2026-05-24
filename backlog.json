@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 144,
+    "version": 145,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T11:04:00+09:00"
+    "updatedAt": "2026-05-24T11:12:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1393,23 +1393,21 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@WSL-20260524-103200",
-      "assignedAt": "2026-05-24T10:55:00+09:00",
+      "assignedAt": "2026-05-24T11:12:00+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "lib/auth/email-verification.ts",
-        "lib/errors/codes.ts",
         "app/api/v1/auth/resend-verification/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 39,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "39 --auto-fix",
-        "updatedAt": "2026-05-24T11:04:00+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-24T11:12:00+09:00"
       },
       "planPath": ".claude/temp/CANDID-037-plan.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -1434,9 +1432,10 @@
         {
           "step": 2,
           "title": "email-verification 정밀화: P2002 meta.target 화이트리스트 + emailVerifiedAt 가드 + 격리 주석",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-037-step2",
           "prNumber": 39,
+          "mergedAt": "2026-05-24T11:12:00+09:00",
           "files": [
             "lib/auth/email-verification.ts",
             "lib/errors/codes.ts",
@@ -1445,8 +1444,10 @@
           ],
           "estimatedLines": 370,
           "actualLines": 232,
+          "mergedLines": 232,
           "prLineLimit": 500,
-          "dependsOn": [1]
+          "dependsOn": [1],
+          "reviewSummary": "CRITICAL 0 / MAJOR 3 (Step 3 합류) / MINOR 5 / INFO 8 (full mode 3-agent). 보안 결함 0. 자기 PR COMMENT."
         },
         {
           "step": 3,
