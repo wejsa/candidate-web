@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
   title: string;
@@ -27,6 +27,9 @@ async function copyToClipboard(text: string): Promise<boolean> {
   const textarea = document.createElement('textarea');
   textarea.value = text;
   textarea.setAttribute('readonly', '');
+  // CANDID-014 Step 3 (S-INFO carry): 스크린리더/탭 포커스 노출 차단.
+  textarea.setAttribute('aria-hidden', 'true');
+  textarea.setAttribute('tabindex', '-1');
   textarea.style.position = 'absolute';
   textarea.style.left = '-9999px';
   document.body.appendChild(textarea);
@@ -44,13 +47,25 @@ async function copyToClipboard(text: string): Promise<boolean> {
 
 export function ShareButton({ title }: Props) {
   const [status, setStatus] = useState<Status>('idle');
+  // CANDID-014 Step 3 L-019 (D-MAJOR-5): unmount 후 setState 회귀 차단 — ref 보관 + cleanup.
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    },
+    [],
+  );
 
   const handleClick = async () => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
+    // CANDID-014 Step 3 (S-INFO carry): origin + pathname만 공유 — 쿼리/해시 토큰 누수 차단.
+    const url =
+      typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : '';
     const ok = await copyToClipboard(url);
     setStatus(ok ? 'copied' : 'failed');
-    // 토스트 3초 후 초기화
-    setTimeout(() => setStatus('idle'), 3000);
+    // 토스트 3초 후 초기화 — 직전 타이머 취소 후 새로 등록.
+    if (timerRef.current !== null) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setStatus('idle'), 3000);
   };
 
   return (
