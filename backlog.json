@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 159,
+    "version": 160,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T13:05:00+09:00"
+    "updatedAt": "2026-05-24T13:17:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -799,12 +799,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 44,
         "fixLoopCount": 0,
-        "autoChainArgs": "44 --auto-fix",
-        "updatedAt": "2026-05-24T13:05:00+09:00"
+        "autoChainArgs": "44",
+        "updatedAt": "2026-05-24T13:17:00+09:00"
       },
       "dependencies": [
         "CANDID-006"
@@ -852,10 +852,10 @@
             "tests/lib/auth/oauth/github.test.ts"
           ],
           "estimatedLines": 500,
-          "actualLines": 911,
-          "prLineLimit": 700,
+          "actualLines": 1035,
+          "prLineLimit": 750,
           "originalPrLineLimit": 600,
-          "prLineLimitAdjustedReason": "http.ts SSRF helper(76 LOC, plan 미반영) + GitHub 2-call 패턴(80 LOC) + 4 테스트 파일로 plan estimate 500→911 inflation. 1.4× threshold 980>911로 강력 경고 범위 내.",
+          "prLineLimitAdjustedReason": "http.ts SSRF helper(76) + GitHub 2-call 패턴(80) + 4 테스트 파일 + in-task fix(normalize.ts + index.test.ts + 보강) 124 추가 → 1035 LOC. 1.4×750=1050 > 1035.",
           "dependsOn": [1]
         },
         {

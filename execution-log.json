@@ -632,5 +632,20 @@
     },
     "note": "plan estimate 500 → actual 911 (1.82× inflation). http.ts SSRF helper + GitHub 2-call 미반영. 회고 학습.",
     "timestamp": "2026-05-24T13:05:00+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-012",
+    "stepNumber": 2,
+    "prNumber": 44,
+    "reviewState": "COMMENTED",
+    "critical": 0,
+    "major": 10,
+    "minor": 12,
+    "info": 8,
+    "inTaskFixes": ["T-MAJOR-1 index.ts 단위 테스트", "D-MAJOR-2/1 normalizeOAuthName + 소셜 사용자 fallback", "D-MAJOR-3 safeHttpsUrl", "T-MAJOR-2 redirect='error' 회귀 가드"],
+    "carryCount": 6,
+    "finalLines": 1035,
+    "timestamp": "2026-05-24T13:17:00+09:00"
   }
 ]
