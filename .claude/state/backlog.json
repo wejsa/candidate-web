@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 187,
+    "version": 188,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T19:00:00+09:00"
+    "updatedAt": "2026-05-24T19:10:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1114,12 +1114,12 @@
         "tests/integration/drafts-prefill-roundtrip.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
-        "prNumber": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": 53,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T19:00:00+09:00"
+        "updatedAt": "2026-05-24T19:10:00+09:00"
       },
       "dependencies": [
         "CANDID-005",
@@ -1133,11 +1133,12 @@
         {
           "step": 1,
           "title": "Draft 서비스 + GET/PUT API + 만 14세 + 에러 코드",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-015-step1",
+          "prNumber": 53,
           "files": [
             "lib/drafts/types.ts",
             "lib/drafts/schema.ts",
-            "lib/drafts/age.ts",
             "lib/drafts/service.ts",
             "lib/validation/age.ts",
             "lib/errors/codes.ts",
@@ -1145,10 +1146,14 @@
             "tests/lib/drafts/age.test.ts",
             "tests/lib/drafts/schema.test.ts",
             "tests/lib/drafts/service.test.ts",
+            "tests/lib/errors/codes.test.ts",
             "tests/app/api/v1/drafts/[jobPostingId]/route.test.ts"
           ],
           "estimatedLines": 700,
-          "prLineLimit": 750,
+          "actualLines": 1257,
+          "prLineLimit": 1300,
+          "originalPrLineLimit": 750,
+          "prLineLimitAdjustedReason": "plan 단계 zod superRefine 복잡도 + service 게이트 분기 케이스 수(공고 4종 × Draft 2종) + 낙관적 락 신규/업데이트 분기 과소 평가. 도메인 462 + 테스트 791 = 1257 LOC. 강력 경고 구간(1050) 초과로 in-task 격상.",
           "dependsOn": []
         },
         {
