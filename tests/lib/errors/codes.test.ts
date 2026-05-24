@@ -7,10 +7,11 @@ const PREFIXES = ['AUTH_', 'USER_', 'JOB_', 'APP_', 'FILE_', 'SYS_'];
 const VALID_STATUSES = new Set([400, 401, 403, 404, 409, 410, 422, 429, 500, 503]);
 
 describe('ERROR_CATALOG', () => {
-  it('contains 27 codes', () => {
+  it('contains 28 codes', () => {
     // CANDID-009 Step 2: SYS_RATE_LIMITED, SYS_FORBIDDEN_ORIGIN 추가로 22 → 24
     // CANDID-010 Step 3: AUTH_VERIFICATION_TOKEN_INVALID/EXPIRED/RESEND_COOLDOWN 추가로 24 → 27
-    expect(ALL_CODES).toHaveLength(27);
+    // CANDID-037 Step 2: AUTH_EMAIL_ALREADY_VERIFIED 추가로 27 → 28
+    expect(ALL_CODES).toHaveLength(28);
   });
 
   it('CANDID-010 Step 3 신규 코드: AUTH_VERIFICATION_TOKEN_INVALID=400, _EXPIRED=410, _RESEND_COOLDOWN=429', () => {
@@ -81,6 +82,7 @@ describe('ERROR_CATALOG', () => {
       AUTH_VERIFICATION_TOKEN_INVALID: 400,
       AUTH_VERIFICATION_TOKEN_EXPIRED: 410,
       AUTH_VERIFICATION_RESEND_COOLDOWN: 429,
+      AUTH_EMAIL_ALREADY_VERIFIED: 409,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);

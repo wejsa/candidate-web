@@ -2,6 +2,7 @@ import 'server-only';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { generateTokenHex, sha256Hex } from '@/lib/auth/token-hash';
+import { isUniqueViolationOn } from '@/lib/prisma/errors';
 
 // CANDID-010 Step 3 — 이메일 인증 토큰 검증 + 재발송.
 // US-AUTH-001: 24h 토큰 + 60초 재발송 쿨다운. BR-AUTH-04: 미인증 사용자는 지원서 제출만 차단.
@@ -11,14 +12,30 @@ import { generateTokenHex, sha256Hex } from '@/lib/auth/token-hash';
 //     PostgreSQL UPDATE row lock 자연 직렬화. `findUnique`+분기+`update` 사이 race window 제거.
 //   - resendVerificationEmail: `uk_email_verifications_active_per_user` 부분 UNIQUE
 //     (CANDID-036 Step 1 마이그레이션) 위반 시 P2002 → AUTH_VERIFICATION_RESEND_COOLDOWN 매핑.
-//     쿨다운 검증이 트랜잭션 외부라 발생하는 TOCTOU race를 deep defense로 차단.
+//
+// CANDID-037 (Step 2) 정밀화 — db-designer 분석 + L-025:
+//   - 격리 수준 가정: PostgreSQL 기본 READ COMMITTED. 부분 UNIQUE는 인덱스 레벨에서 평가되어
+//     격리 수준과 독립적 (REPEATABLE READ로 격상해도 P2002 차단 동작 동일).
+//   - P2002 매핑 정밀화: `email_verifications`에 P2002를 던질 UNIQUE 인덱스가 2개 존재한다.
+//       (a) `uk_email_verifications_active_per_user` (부분 UNIQUE) → race-cooldown 시맨틱
+//       (b) `email_verifications_token_hash_key` (sha256 충돌) → 사실상 시스템 에러
+//     `isUniqueViolationOn(err, ['uk_email_verifications_active_per_user'])` 화이트리스트로만
+//     cooldown 매핑. 다른 인덱스 충돌은 SYS_INTERNAL_ERROR 전파 (잘못된 cooldown 응답 차단).
+//   - 진입부 가드: 이미 `emailVerifiedAt != null`인 사용자는 race로 INSERT까지 가지 않게
+//     단축 차단 (AUTH_EMAIL_ALREADY_VERIFIED 409). 부분 UNIQUE는 mass mailing race를 막지만,
+//     이미 인증된 사용자의 의미 없는 재발송 시도까지 자원 낭비를 막는다.
 
 /** 인증 토큰 유효기간 24시간 (US-AUTH-001). */
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 /** 재발송 쿨다운 60초 (US-AUTH-001). */
 const RESEND_COOLDOWN_MS = 60 * 1000;
-/** Prisma 부분 UNIQUE 위반 코드. */
-const PRISMA_UNIQUE_VIOLATION = 'P2002';
+/**
+ * P2002 매핑 화이트리스트 — 본 인덱스의 충돌만 race-cooldown 시맨틱으로 매핑한다.
+ * `email_verifications_token_hash_key`(sha256 충돌)는 시스템 에러로 전파.
+ */
+const RESEND_COOLDOWN_UNIQUE_INDEXES = [
+  'uk_email_verifications_active_per_user',
+] as const;
 
 export interface ConsumeResult {
   userId: number;
@@ -41,6 +58,9 @@ export interface ResendResult {
  * 단일 UPDATE 문으로 실행 → PostgreSQL이 일치 row에 ExclusiveLock 자동 획득.
  * 동시 두 트랜잭션이 같은 토큰을 클릭해도 첫 UPDATE만 count=1, 두 번째는 count=0
  * (consumedAt이 이미 set되어 WHERE 조건 불일치). 사후 `findUnique`로 부재/만료/멱등 분류.
+ *
+ * 격리 수준: PostgreSQL 기본 READ COMMITTED 가정. UPDATE의 자동 row lock으로 race-free
+ * 직렬화가 보장되므로 REPEATABLE READ로 격상해도 동작은 동일하다.
  *
  * - 토큰 부재: 400 AUTH_VERIFICATION_TOKEN_INVALID
  * - 만료: 410 AUTH_VERIFICATION_TOKEN_EXPIRED
@@ -95,17 +115,36 @@ export async function consumeVerificationToken(token: string): Promise<ConsumeRe
 }
 
 /**
- * 인증 메일 재발송 — 60초 쿨다운 + 기존 활성 토큰 invalidate + 신규 토큰 발행.
+ * 인증 메일 재발송 — 진입 가드 + 60초 쿨다운 + 기존 활성 토큰 invalidate + 신규 토큰 발행.
  *
- * CANDID-036 deep defense: 쿨다운 검증(트랜잭션 외부)에서 race 통과해도
- * `uk_email_verifications_active_per_user` 부분 UNIQUE 제약이 신규 INSERT를
- * P2002로 차단 → AUTH_VERIFICATION_RESEND_COOLDOWN으로 매핑 (race 의미 부합).
+ * 진입 시점 가드 순서 (CANDID-037):
+ *   1. user 조회 — 부재 시 USER_NOT_FOUND (인증된 userId의 race deletion 방어)
+ *   2. emailVerifiedAt 사전 차단 — AUTH_EMAIL_ALREADY_VERIFIED (자원 낭비 방지)
+ *   3. 활성 토큰 60초 쿨다운 검증 (트랜잭션 외부)
+ *   4. 트랜잭션: 기존 활성 토큰 invalidate + 신규 INSERT
+ *   5. P2002 catch — `uk_email_verifications_active_per_user` 인덱스만 cooldown으로 매핑 (L-025)
+ *
+ * 격리 수준: PostgreSQL READ COMMITTED 가정. 부분 UNIQUE 제약은 격리 수준과 독립적이므로
+ * REPEATABLE READ로 격상해도 race 차단 동작 동일.
  */
 export async function resendVerificationEmail(
   userId: number,
   now: Date = new Date(),
 ): Promise<ResendResult> {
-  // 활성(미소진/미만료) 토큰 중 가장 최근 row 조회 — 쿨다운 기준점.
+  // 1) 진입 가드 — user 부재 / 이미 인증 (CANDID-037 D3)
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { emailVerifiedAt: true },
+  });
+  if (user === null) {
+    // requireAuth 통과 후 race deletion (회원 탈퇴 등). 시스템 inconsistency.
+    throw new AppError('USER_NOT_FOUND');
+  }
+  if (user.emailVerifiedAt !== null) {
+    throw new AppError('AUTH_EMAIL_ALREADY_VERIFIED');
+  }
+
+  // 2) 활성(미소진/미만료) 토큰 중 가장 최근 row 조회 — 쿨다운 기준점.
   const active = await prisma.emailVerification.findFirst({
     where: { userId, consumedAt: null, expiresAt: { gt: now } },
     orderBy: { lastSentAt: 'desc' },
@@ -136,8 +175,9 @@ export async function resendVerificationEmail(
       });
     });
   } catch (err) {
-    // 부분 UNIQUE 위반 — race 시 (다른 트랜잭션이 먼저 신규 활성 토큰 생성) cooldown 시맨틱으로 매핑.
-    if (isPrismaUniqueViolation(err)) {
+    // L-025 정밀 매핑 — `uk_email_verifications_active_per_user` 충돌만 cooldown 시맨틱.
+    // `token_hash` UNIQUE 충돌(사실상 sha256 collision)은 시스템 에러로 전파.
+    if (isUniqueViolationOn(err, RESEND_COOLDOWN_UNIQUE_INDEXES)) {
       throw new AppError('AUTH_VERIFICATION_RESEND_COOLDOWN');
     }
     throw err;
@@ -147,14 +187,4 @@ export async function resendVerificationEmail(
     verificationToken,
     nextResendAvailableAt: new Date(now.getTime() + RESEND_COOLDOWN_MS),
   };
-}
-
-/** Prisma `PrismaClientKnownRequestError`의 P2002 식별 (instanceof 의존 제거). */
-function isPrismaUniqueViolation(err: unknown): boolean {
-  return (
-    err !== null &&
-    typeof err === 'object' &&
-    'code' in err &&
-    (err as { code?: unknown }).code === PRISMA_UNIQUE_VIOLATION
-  );
 }

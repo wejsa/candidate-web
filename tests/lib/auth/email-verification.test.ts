@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
+import { Prisma } from '@prisma/client';
 import { sha256Hex } from '@/lib/auth/token-hash';
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     $transaction: vi.fn(),
     emailVerification: { findFirst: vi.fn() },
+    user: { findUnique: vi.fn() },
   },
 }));
 
@@ -13,13 +15,17 @@ const { prisma } = (await import('@/lib/prisma')) as unknown as {
   prisma: {
     $transaction: Mock;
     emailVerification: { findFirst: Mock };
+    user: { findUnique: Mock };
   };
 };
 const { consumeVerificationToken, resendVerificationEmail } =
   await import('@/lib/auth/email-verification');
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  // CANDID-037: vi.resetAllMocks → mockImplementationOnce 큐 누수 방지 + 호출 카운터 초기화.
+  vi.resetAllMocks();
+  // 기본: 사용자 미인증 상태 (대다수 테스트가 이 가정을 따른다). 케이스별 override 가능.
+  prisma.user.findUnique.mockResolvedValue({ emailVerifiedAt: null });
 });
 
 afterEach(() => {
@@ -28,6 +34,19 @@ afterEach(() => {
 
 const PLAIN_TOKEN = 'a'.repeat(64);
 const TOKEN_HASH = sha256Hex(PLAIN_TOKEN);
+
+/**
+ * Prisma `PrismaClientKnownRequestError` 실제 instance 생성 — duck-typing 회귀 가드.
+ * CANDID-037 강화: 기존 `Object.assign(new Error)` mock을 실제 instance로 격상 (`isPrismaKnownError`
+ * 의 instanceof 분기 + duck-typing 폴백 양쪽 모두를 안정 검증).
+ */
+function makePrismaUniqueViolation(target: string | string[]): Prisma.PrismaClientKnownRequestError {
+  return new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+    code: 'P2002',
+    clientVersion: 'test',
+    meta: { target },
+  });
+}
 
 /** updateMany 성공 (count=1) + 이후 findUnique → row 시나리오 mock 빌더. */
 function txMocksConsumeSuccess(opts: { userId: number }) {
@@ -162,6 +181,39 @@ describe('consumeVerificationToken (CANDID-036 updateMany race-free)', () => {
     expect(second.alreadyVerified).toBe(true);
   });
 
+  it('Promise.all 병렬 race — 한 쪽만 alreadyVerified=false, 다른 쪽 alreadyVerified=true (CANDID-037 H006)', async () => {
+    // CANDID-037 H006: 직렬 호출이 아닌 *Promise.all 병렬*로 race 시뮬레이션 강화.
+    // 실제 PostgreSQL UPDATE row lock은 직렬화하지만, mock 환경에서는 mockImplementationOnce 큐로
+    // 첫 호출이 winner, 두 번째가 loser인 패턴을 재현 — 호출 순서 보장은 보장 안 됨.
+    const consumedAt = new Date('2026-05-24T00:00:01Z');
+    prisma.$transaction
+      .mockImplementationOnce(async (cb) => cb(txMocksConsumeSuccess({ userId: 42 })))
+      .mockImplementationOnce(async (cb) =>
+        cb(
+          txMocksConsumeFailure({
+            row: {
+              userId: 42,
+              consumedAt,
+              expiresAt: new Date(Date.now() + 3600_000),
+              user: { emailVerifiedAt: consumedAt },
+            },
+          }),
+        ),
+      );
+
+    const results = await Promise.all([
+      consumeVerificationToken(PLAIN_TOKEN),
+      consumeVerificationToken(PLAIN_TOKEN),
+    ]);
+    const winners = results.filter((r) => !r.alreadyVerified);
+    const losers = results.filter((r) => r.alreadyVerified);
+    expect(winners).toHaveLength(1);
+    expect(losers).toHaveLength(1);
+    // 두 호출 모두 동일 userId로 일관된 결과 — 직렬화 보장 검증
+    expect(winners[0]?.userId).toBe(42);
+    expect(losers[0]?.userId).toBe(42);
+  });
+
   it('트랜잭션 안에서 user.update가 throw → emailVerification.update 미호출 (H010 회귀 가드)', async () => {
     // count=1로 직렬화 승자였으나 user.update가 throw → 트랜잭션 전체 롤백.
     // mock 환경에서는 throw 전파만 검증 (실제 DB 롤백은 prisma의 책임).
@@ -197,6 +249,53 @@ describe('consumeVerificationToken (CANDID-036 updateMany race-free)', () => {
     const callArg = calls[0]?.[0] ?? { where: { tokenHash: '' } };
     expect(callArg.where.tokenHash).toBe(TOKEN_HASH);
     expect(callArg.where.tokenHash).not.toBe(PLAIN_TOKEN);
+  });
+});
+
+describe('resendVerificationEmail — 진입 가드 (CANDID-037)', () => {
+  const fixedNow = new Date('2026-05-23T12:00:00Z');
+
+  it('사용자 부재 → USER_NOT_FOUND (인증 후 race deletion 방어)', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce(null);
+
+    await expect(resendVerificationEmail(42, fixedNow)).rejects.toMatchObject({
+      code: 'USER_NOT_FOUND',
+      status: 404,
+    });
+    // 진입 가드 단계 — DB 후속 호출 전혀 발생 금지
+    expect(prisma.emailVerification.findFirst).not.toHaveBeenCalled();
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('이미 인증된 사용자 → AUTH_EMAIL_ALREADY_VERIFIED (CANDID-037 D3)', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce({
+      emailVerifiedAt: new Date('2026-05-22T10:00:00Z'),
+    });
+
+    await expect(resendVerificationEmail(42, fixedNow)).rejects.toMatchObject({
+      code: 'AUTH_EMAIL_ALREADY_VERIFIED',
+      status: 409,
+    });
+    // 자원 낭비 방지 — 활성 토큰 조회 / 트랜잭션 전혀 발생 금지
+    expect(prisma.emailVerification.findFirst).not.toHaveBeenCalled();
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('진입 가드 통과 (미인증) → 활성 토큰 조회 진행', async () => {
+    // 기본 mock(emailVerifiedAt: null)이 적용된 상태에서 흐름 진행 확인
+    prisma.emailVerification.findFirst.mockResolvedValueOnce(null);
+    prisma.$transaction.mockImplementationOnce(async (cb) =>
+      cb({
+        emailVerification: { update: vi.fn(), create: vi.fn(async () => ({})) },
+      }),
+    );
+
+    const result = await resendVerificationEmail(42, fixedNow);
+    expect(result.verificationToken).toMatch(/^[0-9a-f]{64}$/);
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 42 },
+      select: { emailVerifiedAt: true },
+    });
   });
 });
 
@@ -263,20 +362,46 @@ describe('resendVerificationEmail', () => {
     expect(txMocks.emailVerification.create).toHaveBeenCalled();
   });
 
-  it('TOCTOU race deep defense — P2002 → AUTH_VERIFICATION_RESEND_COOLDOWN (CANDID-036)', async () => {
+  it('TOCTOU race deep defense — uk_active_per_user P2002 → AUTH_VERIFICATION_RESEND_COOLDOWN (L-025)', async () => {
     // 쿨다운 검증은 통과(활성 토큰 부재) — race로 다른 트랜잭션이 신규 활성 토큰 먼저 INSERT.
+    // CANDID-037 강화: 실제 Prisma.PrismaClientKnownRequestError instance 사용 (duck-typing 회귀 가드).
     prisma.emailVerification.findFirst.mockResolvedValueOnce(null);
     prisma.$transaction.mockImplementationOnce(async () => {
-      // Prisma의 PrismaClientKnownRequestError 형태 mock — code='P2002'만 식별
-      throw Object.assign(new Error('Unique constraint failed'), {
-        code: 'P2002',
-        meta: { target: ['user_id'] },
-      });
+      throw makePrismaUniqueViolation(['uk_email_verifications_active_per_user']);
     });
 
     await expect(resendVerificationEmail(42, fixedNow)).rejects.toMatchObject({
       code: 'AUTH_VERIFICATION_RESEND_COOLDOWN',
       status: 429,
+    });
+  });
+
+  it('token_hash UNIQUE P2002 → 화이트리스트 외 → SYS_INTERNAL_ERROR 전파 (CANDID-037 L-025 정밀화)', async () => {
+    // CANDID-037 핵심 정밀화: email_verifications_token_hash_key(sha256 충돌)는 시스템 에러.
+    // 부적절한 cooldown 매핑 회귀 가드.
+    prisma.emailVerification.findFirst.mockResolvedValueOnce(null);
+    prisma.$transaction.mockImplementationOnce(async () => {
+      throw makePrismaUniqueViolation(['token_hash']);
+    });
+
+    // cooldown으로 잘못 매핑되지 않고 원본 throw (라우터의 withErrorHandler가 SYS_INTERNAL_ERROR로 변환)
+    await expect(resendVerificationEmail(42, fixedNow)).rejects.toMatchObject({
+      code: 'P2002',
+    });
+  });
+
+  it('meta.target 부재 P2002 → 화이트리스트 미일치 → 원본 throw (보수적 거부)', async () => {
+    prisma.emailVerification.findFirst.mockResolvedValueOnce(null);
+    prisma.$transaction.mockImplementationOnce(async () => {
+      // meta 부재 — 어떤 인덱스 충돌인지 불명. 보수적으로 매핑 거부.
+      throw new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: 'test',
+      });
+    });
+
+    await expect(resendVerificationEmail(42, fixedNow)).rejects.toMatchObject({
+      code: 'P2002',
     });
   });
 
@@ -287,6 +412,18 @@ describe('resendVerificationEmail', () => {
     });
 
     await expect(resendVerificationEmail(42, fixedNow)).rejects.toThrow('Connection refused');
+  });
+
+  it('duck-typing 회피 — 평범 객체 { code: "P2002" } → 화이트리스트 미일치 → 원본 throw', async () => {
+    // CANDID-037: isUniqueViolationOn은 isPrismaKnownError 가드를 거치므로 평범 객체는 통과 못함.
+    // 결과: 라우터에서 SYS_INTERNAL_ERROR로 처리. signup.ts L-step3 패턴과 일관.
+    prisma.emailVerification.findFirst.mockResolvedValueOnce(null);
+    const fake = { code: 'P2002', meta: { target: ['uk_email_verifications_active_per_user'] } };
+    prisma.$transaction.mockImplementationOnce(async () => {
+      throw fake;
+    });
+
+    await expect(resendVerificationEmail(42, fixedNow)).rejects.toBe(fake);
   });
 
   it('트랜잭션 안에서 create가 throw → invalidate도 같은 tx에서 롤백 의도 (H011 회귀 가드)', async () => {
