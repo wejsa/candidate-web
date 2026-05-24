@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 180,
+    "version": 181,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T17:38:00+09:00"
+    "updatedAt": "2026-05-24T17:55:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -983,15 +983,12 @@
       "priority": "high",
       "phase": 2,
       "assignee": "jaese@hoji-20260524-172129",
-      "assignedAt": "2026-05-24T17:25:00+09:00",
+      "assignedAt": "2026-05-24T17:55:00+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "lib/jobs/detail.ts",
-        "lib/jobs/types.ts",
         "lib/jobs/detail-metadata.ts",
         "lib/jobs/apply-cta.ts",
         "lib/auth/server-cookies.ts",
-        "app/api/v1/job-postings/[id]/route.ts",
         "app/jobs/[id]/page.tsx",
         "app/jobs/[id]/loading.tsx",
         "app/jobs/[id]/not-found.tsx",
@@ -999,33 +996,32 @@
         "app/jobs/[id]/_components/JobDetailBody.tsx",
         "app/jobs/[id]/_components/ShareButton.tsx",
         "app/jobs/[id]/_components/ApplyCta.tsx",
-        "tests/lib/jobs/detail.test.ts",
         "tests/lib/jobs/detail-metadata.test.ts",
         "tests/lib/jobs/apply-cta.test.ts",
-        "tests/lib/auth/server-cookies.test.ts",
-        "tests/app/api/v1/job-postings/[id]/route.test.ts"
+        "tests/lib/auth/server-cookies.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 50,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T17:38:00+09:00"
+        "updatedAt": "2026-05-24T17:55:00+09:00"
       },
       "dependencies": [
         "CANDID-013"
       ],
       "planPath": ".claude/temp/CANDID-014-plan.md",
       "specFile": "docs/sample-requirement.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "steps": [
         {
           "step": 1,
           "title": "Service + API + 단위 테스트 (lib/jobs/detail.ts + GET /api/v1/job-postings/[id])",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-014-step1",
           "prNumber": 50,
+          "mergedAt": "2026-05-24T17:55:00+09:00",
           "files": [
             "lib/jobs/detail.ts",
             "lib/jobs/types.ts",
@@ -1036,9 +1032,11 @@
           ],
           "estimatedLines": 565,
           "actualLines": 539,
+          "mergedLines": 539,
           "prLineLimit": 650,
           "dependsOn": [],
-          "note": "next.config.mjs serverComponentsExternalPackages=['isomorphic-dompurify'] 추가 — collect-page-data 단계 jsdom ENOENT 우회 (Route Handler가 sanitize.ts를 transitive import하면서 노출)."
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 9 / MINOR 11 / INFO 8. self-PR COMMENT. L-022 임계 초과 — CANDID-014-FU1 분리 권장. 테스트 833→854(+21).",
+          "note": "next.config.mjs serverComponentsExternalPackages=['isomorphic-dompurify'] 추가 — collect-page-data 단계 jsdom ENOENT 우회."
         },
         {
           "step": 2,
