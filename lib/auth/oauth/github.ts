@@ -2,6 +2,7 @@ import 'server-only';
 import { AppError } from '@/lib/errors';
 import { getEnv } from '@/lib/env';
 import { oauthFetchJson } from '@/lib/auth/oauth/http';
+import { normalizeOAuthName, safeHttpsUrl } from '@/lib/auth/oauth/normalize';
 import type {
   AuthorizeUrlInput,
   ExchangeInput,
@@ -126,30 +127,25 @@ export const githubOAuthProvider: OAuthProvider = {
       throw new AppError('AUTH_OAUTH_PROVIDER_ERROR');
     }
 
-    // primary+verified 우선 → 미존재 시 verified 첫 항목 → 미존재 시 null
-    const primaryVerified = emailsResp.find(
-      (e) => e.primary === true && e.verified === true && typeof e.email === 'string',
-    );
-    const verifiedAny = emailsResp.find(
-      (e) => e.verified === true && typeof e.email === 'string',
-    );
-    const selectedEmail = primaryVerified?.email ?? verifiedAny?.email ?? null;
-    const email = selectedEmail !== null ? selectedEmail.toLowerCase() : null;
-    const emailVerified = email !== null;
-
-    // 이름 fallback: /user.name → /user.login → email local-part → id
-    const providerUserId = String(userResp.id);
-    const name =
-      typeof userResp.name === 'string' && userResp.name !== ''
-        ? userResp.name
-        : typeof userResp.login === 'string' && userResp.login !== ''
-          ? userResp.login
-          : (email?.split('@')[0] ?? providerUserId);
-
-    const profileImageUrl =
-      typeof userResp.avatar_url === 'string' && userResp.avatar_url !== ''
-        ? userResp.avatar_url
+    // review fix (S-MINOR github emailVerified 가독성): verified entry를 명시 변수로 보유.
+    // primary+verified 우선 → 미존재 시 verified 첫 항목 → 미존재 시 null.
+    const verifiedEntry =
+      emailsResp.find(
+        (e) => e.primary === true && e.verified === true && typeof e.email === 'string',
+      ) ?? emailsResp.find((e) => e.verified === true && typeof e.email === 'string') ?? null;
+    const email =
+      verifiedEntry !== null && typeof verifiedEntry.email === 'string'
+        ? verifiedEntry.email.trim().toLowerCase()
         : null;
+    const emailVerified = verifiedEntry !== null;
+
+    // review fix (D-MAJOR-2/1): provider 내부 ID(login은 GitHub의 공개 handle이라 노출 OK)는 fallback에서 유지,
+    // 숫자 id는 normalizeOAuthName이 의도적으로 제외하지 않으나 normalize의 last-resort('소셜 사용자')로 대체.
+    const providerUserId = String(userResp.id);
+    const name = normalizeOAuthName(userResp.name, userResp.login, email?.split('@')[0]);
+
+    // review fix (D-MAJOR-3): https 스킴만 허용.
+    const profileImageUrl = safeHttpsUrl(userResp.avatar_url);
 
     return {
       providerUserId,

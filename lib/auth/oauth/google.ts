@@ -2,6 +2,7 @@ import 'server-only';
 import { AppError } from '@/lib/errors';
 import { getEnv } from '@/lib/env';
 import { oauthFetchJson } from '@/lib/auth/oauth/http';
+import { normalizeOAuthName, safeHttpsUrl } from '@/lib/auth/oauth/normalize';
 import type {
   AuthorizeUrlInput,
   ExchangeInput,
@@ -111,17 +112,14 @@ export const googleOAuthProvider: OAuthProvider = {
 
     const email =
       typeof userinfo.email === 'string' && userinfo.email !== ''
-        ? userinfo.email.toLowerCase()
+        ? userinfo.email.trim().toLowerCase()
         : null;
     const emailVerified = email !== null && userinfo.email_verified === true;
-    const name =
-      typeof userinfo.name === 'string' && userinfo.name !== ''
-        ? userinfo.name
-        : (email?.split('@')[0] ?? userinfo.sub);
-    const profileImageUrl =
-      typeof userinfo.picture === 'string' && userinfo.picture !== ''
-        ? userinfo.picture
-        : null;
+    // review fix (D-MAJOR-2/1): provider 내부 ID 노출 회피 — name fallback에서 sub 제외.
+    // 모든 후보 실패 시 normalizeOAuthName이 '소셜 사용자' 반환.
+    const name = normalizeOAuthName(userinfo.name, email?.split('@')[0]);
+    // review fix (D-MAJOR-3): https 스킴만 허용 (javascript:/data:/http: 차단).
+    const profileImageUrl = safeHttpsUrl(userinfo.picture);
 
     return {
       providerUserId: userinfo.sub,

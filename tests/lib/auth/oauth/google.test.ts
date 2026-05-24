@@ -88,14 +88,23 @@ describe('googleOAuthProvider.exchange', () => {
     expect(p.profileImageUrl).toBeNull();
   });
 
-  it('email 자체 부재 → email=null, name=sub fallback', async () => {
+  it('email/name 부재 → email=null, name="소셜 사용자" (review fix: sub 노출 차단)', async () => {
     global.fetch = mockFetchSequence([
       { ok: true, json: TOKEN_RESP },
       { ok: true, json: { sub: '999' } },
     ]) as unknown as typeof fetch;
     const p = await googleOAuthProvider.exchange({ code: 'c', codeVerifier: 'v', redirectUri: 'https://x/cb' });
     expect(p.email).toBeNull();
-    expect(p.name).toBe('999');
+    expect(p.name).toBe('소셜 사용자');
+  });
+
+  it('picture가 javascript:/http: 등 비-https → null (review fix: 스킴 검증)', async () => {
+    global.fetch = mockFetchSequence([
+      { ok: true, json: TOKEN_RESP },
+      { ok: true, json: { sub: '111', email: 'a@b.com', email_verified: true, picture: 'javascript:alert(1)' } },
+    ]) as unknown as typeof fetch;
+    const p = await googleOAuthProvider.exchange({ code: 'c', codeVerifier: 'v', redirectUri: 'https://x/cb' });
+    expect(p.profileImageUrl).toBeNull();
   });
 
   it('token endpoint 5xx → AUTH_OAUTH_PROVIDER_ERROR', async () => {

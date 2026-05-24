@@ -65,4 +65,21 @@ describe('oauthFetchJson', () => {
       oauthFetchJson({ method: 'GET', url: 'https://x/y' }),
     ).rejects.toMatchObject({ code: 'AUTH_OAUTH_PROVIDER_ERROR' });
   });
+
+  it('review fix (T-MAJOR-2): fetch 호출에 redirect="error" 옵션 전달 (콜백 chain hijack 방어)', async () => {
+    const { vi } = await import('vitest');
+    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => {
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers(),
+        text: async () => '{}',
+      } as unknown as Response;
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    await oauthFetchJson({ method: 'GET', url: 'https://provider/y' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const init = fetchMock.mock.calls[0]?.[1];
+    expect(init?.redirect).toBe('error');
+  });
 });

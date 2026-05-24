@@ -114,14 +114,24 @@ describe('githubOAuthProvider.exchange — name fallback 체인', () => {
     p = await githubOAuthProvider.exchange({ code: 'c', codeVerifier: 'v', redirectUri: 'https://x/cb' });
     expect(p.name).toBe('carol');
 
-    // providerUserId fallback (모든 상위 fallback 실패)
+    // 모든 fallback 실패 → '소셜 사용자' (review fix: id 노출 차단)
     global.fetch = mockFetchSequence([
       { ok: true, json: TOKEN_RESP },
       { ok: true, json: { id: 999, login: null, name: null, avatar_url: null } },
       { ok: true, json: [] },
     ]) as unknown as typeof fetch;
     p = await githubOAuthProvider.exchange({ code: 'c', codeVerifier: 'v', redirectUri: 'https://x/cb' });
-    expect(p.name).toBe('999');
+    expect(p.name).toBe('소셜 사용자');
+    expect(p.profileImageUrl).toBeNull();
+  });
+
+  it('avatar_url이 비-https → null (review fix: 스킴 검증)', async () => {
+    global.fetch = mockFetchSequence([
+      { ok: true, json: TOKEN_RESP },
+      { ok: true, json: { id: 7, login: 'x', name: 'X', avatar_url: 'http://insecure.example/avatar.jpg' } },
+      { ok: true, json: [{ email: 'x@y.com', primary: true, verified: true }] },
+    ]) as unknown as typeof fetch;
+    const p = await githubOAuthProvider.exchange({ code: 'c', codeVerifier: 'v', redirectUri: 'https://x/cb' });
     expect(p.profileImageUrl).toBeNull();
   });
 });
