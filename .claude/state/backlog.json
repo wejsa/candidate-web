@@ -2,15 +2,15 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 174,
+    "version": 175,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T17:00:49+09:00"
+    "updatedAt": "2026-05-24T17:10:19+09:00"
   },
   "summary": {
     "total": 35,
     "done": 15,
-    "inProgress": 1,
-    "review": 0,
+    "inProgress": 0,
+    "review": 1,
     "todo": 19
   },
   "phases": {
@@ -891,20 +891,25 @@
       "priority": "high",
       "phase": 2,
       "assignee": "jaese@hoji-20260524-161015",
-      "assignedAt": "2026-05-24T17:00:49+09:00",
-      "lockTTL": 3600,
+      "assignedAt": "2026-05-24T17:10:19+09:00",
+      "lockTTL": 7200,
       "lockedFiles": [
+        "lib/jobs/schema.ts",
+        "lib/jobs/list.ts",
+        "lib/jobs/pagination-url.ts",
+        "lib/jobs/filter-changes.ts",
         "app/jobs/_components/JobFilters.tsx",
         "app/jobs/_components/ClosedJobsSection.tsx",
-        "app/jobs/page.tsx"
+        "app/jobs/page.tsx",
+        "tests/lib/jobs/filter-changes.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 49,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-24T17:00:49+09:00"
+        "autoChainArgs": "49 --auto-fix",
+        "updatedAt": "2026-05-24T17:10:19+09:00"
       },
       "planPath": ".claude/temp/CANDID-013-plan.md",
       "currentStep": 3,
@@ -958,13 +963,20 @@
         {
           "step": 3,
           "title": "필터 Client + 마감 섹션 + URL 동기화",
-          "status": "pending",
+          "status": "pr_created",
+          "prNumber": 49,
           "files": [
+            "lib/jobs/schema.ts",
+            "lib/jobs/list.ts",
+            "lib/jobs/pagination-url.ts",
+            "lib/jobs/filter-changes.ts",
             "app/jobs/_components/JobFilters.tsx",
             "app/jobs/_components/ClosedJobsSection.tsx",
-            "tests/app/jobs/JobFilters.test.tsx",
-            "tests/app/jobs/ClosedJobsSection.test.tsx"
+            "app/jobs/page.tsx",
+            "tests/lib/jobs/filter-changes.test.ts"
           ],
+          "actualLines": 410,
+          "note": "schema.ts 분리 추가 — JobFilters('use client')가 list.ts('server-only') chain 위반으로 빌드 실패 → 별도 schema 모듈로 추출. plan과 차이: tests/app/jobs/* 대신 lib/jobs/filter-changes unit 테스트로 대체 (F-5 carry).",
           "estimatedLines": 390,
           "prLineLimit": 500,
           "dependsOn": [1, 2]

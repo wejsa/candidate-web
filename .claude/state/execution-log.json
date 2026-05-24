@@ -844,5 +844,22 @@
     "isLastStep": false,
     "note": "PR #48 squash 머지 → develop. Step 3 진행 (필터 Client + 마감 섹션).",
     "timestamp": "2026-05-24T17:00:49+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-013",
+    "stepNumber": 3,
+    "prNumber": 49,
+    "branch": "feature/CANDID-013-step3",
+    "filesChanged": 8,
+    "additions": 410,
+    "deletions": 58,
+    "vitest": { "passed": 809, "added": 11 },
+    "build": "ok",
+    "lint": "ok",
+    "typecheck": "ok",
+    "isLastStep": true,
+    "note": "Step 3 (마지막) — JobFilters(client) + ClosedJobsSection + schema.ts 분리 (server-only chain 위반 빌드 실패 → 구조 개선). US-JOB-001 완성.",
+    "timestamp": "2026-05-24T17:10:19+09:00"
   }
 ]
