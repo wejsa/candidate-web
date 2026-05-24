@@ -682,5 +682,18 @@
     "minor": 10,
     "criticalIssues": ["C001 callback open-redirect (sanitizeRedirect 우회 + base URL origin 재검증 부재)"],
     "timestamp": "2026-05-24T13:35:00+09:00"
+  },
+  {
+    "event": "fix_completed",
+    "taskId": "CANDID-012",
+    "stepNumber": 3,
+    "prNumber": 45,
+    "issueCount": 4,
+    "issues": ["C001", "S-MAJOR-4.1", "S-MAJOR-4.2", "S-MAJOR-1.2"],
+    "fixLoop": 1,
+    "addedLines": 146,
+    "deletedLines": 16,
+    "vitest": {"passed": 736, "added": 26},
+    "timestamp": "2026-05-24T13:40:00+09:00"
   }
 ]
