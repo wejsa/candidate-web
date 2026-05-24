@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 141,
+    "version": 142,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T10:40:00+09:00"
+    "updatedAt": "2026-05-24T10:48:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1403,12 +1403,12 @@
         "app/api/v1/auth/resend-verification/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 38,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-24T10:40:00+09:00"
+        "autoChainArgs": "38 --auto-fix",
+        "updatedAt": "2026-05-24T10:48:00+09:00"
       },
       "planPath": ".claude/temp/CANDID-037-plan.md",
       "currentStep": 1,
@@ -1416,7 +1416,9 @@
         {
           "step": 1,
           "title": "Cross-cutting: lib/prisma/errors.ts 신설 + RL wrapper 헤더 가드 + enforceUserRateLimit",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-037-step1",
+          "prNumber": 38,
           "files": [
             "lib/prisma/errors.ts",
             "lib/security/rate-limit.ts",
@@ -1424,6 +1426,7 @@
             "tests/lib/security/rate-limit.test.ts"
           ],
           "estimatedLines": 360,
+          "actualLines": 463,
           "prLineLimit": 500,
           "dependsOn": []
         },
