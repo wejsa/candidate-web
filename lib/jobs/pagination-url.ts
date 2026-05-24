@@ -1,7 +1,7 @@
 // CANDID-013 Step 2 — 페이지네이션 URL 빌더 (US-JOB-001 URL 쿼리 상태 유지).
 // Pagination 컴포넌트에서 사용. 순수 함수 — unit 테스트 분리.
 
-import type { ParsedJobListQuery } from '@/lib/jobs/list';
+import type { ParsedJobListQuery } from '@/lib/jobs/schema';
 
 export interface PageUrlInput {
   basePath: string;
