@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 6,
-    "updatedAt": "2026-05-23T12:55:00+09:00",
+    "version": 7,
+    "updatedAt": "2026-05-24T10:17:10+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -398,6 +398,62 @@
       "appliedCount": 1,
       "createdAt": "2026-05-23T12:55:00+09:00",
       "updatedAt": "2026-05-23T12:55:00+09:00"
+    },
+    {
+      "id": "L-023",
+      "taskId": "CANDID-036",
+      "category": "process",
+      "title": "wrapper 합성 시 inner 응답 헤더 보호 — 외부 wrapper override 회피",
+      "description": "Route Handler를 다층 wrapper(예: `withRateLimit(IP, withUserRateLimit(USER, ...))`)로 합성할 때 외부 wrapper가 정상 통과(`limited=false`) 시 자신의 헤더를 응답에 부착하는 패턴이 inner wrapper의 429 응답 헤더(`X-RateLimit-Policy`, `Retry-After`)를 *덮어쓴다*. 결과: 클라이언트 backoff 오작동(부정확한 Retry-After), 운영 메트릭 오분류(IP-bucket 차단으로 잘못 집계). 대응 (1) 외부 wrapper의 `applyRateLimitHeaders`가 `response.headers.has('X-RateLimit-Policy')`로 inner 부착 여부를 사전 확인하고 skip / (2) wrapper 합성 대신 `enforceUserRateLimit` 같은 *인라인 가드* 헬퍼로 평탄화 — wrapper 중첩 자체를 회피. CANDID-036 Step 3 신규 발견 — 테스트 어설션도 잘못된 동작을 가드하지 않도록 후속 task로 분리.",
+      "impact": "low",
+      "tags": [
+        "wrapper",
+        "rate-limit",
+        "http-headers",
+        "backoff",
+        "composition"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-24T10:17:10+09:00",
+      "updatedAt": "2026-05-24T10:17:10+09:00"
+    },
+    {
+      "id": "L-024",
+      "taskId": "CANDID-036",
+      "category": "architecture",
+      "title": "PostgreSQL UPDATE row-level lock으로 race 차단 — updateMany WHERE 패턴",
+      "description": "동일 row를 동시에 소진하는 race(예: 이메일 인증 토큰 더블 클릭, 멱등성 키 중복 처리)에서 별도 `SELECT FOR UPDATE`(Prisma 미지원, raw SQL 우회 필요) 없이 `updateMany` 단일 호출로 race-free 직렬화 가능. 패턴: `tx.model.updateMany({ where: { id, completedAt: null, deadline: { gt: now } }, data: { completedAt: now } })` → PostgreSQL UPDATE의 자동 ExclusiveLock으로 동시 두 트랜잭션 중 하나만 count=1, 다른 쪽은 WHERE 조건 불일치로 count=0. count=0 분기에서 후속 SELECT로 부재/만료/이미 처리됨(멱등) 분류. Prisma idiomatic + ESLint `no-restricted-syntax` 우회 불요. READ COMMITTED 격리에서 충분. **격리 수준 가정**은 함수 주석에 명시 — REPEATABLE READ 격상 시 분기 재검토 필요. CANDID-036 `consumeVerificationToken` 적용.",
+      "impact": "medium",
+      "tags": [
+        "postgresql",
+        "race-condition",
+        "prisma",
+        "transaction",
+        "concurrency",
+        "updateMany"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-24T10:17:10+09:00",
+      "updatedAt": "2026-05-24T10:17:10+09:00"
+    },
+    {
+      "id": "L-025",
+      "taskId": "CANDID-036",
+      "category": "security",
+      "title": "부분 UNIQUE 제약을 비즈니스 race 방어 시맨틱으로 활용 — P2002 → AppError 매핑",
+      "description": "TOCTOU race(외부 SELECT 후 트랜잭션 내 INSERT)에서 코드 레벨로 차단 불가한 경우, PostgreSQL **부분 UNIQUE 제약**(`CREATE UNIQUE INDEX ... WHERE 조건`)을 deep defense로 활용. 예: `email_verifications`에 `(user_id) WHERE consumed_at IS NULL` 부분 UNIQUE → 동시 두 트랜잭션 중 하나의 INSERT가 P2002로 자연 차단됨. catch에서 `code === 'P2002' && meta.target 검증` 후 비즈니스 의미에 맞는 AppError(예: `AUTH_VERIFICATION_RESEND_COOLDOWN`)로 매핑. 주의 (1) `meta.target` 검증 없이 P2002만 잡으면 다른 UNIQUE 제약 위반도 오매핑 위험 / (2) `isPrismaUniqueViolation` 같은 helper는 `lib/prisma/errors.ts` 등 cross-cutting 모듈로 추출 / (3) destructive guard(`DO $$ COUNT > 0 RAISE EXCEPTION`)로 기존 비정상 데이터 사전 점검 필수 (L-001). CANDID-036 `resendVerificationEmail` TOCTOU race 차단.",
+      "impact": "medium",
+      "tags": [
+        "postgresql",
+        "partial-unique",
+        "race-condition",
+        "deep-defense",
+        "prisma-error",
+        "p2002"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-24T10:17:10+09:00",
+      "updatedAt": "2026-05-24T10:17:10+09:00"
     }
   ]
 }
