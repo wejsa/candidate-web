@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 145,
+    "version": 146,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T11:12:00+09:00"
+    "updatedAt": "2026-05-24T11:20:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -1399,12 +1399,12 @@
         "app/api/v1/auth/resend-verification/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 40,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-24T11:12:00+09:00"
+        "autoChainArgs": "40 --auto-fix",
+        "updatedAt": "2026-05-24T11:20:00+09:00"
       },
       "planPath": ".claude/temp/CANDID-037-plan.md",
       "currentStep": 3,
@@ -1452,7 +1452,9 @@
         {
           "step": 3,
           "title": "라우터 일관화 (enforceUserRateLimit 적용) + 회귀 어설션 강화 + 매직 넘버 제거",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-037-step3",
+          "prNumber": 40,
           "files": [
             "app/api/v1/auth/resend-verification/route.ts",
             "tests/app/api/v1/auth/resend-verification.test.ts",
@@ -1460,6 +1462,7 @@
             "tests/app/api/v1/auth/signup.test.ts"
           ],
           "estimatedLines": 85,
+          "actualLines": 258,
           "prLineLimit": 300,
           "dependsOn": [1, 2]
         }
