@@ -174,12 +174,46 @@ export function checkRateLimit(
   };
 }
 
-/** 응답에 표준 X-RateLimit-* 헤더를 부착한다 (RFC 6585 + GitHub/Twitter 관행). */
+/**
+ * 응답에 표준 X-RateLimit-* 헤더를 부착한다 (RFC 6585 + GitHub/Twitter 관행).
+ *
+ * CANDID-037 (L-023) — wrapper 합성 시 inner 헤더 보호:
+ * 외부 `withRateLimit`이 inner `withUserRateLimit`/`enforceUserRateLimit`의 응답에
+ * 부착된 헤더를 덮어쓰지 않도록, `X-RateLimit-Policy`가 이미 존재하면 set을 스킵한다.
+ * inner 정책 정보가 클라이언트 backoff에 더 유용하며 운영 메트릭 분류도 정확해진다.
+ */
 function applyRateLimitHeaders(
   response: Response | NextResponse,
   policy: RateLimitPolicy,
   probe: RateLimitProbe,
 ): void {
+  if (response.headers.has('X-RateLimit-Policy')) {
+    // inner wrapper/helper가 이미 부착 — override 회피 (L-023).
+    return;
+  }
+  response.headers.set('X-RateLimit-Limit', String(policy.maxRequests));
+  response.headers.set('X-RateLimit-Remaining', String(probe.remaining));
+  response.headers.set('X-RateLimit-Policy', policy.name);
+  if (probe.limited) {
+    response.headers.set('Retry-After', String(Math.ceil(probe.retryAfterMs / 1000)));
+  }
+}
+
+/**
+ * userId-기반 정책의 표준 헤더 부착 — `applyRateLimitHeaders`와 동일 시맨틱.
+ *
+ * L-023: `X-RateLimit-Policy`가 이미 존재하면 inner가 부착한 것으로 간주하고 스킵.
+ * 본 헬퍼는 inner(user-bucket) 자체이므로 정상 path에서는 outer 헤더보다 먼저 호출되어
+ * 자신의 정책을 응답에 새긴다. outer `withRateLimit`이 후속 호출 시 가드에 걸려 보존된다.
+ */
+function applyUserRateLimitHeaders(
+  response: Response | NextResponse,
+  policy: UserRateLimitPolicy,
+  probe: RateLimitProbe,
+): void {
+  if (response.headers.has('X-RateLimit-Policy')) {
+    return;
+  }
   response.headers.set('X-RateLimit-Limit', String(policy.maxRequests));
   response.headers.set('X-RateLimit-Remaining', String(probe.remaining));
   response.headers.set('X-RateLimit-Policy', policy.name);
@@ -260,13 +294,9 @@ export function checkUserRateLimit(
  * CANDID-036 — `withRateLimit`은 IP-키, 본 helper는 userId-키. 인증 미들웨어 통과 후
  * userId가 결정된 시점에 호출. 한도 초과 시 표준 429 + X-RateLimit-* / Retry-After.
  *
- * 사용:
- * ```typescript
- * const { userId } = await requireAuth(request);
- * return withUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, userId, async () => {
- *   // ... handler body
- * })(request, context);
- * ```
+ * @deprecated CANDID-037 — wrapper IIFE 합성은 헤더 override / 패턴 비일관 이슈가 있어
+ * `enforceUserRateLimit` 인라인 헬퍼로 교체 권장. 다음 PR에서 본 함수 제거 예정.
+ * 현재 호출자: app/api/v1/auth/resend-verification/route.ts (Step 3에서 마이그레이션).
  */
 export function withUserRateLimit<C = unknown>(
   policy: UserRateLimitPolicy,
@@ -277,18 +307,61 @@ export function withUserRateLimit<C = unknown>(
     const probe = checkUserRateLimit(policy, userId);
     if (probe.limited) {
       const response = errorResponse(request, 'SYS_RATE_LIMITED');
-      // policy 이름 노출만 헤더로 — IP-기반 헬퍼와 동일 시맨틱.
-      response.headers.set('X-RateLimit-Limit', String(policy.maxRequests));
-      response.headers.set('X-RateLimit-Remaining', String(probe.remaining));
-      response.headers.set('X-RateLimit-Policy', policy.name);
-      response.headers.set('Retry-After', String(Math.ceil(probe.retryAfterMs / 1000)));
+      applyUserRateLimitHeaders(response, policy, probe);
       return response;
     }
     const response = await handler(request, context);
-    response.headers.set('X-RateLimit-Limit', String(policy.maxRequests));
-    response.headers.set('X-RateLimit-Remaining', String(probe.remaining));
-    response.headers.set('X-RateLimit-Policy', policy.name);
+    applyUserRateLimitHeaders(response, policy, probe);
     return response;
+  };
+}
+
+/**
+ * userId-기반 정책의 인라인 enforcement helper (CANDID-037 — wrapper IIFE 대체).
+ *
+ * 사용 패턴 — 호출자가 정상 path 응답에 헤더 부착 책임을 가진다:
+ * ```typescript
+ * const { userId } = await requireAuth(request);
+ * const userRateLimit = enforceUserRateLimit(
+ *   USER_POLICIES.RESEND_VERIFICATION_USER, userId, request,
+ * );
+ * if (userRateLimit.response !== null) return userRateLimit.response; // 429 (헤더 포함)
+ *
+ * // ... biz logic ...
+ * const finalResponse = NextResponse.json({...});
+ * userRateLimit.attachHeaders(finalResponse); // 정상 응답에 X-RateLimit-* 부착
+ * return finalResponse;
+ * ```
+ *
+ * 외부 `withRateLimit`이 후속 헤더 부착 시 `applyRateLimitHeaders`의 L-023 가드로
+ * inner(user-bucket) 헤더가 보존된다.
+ */
+export interface UserRateLimitGate {
+  /** 한도 초과 시 헤더 부착된 429 Response. 정상 path에서는 `null`. */
+  readonly response: Response | null;
+  /** 정상 path에서 호출자가 최종 응답에 user-bucket 헤더를 부착하기 위한 helper. */
+  readonly attachHeaders: (response: Response | NextResponse) => void;
+}
+
+export function enforceUserRateLimit(
+  policy: UserRateLimitPolicy,
+  userId: number | string,
+  request: NextRequest,
+): UserRateLimitGate {
+  const probe = checkUserRateLimit(policy, userId);
+  if (probe.limited) {
+    const response = errorResponse(request, 'SYS_RATE_LIMITED');
+    applyUserRateLimitHeaders(response, policy, probe);
+    return {
+      response,
+      attachHeaders: () => {
+        /* limited 분기에서는 호출자 응답이 별도로 만들어지지 않음 — no-op */
+      },
+    };
+  }
+  return {
+    response: null,
+    attachHeaders: (response) => applyUserRateLimitHeaders(response, policy, probe),
   };
 }
 

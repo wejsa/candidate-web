@@ -302,3 +302,132 @@ describe('CANDID-036 — withUserRateLimit', () => {
     expect(body.code).toBe('SYS_RATE_LIMITED');
   });
 });
+
+// =====================================================================
+// CANDID-037 추가 — L-023 wrapper override 가드 + enforceUserRateLimit
+// =====================================================================
+
+describe('CANDID-037 — withRateLimit L-023 헤더 override 가드', () => {
+  beforeEach(() => {
+    vi.stubEnv('TRUST_PROXY', 'true');
+    __resetCachedEnvForTesting();
+  });
+
+  it('inner가 부착한 X-RateLimit-Policy를 outer가 덮어쓰지 않음 (L-023)', async () => {
+    // 시나리오: inner가 user-bucket 헤더를 먼저 부착 → outer withRateLimit이 후속 호출 시 가드.
+    const wrapped = withRateLimit(POLICIES.SIGNUP, async () => {
+      const resp = new NextResponse(null, { status: 200 });
+      // inner wrapper가 user-bucket 헤더를 부착한 상황을 시뮬레이션.
+      resp.headers.set('X-RateLimit-Limit', '3');
+      resp.headers.set('X-RateLimit-Remaining', '2');
+      resp.headers.set('X-RateLimit-Policy', 'resend_verification_user');
+      return resp;
+    });
+
+    const response = await wrapped(req({ 'x-forwarded-for': '203.0.113.30' }), undefined);
+    expect(response.status).toBe(200);
+    // inner 헤더가 보존되어야 한다 (정책 식별자가 클라이언트 backoff에 더 유용).
+    expect(response.headers.get('X-RateLimit-Policy')).toBe('resend_verification_user');
+    expect(response.headers.get('X-RateLimit-Limit')).toBe('3');
+    expect(response.headers.get('X-RateLimit-Remaining')).toBe('2');
+  });
+
+  it('inner 헤더 부재 시 outer가 정상 부착 (가드는 폴백을 막지 않음)', async () => {
+    const wrapped = withRateLimit(
+      POLICIES.SIGNUP,
+      async () => new NextResponse(null, { status: 200 }),
+    );
+    const response = await wrapped(req({ 'x-forwarded-for': '203.0.113.31' }), undefined);
+    expect(response.headers.get('X-RateLimit-Policy')).toBe('signup');
+    expect(response.headers.get('X-RateLimit-Limit')).toBe('5');
+  });
+
+  it('429 응답에 inner 헤더가 있으면 outer가 보존 (inner가 limited인 합성 경로)', async () => {
+    // outer 정상 통과 + inner가 자체 429 응답 반환한 경우.
+    const wrapped = withRateLimit(POLICIES.SIGNUP, async () => {
+      const resp = new NextResponse(JSON.stringify({ code: 'SYS_RATE_LIMITED' }), {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': '3',
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Policy': 'resend_verification_user',
+          'Retry-After': '120',
+        },
+      });
+      return resp;
+    });
+    const response = await wrapped(req({ 'x-forwarded-for': '203.0.113.32' }), undefined);
+    expect(response.status).toBe(429);
+    expect(response.headers.get('X-RateLimit-Policy')).toBe('resend_verification_user');
+    expect(response.headers.get('Retry-After')).toBe('120');
+  });
+});
+
+describe('CANDID-037 — enforceUserRateLimit (인라인 헬퍼)', () => {
+  beforeEach(() => {
+    vi.stubEnv('TRUST_PROXY', 'true');
+    __resetCachedEnvForTesting();
+  });
+
+  it('정상 path — response=null + attachHeaders가 외부 응답에 헤더 부착', async () => {
+    const { USER_POLICIES, enforceUserRateLimit } = await import('@/lib/security/rate-limit');
+
+    const gate = enforceUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, 42, req());
+    expect(gate.response).toBeNull();
+
+    const finalResponse = NextResponse.json({ ok: true }, { status: 200 });
+    gate.attachHeaders(finalResponse);
+
+    expect(finalResponse.headers.get('X-RateLimit-Limit')).toBe('3');
+    expect(finalResponse.headers.get('X-RateLimit-Remaining')).toBe('2');
+    expect(finalResponse.headers.get('X-RateLimit-Policy')).toBe('resend_verification_user');
+    expect(finalResponse.headers.get('Retry-After')).toBeNull();
+  });
+
+  it('한도 초과 — response가 429 + Retry-After (호출자가 즉시 반환)', async () => {
+    const { USER_POLICIES, enforceUserRateLimit, checkUserRateLimit } = await import(
+      '@/lib/security/rate-limit'
+    );
+    // 한도 사전 소진
+    for (let i = 0; i < 3; i++)
+      checkUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, 99);
+
+    const gate = enforceUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, 99, req());
+    expect(gate.response).not.toBeNull();
+    expect(gate.response?.status).toBe(429);
+    expect(gate.response?.headers.get('X-RateLimit-Policy')).toBe('resend_verification_user');
+    expect(gate.response?.headers.get('X-RateLimit-Remaining')).toBe('0');
+    expect(gate.response?.headers.get('Retry-After')).not.toBeNull();
+
+    const body = await gate.response?.json();
+    expect(body?.code).toBe('SYS_RATE_LIMITED');
+  });
+
+  it('attachHeaders는 멱등 — 두 번 호출해도 헤더 값 변하지 않음', async () => {
+    const { USER_POLICIES, enforceUserRateLimit } = await import('@/lib/security/rate-limit');
+    const gate = enforceUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, 'idem-1', req());
+    const finalResponse = NextResponse.json({ ok: true });
+    gate.attachHeaders(finalResponse);
+    gate.attachHeaders(finalResponse); // L-023 가드 — 두 번째 호출은 no-op
+    expect(finalResponse.headers.get('X-RateLimit-Remaining')).toBe('2');
+    expect(finalResponse.headers.get('X-RateLimit-Policy')).toBe('resend_verification_user');
+  });
+
+  it('L-023 합성 — enforceUserRateLimit attach 후 외부 withRateLimit이 헤더 보존', async () => {
+    const { USER_POLICIES, enforceUserRateLimit } = await import('@/lib/security/rate-limit');
+
+    const outerWrapped = withRateLimit(POLICIES.SIGNUP, async (request) => {
+      const gate = enforceUserRateLimit(USER_POLICIES.RESEND_VERIFICATION_USER, 'L023', request);
+      if (gate.response !== null) return gate.response;
+      const finalResponse = NextResponse.json({ ok: true }, { status: 200 });
+      gate.attachHeaders(finalResponse);
+      return finalResponse;
+    });
+
+    const response = await outerWrapped(req({ 'x-forwarded-for': '203.0.113.40' }), undefined);
+    expect(response.status).toBe(200);
+    // user-bucket 헤더가 outer SIGNUP 헤더보다 우선 (L-023 가드 동작).
+    expect(response.headers.get('X-RateLimit-Policy')).toBe('resend_verification_user');
+    expect(response.headers.get('X-RateLimit-Limit')).toBe('3');
+  });
+});
