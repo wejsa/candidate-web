@@ -1,0 +1,180 @@
+// CANDID-015 Step 1 — Draft 서비스 (US-APP-005).
+// - getOrInitDraft: Draft 진입 (없으면 초기 payload 생성 — User PII prefill은 Step 2에서 추가)
+// - upsertDraft: 낙관적 락 (L-024 PostgreSQL UPDATE row-level lock으로 race 차단)
+// - 마감/DRAFT 공고 차단
+
+import 'server-only';
+import { JobStatus, Prisma } from '@prisma/client';
+import { prisma, basePrisma } from '@/lib/prisma';
+import { AppError } from '@/lib/errors';
+import { initialPayload } from '@/lib/drafts/schema';
+import type { DraftPayloadV1 } from '@/lib/drafts/types';
+
+interface JobGate {
+  id: number;
+  status: JobStatus;
+  closesAt: Date | null;
+}
+
+/**
+ * 공고가 Draft 작성 가능 상태인지 검증한다.
+ * - DRAFT 비공개 → JOB_NOT_FOUND
+ * - CLOSED → JOB_CLOSED
+ * - closesAt < now → JOB_CLOSED (F-1 cron 미도입 가드)
+ */
+function assertJobAvailable(job: JobGate | null, now: Date): asserts job is JobGate {
+  if (job === null || job.status === JobStatus.DRAFT) {
+    throw new AppError('JOB_NOT_FOUND');
+  }
+  if (job.status === JobStatus.CLOSED) {
+    throw new AppError('JOB_CLOSED');
+  }
+  if (job.closesAt !== null && job.closesAt.getTime() <= now.getTime()) {
+    throw new AppError('JOB_CLOSED');
+  }
+}
+
+interface DraftRow {
+  id: number;
+  payloadJson: Prisma.JsonValue;
+  version: number;
+  lastSavedAt: Date;
+}
+
+interface GetOrInitResult {
+  draft: DraftRow;
+  created: boolean;
+}
+
+/**
+ * Draft 진입 — 없으면 빈 payload + version=1로 신규 생성.
+ * User PII prefill은 호출자가 별도 헬퍼(lib/drafts/user-prefill.ts, Step 2)로 처리.
+ *
+ * 공고 검증:
+ * - 존재하지 않음 / DRAFT → JOB_NOT_FOUND
+ * - CLOSED 또는 closesAt < now → JOB_CLOSED
+ */
+export async function getOrInitDraft(
+  userId: number,
+  jobPostingId: number,
+  now: Date = new Date(),
+): Promise<GetOrInitResult> {
+  // 1) 공고 게이트
+  const job = await basePrisma.jobPosting.findUnique({
+    where: { id: jobPostingId },
+    select: { id: true, status: true, closesAt: true },
+  });
+  assertJobAvailable(job, now);
+
+  // 2) Draft 조회
+  const existing = await basePrisma.applicationDraft.findUnique({
+    where: { userId_jobPostingId: { userId, jobPostingId } },
+    select: { id: true, payloadJson: true, version: true, lastSavedAt: true },
+  });
+  if (existing !== null) {
+    return { draft: existing, created: false };
+  }
+
+  // 3) 신규 — 빈 payload + version=1
+  const created = await basePrisma.applicationDraft.create({
+    data: {
+      userId,
+      jobPostingId,
+      payloadJson: initialPayload() as unknown as Prisma.InputJsonValue,
+      version: 1,
+      lastSavedAt: now,
+    },
+    select: { id: true, payloadJson: true, version: true, lastSavedAt: true },
+  });
+  return { draft: created, created: true };
+}
+
+interface UpsertInput {
+  userId: number;
+  jobPostingId: number;
+  payload: DraftPayloadV1;
+  expectedVersion: number;
+  now?: Date;
+}
+
+interface UpsertResult {
+  version: number;
+  lastSavedAt: Date;
+}
+
+/**
+ * Draft 저장 (PUT).
+ *
+ * 낙관적 락 (L-024): updateMany({ where: { userId, jobPostingId, version: expectedVersion } })
+ * → count=1 → 성공, version+1 반환
+ * → count=0 → 두 경로 분기:
+ *    a) Draft 미존재 + expectedVersion=0 → create (신규 첫 저장)
+ *    b) version mismatch → APP_DRAFT_CONFLICT throw
+ *
+ * 공고 검증은 별도 (호출자가 getOrInitDraft 통과 후 호출 권장 — 본 함수에서도 게이트 재실행).
+ */
+export async function upsertDraft({
+  userId,
+  jobPostingId,
+  payload,
+  expectedVersion,
+  now = new Date(),
+}: UpsertInput): Promise<UpsertResult> {
+  const job = await basePrisma.jobPosting.findUnique({
+    where: { id: jobPostingId },
+    select: { id: true, status: true, closesAt: true },
+  });
+  assertJobAvailable(job, now);
+
+  // 신규 경로 (expectedVersion=0)
+  if (expectedVersion === 0) {
+    try {
+      const created = await basePrisma.applicationDraft.create({
+        data: {
+          userId,
+          jobPostingId,
+          payloadJson: payload as unknown as Prisma.InputJsonValue,
+          version: 1,
+          lastSavedAt: now,
+        },
+        select: { version: true, lastSavedAt: true },
+      });
+      return created;
+    } catch (err) {
+      // P2002 UNIQUE 위반 → 다른 탭이 먼저 생성함
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw new AppError('APP_DRAFT_CONFLICT');
+      }
+      throw err;
+    }
+  }
+
+  // 기존 업데이트 — 낙관적 락
+  const result = await basePrisma.applicationDraft.updateMany({
+    where: { userId, jobPostingId, version: expectedVersion },
+    data: {
+      payloadJson: payload as unknown as Prisma.InputJsonValue,
+      version: { increment: 1 },
+      lastSavedAt: now,
+    },
+  });
+  if (result.count === 0) {
+    // 두 경우: (a) Draft 미존재 + expectedVersion≠0 → 사용자가 잘못된 version 전송
+    //         (b) version mismatch (다른 탭 우선)
+    // 두 경우 모두 APP_DRAFT_CONFLICT로 매핑 (정보 노출 차단).
+    throw new AppError('APP_DRAFT_CONFLICT');
+  }
+  // updateMany는 반환 데이터가 없으므로 별도 조회
+  const updated = await basePrisma.applicationDraft.findUnique({
+    where: { userId_jobPostingId: { userId, jobPostingId } },
+    select: { version: true, lastSavedAt: true },
+  });
+  if (updated === null) {
+    // 업데이트 직후 사라짐 (이론상 불가, defense-in-depth)
+    throw new AppError('APP_DRAFT_CONFLICT');
+  }
+  return updated;
+}
+
+// prisma 변수 export — 테스트에서 mock 가능성 확보 (사용 안 하면 tree-shake)
+export { prisma };

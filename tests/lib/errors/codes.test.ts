@@ -7,12 +7,13 @@ const PREFIXES = ['AUTH_', 'USER_', 'JOB_', 'APP_', 'FILE_', 'SYS_'];
 const VALID_STATUSES = new Set([400, 401, 403, 404, 409, 410, 422, 429, 500, 502, 503]);
 
 describe('ERROR_CATALOG', () => {
-  it('contains 32 codes', () => {
+  it('contains 33 codes', () => {
     // CANDID-009 Step 2: SYS_RATE_LIMITED, SYS_FORBIDDEN_ORIGIN 추가로 22 → 24
     // CANDID-010 Step 3: AUTH_VERIFICATION_TOKEN_INVALID/EXPIRED/RESEND_COOLDOWN 추가로 24 → 27
     // CANDID-037 Step 2: AUTH_EMAIL_ALREADY_VERIFIED 추가로 27 → 28
     // CANDID-012 Step 1: AUTH_OAUTH_STATE_INVALID/PROVIDER_ERROR/EMAIL_TAKEN/USER_DENIED 추가로 28 → 32
-    expect(ALL_CODES).toHaveLength(32);
+    // CANDID-015 Step 1: APP_USER_UNDER_MIN_AGE 추가로 32 → 33 (BR-PII-05)
+    expect(ALL_CODES).toHaveLength(33);
   });
 
   it('CANDID-012 Step 1 신규 코드: AUTH_OAUTH_STATE_INVALID=400, _PROVIDER_ERROR=502, _EMAIL_TAKEN=409, _USER_DENIED=422', () => {
@@ -100,6 +101,7 @@ describe('ERROR_CATALOG', () => {
       AUTH_OAUTH_PROVIDER_ERROR: 502,
       AUTH_OAUTH_EMAIL_TAKEN: 409,
       AUTH_OAUTH_USER_DENIED: 422,
+      APP_USER_UNDER_MIN_AGE: 422,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);

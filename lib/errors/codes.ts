@@ -84,6 +84,11 @@ export const ERROR_CATALOG = {
     status: 409,
     message: '다른 곳에서 임시저장이 변경되었습니다. 새로고침 후 다시 시도해 주세요.',
   },
+  // CANDID-015 Step 1 — 만 14세 미만 지원 차단 (BR-PII-05)
+  APP_USER_UNDER_MIN_AGE: {
+    status: 422,
+    message: '만 14세 미만은 지원할 수 없습니다.',
+  },
 
   // 파일 — FILE_
   FILE_SIZE_EXCEEDED: { status: 422, message: '허용된 파일 크기를 초과했습니다.' },
