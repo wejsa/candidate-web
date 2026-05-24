@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "lastTaskNumber": 36,
+    "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 138,
+    "version": 139,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T00:38:26+09:00"
+    "updatedAt": "2026-05-24T10:29:27+09:00"
   },
   "summary": {
     "total": 35,
@@ -1384,6 +1384,19 @@
         }
       ],
       "completedAt": "2026-05-24T00:37:44+09:00"
+    },
+    "CANDID-037": {
+      "id": "CANDID-037",
+      "title": "CANDID-036 FU: RL wrapper 합성 + P2002 정밀 매핑 + 테스트 강화",
+      "status": "todo",
+      "type": "enhancement",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": [
+        "CANDID-036"
+      ],
+      "createdAt": "2026-05-24T10:29:27+09:00",
+      "description": "CANDID-036 회고에서 식별된 carry MAJOR 17건(PR #36 9건 + PR #37 8건) + L-022 적용 첫 분리 사례.\n\n## 아키텍처/도메인 (Wrapper + race 정밀화)\n(1) **RL wrapper 헤더 override 차단** (L-023) — 외부 `withRateLimit`이 inner `withUserRateLimit`의 429 응답 헤더를 덮어쓰지 않도록 `applyRateLimitHeaders`에 `has('X-RateLimit-Policy')` 가드 추가, 또는 `enforceUserRateLimit` 인라인 헬퍼로 wrapper 합성 회피.\n(2) **wrapper 중첩 패턴 일관화** — 3 라우터 모두 `(req, ctx)` IIFE 호출 대신 인라인 가드 헬퍼 사용.\n(3) **`isPrismaUniqueViolation` cross-cutting 추출** — `lib/prisma/errors.ts` 신설, `isUniqueViolationOn(err, targets)` 시그니처로 `meta.target` 검증 포함. 향후 signup/application 등 재사용.\n(4) **P2002 매핑 정밀도 (PR #36 D1)** — `email_verifications`의 `token_hash` UNIQUE도 P2002로 잡혀 cooldown 오매핑. `meta.target ⊆ ['user_id', 'uk_email_verifications_active_per_user']`만 cooldown 매핑.\n(5) **격리 수준 가정 주석** (PR #36 D2) — `consumeVerificationToken`/`resendVerificationEmail` 함수 주석에 PG READ COMMITTED 가정 명시.\n(6) **이미 인증된 사용자 race 시 cooldown 분기** (PR #36 D3) — `resendVerificationEmail` 진입부에 `user.emailVerifiedAt !== null` 가드 추가 또는 `AUTH_EMAIL_ALREADY_VERIFIED` 신규 코드.\n\n## 테스트 강화\n(7) **race 시뮬레이션 보강** — `Promise.all`로 병렬 호출 + `mockImplementationOnce` 큐 검증으로 실제 직렬화 검증.\n(8) **P2002 mock 정밀도** — `Prisma.PrismaClientKnownRequestError` instance 사용 (duck-typing 회귀 가드 강화).\n(9) **testcontainers Postgres 통합 테스트** — race/트랜잭션 롤백/P2002의 실제 DB 동작 검증 (별도 인프라 작업 큼, sub-step으로 분리 가능).\n(10) **회귀 가드 어설션 강화** — `resendVerificationEmail.toHaveBeenCalledTimes(3)`, `X-RateLimit-Remaining='0'` (PR #37 H004/H005/H007/H008), user null 분기에서 `body.nextResendAvailableAt` ISO 검증.\n(11) **`mockReset()` 보강** — `mockImplementationOnce` 큐 누수 방지.\n(12) **매직 넘버 제거** — `POLICIES.VERIFY_EMAIL.maxRequests`를 import해 정책 변경 자동 추종.\n\n## 운영 메트릭 의존 (별도 검토)\n(13) **user-bucket UX 조정** (PR #37 H002) — 3회/시간 + DB 60s cooldown 결합 시 정상 사용자가 3분 만에 한도 소진 → 57분 lockout 가능. 운영 메트릭 관찰 후 윈도우/한도 조정 결정 (예: 5회/10분 또는 단계별 backoff).\n\n## 추가 hardening (선택)\n- `redactEmails` 정규식 trailing dot 미매칭 보강 (M004).\n- `summarizeError` 비-Error throw 시 metadata 보존 옵션 (M005).\n- pino + 전역 redact 정책 (CANDID-009 별도 운영 task로 분리 가능).\n\n## 참고 학습\nL-022 (carry 임계 분리) 첫 적용 사례 — 본 task가 분리 효과 검증. L-023/L-024/L-025 (wrapper override/UPDATE race/부분 UNIQUE)는 본 task fix가 결과적으로 검증."
     }
   }
 }
