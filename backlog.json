@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 153,
+    "version": 154,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T12:18:00+09:00"
+    "updatedAt": "2026-05-24T12:27:13+09:00"
   },
   "summary": {
     "total": 35,
     "done": 14,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 21
+    "todo": 20
   },
   "phases": {
     "1": {
@@ -786,14 +786,28 @@
       "id": "CANDID-012",
       "title": "OAuth2 소셜 로그인 Google/GitHub + 계정 연결 정책 (US-AUTH-003)",
       "description": "OAuth2 Authorization Code + PKCE. Google(profile,email)/GitHub(read:user,user:email). 동일 이메일 자동 연결 차단(명시적 연결 안내). 미인증 이메일 별도 인증.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
+      "assignee": "wejsa-u@hoji-20260524-122713",
+      "assignedAt": "2026-05-24T12:27:13+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-24T12:27:13+09:00"
+      },
       "dependencies": [
         "CANDID-006"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "specFile": "docs/sample-requirement.md",
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "updatedAt": "2026-05-24T12:27:13+09:00"
     },
     "CANDID-013": {
       "id": "CANDID-013",
