@@ -11,6 +11,9 @@ export default defineConfig({
     // CANDID-035 Step 1: 통합 테스트는 별도 runner(`vitest.config.integration.ts`)에서 실행.
     exclude: ['tests/integration/**', 'node_modules/**', 'dist/**', '.next/**'],
     setupFiles: ['tests/setup.ts'],
+    // CANDID-015 Step 4: client hook 단위 테스트만 jsdom 환경 (window/timer/event 필요).
+    // 다른 테스트는 node 환경 유지. RSC 컴포넌트 테스트 인프라는 F-5 carry (FU1 위임).
+    environmentMatchGlobs: [['tests/lib/drafts/use-auto-save.test.ts', 'jsdom']],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
