@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 182,
+    "version": 183,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T18:05:00+09:00"
+    "updatedAt": "2026-05-24T18:25:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -983,37 +983,34 @@
       "priority": "high",
       "phase": 2,
       "assignee": "jaese@hoji-20260524-172129",
-      "assignedAt": "2026-05-24T17:55:00+09:00",
+      "assignedAt": "2026-05-24T18:25:00+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "lib/jobs/detail-metadata.ts",
         "lib/jobs/apply-cta.ts",
         "lib/auth/server-cookies.ts",
+        "lib/jobs/list.ts",
         "app/jobs/[id]/page.tsx",
-        "app/jobs/[id]/loading.tsx",
         "app/jobs/[id]/not-found.tsx",
-        "app/jobs/[id]/_components/JobDetailHeader.tsx",
-        "app/jobs/[id]/_components/JobDetailBody.tsx",
         "app/jobs/[id]/_components/ShareButton.tsx",
         "app/jobs/[id]/_components/ApplyCta.tsx",
-        "tests/lib/jobs/detail-metadata.test.ts",
         "tests/lib/jobs/apply-cta.test.ts",
-        "tests/lib/auth/server-cookies.test.ts"
+        "tests/lib/auth/server-cookies.test.ts",
+        "tests/lib/jobs/detail.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 51,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-24T18:05:00+09:00"
+        "updatedAt": "2026-05-24T18:25:00+09:00"
       },
       "dependencies": [
         "CANDID-013"
       ],
       "planPath": ".claude/temp/CANDID-014-plan.md",
       "specFile": "docs/sample-requirement.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -1041,9 +1038,10 @@
         {
           "step": 2,
           "title": "페이지 RSC + 메타데이터 + 표시 컴포넌트 + 공유 버튼",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-014-step2",
           "prNumber": 51,
+          "mergedAt": "2026-05-24T18:25:00+09:00",
           "files": [
             "lib/jobs/dday.ts",
             "lib/jobs/detail-metadata.ts",
@@ -1059,9 +1057,11 @@
           ],
           "estimatedLines": 545,
           "actualLines": 462,
+          "mergedLines": 462,
           "prLineLimit": 600,
           "dependsOn": [1],
-          "note": "L-019 in-task self-correction 적용: Step 1 D-MAJOR-2(computeDDay 추출 → lib/jobs/dday.ts) + D-MAJOR-1(unstable_cache 키 배열 id 명시) 해소. ShareButton의 execCommand fallback에 lint disable 대신 일반 주석 사용."
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 8 / MINOR 10 / INFO 9. self-PR COMMENT. carry: Step 3 in-task 4건(D-MAJOR-3/5, S-MINOR-1, T-MAJOR-1) + CANDID-014-FU1 분리 4건(D-MAJOR-1/2/4/6, T-MAJOR-2). 테스트 833→848(+15).",
+          "note": "L-019 in-task self-correction: Step 1 D-MAJOR-2(computeDDay 추출)/D-MAJOR-1(cache 키 id 명시) 해소."
         },
         {
           "step": 3,
