@@ -3,19 +3,8 @@
 // 상세 페이지 라우트 /jobs/[id]는 CANDID-014에서 추가 — 본 step에서는 href만 선언.
 
 import Link from 'next/link';
+import { CAREER_LABEL, EMPLOYMENT_LABEL } from '@/lib/jobs/labels';
 import type { JobListItem } from '@/lib/jobs/types';
-
-const EMPLOYMENT_LABEL: Record<JobListItem['employmentType'], string> = {
-  FULL_TIME: '정규직',
-  CONTRACT: '계약직',
-  INTERN: '인턴',
-};
-
-const CAREER_LABEL: Record<JobListItem['careerLevel'], string> = {
-  NEW: '신입',
-  EXPERIENCED: '경력',
-  ANY: '경력 무관',
-};
 
 export interface JobCardProps {
   job: JobListItem;

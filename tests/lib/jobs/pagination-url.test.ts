@@ -36,6 +36,19 @@ describe('buildPageUrl', () => {
   it('basePath 변경 지원', () => {
     expect(buildPageUrl({ basePath: '/careers', query: q(), page: 2 })).toBe('/careers?page=2');
   });
+
+  it('PR #48 review T-fix: 같은 page 재호출 idempotent', () => {
+    const query = q({ category: 'dev', page: '3' });
+    const a = buildPageUrl({ basePath: '/jobs', query, page: 3 });
+    const b = buildPageUrl({ basePath: '/jobs', query, page: 3 });
+    expect(a).toBe(b);
+    expect(a).toBe('/jobs?category=dev&page=3');
+  });
+
+  it('PR #48 review T-fix: page=0/음수 → basePath만 (page>1 가드)', () => {
+    expect(buildPageUrl({ basePath: '/jobs', query: q(), page: 0 })).toBe('/jobs');
+    expect(buildPageUrl({ basePath: '/jobs', query: q(), page: -5 })).toBe('/jobs');
+  });
 });
 
 describe('getPageWindow', () => {

@@ -3,20 +3,8 @@
 // page.tsx의 generateMetadata에서 호출 — 순수 함수로 분리해 unit 테스트 가능.
 
 import type { Metadata } from 'next';
-import type { CareerLevel, EmploymentType } from '@prisma/client';
 import type { ParsedJobListQuery } from '@/lib/jobs/list';
-
-const EMPLOYMENT_LABEL: Record<EmploymentType, string> = {
-  FULL_TIME: '정규직',
-  CONTRACT: '계약직',
-  INTERN: '인턴',
-};
-
-const CAREER_LABEL: Record<CareerLevel, string> = {
-  NEW: '신입',
-  EXPERIENCED: '경력',
-  ANY: '무관',
-};
+import { CAREER_LABEL, EMPLOYMENT_LABEL } from '@/lib/jobs/labels';
 
 const SORT_LABEL: Record<ParsedJobListQuery['sort'], string> = {
   latest: '최신순',
