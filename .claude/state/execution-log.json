@@ -968,5 +968,22 @@
     "prNumber": 57,
     "branch": "feature/CANDID-016-step1",
     "timestamp": "2026-05-24T20:35:00+09:00"
+  },
+  {
+    "event": "review_completed",
+    "taskId": "CANDID-016",
+    "stepNumber": 1,
+    "prNumber": 57,
+    "decision": "COMMENT",
+    "critical": 0,
+    "major": 19,
+    "minor": 12,
+    "info": 7,
+    "agents": [
+      "domain",
+      "security",
+      "test"
+    ],
+    "timestamp": "2026-05-24T20:45:00+09:00"
   }
 ]
