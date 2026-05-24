@@ -4,7 +4,7 @@ import type { Mock } from 'vitest';
 import { AppError } from '@/lib/errors';
 import { __resetCachedEnvForTesting } from '@/lib/env';
 import { __resetCorsCacheForTesting } from '@/lib/security/cors';
-import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
+import { POLICIES, __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 
 vi.mock('@/lib/auth/email-verification', () => ({
   consumeVerificationToken: vi.fn(),
@@ -114,37 +114,41 @@ describe('POST /api/v1/auth/verify-email', () => {
 });
 
 describe('POST /api/v1/auth/verify-email — CANDID-036 Rate Limit (PR #33 H005)', () => {
-  it('30회/분/IP 한도 초과 시 429 + X-RateLimit-* 헤더', async () => {
+  // CANDID-037 H005: 매직 넘버 제거 — POLICIES.VERIFY_EMAIL.maxRequests를 import해 정책 자동 추종.
+  it('N+1회 한도 초과 시 429 + X-RateLimit-* 헤더', async () => {
+    const limit = POLICIES.VERIFY_EMAIL.maxRequests;
     consumeVerificationToken.mockResolvedValue({
       userId: 42,
       emailVerifiedAt: new Date(),
       alreadyVerified: false,
     });
 
-    // 한도까지 30회 통과
-    for (let i = 0; i < 30; i++) {
+    // 한도까지 통과
+    for (let i = 0; i < limit; i++) {
       const r = await POST(postRequest({ token: VALID_TOKEN }), undefined);
       expect(r.status).toBe(200);
     }
 
-    // 31번째 → 429
+    // 한도+1번째 → 429
     const blocked = await POST(postRequest({ token: VALID_TOKEN }), undefined);
     expect(blocked.status).toBe(429);
-    expect(blocked.headers.get('X-RateLimit-Policy')).toBe('verify_email');
-    expect(blocked.headers.get('X-RateLimit-Limit')).toBe('30');
+    expect(blocked.headers.get('X-RateLimit-Policy')).toBe(POLICIES.VERIFY_EMAIL.name);
+    expect(blocked.headers.get('X-RateLimit-Limit')).toBe(String(limit));
+    expect(blocked.headers.get('X-RateLimit-Remaining')).toBe('0');
     expect(blocked.headers.get('Retry-After')).not.toBeNull();
     const body = await blocked.json();
     expect(body.code).toBe('SYS_RATE_LIMITED');
   });
 
   it('다른 IP는 격리된 카운터 (NAT 환경 다수 사용자 보호)', async () => {
+    const limit = POLICIES.VERIFY_EMAIL.maxRequests;
     consumeVerificationToken.mockResolvedValue({
       userId: 42,
       emailVerifiedAt: new Date(),
       alreadyVerified: false,
     });
     // IP A: 한도 소진
-    for (let i = 0; i < 30; i++)
+    for (let i = 0; i < limit; i++)
       await POST(postRequest({ token: VALID_TOKEN }, '1.1.1.1'), undefined);
     const blockedA = await POST(postRequest({ token: VALID_TOKEN }, '1.1.1.1'), undefined);
     expect(blockedA.status).toBe(429);

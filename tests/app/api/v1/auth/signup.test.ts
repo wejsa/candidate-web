@@ -4,7 +4,7 @@ import type { Mock } from 'vitest';
 import { AppError } from '@/lib/errors';
 import { __resetCachedEnvForTesting } from '@/lib/env';
 import { __resetCorsCacheForTesting } from '@/lib/security/cors';
-import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
+import { POLICIES, __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 
 // signup.ts / email transport는 mock — Route Handler의 status/Cookie/응답 본문/rate-limit 통합만 검증.
 vi.mock('@/lib/auth/signup', () => ({
@@ -247,17 +247,22 @@ describe('POST /api/v1/auth/signup — 비즈니스 에러', () => {
   });
 });
 
-describe('POST /api/v1/auth/signup — Rate Limit (BR-SEC-04 5회/시간/IP)', () => {
-  it('6번째 요청은 429 SYS_RATE_LIMITED + Retry-After', async () => {
+describe('POST /api/v1/auth/signup — Rate Limit (BR-SEC-04)', () => {
+  // CANDID-037 H005: 매직 넘버 제거 — POLICIES.SIGNUP.maxRequests를 import해 정책 자동 추종.
+  it('N+1번째 요청은 429 SYS_RATE_LIMITED + Retry-After', async () => {
+    const limit = POLICIES.SIGNUP.maxRequests;
     createUserAndIssueTokens.mockResolvedValue(successResult);
     const r = postRequest(validBody, '203.0.113.99');
-    // 5회 소진
-    for (let i = 0; i < 5; i++) await POST(postRequest(validBody, '203.0.113.99'), undefined);
+    // 한도까지 소진
+    for (let i = 0; i < limit; i++)
+      await POST(postRequest(validBody, '203.0.113.99'), undefined);
     const blocked = await POST(r, undefined);
     expect(blocked.status).toBe(429);
     const body = await blocked.json();
     expect(body.code).toBe('SYS_RATE_LIMITED');
     expect(blocked.headers.get('Retry-After')).not.toBeNull();
-    expect(blocked.headers.get('X-RateLimit-Policy')).toBe('signup');
+    expect(blocked.headers.get('X-RateLimit-Policy')).toBe(POLICIES.SIGNUP.name);
+    expect(blocked.headers.get('X-RateLimit-Limit')).toBe(String(limit));
+    expect(blocked.headers.get('X-RateLimit-Remaining')).toBe('0');
   });
 });
