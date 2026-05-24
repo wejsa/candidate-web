@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 7,
-    "updatedAt": "2026-05-24T10:17:10+09:00",
+    "version": 8,
+    "updatedAt": "2026-05-24T11:32:00+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -386,7 +386,7 @@
       "taskId": "CANDID-010",
       "category": "process",
       "title": "MAJOR carry-over 누적 임계 — 7건+ 시 별도 fix PR 분리",
-      "description": "스텝별 PR로 분할 진행 시 MAJOR carry-over가 누적 증가(CANDID-010: Step1→2 carry 2건, Step2→3 carry 9건, Step3→다음 task 14건)하면 마지막 step PR이 신규 기능 + carry fix + 신규 review 누적으로 line inflation·검토 부담이 동시에 증가한다. L-019(in-task self-correction)의 자연 합류 패턴은 carry 건수가 적을 때만 유효하며, 임계(권장: MAJOR ≥7건)를 초과하면 다음 step에 번들하지 말고 별도 fix PR(예: `fix/CANDID-XXX-carryover`)로 분리해 신규 기능 PR과 검토 컨텍스트를 격리한다. 분리 기준: (1) carry MAJOR ≥7건, (2) 누적 추세 증가, (3) carry 항목이 신규 step 파일 외부에 위치. L-009(skill-fix 동일 PR loop)는 CRITICAL 전용이므로 본 패턴과 직교.",
+      "description": "스텝별 PR로 분할 진행 시 MAJOR carry-over가 누적 증가(CANDID-010: Step1→2 carry 2건, Step2→3 carry 9건, Step3→다음 task 14건)하면 마지막 step PR이 신규 기능 + carry fix + 신규 review 누적으로 line inflation·검토 부담이 동시에 증가한다. L-019(in-task self-correction)의 자연 합류 패턴은 carry 건수가 적을 때만 유효하며, 임계(권장: MAJOR ≥7건)를 초과하면 다음 step에 번들하지 말고 별도 fix PR(예: `fix/CANDID-XXX-carryover`)로 분리해 신규 기능 PR과 검토 컨텍스트를 격리한다. 분리 기준: (1) carry MAJOR ≥7건, (2) 누적 추세 증가, (3) carry 항목이 신규 step 파일 외부에 위치. L-009(skill-fix 동일 PR loop)는 CRITICAL 전용이므로 본 패턴과 직교. **CANDID-037에서 첫 적용 검증**: 17건 carry를 3 step 분리 → 53분 안정 완료 + fix loop 0회 + CRITICAL 0건.",
       "impact": "low",
       "tags": [
         "carry-over",
@@ -395,16 +395,16 @@
         "major-accumulation",
         "fix-pr"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-23T12:55:00+09:00",
-      "updatedAt": "2026-05-23T12:55:00+09:00"
+      "updatedAt": "2026-05-24T11:32:00+09:00"
     },
     {
       "id": "L-023",
       "taskId": "CANDID-036",
       "category": "process",
       "title": "wrapper 합성 시 inner 응답 헤더 보호 — 외부 wrapper override 회피",
-      "description": "Route Handler를 다층 wrapper(예: `withRateLimit(IP, withUserRateLimit(USER, ...))`)로 합성할 때 외부 wrapper가 정상 통과(`limited=false`) 시 자신의 헤더를 응답에 부착하는 패턴이 inner wrapper의 429 응답 헤더(`X-RateLimit-Policy`, `Retry-After`)를 *덮어쓴다*. 결과: 클라이언트 backoff 오작동(부정확한 Retry-After), 운영 메트릭 오분류(IP-bucket 차단으로 잘못 집계). 대응 (1) 외부 wrapper의 `applyRateLimitHeaders`가 `response.headers.has('X-RateLimit-Policy')`로 inner 부착 여부를 사전 확인하고 skip / (2) wrapper 합성 대신 `enforceUserRateLimit` 같은 *인라인 가드* 헬퍼로 평탄화 — wrapper 중첩 자체를 회피. CANDID-036 Step 3 신규 발견 — 테스트 어설션도 잘못된 동작을 가드하지 않도록 후속 task로 분리.",
+      "description": "Route Handler를 다층 wrapper(예: `withRateLimit(IP, withUserRateLimit(USER, ...))`)로 합성할 때 외부 wrapper가 정상 통과(`limited=false`) 시 자신의 헤더를 응답에 부착하는 패턴이 inner wrapper의 429 응답 헤더(`X-RateLimit-Policy`, `Retry-After`)를 *덮어쓴다*. 결과: 클라이언트 backoff 오작동(부정확한 Retry-After), 운영 메트릭 오분류(IP-bucket 차단으로 잘못 집계). 대응 (1) 외부 wrapper의 `applyRateLimitHeaders`가 `response.headers.has('X-RateLimit-Policy')`로 inner 부착 여부를 사전 확인하고 skip / (2) wrapper 합성 대신 `enforceUserRateLimit` 같은 *인라인 가드* 헬퍼로 평탄화 — wrapper 중첩 자체를 회피. **CANDID-037에서 두 가지 대응 모두 적용**: applyRateLimitHeaders 가드 + enforceUserRateLimit 인라인 헬퍼 신설 + 라우터 마이그레이션. 회귀 가드 6 케이스(정상 200 + inner 429 보존 + 합성 통합).",
       "impact": "low",
       "tags": [
         "wrapper",
@@ -413,16 +413,16 @@
         "backoff",
         "composition"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-24T10:17:10+09:00",
-      "updatedAt": "2026-05-24T10:17:10+09:00"
+      "updatedAt": "2026-05-24T11:32:00+09:00"
     },
     {
       "id": "L-024",
       "taskId": "CANDID-036",
       "category": "architecture",
       "title": "PostgreSQL UPDATE row-level lock으로 race 차단 — updateMany WHERE 패턴",
-      "description": "동일 row를 동시에 소진하는 race(예: 이메일 인증 토큰 더블 클릭, 멱등성 키 중복 처리)에서 별도 `SELECT FOR UPDATE`(Prisma 미지원, raw SQL 우회 필요) 없이 `updateMany` 단일 호출로 race-free 직렬화 가능. 패턴: `tx.model.updateMany({ where: { id, completedAt: null, deadline: { gt: now } }, data: { completedAt: now } })` → PostgreSQL UPDATE의 자동 ExclusiveLock으로 동시 두 트랜잭션 중 하나만 count=1, 다른 쪽은 WHERE 조건 불일치로 count=0. count=0 분기에서 후속 SELECT로 부재/만료/이미 처리됨(멱등) 분류. Prisma idiomatic + ESLint `no-restricted-syntax` 우회 불요. READ COMMITTED 격리에서 충분. **격리 수준 가정**은 함수 주석에 명시 — REPEATABLE READ 격상 시 분기 재검토 필요. CANDID-036 `consumeVerificationToken` 적용.",
+      "description": "동일 row를 동시에 소진하는 race(예: 이메일 인증 토큰 더블 클릭, 멱등성 키 중복 처리)에서 별도 `SELECT FOR UPDATE`(Prisma 미지원, raw SQL 우회 필요) 없이 `updateMany` 단일 호출로 race-free 직렬화 가능. 패턴: `tx.model.updateMany({ where: { id, completedAt: null, deadline: { gt: now } }, data: { completedAt: now } })` → PostgreSQL UPDATE의 자동 ExclusiveLock으로 동시 두 트랜잭션 중 하나만 count=1, 다른 쪽은 WHERE 조건 불일치로 count=0. count=0 분기에서 후속 SELECT로 부재/만료/이미 처리됨(멱등) 분류. Prisma idiomatic + ESLint `no-restricted-syntax` 우회 불요. READ COMMITTED 격리에서 충분. **격리 수준 가정**은 함수 주석에 명시 — REPEATABLE READ 격상 시 분기 재검토 필요. CANDID-036 `consumeVerificationToken` 적용. **CANDID-037에서 강화**: Promise.all 병렬 race 시뮬레이션 + winner/loser 분류 검증으로 회귀 가드 추가.",
       "impact": "medium",
       "tags": [
         "postgresql",
@@ -432,16 +432,16 @@
         "concurrency",
         "updateMany"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-24T10:17:10+09:00",
-      "updatedAt": "2026-05-24T10:17:10+09:00"
+      "updatedAt": "2026-05-24T11:32:00+09:00"
     },
     {
       "id": "L-025",
       "taskId": "CANDID-036",
       "category": "security",
       "title": "부분 UNIQUE 제약을 비즈니스 race 방어 시맨틱으로 활용 — P2002 → AppError 매핑",
-      "description": "TOCTOU race(외부 SELECT 후 트랜잭션 내 INSERT)에서 코드 레벨로 차단 불가한 경우, PostgreSQL **부분 UNIQUE 제약**(`CREATE UNIQUE INDEX ... WHERE 조건`)을 deep defense로 활용. 예: `email_verifications`에 `(user_id) WHERE consumed_at IS NULL` 부분 UNIQUE → 동시 두 트랜잭션 중 하나의 INSERT가 P2002로 자연 차단됨. catch에서 `code === 'P2002' && meta.target 검증` 후 비즈니스 의미에 맞는 AppError(예: `AUTH_VERIFICATION_RESEND_COOLDOWN`)로 매핑. 주의 (1) `meta.target` 검증 없이 P2002만 잡으면 다른 UNIQUE 제약 위반도 오매핑 위험 / (2) `isPrismaUniqueViolation` 같은 helper는 `lib/prisma/errors.ts` 등 cross-cutting 모듈로 추출 / (3) destructive guard(`DO $$ COUNT > 0 RAISE EXCEPTION`)로 기존 비정상 데이터 사전 점검 필수 (L-001). CANDID-036 `resendVerificationEmail` TOCTOU race 차단.",
+      "description": "TOCTOU race(외부 SELECT 후 트랜잭션 내 INSERT)에서 코드 레벨로 차단 불가한 경우, PostgreSQL **부분 UNIQUE 제약**(`CREATE UNIQUE INDEX ... WHERE 조건`)을 deep defense로 활용. 예: `email_verifications`에 `(user_id) WHERE consumed_at IS NULL` 부분 UNIQUE → 동시 두 트랜잭션 중 하나의 INSERT가 P2002로 자연 차단됨. catch에서 `code === 'P2002' && meta.target 검증` 후 비즈니스 의미에 맞는 AppError(예: `AUTH_VERIFICATION_RESEND_COOLDOWN`)로 매핑. 주의 (1) `meta.target` 검증 없이 P2002만 잡으면 다른 UNIQUE 제약 위반도 오매핑 위험 / (2) `isPrismaUniqueViolation` 같은 helper는 `lib/prisma/errors.ts` 등 cross-cutting 모듈로 추출 / (3) destructive guard(`DO $$ COUNT > 0 RAISE EXCEPTION`)로 기존 비정상 데이터 사전 점검 필수 (L-001). CANDID-036 `resendVerificationEmail` TOCTOU race 차단. **CANDID-037에서 완성**: cross-cutting helper(`lib/prisma/errors.ts`) 추출 + 화이트리스트 부분집합 매칭(`isUniqueViolationOn(err, [인덱스명])`) + token_hash UNIQUE 거부 회귀 가드.",
       "impact": "medium",
       "tags": [
         "postgresql",
@@ -451,9 +451,65 @@
         "prisma-error",
         "p2002"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-24T10:17:10+09:00",
-      "updatedAt": "2026-05-24T10:17:10+09:00"
+      "updatedAt": "2026-05-24T11:32:00+09:00"
+    },
+    {
+      "id": "L-026",
+      "taskId": "CANDID-037",
+      "category": "architecture",
+      "title": "Wrapper 인라인 헬퍼의 attachHeaders 책임 호출자 분배 — discriminated union으로 강제 검토",
+      "description": "`enforceUserRateLimit(policy, userId, request): { response, attachHeaders }` 같은 인라인 헬퍼는 wrapper IIFE 합성을 평탄화하는 대신 *호출자가 정상 path에서 attachHeaders(response)를 호출할 책임*을 떠안긴다. forget 시 enforcement(probe 카운팅)은 정상 작동하나 inner 헤더가 응답에 미부착 → 외부 wrapper가 자신의 헤더로 override(L-023). 결과: 클라이언트 backoff 정보 손실. 본 PR은 `if (response !== null) return` 패턴으로 우회하나 컴파일타임 강제는 없음. 향후 개선: discriminated union `{ limited: true, response } | { limited: false, attachHeaders }` 도입으로 호출 실수를 차단. 또는 `Result<Limited|Allowed>` 패턴. CANDID-037 Step 1/3 라우터 마이그레이션 시점에 노출됨 — domain agent INFO 권고로 도출.",
+      "impact": "low",
+      "tags": [
+        "wrapper",
+        "inline-helper",
+        "responsibility-distribution",
+        "discriminated-union",
+        "type-safety",
+        "L-023"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-24T11:32:00+09:00",
+      "updatedAt": "2026-05-24T11:32:00+09:00"
+    },
+    {
+      "id": "L-027",
+      "taskId": "CANDID-037",
+      "category": "process",
+      "title": "라인 추정 보정 — step 유형별 계수 (인프라 0.7, 도메인 0.6, 라우터/테스트 통합 1.5~2.0)",
+      "description": "CANDID-036의 '헬퍼 추출 보정 계수 0.6~0.8' 가설은 단일 방향(under) 모델로 부정확. CANDID-037 검증: Step 1(인프라, helper 신설) +29%, Step 2(도메인 정밀화, helper 호출) -37%, Step 3(라우터 + 매직 넘버 제거 + 통합 검증) **+204%**. 라우터 통합 단계의 라인 폭발 원인: (a) 매직 넘버 제거가 3개 파일에 걸침, (b) 신규 코드 라우터 통합 검증(USER_NOT_FOUND/AUTH_EMAIL_ALREADY_VERIFIED) 어설션 추가, (c) L-023 헤더 검증 회귀 가드 추가. 권장 보정: 인프라(헬퍼 추출/신설) 0.7, 도메인 정밀화(helper 호출만) 0.6, 라우터/테스트 통합 1.5~2.0. plan 단계에서 step 유형 태깅 → 보정 계수 자동 적용. CANDID-038+에서 가설 검증 필요.",
+      "impact": "low",
+      "tags": [
+        "estimation",
+        "line-count",
+        "step-classification",
+        "calibration",
+        "plan-accuracy"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-24T11:32:00+09:00",
+      "updatedAt": "2026-05-24T11:32:00+09:00"
+    },
+    {
+      "id": "L-028",
+      "taskId": "CANDID-037",
+      "category": "architecture",
+      "title": "Prisma 인덱스명 SSOT 추출 — `lib/prisma/index-names.ts` + 화이트리스트 자동 추종",
+      "description": "P2002 화이트리스트(`isUniqueViolationOn(err, ['uk_email_verifications_active_per_user'])`)는 인덱스명 문자열을 코드 내 상수로 박는다. schema rename 시 화이트리스트도 함께 수정해야 race-cooldown 매핑이 깨지지 않음 — 자동 검증 불가능 (정규식 매칭 어려움). 권장 패턴: `lib/prisma/index-names.ts` SSOT 모듈에 인덱스명 상수 export → 호출처에서 import. `prisma/schema.prisma`의 `@@index(..., map: 'uk_...')`와 SSOT가 분리되나, schema rename 시 SSOT 갱신은 grep으로 추적 가능. 향후 typed schema-codegen 도입 시 자동 동기화 가능(예: prisma-codegen으로 인덱스명 typed enum 생성). CANDID-037 Step 2에서 `RESEND_COOLDOWN_UNIQUE_INDEXES = ['uk_email_verifications_active_per_user']` 도메인 모듈 내부 상수로 두었으나, 향후 signup/application 등 P2002 분기 추가 시 재참조 가능 → SSOT 추출 필요.",
+      "impact": "low",
+      "tags": [
+        "prisma",
+        "ssot",
+        "index-names",
+        "p2002",
+        "whitelist",
+        "schema-sync"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-24T11:32:00+09:00",
+      "updatedAt": "2026-05-24T11:32:00+09:00"
     }
   ]
 }
