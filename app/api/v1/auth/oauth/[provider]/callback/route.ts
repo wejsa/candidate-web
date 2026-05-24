@@ -10,6 +10,7 @@ import {
 } from '@/lib/auth/oauth/state';
 import { getProvider, isOAuthProviderEnabled } from '@/lib/auth/oauth';
 import { linkOrCreateOAuthUser } from '@/lib/auth/oauth/link';
+import { resolveCallbackRedirect } from '@/lib/auth/oauth/redirect';
 
 // CANDID-012 Step 3 — GET /api/v1/auth/oauth/{provider}/callback.
 //
@@ -129,8 +130,10 @@ export const GET = withErrorHandler(async (request: NextRequest, context: unknow
     throw err;
   }
 
-  // (7) JWT 쿠키 + 302 to sanitized redirect path
-  const target = new URL(stateResult.redirect, getEnv().NEXT_PUBLIC_APP_URL);
+  // (7) JWT 쿠키 + 302 to sanitized redirect path.
+  // review fix (C001 + S-MAJOR-4.1/4.2): resolveCallbackRedirect이 defense-in-depth로
+  // 1) 제어문자 차단 (브라우저 URL parsing 비대칭 우회) 2) origin 일치 검증 (외부 redirect 차단).
+  const target = resolveCallbackRedirect(stateResult.redirect);
   const response = NextResponse.redirect(target, { status: 302 });
   setAuthCookies(response, {
     access: { token: linkResult.tokens.accessToken, expiresAt: linkResult.tokens.accessExpiresAt },

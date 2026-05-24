@@ -121,9 +121,11 @@ export async function linkOrCreateOAuthUser(args: {
           passwordHash: null,
           emailVerifiedAt: profile.emailVerified ? now : null,
           // PRD US-AUTH-003 자동 가입 — OAuth 동의 화면이 약관 동의를 묵시적 갈음한다고 가정.
-          // 명시 동의 페이지 분리는 follow-up task.
+          // 명시 동의 페이지 분리는 follow-up task (개인정보보호법 §22 명시 동의 강화).
+          // review fix S-MAJOR-1.2: ageConfirmedAt도 함께 기록 (signup.ts와 일관성, 만 14세 자기 확인 시각).
           termsAgreedAt: now,
           privacyAgreedAt: now,
+          ageConfirmedAt: now,
           authProviders: {
             create: {
               provider: providerEnum,

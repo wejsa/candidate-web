@@ -10,6 +10,7 @@ import {
   type OAuthProviderName,
 } from '@/lib/auth/oauth/state';
 import { getProvider, isOAuthProviderEnabled } from '@/lib/auth/oauth';
+import { sanitizeOAuthRedirect } from '@/lib/auth/oauth/redirect';
 
 // CANDID-012 Step 3 — GET /api/v1/auth/oauth/{provider} (start handler).
 //
@@ -26,18 +27,6 @@ import { getProvider, isOAuthProviderEnabled } from '@/lib/auth/oauth';
 
 const ALLOWED_PROVIDERS: ReadonlySet<OAuthProviderName> = new Set(['google', 'github']);
 const COOKIE_MAX_AGE_SEC = Math.floor(OAUTH_STATE_TTL_MS / 1000);
-
-/**
- * `?redirect=` 파라미터를 안전한 내부 경로로 정규화. 외부 URL/프로토콜-relative는 `/`로 fallback.
- */
-function sanitizeRedirect(raw: string | null): string {
-  if (typeof raw !== 'string' || raw === '') return '/';
-  if (!raw.startsWith('/') || raw.startsWith('//')) return '/';
-  if (raw.length > 2048) return '/';
-  // backslash로 시작하는 우회 차단 (브라우저 일부가 path로 처리)
-  if (raw.startsWith('/\\')) return '/';
-  return raw;
-}
 
 function callbackUrlFor(provider: OAuthProviderName): string {
   return `${getEnv().NEXT_PUBLIC_APP_URL}/api/v1/auth/oauth/${provider}/callback`;
@@ -61,7 +50,7 @@ export const GET = withErrorHandler(
       return new NextResponse(null, { status: 404 });
     }
 
-    const redirect = sanitizeRedirect(request.nextUrl.searchParams.get('redirect'));
+    const redirect = sanitizeOAuthRedirect(request.nextUrl.searchParams.get('redirect'));
     const { state, codeChallenge, cookieValue, cookieExpires } = createOAuthState({
       provider,
       redirect,
