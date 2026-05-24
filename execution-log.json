@@ -671,5 +671,16 @@
       "added": 25
     },
     "timestamp": "2026-05-24T13:27:00+09:00"
+  },
+  {
+    "event": "request_changes",
+    "taskId": "CANDID-012",
+    "stepNumber": 3,
+    "prNumber": 45,
+    "critical": 1,
+    "major": 18,
+    "minor": 10,
+    "criticalIssues": ["C001 callback open-redirect (sanitizeRedirect 우회 + base URL origin 재검증 부재)"],
+    "timestamp": "2026-05-24T13:35:00+09:00"
   }
 ]
