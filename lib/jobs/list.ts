@@ -40,8 +40,17 @@ const includeClosedSchema = z
   .default(true)
   .transform((v) => (typeof v === 'string' ? v === 'true' : v));
 
+// PR #47 보안 리뷰 S-1: category 자유 문자열은 unstable_cache 키 폭증 표면 →
+// JobCategory.slug 실제 형식과 동일한 [a-z0-9-]+ regex로 좁힘.
+// 미매칭 입력은 400 SYS_VALIDATION_FAILED로 거부 → 캐시 오염 차단.
+const slugSchema = z
+  .string()
+  .min(1)
+  .max(80)
+  .regex(/^[a-z0-9-]+$/, 'invalid slug format');
+
 export const JobListQuerySchema = z.object({
-  category: blankToUndef.pipe(z.string().min(1).max(80).optional()),
+  category: blankToUndef.pipe(slugSchema.optional()),
   employment: blankToUndef.pipe(z.nativeEnum(EmploymentType).optional()),
   career: blankToUndef.pipe(z.nativeEnum(CareerLevel).optional()),
   sort: sortSchema,

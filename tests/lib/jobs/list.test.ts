@@ -67,6 +67,18 @@ describe('computeDDay', () => {
   it('정확히 3일 후 → D-3', () => {
     expect(computeDDay(new Date('2026-05-27T00:00:00Z'), NOW)).toBe('D-3');
   });
+  it('T-1: diff=0 (정확히 마감 시각) → 오늘 마감', () => {
+    expect(computeDDay(NOW, NOW)).toBe('오늘 마감');
+  });
+  it('T-1: 24h - 1ms → 오늘 마감 (floor 경계 하한)', () => {
+    expect(computeDDay(new Date(NOW.getTime() + 86_399_999), NOW)).toBe('오늘 마감');
+  });
+  it('T-1: 정확히 24h → D-1 (floor 경계 상한)', () => {
+    expect(computeDDay(new Date(NOW.getTime() + 86_400_000), NOW)).toBe('D-1');
+  });
+  it('T-1: diff = -1ms (방금 마감) → null', () => {
+    expect(computeDDay(new Date(NOW.getTime() - 1), NOW)).toBeNull();
+  });
 });
 
 describe('JobListQuerySchema', () => {
@@ -85,11 +97,28 @@ describe('JobListQuerySchema', () => {
     expect(q.employment).toBeUndefined();
     expect(q.career).toBeUndefined();
   });
-  it('잘못된 enum → throw (422 매핑)', () => {
+  it('잘못된 enum → throw (400 매핑)', () => {
     expect(() => JobListQuerySchema.parse({ employment: 'PART_TIME' })).toThrow();
+  });
+  it('career 잘못된 enum → throw', () => {
+    expect(() => JobListQuerySchema.parse({ career: 'SENIOR' })).toThrow();
   });
   it('page > MAX_PAGE → throw', () => {
     expect(() => JobListQuerySchema.parse({ page: MAX_PAGE + 1 })).toThrow();
+  });
+  it('page = MAX_PAGE (정확값) → 통과', () => {
+    expect(JobListQuerySchema.parse({ page: MAX_PAGE }).page).toBe(MAX_PAGE);
+  });
+  it('S-1: category slug regex 미매칭(공백/대문자/특수문자) → throw (캐시 오염 차단)', () => {
+    expect(() => JobListQuerySchema.parse({ category: 'AAA' })).toThrow();
+    expect(() => JobListQuerySchema.parse({ category: 'dev team' })).toThrow();
+    expect(() => JobListQuerySchema.parse({ category: 'dev/eng' })).toThrow();
+  });
+  it('S-1: category 80자 초과 → throw', () => {
+    expect(() => JobListQuerySchema.parse({ category: 'a'.repeat(81) })).toThrow();
+  });
+  it('정상 slug 통과 (영소문자/숫자/하이픈)', () => {
+    expect(JobListQuerySchema.parse({ category: 'dev-team-1' }).category).toBe('dev-team-1');
   });
 });
 
