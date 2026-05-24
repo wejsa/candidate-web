@@ -799,5 +799,20 @@
     "isLastStep": false,
     "note": "PR #47 squash 머지 → develop. Step 2 진행 (페이지 RSC + 카드 + 페이지네이션).",
     "timestamp": "2026-05-24T16:45:14+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-013",
+    "stepNumber": 2,
+    "prNumber": 48,
+    "branch": "feature/CANDID-013-step2",
+    "filesChanged": 8,
+    "additions": 520,
+    "vitest": { "passed": 796, "added": 26 },
+    "build": "ok",
+    "lint": "ok",
+    "typecheck": "ok",
+    "note": "Step 2 — RSC + 메타데이터 + 카드 + 페이지네이션. React 테스트 인프라 부재로 lib helper unit 테스트(metadata 13 + pagination-url 13)로 대체.",
+    "timestamp": "2026-05-24T16:53:12+09:00"
   }
 ]
