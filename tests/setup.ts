@@ -24,3 +24,11 @@ process.env.SMTP_PORT = '2525';
 process.env.SMTP_USER = '';
 process.env.SMTP_PASS = '';
 process.env.SMTP_FROM = 'noreply@candidate.test';
+
+// CANDID-016 — S3 4-tuple strong-pair refine 통과용. 외부 환경에 부분만 export되어 있으면
+// 부팅 차단되므로 모두 unset (= 저장소 비활성 모드). storage 테스트는 vi.stubEnv로 활성.
+// S3_ENDPOINT는 z.string().url()이라 빈 문자열은 통과 안 함 → delete로 undefined 보장.
+delete process.env.S3_ENDPOINT;
+delete process.env.S3_BUCKET;
+delete process.env.S3_ACCESS_KEY;
+delete process.env.S3_SECRET_KEY;

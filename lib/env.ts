@@ -1,5 +1,22 @@
 import { z } from 'zod';
 
+// S-MAJOR-1 fix (PR #57 in-PR): 사설/메타데이터/loopback IP 차단 — S3_ENDPOINT 검증 헬퍼.
+// CLAUDE.md 보안 강제 사항(SSRF 차단)과 동일 정책. cloud metadata(169.254.x.x) + RFC1918 사설 +
+// link-local + loopback(127.x.x.x) 차단. localhost/127.0.0.1은 *호출 측*에서 dev http 예외 처리.
+function isPrivateOrMetadataHost(hostname: string): boolean {
+  // IPv4 형태가 아니면 false (도메인이면 본 함수가 차단 안 함).
+  const m = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (m === null) return false;
+  const [a, b] = [Number(m[1]), Number(m[2])];
+  if (a === 10) return true; // 10.0.0.0/8
+  if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12
+  if (a === 192 && b === 168) return true; // 192.168.0.0/16
+  if (a === 169 && b === 254) return true; // 169.254.0.0/16 — link-local + cloud metadata
+  if (a === 127) return true; // 127.0.0.0/8 loopback (호출자가 dev에서 별도 허용)
+  if (a === 0) return true; // 0.0.0.0/8
+  return false;
+}
+
 const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -80,10 +97,34 @@ const envSchema = z
     GITHUB_OAUTH_CLIENT_ID: z.string().optional(),
     GITHUB_OAUTH_CLIENT_SECRET: z.string().optional(),
 
-    S3_ENDPOINT: z.string().url().optional(),
+    // CANDID-016: 이력서 첨부용 S3/MinIO presigned URL 발급.
+    // 4개 모두 set 또는 모두 unset 두 상태만 허용 (아래 superRefine에서 강제).
+    // dev: docker-compose minio 서비스가 채움. 운영: 관리형 S3 또는 호환 스토리지 endpoint.
+    //
+    // S-MAJOR-1 fix (PR #57 in-PR): URL 검증 강화 — 운영에서 HTTPS 강제 + 사설/메타데이터 IP 차단.
+    // dev는 http://localhost / http://127.0.0.1만 예외 허용. SigV4 자격증명 평문 전송 + SSRF 차단.
+    S3_ENDPOINT: z
+      .string()
+      .url()
+      .optional()
+      .refine((url) => {
+        if (url === undefined) return true;
+        const u = new URL(url);
+        if (u.protocol === 'https:') {
+          // HTTPS여도 사설/메타데이터 IP는 차단 (운영 misconfig 방어).
+          return !isPrivateOrMetadataHost(u.hostname);
+        }
+        if (u.protocol === 'http:') {
+          if (process.env.NODE_ENV === 'production') return false;
+          return u.hostname === 'localhost' || u.hostname === '127.0.0.1';
+        }
+        return false;
+      }, 'S3_ENDPOINT must be https:// (or http://localhost in dev); private/metadata IPs are blocked'),
     S3_BUCKET: z.string().optional(),
     S3_ACCESS_KEY: z.string().optional(),
     S3_SECRET_KEY: z.string().optional(),
+    // BR-FILE-05: presigned URL 유효기간 5분 (300초) — 기본값 고정, 운영 조정 가능.
+    S3_PRESIGN_TTL_SEC: z.coerce.number().int().positive().max(900).default(300),
 
     // CANDID-010에서 required로 격상 — 회원가입 인증 메일 발송에 SMTP 필수.
     // dev/test: Mailtrap(sandbox.smtp.mailtrap.io:2525) 또는 ethereal.email.
@@ -115,6 +156,23 @@ const envSchema = z
           code: z.ZodIssueCode.custom,
           path: [idSet ? secretKey : idKey],
           message: `${idKey} and ${secretKey} must both be set or both empty (partial OAuth credentials forbidden)`,
+        });
+      }
+    }
+  })
+  // CANDID-016: S3 4변수 strong-tuple — 부분 구성 차단.
+  // 일부만 설정된 상태로 부팅하면 presign 호출 시 SDK가 runtime 5xx로 노출되므로 부팅 차단.
+  // 모두 set(저장소 활성) 또는 모두 unset(저장소 비활성 — 파일 API는 호출 시 FILE_UPLOAD_FAILED).
+  .superRefine((e, ctx) => {
+    const s3Keys = ['S3_ENDPOINT', 'S3_BUCKET', 'S3_ACCESS_KEY', 'S3_SECRET_KEY'] as const;
+    const setKeys = s3Keys.filter((k) => typeof e[k] === 'string' && e[k] !== '');
+    if (setKeys.length !== 0 && setKeys.length !== s3Keys.length) {
+      const missing = s3Keys.filter((k) => !setKeys.includes(k));
+      for (const k of missing) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [k],
+          message: `S3 credentials must be fully set or fully empty (partial S3 config forbidden): missing ${k}`,
         });
       }
     }
