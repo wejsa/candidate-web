@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 156,
+    "version": 157,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T12:40:00+09:00"
+    "updatedAt": "2026-05-24T12:51:00+09:00"
   },
   "summary": {
     "total": 35,
@@ -805,12 +805,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 43,
         "fixLoopCount": 0,
-        "autoChainArgs": "43 --auto-fix",
-        "updatedAt": "2026-05-24T12:40:00+09:00"
+        "autoChainArgs": "43",
+        "updatedAt": "2026-05-24T12:51:00+09:00"
       },
       "dependencies": [
         "CANDID-006"

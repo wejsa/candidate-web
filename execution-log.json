@@ -594,5 +594,19 @@
       "added": 23
     },
     "timestamp": "2026-05-24T12:40:00+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-012",
+    "stepNumber": 1,
+    "prNumber": 43,
+    "reviewState": "COMMENTED",
+    "critical": 0,
+    "major": 13,
+    "minor": 12,
+    "info": 7,
+    "inTaskFixes": ["D-MAJOR-2 OAUTH_STATE_TTL_MS export", "D-MAJOR-1 USER_DENIED 400→422", "T-MAJOR-1 env.superRefine 4 케이스 테스트"],
+    "carryCount": 10,
+    "timestamp": "2026-05-24T12:50:55+09:00"
   }
 ]
