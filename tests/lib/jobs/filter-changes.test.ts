@@ -118,6 +118,40 @@ describe('applyFilterChange', () => {
       }),
     ).toBe('/careers?category=dev');
   });
+
+  it('PR #49 review T-fix: value=undefined → 해당 필터 해제 (null/"" 동치)', () => {
+    expect(
+      applyFilterChange({
+        basePath: '/jobs',
+        query: q({ category: 'dev', employment: 'CONTRACT' }),
+        field: 'employment',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        value: undefined as any,
+      }),
+    ).toBe('/jobs?category=dev');
+  });
+
+  it('PR #49 review T-fix: includeClosed value="false" 문자열 → URL에 false', () => {
+    expect(
+      applyFilterChange({
+        basePath: '/jobs',
+        query: q(),
+        field: 'includeClosed',
+        value: 'false',
+      }),
+    ).toBe('/jobs?includeClosed=false');
+  });
+
+  it('PR #49 review T-fix: includeClosed value="true" 문자열 → URL에서 생략 (true 폴백)', () => {
+    expect(
+      applyFilterChange({
+        basePath: '/jobs',
+        query: q({ includeClosed: 'false' }),
+        field: 'includeClosed',
+        value: 'true',
+      }),
+    ).toBe('/jobs');
+  });
 });
 
 describe('buildResetUrl', () => {
