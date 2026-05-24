@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 166,
+    "version": 167,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T13:46:00+09:00"
+    "updatedAt": "2026-05-24T16:10:15+09:00"
   },
   "summary": {
     "total": 35,
     "done": 15,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 20
+    "todo": 19
   },
   "phases": {
     "1": {
@@ -886,10 +886,22 @@
       "id": "CANDID-013",
       "title": "공고 목록 조회 + 필터/정렬/페이징 + URL 쿼리 상태 (US-JOB-001)",
       "description": "직군/고용형태/경력 필터, 최신순/마감임박순 정렬, 페이지네이션(20건). URL 쿼리 상태 유지. 메타 태그(title/description/OG) 동적 생성.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
+      "assignee": "jaese@hoji-20260524-161015",
+      "assignedAt": "2026-05-24T16:10:15+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-24T16:10:15+09:00"
+      },
       "dependencies": [
         "CANDID-004"
       ],
