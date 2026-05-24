@@ -769,5 +769,23 @@
     "typecheck": "ok",
     "note": "Step 1 — partial index 4종 + types + listJobs 서비스 + GET /api/v1/jobs. 회귀 752→761(+28건).",
     "timestamp": "2026-05-24T16:34:52+09:00"
+  },
+  {
+    "event": "reviewed",
+    "taskId": "CANDID-013",
+    "stepNumber": 1,
+    "prNumber": 47,
+    "reviewState": "COMMENTED",
+    "mode": "full",
+    "agents": ["domain", "security", "test"],
+    "critical": 0,
+    "major": 12,
+    "minor": 6,
+    "info": 6,
+    "selfPr": true,
+    "inTaskFix": ["S-1", "T-1", "T-2-partial"],
+    "carryMajor": 11,
+    "note": "CRITICAL 0. S-1(category slug regex) + T-1(D-Day 경계) in-task fix. 11 MAJOR carry → 회고 follow-up. 테스트 770/770 (+9).",
+    "timestamp": "2026-05-24T16:42:09+09:00"
   }
 ]

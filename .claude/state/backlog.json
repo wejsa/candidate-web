@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 169,
+    "version": 170,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T16:34:52+09:00"
+    "updatedAt": "2026-05-24T16:42:09+09:00"
   },
   "summary": {
     "total": 35,
@@ -891,7 +891,7 @@
       "priority": "high",
       "phase": 2,
       "assignee": "jaese@hoji-20260524-161015",
-      "assignedAt": "2026-05-24T16:34:52+09:00",
+      "assignedAt": "2026-05-24T16:42:09+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "prisma/migrations/20260524072500_candid_013_jobposting_list_indexes/migration.sql",
@@ -902,12 +902,12 @@
         "tests/app/api/v1/jobs/route.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 47,
         "fixLoopCount": 0,
-        "autoChainArgs": "47 --auto-fix",
-        "updatedAt": "2026-05-24T16:34:52+09:00"
+        "autoChainArgs": "47",
+        "updatedAt": "2026-05-24T16:42:09+09:00"
       },
       "planPath": ".claude/temp/CANDID-013-plan.md",
       "currentStep": 1,
