@@ -99,33 +99,32 @@ export async function signin(
     throw new AppError('AUTH_ACCOUNT_LOCKED');
   }
 
-  // 3) 비밀번호 검증 (이메일 부재 / passwordHash null도 dummy verify로 시간 균등화)
-  const hashToVerify = user?.passwordHash ?? DUMMY_BCRYPT_HASH;
+  // 3) 비밀번호 검증 (모든 실패 분기에서 dummy verify로 timing 균등화 — H002 review fix)
+  //    SUSPENDED/WITHDRAWN 비활성 사용자도 ACTIVE 사용자와 동일한 verify 비용을 소모하도록
+  //    *hash 선택*만 변경 (dummy로 강제). 인증 실패 시점에 status 분기를 합쳐 timing oracle 차단.
+  const isActive = user !== null && user.status === 'ACTIVE';
+  const hashToVerify =
+    isActive && user.passwordHash !== null ? user.passwordHash : DUMMY_BCRYPT_HASH;
   const passwordOk = await verifyPassword(input.password, hashToVerify);
 
-  // 4) 실패 분기 — 사용자 부재 / passwordHash null / 비밀번호 불일치
-  if (user === null || user.passwordHash === null || !passwordOk) {
-    if (user !== null) {
-      await recordFailedLogin(user.id, user.failedLoginCount, now);
+  // 4) 실패 분기 — 사용자 부재 / passwordHash null / 비밀번호 불일치 / 비활성 상태
+  //    H002 review fix: status !== 'ACTIVE'를 본 분기에 합쳐 timing 차이 + 의미 없는 카운터 증가 차단.
+  if (user === null || user.passwordHash === null || !passwordOk || !isActive) {
+    // ACTIVE 사용자에 한해 카운터 갱신 — 비활성 사용자는 카운터 의미 없으므로 스킵 (부작용 차단).
+    if (user !== null && isActive) {
+      await recordFailedLogin(user.id, user.failedLoginCount, user.lockedUntil, now);
     }
-    // 사용자 부재 경우는 카운터 갱신 불필요 (대상 row 없음).
     throw new AppError('AUTH_INVALID_CREDENTIALS');
   }
 
-  // 5) SUSPENDED / WITHDRAWN 등 비활성 상태 — enumeration 방지 위해 동일 응답.
-  //    (BR-PII-03: 탈퇴 사용자는 익명화 + status 변경. 본 분기는 방어적 가드.)
-  if (user.status !== 'ACTIVE') {
-    throw new AppError('AUTH_INVALID_CREDENTIALS');
-  }
-
-  // 6) 성공 — failedLoginCount/lockedUntil 카운터 무조건 리셋 (race-free).
+  // 5) 성공 — failedLoginCount/lockedUntil 카운터 무조건 리셋 (race-free).
   //    이전 잠금이 만료된 후 첫 성공도 동일하게 리셋된다.
   await prisma.user.updateMany({
     where: { id: user.id },
     data: { failedLoginCount: 0, lockedUntil: null },
   });
 
-  // 7) JWT Access + Refresh 발급 (refresh DB INSERT는 issueRefreshSession 내부)
+  // 6) JWT Access + Refresh 발급 (refresh DB INSERT는 issueRefreshSession 내부)
   //    rememberMe는 클라이언트 의도(input.rememberMe) 그대로 사용.
   const access = await issueAccessToken(user.id);
   const refreshSession = await issueRefreshSession(user.id, {
@@ -153,16 +152,20 @@ export async function signin(
 /**
  * 실패 카운터 race-free 증가 (L-024 패턴).
  *
- * - 5회 미만일 때만 increment: `updateMany WHERE failedLoginCount < (THRESHOLD - 1)`
- *   첫 4회까지는 1→2→3→4로 증가.
- * - 임계값 도달 시 LOCK 전이: 별도 `updateMany WHERE lockedUntil: null`로 idempotent 처리.
- *   동시 두 트랜잭션이 5번째 실패에 도달해도 lockedUntil 한 번만 설정.
+ * 3가지 분기 (review fix H001 — 잠금 만료 후 새 사이클 시작):
+ * - `currentCount < 4`: 1→2→3→4 increment (idempotent updateMany WHERE failedLoginCount < 4)
+ * - `currentCount >= 5 && lockedUntil 과거(만료)`: 새 사이클 시작 — failedLoginCount=1로 리셋
+ *   - 만료 후 실패 path가 정체되어 무제한 brute-force가 가능했던 문제 차단 (review MAJOR H001)
+ * - `currentCount == 4` (또는 LOCK 전이 race): LOCK 전이 — lockedUntil: null인 경우만 잠금 설정
+ *   - idempotent: 동시 두 트랜잭션이 5번째 실패에 도달해도 lockedUntil 한 번만 설정
  *
  * 격리 수준: READ COMMITTED — PostgreSQL UPDATE 자동 row-level ExclusiveLock으로 직렬화.
+ * REPEATABLE READ 격상 시 `lt:4` 조건이 snapshot 기준으로 평가되어 lost update 가능 → 주의.
  */
 async function recordFailedLogin(
   userId: number,
   currentCount: number,
+  currentLockedUntil: Date | null,
   now: Date,
 ): Promise<void> {
   if (currentCount < LOCK_THRESHOLD - 1) {
@@ -175,7 +178,20 @@ async function recordFailedLogin(
     return;
   }
 
-  // 임계값 도달 (currentCount >= 4) — 5회째 실패. LOCK 전이.
+  // H001 fix — 잠금 만료 후 실패 path: 카운터 5 정체 + lockedUntil 과거 잔존 상태.
+  // signin 진입부 잠금 검사는 통과(lockedUntil > now가 false)했으나, recordFailedLogin은
+  // 기존 코드에서 `lockedUntil: null` 조건 외에는 매치 안 됐다 → 새 사이클 시작 처리.
+  if (currentCount >= LOCK_THRESHOLD && currentLockedUntil !== null && currentLockedUntil < now) {
+    // 만료된 잠금을 비우고 카운터 1부터 재시작 — race-free (lockedUntil < now 조건이 동시 두 요청 중
+    // 하나가 먼저 reset하면 다른 쪽은 매치 0건이 되어 increment 분기에서 처리).
+    await prisma.user.updateMany({
+      where: { id: userId, lockedUntil: { lt: now } },
+      data: { failedLoginCount: 1, lockedUntil: null },
+    });
+    return;
+  }
+
+  // 임계값 도달 (currentCount == 4) — 5번째 실패. LOCK 전이.
   // idempotent: lockedUntil: null 인 row만 잠금 설정 → 동시 두 트랜잭션 중 하나만 갱신.
   await prisma.user.updateMany({
     where: { id: userId, lockedUntil: null },

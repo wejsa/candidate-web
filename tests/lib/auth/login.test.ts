@@ -206,14 +206,45 @@ describe('signin — 실패 분기 (계정 열거 방지)', () => {
     });
   });
 
-  it('비활성 상태(SUSPENDED) → AUTH_INVALID_CREDENTIALS (enumeration 방지)', async () => {
+  it('비활성 상태(SUSPENDED) → AUTH_INVALID_CREDENTIALS + dummy verify 호출 + 카운터 증가 X (review H002 fix)', async () => {
     prisma.user.findUnique.mockResolvedValueOnce(
-      makeActiveUser({ status: 'SUSPENDED' as const }),
+      makeActiveUser({ status: 'SUSPENDED' as const, failedLoginCount: 2 }),
     );
 
     await expect(signin(validInput)).rejects.toMatchObject({
       code: 'AUTH_INVALID_CREDENTIALS',
     });
+
+    // H002 회귀 가드 — SUSPENDED 사용자도 dummy verify로 timing 균등화
+    expect(verifyPassword).toHaveBeenCalledTimes(1);
+    const [, hash] = verifyPassword.mock.calls[0] ?? [];
+    expect(hash).toMatch(/^\$2[ab]\$12\$/);
+
+    // H002 회귀 가드 — 비활성 사용자는 카운터 증가 없음 (의미 없는 부작용 차단)
+    expect(prisma.user.updateMany).not.toHaveBeenCalled();
+  });
+
+  // it.each — H002 회귀 가드 (모든 비-ACTIVE status 동일 응답 + 카운터 미증가)
+  it.each(['SUSPENDED', 'WITHDRAWN'] as const)(
+    'status=%s → AUTH_INVALID_CREDENTIALS + dummy verify + 카운터 X (enum 확장 회귀 가드)',
+    async (status) => {
+      prisma.user.findUnique.mockResolvedValueOnce(makeActiveUser({ status }));
+      await expect(signin(validInput)).rejects.toMatchObject({
+        code: 'AUTH_INVALID_CREDENTIALS',
+      });
+      expect(verifyPassword).toHaveBeenCalledTimes(1);
+      expect(prisma.user.updateMany).not.toHaveBeenCalled();
+    },
+  );
+
+  it('verifyPassword가 throw → 예외 그대로 전파 (현재는 false 변환되나 회귀 가드)', async () => {
+    // 현재 verifyPassword는 내부 try/catch로 false 반환하나, mock에서 직접 throw 시 signin은 그대로 throw 전파.
+    // 운영 환경에서 bcrypt 라이브러리가 손상된 해시로 throw하면 500이 노출 — 향후 명시적 catch 검토.
+    prisma.user.findUnique.mockResolvedValueOnce(makeActiveUser());
+    verifyPassword.mockRejectedValueOnce(new Error('malformed hash'));
+
+    await expect(signin(validInput)).rejects.toThrow('malformed hash');
+    expect(prisma.user.updateMany).not.toHaveBeenCalled();
   });
 });
 
@@ -277,6 +308,28 @@ describe('signin — 잠금 (BR-AUTH-03)', () => {
     const deltaMs = lockedUntil.getTime() - Date.now();
     expect(deltaMs).toBeGreaterThan(14 * 60_000);
     expect(deltaMs).toBeLessThan(16 * 60_000);
+  });
+
+  it('잠금 만료 후 잘못된 비밀번호 → 새 사이클 시작 (failedLoginCount=1로 리셋) — H001 회귀 가드', async () => {
+    // 시나리오: failedLoginCount=5 + lockedUntil 과거 (만료)
+    // 기존 버그: increment 분기는 lt:4 조건으로 매치 안 됨, LOCK 전이 분기는 lockedUntil:null 조건 미달
+    //         → updateMany 0건 호출, 카운터 정체 → 무제한 brute-force 가능
+    // H001 fix: lockedUntil < now 조건으로 새 사이클 시작 (failedLoginCount=1로 리셋)
+    const past = new Date(Date.now() - 60_000);
+    verifyPassword.mockResolvedValueOnce(false);
+    prisma.user.findUnique.mockResolvedValueOnce(
+      makeActiveUser({ failedLoginCount: 5, lockedUntil: past }),
+    );
+
+    await expect(signin(validInput)).rejects.toMatchObject({
+      code: 'AUTH_INVALID_CREDENTIALS',
+    });
+
+    // H001 회귀 가드: 만료된 잠금 분기 — lockedUntil { lt: now } 조건으로 reset
+    expect(prisma.user.updateMany).toHaveBeenCalledWith({
+      where: { id: 42, lockedUntil: { lt: expect.any(Date) } },
+      data: { failedLoginCount: 1, lockedUntil: null },
+    });
   });
 
   it('failedLoginCount=4 미만 (예: 3) → LOCK 전이 없이 increment만', async () => {
