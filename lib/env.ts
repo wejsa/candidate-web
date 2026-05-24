@@ -98,6 +98,26 @@ const envSchema = z
     // CANDID-006: Access/Refresh secret 분리 강제 — 동일 값이면 누수 영향 격리 무력화.
     message: 'JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ',
     path: ['JWT_REFRESH_SECRET'],
+  })
+  // CANDID-012: OAuth client credential 쌍 무결성 강제 — 한쪽만 채워진 부분 구성은 부팅 차단.
+  // start handler가 secret 없이 authorize URL을 만들거나, callback이 client_id 없이 token exchange를
+  // 시도해 런타임 5xx로 노출되는 사고를 방지한다. 둘 다 채우거나 둘 다 비우는 두 상태만 허용.
+  .superRefine((e, ctx) => {
+    const pairs = [
+      ['GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET'] as const,
+      ['GITHUB_OAUTH_CLIENT_ID', 'GITHUB_OAUTH_CLIENT_SECRET'] as const,
+    ];
+    for (const [idKey, secretKey] of pairs) {
+      const idSet = typeof e[idKey] === 'string' && e[idKey] !== '';
+      const secretSet = typeof e[secretKey] === 'string' && e[secretKey] !== '';
+      if (idSet !== secretSet) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [idSet ? secretKey : idKey],
+          message: `${idKey} and ${secretKey} must both be set or both empty (partial OAuth credentials forbidden)`,
+        });
+      }
+    }
   });
 
 export type Env = z.infer<typeof envSchema>;

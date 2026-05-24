@@ -48,6 +48,25 @@ export const ERROR_CATALOG = {
     status: 409,
     message: '이미 인증된 이메일입니다. 재발송이 필요하지 않습니다.',
   },
+  // CANDID-012 Step 1 — OAuth2 소셜 로그인 (Google/GitHub, US-AUTH-003)
+  AUTH_OAUTH_STATE_INVALID: {
+    status: 400,
+    message: '소셜 로그인 요청이 만료되었거나 변조되었습니다. 다시 시도해 주세요.',
+  },
+  AUTH_OAUTH_PROVIDER_ERROR: {
+    status: 502,
+    message: '소셜 로그인 제공자와 통신에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+  },
+  AUTH_OAUTH_EMAIL_TAKEN: {
+    status: 409,
+    message: '이미 가입된 이메일입니다. 이메일 로그인 후 마이페이지에서 소셜 연동을 진행해 주세요.',
+  },
+  // 사용자가 동의 화면에서 명시적으로 거부한 정상 비즈니스 분기 — 클라이언트 요청 결함(400)이 아닌
+  // 처리 가능했으나 의도적 종결(422). 모니터링 anomaly detection 노이즈 차단.
+  AUTH_OAUTH_USER_DENIED: {
+    status: 422,
+    message: '소셜 로그인 권한 요청이 거부되었습니다.',
+  },
 
   // 사용자 — USER_
   USER_EMAIL_DUPLICATED: { status: 409, message: '이미 가입된 이메일입니다.' },
