@@ -25,7 +25,8 @@ import { getEnv } from '@/lib/env';
 // TTL: 5분 — 사용자가 로그인 페이지로 진입 후 provider 동의 화면을 거쳐 callback까지 도달하는
 //      현실적 상한. 시스템 시계 오차 방지를 위해 만료 비교는 ms 단위로 수행.
 
-const OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
+/** OAuth state·PKCE 쿠키 TTL (ms). Set-Cookie Max-Age 산출의 SSOT — Step 2/3 라우터에서 동일 값 사용. */
+export const OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
 const SIGNING_LABEL = 'oauth-state';
 
 /** state(쿼리/쿠키 동시) — 32바이트 무작위 hex 64자. */

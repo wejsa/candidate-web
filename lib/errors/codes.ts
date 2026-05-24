@@ -61,8 +61,10 @@ export const ERROR_CATALOG = {
     status: 409,
     message: '이미 가입된 이메일입니다. 이메일 로그인 후 마이페이지에서 소셜 연동을 진행해 주세요.',
   },
+  // 사용자가 동의 화면에서 명시적으로 거부한 정상 비즈니스 분기 — 클라이언트 요청 결함(400)이 아닌
+  // 처리 가능했으나 의도적 종결(422). 모니터링 anomaly detection 노이즈 차단.
   AUTH_OAUTH_USER_DENIED: {
-    status: 400,
+    status: 422,
     message: '소셜 로그인 권한 요청이 거부되었습니다.',
   },
 

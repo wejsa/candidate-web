@@ -15,11 +15,12 @@ describe('ERROR_CATALOG', () => {
     expect(ALL_CODES).toHaveLength(32);
   });
 
-  it('CANDID-012 Step 1 신규 코드: AUTH_OAUTH_STATE_INVALID=400, _PROVIDER_ERROR=502, _EMAIL_TAKEN=409, _USER_DENIED=400', () => {
+  it('CANDID-012 Step 1 신규 코드: AUTH_OAUTH_STATE_INVALID=400, _PROVIDER_ERROR=502, _EMAIL_TAKEN=409, _USER_DENIED=422', () => {
     expect(ERROR_CATALOG.AUTH_OAUTH_STATE_INVALID.status).toBe(400);
     expect(ERROR_CATALOG.AUTH_OAUTH_PROVIDER_ERROR.status).toBe(502);
     expect(ERROR_CATALOG.AUTH_OAUTH_EMAIL_TAKEN.status).toBe(409);
-    expect(ERROR_CATALOG.AUTH_OAUTH_USER_DENIED.status).toBe(400);
+    // _USER_DENIED=422 — 사용자 명시적 거부는 비즈니스 분기(processable but rejected) (review fix)
+    expect(ERROR_CATALOG.AUTH_OAUTH_USER_DENIED.status).toBe(422);
     expect(errorMessage('AUTH_OAUTH_STATE_INVALID')).toMatch(/만료|변조/);
     expect(errorMessage('AUTH_OAUTH_PROVIDER_ERROR')).toMatch(/제공자|통신/);
     expect(errorMessage('AUTH_OAUTH_EMAIL_TAKEN')).toMatch(/이미 가입된 이메일/);
@@ -98,7 +99,7 @@ describe('ERROR_CATALOG', () => {
       AUTH_OAUTH_STATE_INVALID: 400,
       AUTH_OAUTH_PROVIDER_ERROR: 502,
       AUTH_OAUTH_EMAIL_TAKEN: 409,
-      AUTH_OAUTH_USER_DENIED: 400,
+      AUTH_OAUTH_USER_DENIED: 422,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);

@@ -80,3 +80,51 @@ describe('CORS_ALLOWED_ORIGINS refine (H005 + H009 — BR-SEC-03)', () => {
     expect(() => getEnv()).toThrow(/CORS_ALLOWED_ORIGINS/);
   });
 });
+
+// CANDID-012 Step 1 — OAuth client credential 쌍 무결성 (superRefine).
+// 각 provider는 CLIENT_ID/CLIENT_SECRET을 *모두* 채우거나 *모두* 비워야 한다.
+// 한쪽만 설정되면 부팅 차단 — start handler가 secret 없이 authorize URL 생성하거나
+// callback이 client_id 없이 token exchange를 시도해 런타임 5xx로 노출되는 사고를 방지.
+describe('OAuth pair superRefine (CANDID-012)', () => {
+  it.each([
+    ['google', 'GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET'],
+    ['github', 'GITHUB_OAUTH_CLIENT_ID', 'GITHUB_OAUTH_CLIENT_SECRET'],
+  ])('%s — ID만 설정되면 부팅 차단 (SECRET 누락)', (_, idKey, secretKey) => {
+    vi.stubEnv(idKey, 'id-only-value');
+    vi.stubEnv(secretKey, '');
+    expect(() => getEnv()).toThrow(new RegExp(`${secretKey}.*partial OAuth credentials`));
+  });
+
+  it.each([
+    ['google', 'GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET'],
+    ['github', 'GITHUB_OAUTH_CLIENT_ID', 'GITHUB_OAUTH_CLIENT_SECRET'],
+  ])('%s — SECRET만 설정되면 부팅 차단 (ID 누락)', (_, idKey, secretKey) => {
+    vi.stubEnv(idKey, '');
+    vi.stubEnv(secretKey, 'secret-only-value');
+    expect(() => getEnv()).toThrow(new RegExp(`${idKey}.*partial OAuth credentials`));
+  });
+
+  it('Google·GitHub 둘 다 채워진 정상 — 통과', () => {
+    vi.stubEnv('GOOGLE_OAUTH_CLIENT_ID', 'g-id');
+    vi.stubEnv('GOOGLE_OAUTH_CLIENT_SECRET', 'g-secret');
+    vi.stubEnv('GITHUB_OAUTH_CLIENT_ID', 'gh-id');
+    vi.stubEnv('GITHUB_OAUTH_CLIENT_SECRET', 'gh-secret');
+    expect(() => getEnv()).not.toThrow();
+  });
+
+  it('둘 다 비어 있어도 통과 (선택적 provider)', () => {
+    vi.stubEnv('GOOGLE_OAUTH_CLIENT_ID', '');
+    vi.stubEnv('GOOGLE_OAUTH_CLIENT_SECRET', '');
+    vi.stubEnv('GITHUB_OAUTH_CLIENT_ID', '');
+    vi.stubEnv('GITHUB_OAUTH_CLIENT_SECRET', '');
+    expect(() => getEnv()).not.toThrow();
+  });
+
+  it('한 provider만 활성화 (Google만 채움, GitHub 비움) — 통과', () => {
+    vi.stubEnv('GOOGLE_OAUTH_CLIENT_ID', 'g-id');
+    vi.stubEnv('GOOGLE_OAUTH_CLIENT_SECRET', 'g-secret');
+    vi.stubEnv('GITHUB_OAUTH_CLIENT_ID', '');
+    vi.stubEnv('GITHUB_OAUTH_CLIENT_SECRET', '');
+    expect(() => getEnv()).not.toThrow();
+  });
+});
