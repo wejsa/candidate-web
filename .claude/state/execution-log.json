@@ -1153,5 +1153,36 @@
     ],
     "totalLines": 2658,
     "timestamp": "2026-05-25T10:47:07+09:00"
+  },
+  {
+    "event": "retro_completed",
+    "taskId": "CANDID-016",
+    "reportPath": "docs/retro/CANDID-016-retro.md",
+    "lessonsLearned": {
+      "added": [
+        "L-029",
+        "L-030",
+        "L-031",
+        "L-032",
+        "L-033"
+      ]
+    },
+    "timestamp": "2026-05-25T10:55:00+09:00"
+  },
+  {
+    "event": "checklist_updated",
+    "files": [
+      ".claude/domains/_base/conventions/database.md",
+      ".claude/domains/_base/checklists/common.md",
+      ".claude/domains/_base/conventions/security.md"
+    ],
+    "lessonsApplied": [
+      "L-029",
+      "L-030",
+      "L-031",
+      "L-032",
+      "L-033"
+    ],
+    "timestamp": "2026-05-25T10:55:00+09:00"
   }
 ]

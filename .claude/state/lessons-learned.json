@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 8,
-    "updatedAt": "2026-05-24T11:32:00+09:00",
+    "version": 9,
+    "updatedAt": "2026-05-25T10:50:00+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -510,6 +510,98 @@
       "appliedCount": 1,
       "createdAt": "2026-05-24T11:32:00+09:00",
       "updatedAt": "2026-05-24T11:32:00+09:00"
+    },
+    {
+      "id": "L-029",
+      "taskId": "CANDID-016",
+      "category": "architecture",
+      "title": "Prisma migrate deploy의 마이그 트랜잭션 wrap — CONCURRENTLY 사용 불가",
+      "description": "Prisma migrate deploy는 각 마이그레이션 파일을 BEGIN..COMMIT 트랜잭션으로 자동 wrap한다(prisma issue #11164). PostgreSQL의 CREATE INDEX CONCURRENTLY는 트랜잭션 블록 안에서 실행 불가 — `ERROR: CREATE INDEX CONCURRENTLY cannot run inside a transaction block`. 따라서 prisma migration.sql에 CONCURRENTLY를 사용하면 운영 첫 배포 시 실패. 회피 옵션: (a) 일반 CREATE INDEX 사용(소량 테이블 대상 + ms 수준 락 허용) (b) 별도 runbook으로 psql 사전 실행 + 마이그는 IF NOT EXISTS no-op (c) prisma-migrate raw exec 분리. CANDID-016 Step 1 in-PR fix(D-MAJOR-1) — PR #57. CANDID-013 동일 패턴 회귀 위험.",
+      "impact": "high",
+      "tags": [
+        "prisma",
+        "migration",
+        "postgres",
+        "concurrently",
+        "transaction",
+        "operational-safety"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T10:50:00+09:00",
+      "updatedAt": "2026-05-25T10:50:00+09:00"
+    },
+    {
+      "id": "L-030",
+      "taskId": "CANDID-016",
+      "category": "quality",
+      "title": "P2002 unique violation 매핑은 err.meta.target 검증 필수",
+      "description": "Prisma P2002(unique constraint) 충돌을 도메인 에러로 매핑할 때 target 검증 없이 모든 P2002를 단일 도메인 에러(예: FILE_ALREADY_EXISTS)로 매핑하면, 향후 같은 모델에 다른 UNIQUE 인덱스(예: checksum_sha256 unique) 추가 시 오매핑 + 사용자 오안내 발생. 패턴: `err.meta?.target` (string | string[])을 화이트리스트 컬럼 집합과 교집합 검사 후 매핑. CANDID-016 Step 2 in-PR fix(D-MAJOR-1+S-MAJOR-1) — PR #58. SSOT 헬퍼는 `lib/files/prisma-errors.ts`로 분리 (resume/confirm 순환 import 동반 해소). 다른 도메인(CANDID-010 signup USER_EMAIL_DUPLICATED, CANDID-036 verification)에도 동일 패턴 적용 가능 — `lib/db/prisma-errors.ts`로 일반화 후보.",
+      "impact": "high",
+      "tags": [
+        "prisma",
+        "p2002",
+        "error-mapping",
+        "unique-constraint",
+        "target-validation"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T10:50:00+09:00",
+      "updatedAt": "2026-05-25T10:50:00+09:00"
+    },
+    {
+      "id": "L-031",
+      "taskId": "CANDID-016",
+      "category": "security",
+      "title": "MIME 화이트리스트에서 generic application/octet-stream 제외",
+      "description": "파일 업로드 MIME 화이트리스트에 application/octet-stream을 폴백으로 허용하면, 임의 바이너리(.exe 등)를 .hwp/.hwpx 같은 허용 확장자로 위장 + octet-stream 선언하여 통과 가능. ClamAV 같은 사후 스캔이 미작동인 도입 초기 기간 동안 악성 파일 저장 위험. 명시 MIME만 허용하고, 클라이언트가 octet-stream으로 업로드 시도 시 거부 → UI에서 명시 MIME 재요청 안내. CANDID-016 Step 2 in-PR fix(S-MAJOR-2+T-MAJOR-1) — PR #58. 회귀 가드: 명시 거부 케이스 테스트 1건 이상 (octet-stream + 허용 확장자 조합).",
+      "impact": "medium",
+      "tags": [
+        "security",
+        "file-upload",
+        "mime",
+        "whitelist",
+        "malware-disguise"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T10:50:00+09:00",
+      "updatedAt": "2026-05-25T10:50:00+09:00"
+    },
+    {
+      "id": "L-032",
+      "taskId": "CANDID-016",
+      "category": "security",
+      "title": "외부 SDK cause는 safe 필드만 추출 후 AppError 전달",
+      "description": "AWS SDK / 외부 라이브러리 에러를 AppError({cause}) 그대로 전달하면, requestId/signedURL/region/credentials 일부 등 민감 정보가 향후 로깅 sink(Sentry/pino) 직렬화로 누출 위험. 응답 본문은 안전하지만 로깅 파이프라인 추가 시 회귀. 패턴: `safeXxxCause(cause)` 헬퍼로 화이트리스트 필드(name/statusCode/requestId)만 추출 → AppError에 plain object 전달. CANDID-016 Step 2 carry fix(S-MAJOR-2) — PR #58. 회귀 가드: 화이트리스트 외 필드 부재 단언 + JSON.stringify 결과에 민감 토큰 미포함 단언.",
+      "impact": "medium",
+      "tags": [
+        "security",
+        "logging",
+        "aws-sdk",
+        "error-cause",
+        "credentials-leak",
+        "defense-in-depth"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T10:50:00+09:00",
+      "updatedAt": "2026-05-25T10:50:00+09:00"
+    },
+    {
+      "id": "L-033",
+      "taskId": "CANDID-016",
+      "category": "architecture",
+      "title": "partial UNIQUE 인덱스에 상태 컬럼 포함 — 사용자 재시도 흐름 보존",
+      "description": "활성 row 1건 강제용 partial UNIQUE 인덱스에 상태 컬럼을 WHERE 절에 포함하면, 비활성 상태(예: INFECTED/FAILED) row가 잔존해도 새 활성 row 생성을 허용해 사용자 재시도 흐름이 자연스럽게 보존된다. CANDID-016 D-MAJOR-2: `WHERE draft_id IS NOT NULL AND virus_scan_status IN (PENDING, CLEAN)`. 부수효과: audit 추적성 유지 + INFECTED row hard-delete 정책과 분리. plan 단계 db-designer 권고에 상태 컬럼 평가 여부를 명시하면 Step 2 이후 추가 마이그 회피 가능. PR #58.",
+      "impact": "medium",
+      "tags": [
+        "postgres",
+        "partial-unique",
+        "state-column",
+        "user-flow",
+        "schema-design"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T10:50:00+09:00",
+      "updatedAt": "2026-05-25T10:50:00+09:00"
     }
   ]
 }

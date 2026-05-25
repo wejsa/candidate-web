@@ -54,6 +54,15 @@
 | 컨텍스트 | 디버깅에 필요한 정보 포함 | MINOR |
 | 성능 | 불필요한 로깅 제거 | MINOR |
 
+## ORM 에러 매핑 (L-030)
+
+| 항목 | 설명 | 심각도 |
+|------|------|--------|
+| **P2002 unique violation 매핑** | Prisma `P2002`를 도메인 에러로 매핑할 때 반드시 `err.meta.target` (string \| string[])을 화이트리스트 컬럼 집합과 교집합 검사. target 검증 없이 모든 P2002를 단일 에러로 매핑하면, 향후 같은 모델에 다른 UNIQUE 인덱스(예: checksum 등) 추가 시 오매핑 + 사용자 오안내. SSOT 헬퍼(`lib/db/prisma-errors.ts` 또는 도메인별 모듈)로 추출 권장. | **MAJOR** |
+| 외부 SDK cause leak | AWS SDK / 외부 라이브러리 에러를 `AppError({cause})` 그대로 전달 금지. `safeXxxCause(cause)` 화이트리스트 헬퍼로 `{name, statusCode, requestId}` 등 안전 필드만 추출 후 plain object 전달. requestId/signedURL/credentials 일부가 로깅 sink(Sentry/pino) 직렬화로 누출되는 사고 차단. 회귀 가드: 화이트리스트 외 필드 부재 단언 + JSON.stringify 결과에 민감 토큰 미포함 단언. (L-032) | **MAJOR** |
+
+> 본 항목은 CANDID-016 회고(L-030, L-032)에서 도입.
+
 ## 사용 방법
 
 이 체크리스트는 `skill-review`, `skill-review-pr` 실행 시 자동으로 로드됩니다.

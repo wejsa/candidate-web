@@ -202,3 +202,35 @@ Prisma `query.{model}.{op}` 후크는 **top-level write에만 발동**한다. `p
 회귀 차단: `tests/integration/prisma-extends-application-nested-write.test.ts`가 L-007 한계의 SSOT 증거로 동작 (fail = wiring 강화 → 컨벤션 갱신 필요).
 
 > **출처**: CANDID-035 Step 3 (docs/retro/CANDID-034-retro.md §3 A1, L-007).
+
+## Prisma migrate deploy의 트랜잭션 wrap — CONCURRENTLY 금지 (L-029)
+
+Prisma `migrate deploy`는 각 마이그레이션 파일을 **BEGIN..COMMIT 트랜잭션으로 자동 wrap**한다 (prisma issue #11164). PostgreSQL `CREATE INDEX CONCURRENTLY`는 트랜잭션 블록 안에서 실행 불가하므로 (`ERROR: CREATE INDEX CONCURRENTLY cannot run inside a transaction block`) 운영 첫 배포 시 마이그가 100% 실패한다.
+
+**컨벤션**: Prisma `migration.sql`에 `CONCURRENTLY` 사용 금지. 대신:
+1. **소량 테이블 + ms 수준 락 허용**: 일반 `CREATE [UNIQUE] INDEX IF NOT EXISTS` 사용 (CANDID-016 채택 — resume_files 운영 초기 0~1k rows)
+2. **대량 테이블 + 락 회피 필수**: 별도 runbook으로 `psql -c "CREATE INDEX CONCURRENTLY ..."` 사전 실행 + 마이그는 `IF NOT EXISTS` no-op
+3. `IF NOT EXISTS` 패턴은 항상 권장 (재실행 안전).
+
+**회귀 가드**: 신규 마이그 PR 리뷰 시 `grep -i concurrently prisma/migrations/*.sql` 자동 검사 권장.
+
+> **출처**: CANDID-016 Step 1 in-PR fix(D-MAJOR-1), PR #57. 동일 패턴 회귀 위험: CANDID-013 마이그(`20260524072500_candid_013_jobposting_list_indexes`) — follow-up task 등록.
+
+## Partial UNIQUE 인덱스의 상태 컬럼 포함 (L-033)
+
+활성 row 1건 강제용 partial UNIQUE 인덱스의 `WHERE` 절에 상태 컬럼을 포함하면, 비활성 상태(`INFECTED`/`FAILED`/`DELETED` 등) row가 잔존해도 새 활성 row 생성을 허용해 사용자 재시도 흐름이 자연스럽게 보존된다.
+
+**패턴 예시** (CANDID-016 resume_files):
+```sql
+CREATE UNIQUE INDEX uk_resume_files_one_per_draft
+  ON resume_files(draft_id)
+  WHERE draft_id IS NOT NULL AND virus_scan_status IN ('PENDING', 'CLEAN');
+```
+
+**효과**:
+- INFECTED row hard-delete 정책과 분리 (audit 추적성 유지)
+- 사용자가 INFECTED 통보 후 깨끗한 파일 재업로드 → partial UNIQUE 평가 외 → 정상 흐름
+
+**plan 단계 가드**: db-designer 권고에 *"활성 row 강제 시 평가 대상 상태 컬럼 명시"*를 포함하여 Step 2 이후 추가 마이그 회피.
+
+> **출처**: CANDID-016 D-MAJOR-2 정책 결정, PR #58.

@@ -192,3 +192,58 @@ class CorsConfig : WebMvcConfigurer {
 | WebSocket | `wss://` 전용 (`ws://` 금지), 서버사이드 Origin 헤더 검증 필수, 핸드셰이크 시 인증 (쿠키 또는 첫 메시지 JWT) |
 | SSE | TLS 필수, 인증 토큰을 URL 쿼리 파라미터에 포함 금지 (헤더 사용) |
 | gRPC | TLS 채널 암호화 필수, 내부 서비스 간 mTLS 권장 |
+
+## 파일 업로드 MIME 화이트리스트 (L-031)
+
+파일 업로드 검증에서 **확장자 + MIME 이중 검증** 시, MIME 화이트리스트에 generic `application/octet-stream`을 폴백으로 허용하면 안 된다.
+
+**위협**: 임의 바이너리(.exe / 셸 스크립트 등)를 허용된 확장자(.hwp / .doc 등)로 위장 + `application/octet-stream` 선언으로 검증 통과 가능. 사후 ClamAV 등이 미작동인 도입 초기 기간 동안 악성 파일 저장 위험.
+
+**컨벤션**:
+- 확장자별 화이트리스트는 **명시 MIME만** 허용 (예: `.hwp` → `application/x-hwp`, `application/haansofthwp`)
+- `application/octet-stream`, `application/x-binary`, `*/*` 등 generic MIME 폴백 금지
+- 클라이언트가 generic MIME으로 업로드 시도하면 422 거부 → UI에서 명시 MIME 재요청 안내
+- 회귀 가드: 명시 거부 케이스 테스트 (octet-stream + 허용 확장자 조합) 최소 1건
+
+**예시 위반**:
+```ts
+// ❌ HWP/HWPX의 octet-stream 폴백 — 악성 파일 위장 표면
+const ALLOWED: Record<Ext, string[]> = {
+  hwp: ['application/x-hwp', 'application/haansofthwp', 'application/octet-stream'], // 위험!
+};
+```
+
+**안전 패턴**:
+```ts
+// ✅ 명시 MIME만 — generic 폴백 제거
+const ALLOWED: Record<Ext, string[]> = {
+  hwp: ['application/x-hwp', 'application/haansofthwp'],
+  hwpx: ['application/hwp+zip'],
+};
+```
+
+> **출처**: CANDID-016 Step 2 in-PR fix(S-MAJOR-2+T-MAJOR-1), PR #58.
+
+## 외부 SDK 에러 cause 화이트리스트 (L-032)
+
+AWS SDK / Stripe SDK / 기타 외부 라이브러리의 에러를 `AppError({cause})` 그대로 전달 금지. SDK 원본 에러에는 `requestId`, signed URL 일부, region, signature 등 민감 정보가 포함될 수 있으며, 향후 로깅 sink(Sentry/pino) 직렬화로 누출 위험.
+
+**컨벤션**:
+- `safeXxxCause(cause)` 헬퍼로 화이트리스트 필드(`name`, `statusCode`, `requestId` 등 운영 추적용)만 추출
+- AppError에는 plain object 전달 (원본 Error 인스턴스 제거)
+- 회귀 가드: 화이트리스트 외 필드 부재 단언 + `JSON.stringify(cause).not.toContain('signature_token')` 단언
+
+**예시**:
+```ts
+function safeS3Cause(cause: unknown): { name: string; statusCode?: number; requestId?: string } {
+  if (cause instanceof S3ServiceException) {
+    return { name: cause.name, statusCode: cause.$metadata?.httpStatusCode, requestId: cause.$metadata?.requestId };
+  }
+  if (cause instanceof Error) return { name: cause.name };
+  return { name: 'UnknownError' };
+}
+
+throw new AppError('FILE_UPLOAD_FAILED', { message: 'presigned URL 발급 실패', cause: safeS3Cause(cause) });
+```
+
+> **출처**: CANDID-016 Step 2 carry fix(S-MAJOR-2), PR #58.
