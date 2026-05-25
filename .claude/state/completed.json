@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 24,
+    "version": 25,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-25T19:48:39+09:00"
+    "updatedAt": "2026-05-25T21:06:42+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -791,6 +791,29 @@
       "testsBefore": 1092,
       "testsAfter": 1107,
       "note": "L-034 첫 적용 (meta-guard). 15 케이스 (12 초기 + 3 in-PR fix). assertion 강도 강화 + /i flag 회귀 가드 + 라인 번호 보존 검증. carry: A-1 tmpDirs race / A-2 spawn 헬퍼 DRY / D-1 CRLF 변형."
+    },
+    "CANDID-042": {
+      "id": "CANDID-042",
+      "title": "CANDID-038 회귀 가드 자동 호출 wiring (skill-review-pr + CI)",
+      "description": "CANDID-038 회고 Action Item HIGH-A2 (L-036 적용 1번째). README L100의 \"PR 리뷰에서 호출\" 선언을 실제 메커니즘으로 backing. (1) `.claude/skills/skill-review-pr/SKILL.md`에 \"마이그 파일(`prisma/migrations/**`) diff 감지 시 `pnpm check:migrations` 자동 실행 + 결과를 reviewer 에이전트에 전달\" Step 2.x 추가, (2) 옵션: `.github/workflows/pr-check.yml`에 check:migrations 단계 추가(가장 강력) 또는 husky pre-push hook 도입. 동일 패턴(자동 호출 wiring)을 향후 다른 가드 도입 시에도 표준화하도록 SKILL.md를 일반화. 추정 ~80줄.",
+      "type": "chore",
+      "priority": "high",
+      "phase": 1,
+      "source": "CANDID-038 retro Action Item HIGH-A2 (L-036)",
+      "dependencies": [
+        "CANDID-038"
+      ],
+      "createdAt": "2026-05-25T18:33:14+09:00",
+      "completedAt": "2026-05-25T21:06:42+09:00",
+      "totalSteps": 1,
+      "totalAdditions": 73,
+      "totalDeletions": 5,
+      "prNumbers": [
+        62
+      ],
+      "fixLoopTotal": 1,
+      "carriedMajors": 6,
+      "note": "L-036 self-referential 첫 적용. SKILL.md §2.4 declarative wiring 매핑 표 + 공급망 공격 차단 (npm script 화이트리스트 + 가드 인프라 변경 감지). README L100 SSOT 동기화. carry 6건 → 향후 신규 가드 도입 시 표 컬럼 확장 + meta-guard 도입 시점 처리."
     }
   }
 }

@@ -1471,5 +1471,31 @@
     "deletedLines": 2,
     "note": "L-036 self-referential 적용 — README 단언 동기화 + 공급망 공격 차단(npm script 화이트리스트 + 가드 인프라 변경 감지).",
     "timestamp": "2026-05-25T21:05:51+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-042",
+    "stepNumber": 1,
+    "prNumber": 62,
+    "mergeMethod": "squash",
+    "mergedLines": 73,
+    "branchDeleted": true,
+    "isLastStep": true,
+    "fixLoop": 1,
+    "timestamp": "2026-05-25T21:06:42+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-042",
+    "totalSteps": 1,
+    "totalAdditions": 73,
+    "totalDeletions": 5,
+    "prNumbers": [
+      62
+    ],
+    "fixLoopTotal": 1,
+    "carriedMajors": 6,
+    "closedLoop": "CANDID-038 → 041 → 042 (L-029 + L-034 + L-036 모두 첫 적용)",
+    "timestamp": "2026-05-25T21:06:42+09:00"
   }
 ]

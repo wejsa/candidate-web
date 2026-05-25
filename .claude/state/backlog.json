@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 42,
     "projectPrefix": "CANDID",
-    "version": 225,
+    "version": 226,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T21:05:51+09:00"
+    "updatedAt": "2026-05-25T21:06:42+09:00"
   },
   "summary": {
     "total": 40,
-    "done": 21,
-    "inProgress": 1,
+    "done": 22,
+    "inProgress": 0,
     "review": 0,
     "todo": 18
   },
@@ -2120,38 +2120,27 @@
       "id": "CANDID-042",
       "title": "CANDID-038 회귀 가드 자동 호출 wiring (skill-review-pr + CI)",
       "description": "CANDID-038 회고 Action Item HIGH-A2 (L-036 적용 1번째). README L100의 \"PR 리뷰에서 호출\" 선언을 실제 메커니즘으로 backing. (1) `.claude/skills/skill-review-pr/SKILL.md`에 \"마이그 파일(`prisma/migrations/**`) diff 감지 시 `pnpm check:migrations` 자동 실행 + 결과를 reviewer 에이전트에 전달\" Step 2.x 추가, (2) 옵션: `.github/workflows/pr-check.yml`에 check:migrations 단계 추가(가장 강력) 또는 husky pre-push hook 도입. 동일 패턴(자동 호출 wiring)을 향후 다른 가드 도입 시에도 표준화하도록 SKILL.md를 일반화. 추정 ~80줄.",
-      "status": "in_progress",
+      "status": "done",
       "type": "chore",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260525-200000",
-      "assignedAt": "2026-05-25T20:58:45+09:00",
-      "lockedFiles": [
-        ".claude/skills/skill-review-pr/SKILL.md",
-        ".claude/domains/_base/checklists/common.md",
-        ".claude/domains/_base/conventions/database.md"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-038"
       ],
       "createdAt": "2026-05-25T18:33:14+09:00",
       "source": "CANDID-038 retro Action Item HIGH-A2 (L-036)",
       "lockTTL": 3600,
-      "updatedAt": "2026-05-25T21:05:51+09:00",
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 62,
-        "fixLoopCount": 1,
-        "autoChainArgs": "62",
-        "updatedAt": "2026-05-25T21:05:51+09:00"
-      },
+      "updatedAt": "2026-05-25T21:06:42+09:00",
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
           "title": "SKILL.md §2.4 추가 + 컨벤션 sync",
           "description": "skill-review-pr/SKILL.md에 Step 2.4 \"Pre-Review Guard Execution\" 신설 (declarative 매핑 표 + 실행 절차 + fail 시 PR 코멘트 포맷 + Trivial SKIP + Step 7 분기 1줄). _base/checklists/common.md L-036 항목 + _base/conventions/database.md §회귀 가드에 \"wiring 완료 (CANDID-042 SKILL.md §2.4)\" 표기.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             ".claude/skills/skill-review-pr/SKILL.md",
             ".claude/domains/_base/checklists/common.md",
@@ -2160,11 +2149,12 @@
           "estimatedLines": 80,
           "prLineLimit": 200,
           "prNumber": 62,
-          "mergedAt": null,
+          "mergedAt": "2026-05-25T21:06:42+09:00",
           "branch": "feature/CANDID-042-step1"
         }
       ],
-      "currentStep": 1
+      "currentStep": 1,
+      "completedAt": "2026-05-25T21:06:42+09:00"
     }
   }
 }
