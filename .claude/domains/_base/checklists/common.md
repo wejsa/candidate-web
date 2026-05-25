@@ -70,8 +70,10 @@
 | **가드 자체 단위 테스트 동반** | 회귀 가드 스크립트(정규식/AST/grep 기반 검출 도구)를 도입하는 PR은 가드 *자체의* 단위 테스트(tmpdir fixture 기반 ≥ 6 케이스 — positive/negative/comment/multiline/edge)를 동반해야 한다. 가드는 무성 실패 시 차단 효과 0이고 그 사실조차 탐지 불가. 별도 follow-up 분리는 가드 무결성 검증 공백 기간을 만든다. (L-034) | **MAJOR** |
 | **자동 호출 wiring 동반** | README/CONVENTION에 "PR 리뷰에서 호출", "CI에서 차단" 같은 자동화 선언을 추가하는 시점에 (a) 실제 wiring(CI workflow, husky hook, skill-review-pr SKILL.md hook 절차) 동반 또는 (b) 즉시 follow-up task 등록 중 택1 필수. 휴먼 수동 호출 의존 시 누적 회귀 발생. wiring SSOT: `skill-review-pr/SKILL.md` §2.4 declarative 매핑 표 (CANDID-042부터 구현). 신규 가드 추가 시 본 표에 행 등록 필수. (L-036) | **MAJOR** |
 | **정규식 멀티라인 false-negative 회피** | SQL/코드의 라인 단위(`RX.test(lines[i])`) 매칭은 토큰 간 줄바꿈을 합법으로 허용하는 언어(PostgreSQL DDL 등)에서 우회 가능. 파일 전체 매칭 + `stripSqlComments`(주석 공백 치환, 라인 보존) + `match.index → 라인 번호 재계산` 패턴 권장. (L-035) | **MAJOR** |
+| **명령어 column 보안 제약** | declarative 매핑 표(예: `skill-review-pr/SKILL.md` §2.4)가 명령어/script column을 가지면 도입 시점에 (a) `&&`/`\|\|`/`;`/`\|`/`$(...)`/백틱/redirection/`curl,wget,nc,bash,sh` inline 호출 금지 (b) 가드 스크립트 본문은 read-only 정적 분석만 허용 (no network, no fs.write 외 tmpdir, no git mutation) (c) 위반 매핑 행 추가 PR REQUEST_CHANGES. 공급망 공격 벡터 차단. (L-038) | **MAJOR** |
+| **환경 오류 escalation 트리거** | 가드 스크립트의 exit code 환경 오류(인프라 누락 등) 처리 정책 작성 시 "동일 PR이 환경 자체를 변경하는가?"를 escalation trigger로 사용. 환경 변경 PR(`scripts/check-*.mjs` 또는 `package.json check:* script` 변경 포함)에서는 exit 2도 REQUEST_CHANGES로 격상해 *가드 무력화 + 위반 동시 제출* 공격 차단. (L-039) | **MAJOR** |
 
-> 본 항목은 CANDID-038 회고(L-034, L-035, L-036)에서 도입. CANDID-038 가드 도입 PR(#60)에서 가드 자체 vitest 부재가 3개 리뷰 에이전트(domain/security/test) MUST 지적 → follow-up 분리 시 무결성 공백 학습.
+> 본 항목은 CANDID-038/041/042 회고(L-034, L-035, L-036, L-038, L-039)에서 도입. closed loop: 가드 도입(038) → 가드 자체 테스트(041) → 가드 호출 wiring + 공급망 방어(042).
 
 ## 사용 방법
 

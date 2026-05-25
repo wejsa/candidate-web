@@ -1497,5 +1497,38 @@
     "carriedMajors": 6,
     "closedLoop": "CANDID-038 → 041 → 042 (L-029 + L-034 + L-036 모두 첫 적용)",
     "timestamp": "2026-05-25T21:06:42+09:00"
+  },
+  {
+    "event": "retro_completed",
+    "taskId": "CANDID-042",
+    "reportPath": "docs/retro/CANDID-042-retro.md",
+    "lessonsLearned": {
+      "added": [
+        "L-037",
+        "L-038",
+        "L-039"
+      ],
+      "appliedCountIncreased": [
+        "L-036"
+      ]
+    },
+    "followUpTasksRegistered": [
+      "CANDID-043",
+      "CANDID-044"
+    ],
+    "closedLoopCompleted": "CANDID-038 → 041 → 042 (3-layer 방어)",
+    "timestamp": "2026-05-25T21:34:03+09:00"
+  },
+  {
+    "event": "checklist_updated",
+    "files": [
+      ".claude/domains/_base/checklists/common.md"
+    ],
+    "lessonsApplied": [
+      "L-038",
+      "L-039"
+    ],
+    "source": "CANDID-042 retro",
+    "timestamp": "2026-05-25T21:34:03+09:00"
   }
 ]
