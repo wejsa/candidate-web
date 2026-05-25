@@ -1119,5 +1119,19 @@
     "agents": "skipped-trivial-fix",
     "round": 2,
     "timestamp": "2026-05-25T10:43:00+09:00"
+  },
+  {
+    "event": "review_in_pr_fix",
+    "taskId": "CANDID-016",
+    "stepNumber": 3,
+    "prNumber": 59,
+    "fixedIssues": [
+      "D-MAJOR-2",
+      "A-MAJOR-1",
+      "S-MAJOR-2"
+    ],
+    "round": 2,
+    "carriedIssues": 9,
+    "timestamp": "2026-05-25T10:46:00+09:00"
   }
 ]
