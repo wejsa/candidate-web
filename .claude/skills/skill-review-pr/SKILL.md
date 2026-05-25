@@ -168,6 +168,11 @@ PR diff에 등록된 파일 패턴이 포함되면 매핑된 npm script 가드�
 > 1. 가드 스크립트 작성 (`scripts/check-{name}.mjs`)
 > 2. 가드 단위 테스트 vitest 작성 (`tests/scripts/check-{name}.test.ts`, ≥ 6 fixture)
 > 3. **본 표에 행 추가** + `package.json`의 `check:{name}` script 등록
+>
+> **보안 제약 (S-MAJOR-1 in-PR fix)** — npm script 컬럼 값 검증:
+> - 허용: 단일 `pnpm <script-name>` 또는 `pnpm run <script-name>` 형식만 (`package.json` `scripts` 항목 직접 참조)
+> - 금지: `&&`, `||`, `;`, `|`, `$(...)`, 백틱(`` ` ``), redirection(`>`/`<`), `curl`/`wget`/`nc`/`bash`/`sh` inline 호출
+> - 위반 매핑 행이 추가된 PR은 REQUEST_CHANGES (공급망 공격 차단). 가드 스크립트 본문이 외부 호출/파일 쓰기/git mutation을 수행하면 *가드 도입 PR* 자체를 REQUEST_CHANGES — 읽기 전용 정적 분석만 허용.
 
 #### 절차
 
@@ -185,7 +190,9 @@ PR diff에 등록된 파일 패턴이 포함되면 매핑된 npm script 가드�
      - **skill-fix 호출 금지** (--auto-fix 무관 — 가드 위반은 인간이 수동 수정 필수)
      - 사용자 안내: "가드 위반 수정 후 `/skill-review-pr {N}` 재실행"
      - 종료
-   - **가드 자체 환경 오류 (exit 2, 스크립트 누락 등)**: WARNING 출력 후 정상 진행 (가드 인프라 문제는 별도 alert, 리뷰 자체는 막지 않음)
+   - **가드 자체 환경 오류 (exit 2, 스크립트 누락 등)**:
+     - 기본: WARNING 출력 + PR 코멘트에 "⚠️ 가드 인프라 오류" 명시 + 정상 진행
+     - **D-MAJOR-3/S-MAJOR-3 in-PR fix — 가드 인프라 변경 PR 감지 시 CRITICAL 격상**: PR diff에 `scripts/check-*.mjs` 삭제·변경 또는 `package.json`의 `check:*` script 삭제·변경이 포함되어 있으면 exit 2를 **REQUEST_CHANGES**로 격상 (사유: "가드 인프라 변경 감지 — 무력화 공격 방어"). 가드 인프라와 위반 동시 제출 공격 차단.
 
 #### 가드 fail PR 코멘트 포맷
 
