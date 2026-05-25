@@ -1,5 +1,5 @@
 import 'server-only';
-import { Prisma, VirusScanStatus } from '@prisma/client';
+import { VirusScanStatus } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import {
@@ -23,7 +23,10 @@ import {
 //      INFECTED/FAILED row는 audit 추적 위해 보존 (partial UNIQUE 평가 외).
 //   4. S3 presigned URL 발급 + 응답 반환.
 //
-// 트랜잭션 경계: 단일 트랜잭션으로 활성 row 조회 + 삭제 (race 차단 — L-024 PostgreSQL row lock).
+// 트랜잭션 경계: D-MAJOR-2 fix (PR #58 in-PR) 주석 정정 — $transaction은 활성 row 조회/삭제 윈도우만
+// 좁힌다. 트랜잭션 커밋 후 ~ presign/confirm 도착 사이에 다른 탭 confirm이 끼어들 수 있으나,
+// **DB partial UNIQUE(uk_resume_files_one_per_draft)가 최종 방어선**이라 데이터 정합성은 보장.
+// 늦은 confirm은 P2002 → 409 FILE_ALREADY_EXISTS로 사용자에게 안내(교체 후 재시도).
 // S3 객체 정리는 *트랜잭션 외부* fire-and-forget (BR-TX-02). 실패는 audit 로그로 분류
 // (본 task는 최소 구현 — 본격 정리는 CANDID-029 야간 배치 위임).
 
@@ -58,7 +61,7 @@ export async function issueResumePresign(
 
   // 3. 기존 활성 첨부 정리 — 트랜잭션 내 단일 SELECT + DELETE.
   //    partial UNIQUE는 PENDING/CLEAN만 평가하므로 동일 조건으로 deleteMany.
-  //    L-024: deleteMany WHERE는 row-lock 자동 — 동시 두 요청 중 한 쪽만 row 소진.
+  //    트랜잭션은 race 윈도우를 좁힐 뿐 (D-MAJOR-2 정정), DB partial UNIQUE가 최종 방어선.
   const replacedPaths = await basePrisma.$transaction(async (tx) => {
     const active = await tx.resumeFile.findMany({
       where: {
@@ -89,7 +92,4 @@ export async function issueResumePresign(
   return { ...presigned, replacedPaths };
 }
 
-// confirm.ts에서 공유 — Prisma 의존성 isolation.
-export function isPrismaUniqueViolation(err: unknown): err is Prisma.PrismaClientKnownRequestError {
-  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002';
-}
+// A-MAJOR-1 fix (PR #58 in-PR): isPrismaUniqueViolation을 `@/lib/files/prisma-errors`로 이관 (순환 import 방지).

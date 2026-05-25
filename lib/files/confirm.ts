@@ -8,7 +8,9 @@ import {
   type ConfirmRequest,
 } from '@/lib/files/validation';
 import { isValidResumeStoredPath } from '@/lib/files/storage';
-import { isPrismaUniqueViolation } from '@/lib/files/resume';
+// A-MAJOR-1 + D-MAJOR-1 + S-MAJOR-1 fix (PR #58 in-PR): isResumeActiveUniqueViolation으로 교체.
+// 순환 import 해소(resume → confirm 의존성 제거) + P2002 target 검증으로 무차별 매핑 차단.
+import { isResumeActiveUniqueViolation } from '@/lib/files/prisma-errors';
 
 // CANDID-016 Step 2 — confirmResumeUpload 비즈니스.
 //
@@ -72,7 +74,8 @@ export async function confirmResumeUpload(params: ConfirmResumeParams): Promise<
     });
     return created;
   } catch (err) {
-    if (isPrismaUniqueViolation(err)) {
+    // D-MAJOR-1/S-MAJOR-1 fix: target 검증된 헬퍼만 매핑. 다른 UNIQUE 충돌은 그대로 전파.
+    if (isResumeActiveUniqueViolation(err)) {
       // partial UNIQUE — 동시 탭 race. 호출자에게 안내 (409 → 사용자 재시도).
       throw new AppError('FILE_ALREADY_EXISTS', {
         message: '이미 첨부된 파일이 있습니다. 기존 파일 교체 후 다시 시도해 주세요.',

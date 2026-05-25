@@ -44,6 +44,7 @@ import {
   deleteResumeObject,
   isValidResumeStoredPath,
   presignResumeUpload,
+  safeS3Cause,
 } from '@/lib/files/storage';
 
 function stubS3Env(): void {
@@ -243,3 +244,55 @@ describe('storedPath round-trip invariant (T-MAJOR-1 fix)', () => {
     );
   });
 });
+
+// T-MAJOR-2 fix (PR #58 in-PR): safeS3Cause 화이트리스트 회귀 가드.
+// SDK 원본 메시지/endpoint/signature가 cause 직렬화로 누출되지 않도록 필드를 좁힌다.
+describe('safeS3Cause (T-MAJOR-2 fix)', () => {
+  it('S3ServiceException → {name, statusCode, requestId} 만 추출', () => {
+    const ex = new S3ServiceException({
+      name: 'AccessDenied',
+      message: 'Signature=AKIA...secret_leak',
+      $fault: 'client',
+      $metadata: { httpStatusCode: 403, requestId: 'req-abc-123' },
+    });
+    const cause = safeS3Cause(ex);
+    expect(cause).toEqual({
+      name: 'AccessDenied',
+      statusCode: 403,
+      requestId: 'req-abc-123',
+    });
+    // 화이트리스트 외 필드 부재 가드 — message/endpoint/signature 누출 차단.
+    expect(Object.keys(cause).sort()).toEqual(['name', 'requestId', 'statusCode']);
+    expect(JSON.stringify(cause)).not.toContain('secret_leak');
+  });
+
+  it('일반 Error → {name} 만', () => {
+    const cause = safeS3Cause(new TypeError('something broke'));
+    expect(cause).toEqual({ name: 'TypeError' });
+    expect(JSON.stringify(cause)).not.toContain('broke');
+  });
+
+  it('unknown (객체/null/undefined) → {name: UnknownError}', () => {
+    expect(safeS3Cause({ foo: 'bar' })).toEqual({ name: 'UnknownError' });
+    expect(safeS3Cause(null)).toEqual({ name: 'UnknownError' });
+    expect(safeS3Cause(undefined)).toEqual({ name: 'UnknownError' });
+    expect(safeS3Cause('plain string')).toEqual({ name: 'UnknownError' });
+  });
+
+  it('$metadata 누락 — statusCode/requestId undefined', () => {
+    const ex = new S3ServiceException({
+      name: 'InternalError',
+      message: 'x',
+      $fault: 'server',
+      $metadata: {},
+    });
+    const cause = safeS3Cause(ex);
+    expect(cause.name).toBe('InternalError');
+    expect(cause.statusCode).toBeUndefined();
+    expect(cause.requestId).toBeUndefined();
+  });
+});
+
+// D-MAJOR-1/S-MAJOR-1 fix (PR #58 in-PR) 회귀 가드: confirm.test.ts에서 검증되는 정책이 깨지지 않도록
+// 본 storage 모듈에서 노출하는 정규식 가드는 별도 확장자 화이트리스트 가지지 않음(이중 방어로 validation.ts 책임).
+// 향후 확장자 화이트리스트 통합 시 D-MINOR-1 SSOT 가드 추가 가능.

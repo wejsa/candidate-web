@@ -34,6 +34,10 @@ describe('assertResumeContentType — 거부', () => {
     ['미허용 확장자', 'malware.exe', 'application/x-msdownload', 'FILE_TYPE_NOT_ALLOWED'],
     ['MIME 불일치', 'CV.pdf', 'image/jpeg', 'FILE_TYPE_NOT_ALLOWED'],
     ['MIME 불일치 (확장자 docx + MIME pdf)', 'CV.docx', 'application/pdf', 'FILE_TYPE_NOT_ALLOWED'],
+    // S-MAJOR-2 + T-MAJOR-1 fix (PR #58 in-PR): HWP/HWPX의 octet-stream 폴백 제거 회귀 가드.
+    // 임의 바이너리(.exe 등)를 .hwp로 위장 + octet-stream 선언으로 우회 차단.
+    ['HWP + octet-stream 거부 (위장 차단)', '이력서.hwp', 'application/octet-stream', 'FILE_TYPE_NOT_ALLOWED'],
+    ['HWPX + octet-stream 거부', '이력서.hwpx', 'application/octet-stream', 'FILE_TYPE_NOT_ALLOWED'],
   ])('%s — %s + %s', (_label, filename, mime, expectedCode) => {
     try {
       assertResumeContentType(filename, mime);

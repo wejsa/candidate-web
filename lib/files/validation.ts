@@ -11,14 +11,16 @@ export const RESUME_ALLOWED_EXTS = ['pdf', 'docx', 'doc', 'hwp', 'hwpx'] as cons
 export type ResumeExt = (typeof RESUME_ALLOWED_EXTS)[number];
 
 // 확장자 → 허용 MIME 집합. 클라이언트가 잘못된 MIME을 보내면 거부.
-// HWP는 운영체제별로 application/x-hwp / application/haansofthwp / application/octet-stream까지
-// 다양하게 보낼 수 있어 마지막을 폴백으로 허용 — 단, 확장자가 .hwp/.hwpx인 경우에 한정.
+// S-MAJOR-2 + T-MAJOR-1 fix (PR #58 in-PR): HWP/HWPX의 `application/octet-stream` 폴백 제거.
+// 폴백 허용 시 임의 바이너리(.exe 등)를 .hwp로 위장 + octet-stream 선언으로 통과 가능 →
+// ClamAV(CANDID-029) 미작동 PHASE-2 기간 동안 악성 파일 저장 위험. 명시 HWP MIME만 허용.
+// 클라이언트가 octet-stream으로 업로드 시도하면 거부 → UI에서 명시 MIME 재요청 안내(BR-FILE-01).
 const RESUME_MIME_BY_EXT: Record<ResumeExt, readonly string[]> = {
   pdf: ['application/pdf'],
   docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   doc: ['application/msword', 'application/vnd.ms-word'],
-  hwp: ['application/x-hwp', 'application/haansofthwp', 'application/octet-stream'],
-  hwpx: ['application/hwp+zip', 'application/octet-stream'],
+  hwp: ['application/x-hwp', 'application/haansofthwp'],
+  hwpx: ['application/hwp+zip'],
 };
 
 // BR-FILE-02: 최대 10MB. SDK/응답 시 BigInt 변환은 호출자 책임.

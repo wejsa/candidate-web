@@ -31,7 +31,12 @@ function isStorageConfigured(): boolean {
 
 // S-MAJOR-2 fix (PR #57 carry): S3 SDK 원본 에러를 직접 cause에 전달하지 않고 safe 필드만 추출.
 // requestId / endpoint / signature 등이 향후 로깅 sink(Sentry/pino) 직렬화로 누출되는 위험 차단.
-function safeS3Cause(cause: unknown): { name: string; statusCode?: number; requestId?: string } {
+// T-MAJOR-2 fix (PR #58 in-PR): export로 단위 테스트 노출 — 화이트리스트 회귀 가드.
+export function safeS3Cause(cause: unknown): {
+  name: string;
+  statusCode?: number;
+  requestId?: string;
+} {
   if (cause instanceof S3ServiceException) {
     return {
       name: cause.name,
