@@ -115,6 +115,22 @@ describe('check-migrations-no-concurrently — allowlist', () => {
     );
     const r = runGuard(cwd);
     expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('00000000_t/migration.sql');
+  });
+
+  it('allowlist 주석/빈 라인 필터링 (T-MAJOR-4 in-PR fix)', () => {
+    const cwd = track(
+      setupTempProject({
+        migrations: { '00000000_legacy': 'CREATE INDEX CONCURRENTLY "x" ON "t"(a);\n' },
+        allowlist: [
+          '# legacy 마이그 — 회수 예정',
+          '',
+          'prisma/migrations/00000000_legacy/migration.sql',
+        ],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(0);
   });
 });
 
@@ -152,9 +168,10 @@ describe('check-migrations-no-concurrently — DETECT 케이스 (L-035 회귀 �
     const r = runGuard(cwd);
     expect(r.exitCode).toBe(1);
     expect(r.stderr).toMatch(/migration\.sql:2/);
+    expect(r.stderr).toMatch(/CREATE\s+INDEX\s+CONCURRENTLY/i);
   });
 
-  it('멀티라인 DDL `CREATE INDEX\\n  CONCURRENTLY` → exit 1 (L-035 핵심)', () => {
+  it('멀티라인 DDL `CREATE INDEX\\n  CONCURRENTLY` → exit 1 + 라인 1 보고 (L-035 핵심)', () => {
     const cwd = track(
       setupTempProject({
         migrations: { '00000000_t': 'CREATE INDEX\n  CONCURRENTLY "idx_x" ON "t" (a);\n' },
@@ -162,12 +179,34 @@ describe('check-migrations-no-concurrently — DETECT 케이스 (L-035 회귀 �
     );
     const r = runGuard(cwd);
     expect(r.exitCode).toBe(1);
+    // T-MAJOR-3 in-PR fix: 라인 번호 단언 (stripSqlComments 라인 보존 메커니즘 검증)
+    expect(r.stderr).toMatch(/migration\.sql:1/);
+  });
+
+  it('블록 주석 후 violation — 라인 번호 정확성 (stripSqlComments 라인 보존)', () => {
+    const sql = '/* 3 줄\n블록\n주석 */\nCREATE INDEX CONCURRENTLY "x" ON "t"(a);\n';
+    const cwd = track(setupTempProject({ migrations: { '00000000_t': sql } }));
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    // T-MAJOR-3 in-PR fix: 코멘트 4줄 + violation 4번째 라인 — stripSqlComments가 라인 보존하는지
+    expect(r.stderr).toMatch(/migration\.sql:4/);
   });
 
   it('CREATE UNIQUE INDEX CONCURRENTLY → exit 1', () => {
     const cwd = track(
       setupTempProject({
         migrations: { '00000000_t': 'CREATE UNIQUE INDEX CONCURRENTLY "u_x" ON "t" (a);\n' },
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toMatch(/CREATE\s+UNIQUE\s+INDEX\s+CONCURRENTLY/i);
+  });
+
+  it('소문자 `create index concurrently` → exit 1 (T-MAJOR-1: /i flag 회귀 가드)', () => {
+    const cwd = track(
+      setupTempProject({
+        migrations: { '00000000_t': 'create index concurrently "x" on "t"(a);\n' },
       }),
     );
     const r = runGuard(cwd);
@@ -182,6 +221,7 @@ describe('check-migrations-no-concurrently — DETECT 케이스 (L-035 회귀 �
     );
     const r = runGuard(cwd);
     expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('00000000_t/migration.sql');
   });
 
   it('여러 파일에 걸친 다중 위반 → 모두 보고 + exit 1', () => {
@@ -197,6 +237,8 @@ describe('check-migrations-no-concurrently — DETECT 케이스 (L-035 회귀 �
     const r = runGuard(cwd);
     expect(r.exitCode).toBe(1);
     expect(r.stderr).toMatch(/3건 감지/);
+    expect(r.stderr).toContain('00000000_a/migration.sql');
+    expect(r.stderr).toContain('00000001_b/migration.sql');
   });
 });
 
