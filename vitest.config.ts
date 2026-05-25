@@ -7,13 +7,19 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['tests/**/*.test.ts'],
+    // CANDID-016 Step 3: .test.tsx 포함 (RTL-less minimal renderer 패턴).
+    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
     // CANDID-035 Step 1: 통합 테스트는 별도 runner(`vitest.config.integration.ts`)에서 실행.
     exclude: ['tests/integration/**', 'node_modules/**', 'dist/**', '.next/**'],
     setupFiles: ['tests/setup.ts'],
-    // CANDID-015 Step 4: client hook 단위 테스트만 jsdom 환경 (window/timer/event 필요).
-    // 다른 테스트는 node 환경 유지. RSC 컴포넌트 테스트 인프라는 F-5 carry (FU1 위임).
-    environmentMatchGlobs: [['tests/lib/drafts/use-auto-save.test.ts', 'jsdom']],
+    // CANDID-015 Step 4 + CANDID-016 Step 3: 브라우저 환경(XHR/window/event) 필요 테스트만 jsdom.
+    // 다른 테스트는 node 환경 유지.
+    // T-CRITICAL-1 fix (PR #59 회차 1): ResumeUploadStep.test.tsx dead reference 제거.
+    // RTL 컴포넌트 테스트는 follow-up task로 carry — 도입 시 본 배열에 다시 추가.
+    environmentMatchGlobs: [
+      ['tests/lib/drafts/use-auto-save.test.ts', 'jsdom'],
+      ['tests/lib/files/client.test.ts', 'jsdom'],
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
