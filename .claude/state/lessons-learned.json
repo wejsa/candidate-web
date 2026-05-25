@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 11,
-    "updatedAt": "2026-05-25T21:33:07+09:00",
+    "version": 12,
+    "updatedAt": "2026-05-25T23:33:08+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -617,9 +617,9 @@
         "tooling",
         "meta-testing"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-25T18:31:21+09:00",
-      "updatedAt": "2026-05-25T18:31:21+09:00"
+      "updatedAt": "2026-05-25T23:33:08+09:00"
     },
     {
       "id": "L-035",
@@ -652,9 +652,9 @@
         "governance",
         "closed-loop"
       ],
-      "appliedCount": 2,
+      "appliedCount": 3,
       "createdAt": "2026-05-25T18:31:21+09:00",
-      "updatedAt": "2026-05-25T21:33:07+09:00"
+      "updatedAt": "2026-05-25T23:33:08+09:00"
     },
     {
       "id": "L-037",
@@ -669,9 +669,9 @@
         "plan-checklist",
         "consistency"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-25T21:33:07+09:00",
-      "updatedAt": "2026-05-25T21:33:07+09:00"
+      "updatedAt": "2026-05-25T23:33:08+09:00"
     },
     {
       "id": "L-038",
@@ -706,6 +706,58 @@
       "appliedCount": 1,
       "createdAt": "2026-05-25T21:33:07+09:00",
       "updatedAt": "2026-05-25T21:33:07+09:00"
+    },
+    {
+      "id": "L-040",
+      "taskId": "CANDID-043",
+      "category": "architecture",
+      "title": "Binding 모델 — alias 관계에서 SSOT 위치 명확화. 양방향 매핑이 아닌 원본 → 별칭 단방향",
+      "description": "시스템에 alias가 있을 때(예: `skill-review-pr` §2.4의 npm script name `check:migrations`와 실제 파일 `scripts/check-migrations-no-concurrently.mjs`), SSOT 한 곳을 정하고 반대 방향은 도출만 허용. 양방향 추론 가능 코드는 한 방향이 깨질 때 silent failure. CANDID-043에서 binding 모델: SKILL.md row(npm name 명시) → package.json scripts[npm name](파일 경로 정의) → file 존재 확인. package.json이 SSOT. 초기 가정(\"npm name = file base name\")이 실 매핑과 mismatch → impl 단계 즉시 재설계. 일반화: alias 시스템 설계 시 plan 단계에서 \"SSOT가 어디인가?\" 질문 필수.",
+      "impact": "medium",
+      "tags": [
+        "ssot",
+        "alias",
+        "binding",
+        "naming",
+        "static-analysis"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T23:33:08+09:00",
+      "updatedAt": "2026-05-25T23:33:08+09:00"
+    },
+    {
+      "id": "L-041",
+      "taskId": "CANDID-043",
+      "category": "process",
+      "title": "impl 단계 핵심 algorithm은 실 데이터로 즉시 dry-run — review까지 미루지 않기",
+      "description": "CANDID-043 impl에서 초기 알고리즘이 실제 매핑(`check:migrations` ↔ `check-migrations-no-concurrently.mjs`)에서 깨진 것을 즉시 dry-run으로 발견 → binding 모델 재설계 (~10분 비용). review까지 끌었다면 3-에이전트 재검증 + plan 결정 번복 + 라인 부담 누적. 정책: impl 중 핵심 알고리즘은 (1) 실 데이터(현재 프로젝트 상태)로 한 번 dry-run (2) 결과 정상이면 단위 테스트 작성 (3) 결과 비정상이면 즉시 plan 가정 재검토. plan 단계 가정 → impl 단계 즉시 검증 → review 단계는 *추가* design fix만 surface.",
+      "impact": "medium",
+      "tags": [
+        "impl-process",
+        "algorithm-validation",
+        "dry-run",
+        "plan-cross-check"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T23:33:08+09:00",
+      "updatedAt": "2026-05-25T23:33:08+09:00"
+    },
+    {
+      "id": "L-042",
+      "taskId": "CANDID-043",
+      "category": "architecture",
+      "title": "Dynamic self-detection 패턴 — import.meta.url 기반 SELF_BASE + canonical cwd-relative 경로",
+      "description": "meta-guard / self-validating tool에서 정적 하드코딩 상수는 rename 회귀에 silent failure 위험. 패턴: (1) `SELF_BASE = basename(fileURLToPath(import.meta.url))`로 동적 도출 (rename 자동 추종) (2) canonical 경로 `${dir}/check-${SELF_BASE}.{ext}`로 fixture(tmpdir cwd ≠ script location) 호환 (3) self-integrity check는 `existsSync(SELF_PATH)` gate로 production-only 실행 → fixture 격리 유지. CANDID-043 D-2/T-5 in-PR fix. 일반화: 자기 자신을 참조해야 하는 도구는 정적 상수 대신 import.meta.url 동적 도출 + canonical 경로 조합으로 rename 회귀 + fixture 호환 동시 달성.",
+      "impact": "medium",
+      "tags": [
+        "self-reference",
+        "meta-tooling",
+        "rename-resilience",
+        "fixture-isolation"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T23:33:08+09:00",
+      "updatedAt": "2026-05-25T23:33:08+09:00"
     }
   ]
 }

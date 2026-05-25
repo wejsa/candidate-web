@@ -72,8 +72,9 @@
 | **정규식 멀티라인 false-negative 회피** | SQL/코드의 라인 단위(`RX.test(lines[i])`) 매칭은 토큰 간 줄바꿈을 합법으로 허용하는 언어(PostgreSQL DDL 등)에서 우회 가능. 파일 전체 매칭 + `stripSqlComments`(주석 공백 치환, 라인 보존) + `match.index → 라인 번호 재계산` 패턴 권장. (L-035) | **MAJOR** |
 | **명령어 column 보안 제약** | declarative 매핑 표(예: `skill-review-pr/SKILL.md` §2.4)가 명령어/script column을 가지면 도입 시점에 (a) `&&`/`\|\|`/`;`/`\|`/`$(...)`/백틱/redirection/`curl,wget,nc,bash,sh` inline 호출 금지 (b) 가드 스크립트 본문은 read-only 정적 분석만 허용 (no network, no fs.write 외 tmpdir, no git mutation) (c) 위반 매핑 행 추가 PR REQUEST_CHANGES. 공급망 공격 벡터 차단. (L-038) | **MAJOR** |
 | **환경 오류 escalation 트리거** | 가드 스크립트의 exit code 환경 오류(인프라 누락 등) 처리 정책 작성 시 "동일 PR이 환경 자체를 변경하는가?"를 escalation trigger로 사용. 환경 변경 PR(`scripts/check-*.mjs` 또는 `package.json check:* script` 변경 포함)에서는 exit 2도 REQUEST_CHANGES로 격상해 *가드 무력화 + 위반 동시 제출* 공격 차단. (L-039) | **MAJOR** |
+| **Dynamic self-detection 권장** | self-validating tool(meta-guard 등 자기 자신을 참조해야 하는 도구)의 self-paths는 정적 하드코딩 상수 대신 `import.meta.url` 기반 `SELF_BASE`(basename 추출) + canonical cwd-relative 경로(`${dir}/check-${SELF_BASE}.{ext}`)로 동적 도출. rename 회귀 자동 추종 + fixture(tmpdir) 격리 호환. self-integrity check는 `existsSync(SELF_PATH)` gate로 production-only 실행. (L-042) | **MAJOR** |
 
-> 본 항목은 CANDID-038/041/042 회고(L-034, L-035, L-036, L-038, L-039)에서 도입. closed loop: 가드 도입(038) → 가드 자체 테스트(041) → 가드 호출 wiring + 공급망 방어(042).
+> 본 항목은 CANDID-038/041/042/043 회고(L-034, L-035, L-036, L-038, L-039, L-042)에서 도입. closed loop **4-layer 방어 완성**: 가드 도입(038) → 가드 자체 테스트(041) → 가드 호출 wiring + 공급망 방어(042) → wiring 일관성 meta-guard + dynamic self-detection(043).
 
 ## 사용 방법
 

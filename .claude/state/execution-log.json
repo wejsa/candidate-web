@@ -1636,5 +1636,45 @@
     },
     "closedLoopComplete": "CANDID-038 → 041 → 042 → 043 — 4-layer 방어 완성",
     "timestamp": "2026-05-25T23:09:03+09:00"
+  },
+  {
+    "event": "retro_completed",
+    "taskId": "CANDID-043",
+    "reportPath": "docs/retro/CANDID-043-retro.md",
+    "lessonsLearned": {
+      "added": [
+        "L-040",
+        "L-041",
+        "L-042"
+      ],
+      "appliedCountIncreased": [
+        "L-034",
+        "L-036",
+        "L-037"
+      ]
+    },
+    "followUpTasksRegistered": [
+      "CANDID-045"
+    ],
+    "closedLoopComplete": "CANDID-038 → 041 → 042 → 043 (4-layer 방어 완성)",
+    "cumulative": {
+      "tasks": 4,
+      "lines": 924,
+      "fixLoops": 4,
+      "carryMajors": 21,
+      "lessonsAdded": 9
+    },
+    "timestamp": "2026-05-25T23:34:34+09:00"
+  },
+  {
+    "event": "checklist_updated",
+    "files": [
+      ".claude/domains/_base/checklists/common.md"
+    ],
+    "lessonsApplied": [
+      "L-042"
+    ],
+    "source": "CANDID-043 retro",
+    "timestamp": "2026-05-25T23:34:34+09:00"
   }
 ]
