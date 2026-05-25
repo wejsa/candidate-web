@@ -1040,5 +1040,24 @@
       "test"
     ],
     "timestamp": "2026-05-25T10:05:00+09:00"
+  },
+  {
+    "event": "review_in_pr_fix",
+    "taskId": "CANDID-016",
+    "stepNumber": 2,
+    "prNumber": 58,
+    "fixedIssues": [
+      "A-MAJOR-1",
+      "D-MAJOR-1",
+      "S-MAJOR-1",
+      "S-MAJOR-2",
+      "T-MAJOR-1",
+      "T-MAJOR-2",
+      "D-MAJOR-2"
+    ],
+    "carriedIssues": 6,
+    "testCountBefore": 1062,
+    "testCountAfter": 1068,
+    "timestamp": "2026-05-25T10:15:00+09:00"
   }
 ]
