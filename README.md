@@ -97,6 +97,7 @@ pnpm db:down       # docker compose down (볼륨 보존)
 - Prisma client는 `lib/prisma.ts`의 singleton 사용. **클라이언트 컴포넌트 import 금지** (`'server-only'` 가드).
 - 운영 DB는 관리형 PostgreSQL 권장 (`DATABASE_URL`은 시크릿 매니저에서 주입).
 - **Destructive migration guard** (CANDID-030 부터): `DROP COLUMN` / 컬럼 `TYPE` 변경 같은 destructive ALTER는 SQL 본문 상단에 `COUNT(*) > 0` guard를 동반해야 한다 (`.claude/domains/_base/conventions/database.md` 참조).
+- **CONCURRENTLY 회귀 가드** (CANDID-038 부터): `pnpm check:migrations` — 신규 `CREATE INDEX CONCURRENTLY` 감지 시 exit 1 (L-029, `_base/conventions/database.md` §"Prisma migrate deploy의 트랜잭션 wrap" 참조). PR 리뷰에서 호출.
 - ⚠ **이미 적용된 마이그레이션의 SQL 수정 시 Prisma hash mismatch**: 본 PR(CANDID-030)에서 `20260512210900_candid_008_pii_encryption/migration.sql`에 guard 추가 → 이미 적용된 dev DB에서는 `prisma migrate dev` 실행 시 drift 감지. dev 환경은 `prisma migrate reset`으로 재적용 권장 (운영 데이터 없음 가정 — CANDID-008 dev-only 마이그레이션 정합).
 
 ### 통합 테스트 (CANDID-035)
