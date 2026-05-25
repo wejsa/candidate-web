@@ -1550,5 +1550,61 @@
     "isLastStep": true,
     "note": "Layer 4 방어 완성 — 4자 일치 meta-guard. 11 fixture L-034 self-application. 강력 경고 영역(439/350=125%) but 차단 미달.",
     "timestamp": "2026-05-25T22:57:55+09:00"
+  },
+  {
+    "event": "guard_executed",
+    "taskId": "CANDID-043",
+    "stepNumber": 1,
+    "prNumber": 63,
+    "guard": "G-META-WIRING (preflight)",
+    "exitCode": 0,
+    "note": "self-validation 통과 (1개 guard entry 4자 일치). §2.4 step 0 첫 운영 사례.",
+    "timestamp": "2026-05-25T23:08:20+09:00"
+  },
+  {
+    "event": "review_completed",
+    "taskId": "CANDID-043",
+    "stepNumber": 1,
+    "prNumber": 63,
+    "decision": "COMMENT",
+    "reason": "self-PR + CRITICAL 0",
+    "critical": 0,
+    "major": 12,
+    "minor": 7,
+    "info": 7,
+    "agents": [
+      "domain",
+      "security",
+      "test"
+    ],
+    "preReviewGuard": "PASS (G-META-WIRING preflight 1 entry OK)",
+    "timestamp": "2026-05-25T23:08:20+09:00"
+  },
+  {
+    "event": "review_in_pr_fix",
+    "taskId": "CANDID-043",
+    "stepNumber": 1,
+    "prNumber": 63,
+    "fixedIssues": [
+      "D-2+T-5 (dynamic self-detection)",
+      "T-2+T-6 (continue invariant 동결)"
+    ],
+    "fixLoopCount": 1,
+    "carriedIssues": 10,
+    "carriedMajors": [
+      "D-1 exit 2 스크립트 자체 보고",
+      "D-3 binding alias 일관성",
+      "D-4 PKG_VALUE_RX runner 화이트리스트",
+      "D-5 META 가드 디렉토리",
+      "D-6 SKILL.md 섹션 번호",
+      "T-1 다중 row",
+      "T-3 ROW_RX 헤더 회귀",
+      "T-4 parseNpmScriptName 실패"
+    ],
+    "addedLines": 55,
+    "deletedLines": 8,
+    "testCountAfter": 12,
+    "note": "rename 회귀 자동 차단 + continue invariant 동결 + self-integrity 명시 검증.",
+    "timestamp": "2026-05-25T23:08:20+09:00"
   }
 ]
