@@ -1336,5 +1336,48 @@
     "isLastStep": true,
     "note": "L-034 첫 적용. 12 케이스 (clean/allowlist/comment/DETECT/edge). spawn+tmpdir 패턴. 가드 스크립트 변경 0.",
     "timestamp": "2026-05-25T19:40:44+09:00"
+  },
+  {
+    "event": "review_completed",
+    "taskId": "CANDID-041",
+    "stepNumber": 1,
+    "prNumber": 61,
+    "decision": "COMMENT",
+    "reason": "self-PR + CRITICAL 0",
+    "critical": 0,
+    "major": 7,
+    "minor": 12,
+    "info": 6,
+    "agents": [
+      "domain",
+      "security",
+      "test"
+    ],
+    "timestamp": "2026-05-25T19:47:41+09:00"
+  },
+  {
+    "event": "review_in_pr_fix",
+    "taskId": "CANDID-041",
+    "stepNumber": 1,
+    "prNumber": 61,
+    "fixedIssues": [
+      "T-MAJOR-1 (/i flag 회귀 가드)",
+      "T-MAJOR-2 (assertion 강도)",
+      "T-MAJOR-3 (라인 번호 검증)",
+      "T-MAJOR-4 (allowlist 주석/공백)"
+    ],
+    "fixLoopCount": 1,
+    "carriedIssues": 3,
+    "carriedMajors": [
+      "A-1 (tmpDirs 모듈 스코프)",
+      "A-2 (spawn 헬퍼 DRY)",
+      "D-1 (CRLF 변형)"
+    ],
+    "addedLines": 43,
+    "deletedLines": 1,
+    "testCountBefore": 12,
+    "testCountAfter": 15,
+    "note": "meta-guard 신뢰도 확보 — 4 MAJOR 모두 test 영역 in-PR fix. 전체 회귀 1092→1107.",
+    "timestamp": "2026-05-25T19:47:41+09:00"
   }
 ]
