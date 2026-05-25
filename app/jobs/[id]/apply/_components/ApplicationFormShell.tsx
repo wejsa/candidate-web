@@ -9,6 +9,8 @@ import { useAutoSave } from '@/lib/drafts/use-auto-save';
 import { PersonalInfoStep } from './PersonalInfoStep';
 import { StepNavigation } from './StepNavigation';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
+// CANDID-016 Step 3: Step 2(이력서 첨부) 본문 통합.
+import { ResumeUploadStep } from './ResumeUploadStep';
 
 interface Props {
   jobId: number;
@@ -100,7 +102,13 @@ export function ApplicationFormShell({
           />
         )}
         {currentStep === 2 && (
-          <p>이력서 · 포트폴리오 단계 (CANDID-016/017에서 구현 예정)</p>
+          <ResumeUploadStep
+            draftId={jobId}
+            onAttached={() => {
+              // ResumeFile 메타는 서버 DB(resume_files.draft_id)로 직접 연결되므로 payload 갱신 불요.
+              // CANDID-018 최종 제출 시 BR-TX-01 단일 트랜잭션으로 draft → application 이관.
+            }}
+          />
         )}
         {currentStep === 3 && (
           <p>자기소개 · 추가 질문 단계 (CANDID-018에서 구현 예정)</p>
