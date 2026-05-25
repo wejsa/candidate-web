@@ -1280,5 +1280,41 @@
     "fixLoopTotal": 1,
     "carriedMajors": 4,
     "timestamp": "2026-05-25T17:23:50+09:00"
+  },
+  {
+    "event": "retro_completed",
+    "taskId": "CANDID-038",
+    "reportPath": "docs/retro/CANDID-038-retro.md",
+    "lessonsLearned": {
+      "added": [
+        "L-034",
+        "L-035",
+        "L-036"
+      ],
+      "appliedCountIncreased": [
+        "L-029",
+        "L-022"
+      ]
+    },
+    "followUpTasksRegistered": [
+      "CANDID-041",
+      "CANDID-042"
+    ],
+    "timestamp": "2026-05-25T18:33:14+09:00"
+  },
+  {
+    "event": "checklist_updated",
+    "files": [
+      ".claude/domains/_base/conventions/database.md",
+      ".claude/domains/_base/checklists/common.md"
+    ],
+    "lessonsApplied": [
+      "L-029",
+      "L-034",
+      "L-035",
+      "L-036"
+    ],
+    "source": "CANDID-038 retro",
+    "timestamp": "2026-05-25T18:33:14+09:00"
   }
 ]

@@ -212,9 +212,15 @@ Prisma `migrate deploy`는 각 마이그레이션 파일을 **BEGIN..COMMIT 트�
 2. **대량 테이블 + 락 회피 필수**: 별도 runbook으로 `psql -c "CREATE INDEX CONCURRENTLY ..."` 사전 실행 + 마이그는 `IF NOT EXISTS` no-op
 3. `IF NOT EXISTS` 패턴은 항상 권장 (재실행 안전).
 
-**회귀 가드**: 신규 마이그 PR 리뷰 시 `grep -i concurrently prisma/migrations/*.sql` 자동 검사 권장.
+**회귀 가드** (CANDID-038부터 자동화 — Node.js/Prisma 프로젝트 한정):
+- 도구: `pnpm check:migrations` (구현: `scripts/check-migrations-no-concurrently.mjs`)
+- 정규식: 파일 전체 매칭 + `stripSqlComments`(`--`, `/* */` 모두 공백 치환, 라인 보존)로 멀티라인 SQL + 코멘트 false-negative/positive 동시 차단
+- allowlist: `.claude/state/migration-concurrently-allowlist.txt` (한 줄당 파일 경로). legacy 마이그(예: CANDID-013 v1)는 grandfather 등재
+- 호출 시점: PR 리뷰 단계 (`skill-review-pr`에서 `prisma/migrations/**` diff 감지 시 자동 호출 — wiring follow-up 필요)
+- L-034 정책: 본 가드 자체의 단위 테스트는 가드 도입 PR에 동반 (follow-up 분리 시 무결성 검증 공백)
+- L-036 정책: 자동 호출 wiring(skill-review-pr/SKILL.md hook 또는 CI workflow) 없이는 본 가드의 효과가 PR 리뷰자의 수동 실행에 의존 — 별도 follow-up task로 즉시 등록 필수
 
-> **출처**: CANDID-016 Step 1 in-PR fix(D-MAJOR-1), PR #57. 동일 패턴 회귀 위험: CANDID-013 마이그(`20260524072500_candid_013_jobposting_list_indexes`) — follow-up task 등록.
+> **출처**: CANDID-016 Step 1 in-PR fix(D-MAJOR-1) PR #57 + CANDID-038 follow-up PR #60 (자동 가드 + DROP+CREATE 신규 마이그). 도구 구현은 다른 ORM/언어로 직접 이식 불가 — Node.js/Prisma 환경 한정 절차.
 
 ## Partial UNIQUE 인덱스의 상태 컬럼 포함 (L-033)
 

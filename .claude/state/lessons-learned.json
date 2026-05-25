@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 9,
-    "updatedAt": "2026-05-25T10:50:00+09:00",
+    "version": 10,
+    "updatedAt": "2026-05-25T18:31:21+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -395,9 +395,9 @@
         "major-accumulation",
         "fix-pr"
       ],
-      "appliedCount": 2,
+      "appliedCount": 3,
       "createdAt": "2026-05-23T12:55:00+09:00",
-      "updatedAt": "2026-05-24T11:32:00+09:00"
+      "updatedAt": "2026-05-25T18:31:21+09:00"
     },
     {
       "id": "L-023",
@@ -526,9 +526,9 @@
         "transaction",
         "operational-safety"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-25T10:50:00+09:00",
-      "updatedAt": "2026-05-25T10:50:00+09:00"
+      "updatedAt": "2026-05-25T18:31:21+09:00"
     },
     {
       "id": "L-030",
@@ -602,6 +602,59 @@
       "appliedCount": 1,
       "createdAt": "2026-05-25T10:50:00+09:00",
       "updatedAt": "2026-05-25T10:50:00+09:00"
+    },
+    {
+      "id": "L-034",
+      "taskId": "CANDID-038",
+      "category": "process",
+      "title": "회귀 가드 도입 PR에 가드 자체의 단위 테스트 동반 필수",
+      "description": "회귀 가드 스크립트(예: prisma 마이그 CONCURRENTLY 검출)는 도입 PR에 자체 단위 테스트(fixture 기반)를 동반해야 한다. 가드는 무성 실패 시 차단 효과 0이고 그 사실조차 알 수 없다 (정규식이 깨졌는지 가드 자체로 검증 불가). CANDID-038에서 plan 단계 deferral 결정 후 3개 리뷰 에이전트(domain/security/test) 모두 MUST로 지적. 표준 절차: (1) 가드 스크립트 + (2) tmpdir fixture vitest (positive/negative/comment/edge ≥ 6 케이스) + (3) npm script 등록을 한 PR에 묶는다. 별도 follow-up 분리는 가드 무결성 검증 공백 기간을 만든다.",
+      "impact": "high",
+      "tags": [
+        "testing",
+        "regression-guard",
+        "pr-scope",
+        "tooling",
+        "meta-testing"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T18:31:21+09:00",
+      "updatedAt": "2026-05-25T18:31:21+09:00"
+    },
+    {
+      "id": "L-035",
+      "taskId": "CANDID-038",
+      "category": "architecture",
+      "title": "정규식 라인 단위 매칭은 멀티라인 SQL/코드 false-negative — 파일 전체 매칭 + comment strip",
+      "description": "SQL DDL(특히 PostgreSQL)은 토큰 간 줄바꿈을 합법적으로 허용 (예: `CREATE INDEX\\n  CONCURRENTLY ...`). 따라서 `RX.test(lines[i])` 라인 단위 매칭은 정상 포맷 우회 가능. 권장 패턴: (1) `stripSqlComments(sql)` 헬퍼로 `-- ...` + `/* ... */` 모두 *라인 보존 공백 치환* (개행 유지로 line 번호 재계산 가능) (2) 파일 전체에 `g/i` flag 매칭 (3) `match.index → slice(0, idx).split(\"\\n\").length`로 원본 라인 번호 정확 재계산. CANDID-038 in-PR fix(D-MAJOR-1 + S-MAJOR-1 + T-MAJOR-2 통합). false-positive(블록 주석) + false-negative(멀티라인) 동시 해결.",
+      "impact": "medium",
+      "tags": [
+        "regex",
+        "sql",
+        "multiline",
+        "static-analysis",
+        "lint-tooling"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T18:31:21+09:00",
+      "updatedAt": "2026-05-25T18:31:21+09:00"
+    },
+    {
+      "id": "L-036",
+      "taskId": "CANDID-038",
+      "category": "process",
+      "title": "README/문서의 자동화 선언은 wiring 메커니즘 없이 신뢰 불가 — 선언 시점에 wiring 동반 또는 즉시 follow-up",
+      "description": "\"PR 리뷰에서 호출\", \"CI에서 차단\" 같은 문서 선언은 실제 메커니즘(CI workflow, husky hook, skill SKILL.md 절차)이 동반되지 않으면 신뢰성 0. 휴먼이 수동 호출을 잊으면 가드/규약 효과가 사라지고, 6개월 후 누적 회귀로 드러난다. 정책: (1) README/CONVENTION에 자동화를 선언하는 시점에 (a) wiring 동반 또는 (b) 즉시 follow-up task 등록 중 택1 (2) \"PR 리뷰에서 호출\" 같은 표현은 실제 skill-review-pr SKILL.md 또는 CODEOWNERS/ruleset으로 backing 필수 (3) docs-impact-analyzer 등 서브에이전트 분석에서 \"선언 vs wiring gap\"을 명시 항목화. CANDID-038 D-MAJOR-1 carry (CANDID-040으로 분리).",
+      "impact": "medium",
+      "tags": [
+        "documentation",
+        "automation-wiring",
+        "governance",
+        "closed-loop"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-05-25T18:31:21+09:00",
+      "updatedAt": "2026-05-25T18:31:21+09:00"
     }
   ]
 }
