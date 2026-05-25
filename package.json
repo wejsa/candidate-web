@@ -26,6 +26,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "check:migrations": "node scripts/check-migrations-no-concurrently.mjs",
+    "check:guard-wiring": "node scripts/check-guard-wiring-consistency.mjs",
     "postinstall": "prisma generate"
   },
   "prisma": {
