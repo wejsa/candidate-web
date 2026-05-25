@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 40,
     "projectPrefix": "CANDID",
-    "version": 211,
+    "version": 212,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T16:50:11+09:00"
+    "updatedAt": "2026-05-25T17:04:06+09:00"
   },
   "summary": {
     "total": 38,
@@ -2013,21 +2013,47 @@
       "priority": "critical",
       "phase": 1,
       "assignee": "jaese@hoji-20260525-113000",
-      "assignedAt": "2026-05-25T16:50:11+09:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-05-25T17:04:06+09:00",
+      "lockedFiles": [
+        "prisma/migrations/20260525113000_candid_038_jp_indexes_no_concurrently/migration.sql",
+        "scripts/check-migrations-no-concurrently.mjs",
+        ".claude/state/migration-concurrently-allowlist.txt",
+        "package.json",
+        "README.md"
+      ],
       "dependencies": [],
       "createdAt": "2026-05-25T11:00:00+09:00",
       "source": "CANDID-016 retro Action Item HIGH-1",
-      "lockTTL": 1800,
-      "updatedAt": "2026-05-25T16:50:11+09:00",
+      "lockTTL": 7200,
+      "updatedAt": "2026-05-25T17:04:06+09:00",
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-25T16:50:11+09:00"
-      }
+        "updatedAt": "2026-05-25T17:04:06+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "마이그 + 회귀 가드 + allowlist + npm script",
+          "description": "신규 마이그(DROP IF EXISTS × 4 + CREATE INDEX IF NOT EXISTS × 4, no CONCURRENTLY) + scripts/check-migrations-no-concurrently.mjs (정규식 + allowlist) + .claude/state/migration-concurrently-allowlist.txt (CANDID-013 legacy 등록) + package.json check:migrations script + README.md 1줄 안내. CANDID-013 v1 마이그 파일은 history integrity 유지 위해 변경 없음.",
+          "status": "pending",
+          "files": [
+            "prisma/migrations/20260525113000_candid_038_jp_indexes_no_concurrently/migration.sql",
+            "scripts/check-migrations-no-concurrently.mjs",
+            ".claude/state/migration-concurrently-allowlist.txt",
+            "package.json",
+            "README.md"
+          ],
+          "estimatedLines": 100,
+          "prLineLimit": 200,
+          "prNumber": null,
+          "mergedAt": null
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-039": {
       "id": "CANDID-039",
