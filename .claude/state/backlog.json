@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 42,
     "projectPrefix": "CANDID",
-    "version": 217,
+    "version": 218,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T19:26:46+09:00"
+    "updatedAt": "2026-05-25T19:37:41+09:00"
   },
   "summary": {
     "total": 40,
@@ -2087,23 +2087,41 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260525-180000",
-      "assignedAt": "2026-05-25T19:26:46+09:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-05-25T19:37:41+09:00",
+      "lockedFiles": [
+        "tests/scripts/check-migrations-no-concurrently.test.ts"
+      ],
       "dependencies": [
         "CANDID-038"
       ],
       "createdAt": "2026-05-25T18:33:14+09:00",
       "source": "CANDID-038 retro Action Item HIGH-A1 (L-034)",
-      "lockTTL": 1800,
-      "updatedAt": "2026-05-25T19:26:46+09:00",
+      "lockTTL": 3600,
+      "updatedAt": "2026-05-25T19:37:41+09:00",
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-25T19:26:46+09:00"
-      }
+        "updatedAt": "2026-05-25T19:37:41+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "vitest 테스트 작성 + 통과 검증",
+          "description": "tests/scripts/check-migrations-no-concurrently.test.ts 신설. mkdtempSync tmpdir fixture + execFileSync spawn 패턴으로 10건 케이스 (clean/allowlist/negative/line-comment/block-comment/multiline/UNIQUE/leading-tab/multiple-violations/dir-absent) 커버. 가드 스크립트(scripts/check-migrations-no-concurrently.mjs) 변경 금지.",
+          "status": "pending",
+          "files": [
+            "tests/scripts/check-migrations-no-concurrently.test.ts"
+          ],
+          "estimatedLines": 150,
+          "prLineLimit": 250,
+          "prNumber": null,
+          "mergedAt": null
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-042": {
       "id": "CANDID-042",
