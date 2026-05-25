@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 40,
     "projectPrefix": "CANDID",
-    "version": 214,
+    "version": 215,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T17:21:46+09:00"
+    "updatedAt": "2026-05-25T17:23:50+09:00"
   },
   "summary": {
     "total": 38,
-    "done": 19,
-    "inProgress": 1,
+    "done": 20,
+    "inProgress": 0,
     "review": 0,
     "todo": 18
   },
@@ -2008,38 +2008,25 @@
       "id": "CANDID-038",
       "title": "CANDID-013 마이그 CONCURRENTLY 제거 (L-029 회귀 위험)",
       "description": "CANDID-013 (20260524072500_candid_013_jobposting_list_indexes/migration.sql)이 `CREATE INDEX CONCURRENTLY`를 4건 사용. CANDID-016 회고(L-029)에서 발견된 동일 패턴 — Prisma migrate deploy의 트랜잭션 wrap 때문에 운영 첫 배포 시 100% 실패. 운영 적용 전 마이그 수정 필수. 옵션: (a) 일반 CREATE INDEX 변경 — job_postings 운영 초기 데이터량 평가 후 결정 (b) 별도 runbook으로 psql 사전 실행 + 마이그 IF NOT EXISTS no-op. 본 task로 결정 + 적용 + 회귀 가드 (grep -i concurrently prisma/migrations 자동 검사).",
-      "status": "in_progress",
+      "status": "done",
       "type": "bug",
       "priority": "critical",
       "phase": 1,
-      "assignee": "jaese@hoji-20260525-113000",
-      "assignedAt": "2026-05-25T17:10:56+09:00",
-      "lockedFiles": [
-        "prisma/migrations/20260525113000_candid_038_jp_indexes_no_concurrently/migration.sql",
-        "scripts/check-migrations-no-concurrently.mjs",
-        ".claude/state/migration-concurrently-allowlist.txt",
-        "package.json",
-        "README.md"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-05-25T11:00:00+09:00",
       "source": "CANDID-016 retro Action Item HIGH-1",
       "lockTTL": 7200,
-      "updatedAt": "2026-05-25T17:21:46+09:00",
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 60,
-        "fixLoopCount": 1,
-        "autoChainArgs": "60",
-        "updatedAt": "2026-05-25T17:21:46+09:00"
-      },
+      "updatedAt": "2026-05-25T17:23:50+09:00",
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
           "title": "마이그 + 회귀 가드 + allowlist + npm script",
           "description": "신규 마이그(DROP IF EXISTS × 4 + CREATE INDEX IF NOT EXISTS × 4, no CONCURRENTLY) + scripts/check-migrations-no-concurrently.mjs (정규식 + allowlist) + .claude/state/migration-concurrently-allowlist.txt (CANDID-013 legacy 등록) + package.json check:migrations script + README.md 1줄 안내. CANDID-013 v1 마이그 파일은 history integrity 유지 위해 변경 없음.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "prisma/migrations/20260525113000_candid_038_jp_indexes_no_concurrently/migration.sql",
             "scripts/check-migrations-no-concurrently.mjs",
@@ -2050,11 +2037,12 @@
           "estimatedLines": 100,
           "prLineLimit": 200,
           "prNumber": 60,
-          "mergedAt": null,
+          "mergedAt": "2026-05-25T17:23:50+09:00",
           "branch": "feature/CANDID-038-step1"
         }
       ],
-      "currentStep": 1
+      "currentStep": 1,
+      "completedAt": "2026-05-25T17:23:50+09:00"
     },
     "CANDID-039": {
       "id": "CANDID-039",

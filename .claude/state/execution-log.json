@@ -1255,5 +1255,30 @@
     "deletedLines": 9,
     "note": "가드 정규식 파일 전체 매칭 + stripSqlComments. 5종 fixture 수동 검증 통과.",
     "timestamp": "2026-05-25T17:21:46+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-038",
+    "stepNumber": 1,
+    "prNumber": 60,
+    "mergeMethod": "squash",
+    "mergedLines": 113,
+    "branchDeleted": true,
+    "isLastStep": true,
+    "fixLoop": 1,
+    "timestamp": "2026-05-25T17:23:50+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-038",
+    "totalSteps": 1,
+    "totalAdditions": 113,
+    "totalDeletions": 0,
+    "prNumbers": [
+      60
+    ],
+    "fixLoopTotal": 1,
+    "carriedMajors": 4,
+    "timestamp": "2026-05-25T17:23:50+09:00"
   }
 ]
