@@ -176,6 +176,12 @@ PR diff에 등록된 파일 패턴이 포함되면 매핑된 npm script 가드�
 
 #### 절차
 
+0. **Wiring integrity preflight (CANDID-043 — meta-guard / L-NEW)**:
+   - `pnpm check:guard-wiring` 실행 (Bash tool, timeout 15초) — §2.4 매핑 표 ↔ `scripts/check-*.mjs` ↔ `package.json check:*` ↔ `tests/scripts/check-*.test.ts` **4자 일치** 정적 검증
+   - **exit 0**: 정상 진행 → step 1
+   - **exit 1 (wiring drift 감지)**: 즉시 REQUEST_CHANGES + Rules/3-에이전트 리뷰 스킵 + skill-fix 호출 금지 + 사용자 안내 "wiring 일관성 수정 후 `/skill-review-pr {N}` 재실행"
+   - **exit 2 (SKILL.md 파싱 실패 등 환경 오류)**: WARNING + PR 코멘트에 "⚠️ meta-guard 환경 오류" 명시 + 정상 진행. 단 PR diff에 `scripts/check-*.mjs` / `tests/scripts/check-*.test.ts` / `package.json` / SKILL.md §2.4 변경이 포함되어 있으면 L-039 적용해 REQUEST_CHANGES로 격상 (가드 인프라 무력화 공격 차단)
+   - META-LEVEL 가드이므로 §2.4 매핑 표에 별도 행 등록하지 않음 (USER-LEVEL 가드와 구분)
 1. PR 변경 파일 목록(`gh pr view {N} --json files`)에서 본 표의 글롭과 매칭되는 파일 식별
 2. 매칭되는 가드별 npm script를 순차 실행 (Bash tool):
    - cwd: 프로젝트 루트
