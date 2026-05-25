@@ -13,11 +13,12 @@ export default defineConfig({
     exclude: ['tests/integration/**', 'node_modules/**', 'dist/**', '.next/**'],
     setupFiles: ['tests/setup.ts'],
     // CANDID-015 Step 4 + CANDID-016 Step 3: 브라우저 환경(XHR/window/event) 필요 테스트만 jsdom.
-    // 다른 테스트는 node 환경 유지. RSC 컴포넌트 테스트 인프라는 F-5 carry (FU1 위임).
+    // 다른 테스트는 node 환경 유지.
+    // T-CRITICAL-1 fix (PR #59 회차 1): ResumeUploadStep.test.tsx dead reference 제거.
+    // RTL 컴포넌트 테스트는 follow-up task로 carry — 도입 시 본 배열에 다시 추가.
     environmentMatchGlobs: [
       ['tests/lib/drafts/use-auto-save.test.ts', 'jsdom'],
       ['tests/lib/files/client.test.ts', 'jsdom'],
-      ['tests/app/jobs/apply/ResumeUploadStep.test.tsx', 'jsdom'],
     ],
     coverage: {
       provider: 'v8',
