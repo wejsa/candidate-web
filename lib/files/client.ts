@@ -77,6 +77,9 @@ function xhrPut(args: {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', args.url);
+    // A-MAJOR-1 fix (PR #59 in-PR): S3/MinIO 장애 hang 방어. 60s는 10MB 파일을 150KB/s 회선에서도
+    // 완료 가능한 마진. 더 큰 파일/엄격한 SLA 시 환경 변수 분리 권장.
+    xhr.timeout = 60_000;
     for (const [k, v] of Object.entries(args.headers)) xhr.setRequestHeader(k, v);
 
     if (args.onProgress !== undefined) {
@@ -100,6 +103,10 @@ function xhrPut(args: {
     });
     xhr.addEventListener('abort', () => {
       reject(new DOMException('Aborted', 'AbortError'));
+    });
+    // A-MAJOR-1 fix (PR #59 in-PR): timeout 이벤트 처리 — status=0으로 network 분류.
+    xhr.addEventListener('timeout', () => {
+      reject(new HttpStatusError(0, '업로드 시간이 초과되었습니다. 다시 시도해 주세요.'));
     });
 
     if (args.signal !== undefined) {

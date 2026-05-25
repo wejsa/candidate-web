@@ -69,7 +69,12 @@ export type UploadAction =
   | { type: 'upload-progress'; progress: number }
   | { type: 'upload-complete' }
   | { type: 'confirm-start' }
-  | { type: 'confirm-success'; resumeFileId: number; scanStatus: 'PENDING' | 'CLEAN' }
+  | {
+      type: 'confirm-success';
+      resumeFileId: number;
+      // D-MAJOR-2 fix (PR #59 in-PR): INFECTED도 명시 허용 — UI에서 정확히 표시 (강제 변환 금지).
+      scanStatus: 'PENDING' | 'CLEAN' | 'INFECTED';
+    }
   | { type: 'fail'; kind: UploadFailureKind; message: string }
   | { type: 'abort' }
   | { type: 'reset' };
@@ -108,13 +113,22 @@ export function uploadReducer(state: UploadState, action: UploadAction): UploadS
     case 'confirm-start':
       return { ...state, status: 'confirming' };
     case 'confirm-success':
+      // D-MAJOR-2 fix (PR #59 in-PR): INFECTED 명시 상태 전이 — BR-FILE-07 정합.
       return {
         ...state,
-        status: action.scanStatus === 'CLEAN' ? 'clean' : 'scanning',
+        status:
+          action.scanStatus === 'INFECTED'
+            ? 'infected'
+            : action.scanStatus === 'CLEAN'
+              ? 'clean'
+              : 'scanning',
         progress: 100,
         resumeFileId: action.resumeFileId,
         scanStatus: action.scanStatus,
-        errorMessage: null,
+        errorMessage:
+          action.scanStatus === 'INFECTED'
+            ? '바이러스가 감지되어 첨부가 차단되었습니다. 다른 파일을 첨부해 주세요.'
+            : null,
         failureKind: null,
       };
     case 'fail':

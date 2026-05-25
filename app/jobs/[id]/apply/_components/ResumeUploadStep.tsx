@@ -85,17 +85,22 @@ export function ResumeUploadStep({ draftId, onAttached }: Props) {
           onProgress: (percent) => dispatch({ type: 'upload-progress', progress: percent }),
         });
         dispatch({ type: 'upload-complete' });
+        // D-MAJOR-2 fix (PR #59 in-PR): INFECTED → CLEAN 강제 변환 제거. 정확한 스캔 상태 전달.
+        // CLEAN/PENDING은 정상 성공, INFECTED는 reducer가 'infected' 상태 + 오류 메시지로 전이.
         dispatch({
           type: 'confirm-success',
           resumeFileId: result.resumeFileId,
-          scanStatus: result.scanStatus === 'INFECTED' ? 'CLEAN' : result.scanStatus,
+          scanStatus: result.scanStatus,
         });
         if (onAttached !== undefined) onAttached(result.resumeFileId);
       } catch (err) {
+        // S-MAJOR-2 fix (PR #59 in-PR): 서버 message 화이트리스트 — 422(validation)만 서버 메시지
+        // 사용 (사용자에게 유의미한 형식/크기 안내). 그 외 status는 classifyUploadError의 일반화된
+        // 메시지만 사용 — 서버 zod 상세/stack 누출 차단.
         const { kind, message } = classifyUploadError(err);
-        // server-side message가 더 명확하면 우선 (HttpStatusError.message는 응답 body의 message).
-        const finalMsg =
-          err instanceof HttpStatusError && err.message !== '' ? err.message : message;
+        const finalMsg = kind === 'validation' && err instanceof HttpStatusError && err.message !== ''
+          ? err.message
+          : message;
         dispatch({ type: 'fail', kind, message: finalMsg });
       } finally {
         abortRef.current = null;
@@ -181,6 +186,13 @@ export function ResumeUploadStep({ draftId, onAttached }: Props) {
         </p>
       )}
 
+      {state.status === 'infected' && (
+        // D-MAJOR-2 fix (PR #59 in-PR): INFECTED 명시 표시 — BR-FILE-07 정합.
+        <p role="alert">
+          ⚠️ {state.errorMessage ?? '바이러스가 감지되어 첨부가 차단되었습니다.'}
+        </p>
+      )}
+
       {state.status === 'failed' && state.errorMessage !== null && (
         <p role="alert">⚠️ {state.errorMessage}</p>
       )}
@@ -202,6 +214,7 @@ export function ResumeUploadStep({ draftId, onAttached }: Props) {
         )}
         {(state.status === 'scanning' ||
           state.status === 'clean' ||
+          state.status === 'infected' ||
           state.status === 'failed' ||
           state.status === 'aborted') &&
           state.file !== null && (
