@@ -1184,5 +1184,42 @@
       "L-033"
     ],
     "timestamp": "2026-05-25T10:55:00+09:00"
+  },
+  {
+    "event": "task_started",
+    "taskId": "CANDID-038",
+    "title": "CANDID-013 마이그 CONCURRENTLY 제거 (L-029 회귀 위험)",
+    "priority": "critical",
+    "phase": 1,
+    "steps": 1,
+    "estimatedLines": 100,
+    "timestamp": "2026-05-25T17:13:18+09:00"
+  },
+  {
+    "event": "plan_approved",
+    "taskId": "CANDID-038",
+    "stepCount": 1,
+    "note": "DROP+CREATE 신규 마이그 + check:migrations 회귀 가드 (regex + allowlist). prLineLimit 200.",
+    "timestamp": "2026-05-25T17:13:18+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-038",
+    "stepNumber": 1,
+    "prNumber": 60,
+    "branch": "feature/CANDID-038-step1",
+    "filesChanged": 5,
+    "additions": 101,
+    "deletions": 0,
+    "vitest": {
+      "passed": 1092,
+      "added": 0
+    },
+    "build": "ok",
+    "lint": "ok",
+    "typecheck": "ok",
+    "isLastStep": true,
+    "note": "Step 1 (마지막) — CANDID-013 follow-up. 신규 마이그 + 회귀 가드 (regex + allowlist) + npm script + README 1줄. 가드 negative 검증(코멘트 무시, SQL 감지) 통과.",
+    "timestamp": "2026-05-25T17:13:18+09:00"
   }
 ]
