@@ -1105,5 +1105,19 @@
     ],
     "fixLoopCount": 1,
     "timestamp": "2026-05-25T10:40:00+09:00"
+  },
+  {
+    "event": "review_completed",
+    "taskId": "CANDID-016",
+    "stepNumber": 3,
+    "prNumber": 59,
+    "decision": "COMMENT",
+    "critical": 0,
+    "major": 12,
+    "minor": 10,
+    "info": 3,
+    "agents": "skipped-trivial-fix",
+    "round": 2,
+    "timestamp": "2026-05-25T10:43:00+09:00"
   }
 ]
