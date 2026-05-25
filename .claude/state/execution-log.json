@@ -1009,5 +1009,19 @@
     "prNumber": 57,
     "mergeCommit": "e3d161feaa8d9f63a9f81b541c3aef7d6d401ac6",
     "timestamp": "2026-05-24T23:42:36+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-016",
+    "stepNumber": 2,
+    "prNumber": 58,
+    "branch": "feature/CANDID-016-step2",
+    "actualLines": 1100,
+    "carriedFixIncluded": [
+      "A-MAJOR-1",
+      "A-MAJOR-2",
+      "S-MAJOR-2"
+    ],
+    "timestamp": "2026-05-25T09:55:00+09:00"
   }
 ]

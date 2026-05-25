@@ -2,15 +2,15 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 200,
+    "version": 201,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-24T23:42:36+09:00"
+    "updatedAt": "2026-05-25T09:55:00+09:00"
   },
   "summary": {
     "total": 35,
     "done": 18,
     "inProgress": 1,
-    "review": 0,
+    "review": 1,
     "todo": 16
   },
   "phases": {
@@ -1242,7 +1242,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260524-202030",
-      "assignedAt": "2026-05-24T20:55:00+09:00",
+      "assignedAt": "2026-05-25T09:55:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
@@ -1265,14 +1265,14 @@
         "pnpm-lock.yaml"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 58,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-24T23:42:36+09:00"
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-25T09:55:00+09:00"
       },
-      "updatedAt": "2026-05-24T23:42:36+09:00",
+      "updatedAt": "2026-05-25T09:55:00+09:00",
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-016-plan.md",
       "currentStep": 2,
@@ -1305,7 +1305,7 @@
         {
           "step": 2,
           "title": "presign + confirm API + 비즈니스 + 단위/통합 테스트 + 에러 코드",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/files/validation.ts",
             "lib/files/resume.ts",
@@ -1324,7 +1324,11 @@
           "prLineLimit": 900,
           "dependsOn": [
             1
-          ]
+          ],
+          "note": "D-MAJOR-2 정책 결정: partial UNIQUE에 virus_scan_status 조건 추가 마이그레이션 포함 (INFECTED/FAILED row 잔존 허용 + 재업로드 가능)",
+          "branch": "feature/CANDID-016-step2",
+          "prNumber": 58,
+          "actualLines": 1100
         },
         {
           "step": 3,
