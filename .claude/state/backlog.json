@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 44,
     "projectPrefix": "CANDID",
-    "version": 228,
+    "version": 229,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T21:57:37+09:00"
+    "updatedAt": "2026-05-25T22:51:04+09:00"
   },
   "summary": {
     "total": 42,
@@ -2165,8 +2165,13 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260525-220000",
-      "assignedAt": "2026-05-25T21:57:37+09:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-05-25T22:51:04+09:00",
+      "lockedFiles": [
+        "scripts/check-guard-wiring-consistency.mjs",
+        "tests/scripts/check-guard-wiring-consistency.test.ts",
+        ".claude/skills/skill-review-pr/SKILL.md",
+        "package.json"
+      ],
       "dependencies": [
         "CANDID-038",
         "CANDID-041",
@@ -2174,16 +2179,35 @@
       ],
       "createdAt": "2026-05-25T21:34:03+09:00",
       "source": "CANDID-042 retro Action Item HIGH-A1 (D-MAJOR-4 + T-MAJOR-2/3)",
-      "lockTTL": 1800,
-      "updatedAt": "2026-05-25T21:57:37+09:00",
+      "lockTTL": 7200,
+      "updatedAt": "2026-05-25T22:51:04+09:00",
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-25T21:57:37+09:00"
-      }
+        "updatedAt": "2026-05-25T22:51:04+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "meta-guard + vitest + SKILL.md preflight + package.json",
+          "description": "scripts/check-guard-wiring-consistency.mjs (4자 일치 정적 검증) + tests/scripts/check-guard-wiring-consistency.test.ts (8 fixture) + SKILL.md §2.4 step 0 preflight 신설 + package.json check:guard-wiring 추가. self-allowlist로 meta-guard 자체는 orphan 분류 회피. layer 4 방어 완성.",
+          "status": "pending",
+          "files": [
+            "scripts/check-guard-wiring-consistency.mjs",
+            "tests/scripts/check-guard-wiring-consistency.test.ts",
+            ".claude/skills/skill-review-pr/SKILL.md",
+            "package.json"
+          ],
+          "estimatedLines": 305,
+          "prLineLimit": 350,
+          "prNumber": null,
+          "mergedAt": null
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-044": {
       "id": "CANDID-044",
