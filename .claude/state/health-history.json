@@ -1,0 +1,94 @@
+{
+  "version": "1.0.0",
+  "history": [
+    {
+      "timestamp": "2026-05-24T19:05:00+09:00",
+      "mode": "full",
+      "score": 81,
+      "grade": "NEEDS_ATTENTION",
+      "criticalCount": 1,
+      "majorCount": 0,
+      "minorCount": 2,
+      "categories": {
+        "doc-sync": {
+          "score": 60,
+          "pass": 3,
+          "fail": 2,
+          "skip": 2
+        },
+        "state-integrity": {
+          "score": 100,
+          "pass": 3,
+          "fail": 0,
+          "skip": 2
+        },
+        "security": {
+          "score": 100,
+          "pass": 5,
+          "fail": 0,
+          "skip": 2
+        },
+        "agent-config": {
+          "score": 100,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "hook-safety": {
+          "score": 40,
+          "pass": 3,
+          "fail": 1,
+          "skip": 0
+        }
+      },
+      "fails": [
+        {
+          "id": "DS-06",
+          "severity": "MINOR",
+          "note": "CLAUDE.md 신선도 — 마지막 수정 후 src 변경 31건 (임계 30)"
+        },
+        {
+          "id": "DS-07",
+          "severity": "MINOR",
+          "note": "docs/requirements/ 디렉토리 부재 — completed Task 19건 대응 문서 0"
+        },
+        {
+          "id": "HI-01",
+          "severity": "CRITICAL",
+          "note": "차단 패턴 `rm -f` 매칭 (.claude/hooks/post-tool-use.sh:134, stop.sh:127) — 임시 파일 cleanup 패턴. 실제 위험 없으나 정규식이 false positive로 잡음. 패턴 정밀화 또는 excludeContexts 추가 검토 필요"
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-05-25T17:25:25+09:00",
+      "mode": "quick",
+      "trigger": "post-merge (CANDID-038 PR #60)",
+      "score": 100,
+      "grade": "A",
+      "criticalFails": 0,
+      "majorFails": 0,
+      "categoriesSummary": {
+        "doc-sync": {
+          "DS-01": "PASS (verified during impl)",
+          "DS-02": "PASS (1092 tests pass)"
+        },
+        "state-integrity": {
+          "SI-05": "PASS (all 8 agents present)"
+        },
+        "security": {
+          "SEC-01": "SKIP (quick mode, full regex scan deferred)",
+          "SEC-05": "PASS (PR files scanned)",
+          "SEC-06": "PASS (.env in gitignore, no dotenv files)",
+          "SEC-07": "SKIP (general domain)"
+        },
+        "agent-config": {
+          "AC-01": "PASS (general in registry)"
+        },
+        "hook-safety": {
+          "HI-01": "PASS (hooks[].command 위반 0건; rm -f in scripts는 single-file cleanup 양호)",
+          "HI-02": "PASS (외부 스크립트 참조 없음)"
+        }
+      }
+    }
+  ]
+}
