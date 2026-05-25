@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 40,
     "projectPrefix": "CANDID",
-    "version": 213,
+    "version": 214,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T17:10:56+09:00"
+    "updatedAt": "2026-05-25T17:21:46+09:00"
   },
   "summary": {
     "total": 38,
@@ -2025,14 +2025,14 @@
       "createdAt": "2026-05-25T11:00:00+09:00",
       "source": "CANDID-016 retro Action Item HIGH-1",
       "lockTTL": 7200,
-      "updatedAt": "2026-05-25T17:10:56+09:00",
+      "updatedAt": "2026-05-25T17:21:46+09:00",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 60,
-        "fixLoopCount": 0,
-        "autoChainArgs": "60 --auto-fix",
-        "updatedAt": "2026-05-25T17:10:56+09:00"
+        "fixLoopCount": 1,
+        "autoChainArgs": "60",
+        "updatedAt": "2026-05-25T17:21:46+09:00"
       },
       "steps": [
         {

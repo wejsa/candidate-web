@@ -1221,5 +1221,39 @@
     "isLastStep": true,
     "note": "Step 1 (마지막) — CANDID-013 follow-up. 신규 마이그 + 회귀 가드 (regex + allowlist) + npm script + README 1줄. 가드 negative 검증(코멘트 무시, SQL 감지) 통과.",
     "timestamp": "2026-05-25T17:13:18+09:00"
+  },
+  {
+    "event": "review_completed",
+    "taskId": "CANDID-038",
+    "stepNumber": 1,
+    "prNumber": 60,
+    "decision": "COMMENT",
+    "reason": "self-PR + CRITICAL 0",
+    "critical": 0,
+    "major": 5,
+    "minor": 4,
+    "info": 5,
+    "agents": [
+      "domain",
+      "security",
+      "test"
+    ],
+    "timestamp": "2026-05-25T17:21:46+09:00"
+  },
+  {
+    "event": "review_in_pr_fix",
+    "taskId": "CANDID-038",
+    "stepNumber": 1,
+    "prNumber": 60,
+    "fixedIssues": [
+      "D-MAJOR-1+S-MAJOR-1+T-MAJOR-2 (정규식 멀티라인)",
+      "D-MINOR-1 (블록 주석 false-positive)"
+    ],
+    "fixLoopCount": 1,
+    "carriedIssues": 7,
+    "addedLines": 21,
+    "deletedLines": 9,
+    "note": "가드 정규식 파일 전체 매칭 + stripSqlComments. 5종 fixture 수동 검증 통과.",
+    "timestamp": "2026-05-25T17:21:46+09:00"
   }
 ]
