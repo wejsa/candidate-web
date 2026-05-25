@@ -2,15 +2,15 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 203,
+    "version": 204,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T10:14:02+09:00"
+    "updatedAt": "2026-05-25T10:30:00+09:00"
   },
   "summary": {
     "total": 35,
     "done": 18,
     "inProgress": 1,
-    "review": 0,
+    "review": 1,
     "todo": 16
   },
   "phases": {
@@ -1242,7 +1242,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260524-202030",
-      "assignedAt": "2026-05-25T10:20:00+09:00",
+      "assignedAt": "2026-05-25T10:30:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
@@ -1265,14 +1265,14 @@
         "pnpm-lock.yaml"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 59,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-25T10:14:02+09:00"
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-25T10:30:00+09:00"
       },
-      "updatedAt": "2026-05-25T10:14:02+09:00",
+      "updatedAt": "2026-05-25T10:30:00+09:00",
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-016-plan.md",
       "currentStep": 3,
@@ -1335,7 +1335,7 @@
         {
           "step": 3,
           "title": "UI — ResumeUploadStep + 클라이언트 업로드 + 진행률 + 상태머신 + RTL",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/files/client.ts",
             "lib/files/upload-state.ts",
@@ -1349,7 +1349,10 @@
           "prLineLimit": 700,
           "dependsOn": [
             2
-          ]
+          ],
+          "branch": "feature/CANDID-016-step3",
+          "prNumber": 59,
+          "actualLines": 950
         }
       ]
     },

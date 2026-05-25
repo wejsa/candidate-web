@@ -1067,5 +1067,15 @@
     "prNumber": 58,
     "mergeCommit": "55cad575b53390fd56cca50de356b4dce326f605",
     "timestamp": "2026-05-25T10:14:02+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-016",
+    "stepNumber": 3,
+    "prNumber": 59,
+    "branch": "feature/CANDID-016-step3",
+    "actualLines": 950,
+    "lastStep": true,
+    "timestamp": "2026-05-25T10:30:00+09:00"
   }
 ]
