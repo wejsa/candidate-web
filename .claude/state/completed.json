@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 25,
+    "version": 26,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-25T21:06:42+09:00"
+    "updatedAt": "2026-05-25T23:09:03+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -814,6 +814,32 @@
       "fixLoopTotal": 1,
       "carriedMajors": 6,
       "note": "L-036 self-referential 첫 적용. SKILL.md §2.4 declarative wiring 매핑 표 + 공급망 공격 차단 (npm script 화이트리스트 + 가드 인프라 변경 감지). README L100 SSOT 동기화. carry 6건 → 향후 신규 가드 도입 시 표 컬럼 확장 + meta-guard 도입 시점 처리."
+    },
+    "CANDID-043": {
+      "id": "CANDID-043",
+      "title": "회귀 가드 wiring meta-guard (3종 세트 자동 일관성 검증)",
+      "description": "CANDID-042 회고 Action Item HIGH-A1. `scripts/check-guard-wiring-consistency.mjs` 신규 도입 — skill-review-pr/SKILL.md §2.4 매핑 표 ↔ `scripts/check-*.mjs` ↔ `package.json check:*` script ↔ `tests/scripts/check-*.test.ts` 4자 일치 정적 검증. L-034 + L-036 결합 절차(3종 세트 PR 강제)를 자동화. 3종 세트 절차 자체에 L-034 적용(meta-guard도 vitest 동반). 추정: 스크립트 ~80줄 + vitest fixture ~70줄 = ~150줄. layer 3 방어 완성 (layer 1 가드, layer 2 가드 자체 테스트, layer 3 wiring 일관성).",
+      "type": "chore",
+      "priority": "high",
+      "phase": 1,
+      "source": "CANDID-042 retro Action Item HIGH-A1 (D-MAJOR-4 + T-MAJOR-2/3)",
+      "dependencies": [
+        "CANDID-038",
+        "CANDID-041",
+        "CANDID-042"
+      ],
+      "createdAt": "2026-05-25T21:34:03+09:00",
+      "completedAt": "2026-05-25T23:09:03+09:00",
+      "totalSteps": 1,
+      "totalAdditions": 494,
+      "totalDeletions": 8,
+      "prNumbers": [
+        63
+      ],
+      "fixLoopTotal": 1,
+      "carriedMajors": 8,
+      "testsAfter": 1120,
+      "note": "Layer 4 방어 완성. binding 모델 + dynamic self-detection (rename 회귀 자동 차단). 12 vitest fixture. L-037 self-application 통과. carry 10건 → 향후 2번째 META 가드 도입 시점 처리. closed loop: CANDID-038(layer 1) → 041(layer 2) → 042(layer 3) → 043(layer 4) 완성."
     }
   }
 }

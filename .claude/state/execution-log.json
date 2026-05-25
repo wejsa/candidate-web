@@ -1606,5 +1606,35 @@
     "testCountAfter": 12,
     "note": "rename 회귀 자동 차단 + continue invariant 동결 + self-integrity 명시 검증.",
     "timestamp": "2026-05-25T23:08:20+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-043",
+    "stepNumber": 1,
+    "prNumber": 63,
+    "mergeMethod": "squash",
+    "mergedLines": 486,
+    "branchDeleted": true,
+    "isLastStep": true,
+    "fixLoop": 1,
+    "timestamp": "2026-05-25T23:09:03+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-043",
+    "totalSteps": 1,
+    "totalAdditions": 494,
+    "totalDeletions": 8,
+    "prNumbers": [
+      63
+    ],
+    "fixLoopTotal": 1,
+    "carriedMajors": 8,
+    "vitest": {
+      "passed": 1120,
+      "added": 12
+    },
+    "closedLoopComplete": "CANDID-038 → 041 → 042 → 043 — 4-layer 방어 완성",
+    "timestamp": "2026-05-25T23:09:03+09:00"
   }
 ]
