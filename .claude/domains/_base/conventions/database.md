@@ -216,9 +216,9 @@ Prisma `migrate deploy`는 각 마이그레이션 파일을 **BEGIN..COMMIT 트�
 - 도구: `pnpm check:migrations` (구현: `scripts/check-migrations-no-concurrently.mjs`)
 - 정규식: 파일 전체 매칭 + `stripSqlComments`(`--`, `/* */` 모두 공백 치환, 라인 보존)로 멀티라인 SQL + 코멘트 false-negative/positive 동시 차단
 - allowlist: `.claude/state/migration-concurrently-allowlist.txt` (한 줄당 파일 경로). legacy 마이그(예: CANDID-013 v1)는 grandfather 등재
-- 호출 시점: PR 리뷰 단계 (`skill-review-pr`에서 `prisma/migrations/**` diff 감지 시 자동 호출 — wiring follow-up 필요)
-- L-034 정책: 본 가드 자체의 단위 테스트는 가드 도입 PR에 동반 (follow-up 분리 시 무결성 검증 공백)
-- L-036 정책: 자동 호출 wiring(skill-review-pr/SKILL.md hook 또는 CI workflow) 없이는 본 가드의 효과가 PR 리뷰자의 수동 실행에 의존 — 별도 follow-up task로 즉시 등록 필수
+- 호출 시점: PR 리뷰 단계 — `skill-review-pr` SKILL.md §2.4 "Pre-Review Guard Execution" 매핑 표가 `prisma/migrations/**/migration.sql` 변경 감지 시 자동 호출. 가드 fail 시 즉시 REQUEST_CHANGES + 3-에이전트 리뷰 스킵 (CANDID-042 PR, wiring 완료)
+- L-034 정책: 본 가드 자체의 단위 테스트는 가드 도입 PR에 동반 (CANDID-041에서 15 fixture로 충족 — `tests/scripts/check-migrations-no-concurrently.test.ts`)
+- L-036 정책: 자동 호출 wiring은 `skill-review-pr` SKILL.md §2.4 declarative 매핑 표에서 SSOT 관리. 신규 가드 추가 시 (스크립트 + vitest + 표 등록) 3종 세트 PR 필수
 
 > **출처**: CANDID-016 Step 1 in-PR fix(D-MAJOR-1) PR #57 + CANDID-038 follow-up PR #60 (자동 가드 + DROP+CREATE 신규 마이그). 도구 구현은 다른 ORM/언어로 직접 이식 불가 — Node.js/Prisma 환경 한정 절차.
 

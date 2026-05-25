@@ -150,6 +150,64 @@ diff는 임시 파일에 저장하여 에이전트가 Read로 참조하도록 �
 | 라인 수 제한 | diff 분석 | ⚠️ |
 | 충돌 없음 | mergeable | ✅ |
 
+### 2.4. Pre-Review Guard Execution (CANDID-042 — L-036)
+
+PR diff에 등록된 파일 패턴이 포함되면 매핑된 npm script 가드를 자동 실행한다. 가드 fail 시 즉시 REQUEST_CHANGES로 처리하고 후속 단계(Rules 로드 + 3-에이전트 리뷰)를 스킵한다.
+
+**Trivial 경량 리뷰 시 SKIP** (경량 리뷰는 본질적으로 빠른 통과 의도이므로 가드 게이트 우회).
+
+#### 가드 매핑 (declarative SSOT)
+
+| 파일 글롭 | npm script | 가드 ID | 도입 | 근거 |
+|-----------|------------|---------|------|------|
+| `prisma/migrations/**/migration.sql` | `pnpm check:migrations` | G-MIG-CONCURRENTLY | CANDID-038 (PR #60) | L-029, `_base/conventions/database.md` §"Prisma migrate deploy의 트랜잭션 wrap" |
+
+> **단일 SSOT**: 가드 매핑은 본 표가 유일한 진실 소스. README/conventions는 본 표를 *참조*한다 (역참조 없음).
+>
+> **신규 가드 추가 절차 (L-034 + L-036 결합 — 같은 PR에서 3종 세트 필수)**:
+> 1. 가드 스크립트 작성 (`scripts/check-{name}.mjs`)
+> 2. 가드 단위 테스트 vitest 작성 (`tests/scripts/check-{name}.test.ts`, ≥ 6 fixture)
+> 3. **본 표에 행 추가** + `package.json`의 `check:{name}` script 등록
+
+#### 절차
+
+1. PR 변경 파일 목록(`gh pr view {N} --json files`)에서 본 표의 글롭과 매칭되는 파일 식별
+2. 매칭되는 가드별 npm script를 순차 실행 (Bash tool):
+   - cwd: 프로젝트 루트
+   - timeout: 30초
+   - 결과 캡처: exit code + stdout + stderr
+3. 결과 분기:
+   - **모든 가드 PASS (exit 0)**: 정상 진행 → Step 2.5 (Rules) 이동
+   - **하나 이상 가드 FAIL (exit ≠ 0)**:
+     - 아래 §"가드 fail PR 코멘트" 포맷으로 `gh pr comment` 등록
+     - `gh pr review --request-changes --body "..."` 즉시 실행
+     - **Step 2.5/3 (Rules + 3-에이전트 리뷰) 스킵** (가드가 이미 도메인 문제 명시 — 토큰 절감)
+     - **skill-fix 호출 금지** (--auto-fix 무관 — 가드 위반은 인간이 수동 수정 필수)
+     - 사용자 안내: "가드 위반 수정 후 `/skill-review-pr {N}` 재실행"
+     - 종료
+   - **가드 자체 환경 오류 (exit 2, 스크립트 누락 등)**: WARNING 출력 후 정상 진행 (가드 인프라 문제는 별도 alert, 리뷰 자체는 막지 않음)
+
+#### 가드 fail PR 코멘트 포맷
+
+```
+⛔ Pre-Review Guard 실패: {가드 ID}
+   파일: {매칭 파일 경로} ({N건} 매칭)
+   가드: {npm script}
+   exit code: {N}
+   stderr (요약, 첫 5줄):
+     {stderr 본문}
+
+근거: {근거 — 본 표의 "근거" 컬럼 참조}
+대응: stderr의 위반 라인 수정 후 PR 갱신 → /skill-review-pr {prNumber} 재실행.
+3-에이전트 리뷰는 가드 통과 후 진행됩니다.
+```
+
+#### 실행 로그
+
+execution-log.json에 추가:
+- 가드 실행: `action="guard_executed"`, `guards=[{id, exitCode, files, matchCount}]`
+- 가드 fail: `action="guard_failed"`, `failedGuards=[id, ...]`, `decision="REQUEST_CHANGES (guard-fail)"`
+
 ### 2.5. 도메인 × 언어 Rules 로드 (Phase 4)
 
 `.claude/rules/{domain}/{language}/`에 도메인 비즈니스 제약 파일이 있으면 자동 참조.
@@ -233,6 +291,9 @@ execution-log.json: APPROVED → action="approved", REQUEST_CHANGES → action="
 - CRITICAL 1개+ → workflowState.fixLoopCount 증가 후 `Skill tool: skill="skill-fix", args="{prNumber}"`
   - fixLoopCount 3회째 CRITICAL → skill-fix 호출 금지, REQUEST_CHANGES 즉시 중단 (루프 가드)
   - 직접 코드 수정 금지. skill-fix 없이 REQUEST_CHANGES 후 종료 금지.
+
+#### Pre-Review Guard fail (Step 2.4 — CANDID-042)
+- skill-fix 호출 금지 (가드 위반은 인간 수동 수정 필수). 사용자가 직접 위반 라인 수정 후 `/skill-review-pr {N}` 재실행.
 
 ## 출력
 필수 포함: PR 번호/제목/작성자/브랜치, **리뷰 모드 + 실행 에이전트 목록**, **적용 Rules**(있을 때만), 체크리스트 결과, 관점별 리뷰 테이블(CRITICAL/MAJOR/MINOR 수), 주요 피드백 목록, 결정(APPROVED/REQUEST_CHANGES), 다음 자동 스킬
