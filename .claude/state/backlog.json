@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 42,
     "projectPrefix": "CANDID",
-    "version": 220,
+    "version": 221,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T19:47:41+09:00"
+    "updatedAt": "2026-05-25T19:48:39+09:00"
   },
   "summary": {
     "total": 40,
-    "done": 20,
-    "inProgress": 1,
+    "done": 21,
+    "inProgress": 0,
     "review": 0,
     "todo": 19
   },
@@ -2082,47 +2082,39 @@
       "id": "CANDID-041",
       "title": "CANDID-038 가드 vitest 단위 테스트 (회귀 가드 무결성)",
       "description": "CANDID-038 회고 Action Item HIGH-A1 (L-034 적용 1번째). `scripts/check-migrations-no-concurrently.mjs`의 vitest 단위 테스트 추가. tmpdir + mkdtempSync fixture로 ≥ 6 케이스 커버: (1) allowlist 등록 파일 내 CONCURRENTLY → exit 0, (2) 비등록 CONCURRENTLY → exit 1 + 라인 번호 정확, (3) 라인 주석 `--` SKIP, (4) 블록 주석 `/* */` SKIP, (5) 멀티라인 DDL DETECT, (6) UNIQUE INDEX CONCURRENTLY DETECT, (7) 선행 공백/탭 DETECT, (8) 빈 디렉토리/allowlist 부재 정상 동작. 추정 ~140줄. `_base/checklists/common.md` §\"회귀 가드 도구 도입\" 표준 절차의 첫 적용 사례.",
-      "status": "in_progress",
+      "status": "done",
       "type": "chore",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260525-180000",
-      "assignedAt": "2026-05-25T19:40:44+09:00",
-      "lockedFiles": [
-        "tests/scripts/check-migrations-no-concurrently.test.ts"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-038"
       ],
       "createdAt": "2026-05-25T18:33:14+09:00",
       "source": "CANDID-038 retro Action Item HIGH-A1 (L-034)",
       "lockTTL": 3600,
-      "updatedAt": "2026-05-25T19:47:41+09:00",
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 61,
-        "fixLoopCount": 1,
-        "autoChainArgs": "61",
-        "updatedAt": "2026-05-25T19:47:41+09:00"
-      },
+      "updatedAt": "2026-05-25T19:48:39+09:00",
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
           "title": "vitest 테스트 작성 + 통과 검증",
           "description": "tests/scripts/check-migrations-no-concurrently.test.ts 신설. mkdtempSync tmpdir fixture + execFileSync spawn 패턴으로 10건 케이스 (clean/allowlist/negative/line-comment/block-comment/multiline/UNIQUE/leading-tab/multiple-violations/dir-absent) 커버. 가드 스크립트(scripts/check-migrations-no-concurrently.mjs) 변경 금지.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "tests/scripts/check-migrations-no-concurrently.test.ts"
           ],
           "estimatedLines": 150,
           "prLineLimit": 250,
           "prNumber": 61,
-          "mergedAt": null,
+          "mergedAt": "2026-05-25T19:48:39+09:00",
           "branch": "feature/CANDID-041-step1"
         }
       ],
-      "currentStep": 1
+      "currentStep": 1,
+      "completedAt": "2026-05-25T19:48:39+09:00"
     },
     "CANDID-042": {
       "id": "CANDID-042",

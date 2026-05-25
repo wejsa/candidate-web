@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 23,
+    "version": 24,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-25T17:23:50+09:00"
+    "updatedAt": "2026-05-25T19:48:39+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -766,6 +766,31 @@
       "fixLoopTotal": 1,
       "carriedMajors": 4,
       "note": "CANDID-013 follow-up. 신규 마이그 DROP+CREATE (CONCURRENTLY 제거) + 회귀 가드(check:migrations) + allowlist. in-PR fix 1회(정규식 멀티라인 + 블록 주석 strip). 7건 carry → 회고 follow-up."
+    },
+    "CANDID-041": {
+      "id": "CANDID-041",
+      "title": "CANDID-038 가드 vitest 단위 테스트 (회귀 가드 무결성)",
+      "description": "CANDID-038 회고 Action Item HIGH-A1 (L-034 적용 1번째). `scripts/check-migrations-no-concurrently.mjs`의 vitest 단위 테스트 추가. tmpdir + mkdtempSync fixture로 ≥ 6 케이스 커버: (1) allowlist 등록 파일 내 CONCURRENTLY → exit 0, (2) 비등록 CONCURRENTLY → exit 1 + 라인 번호 정확, (3) 라인 주석 `--` SKIP, (4) 블록 주석 `/* */` SKIP, (5) 멀티라인 DDL DETECT, (6) UNIQUE INDEX CONCURRENTLY DETECT, (7) 선행 공백/탭 DETECT, (8) 빈 디렉토리/allowlist 부재 정상 동작. 추정 ~140줄. `_base/checklists/common.md` §\"회귀 가드 도구 도입\" 표준 절차의 첫 적용 사례.",
+      "type": "chore",
+      "priority": "high",
+      "phase": 1,
+      "source": "CANDID-038 retro Action Item HIGH-A1 (L-034)",
+      "dependencies": [
+        "CANDID-038"
+      ],
+      "createdAt": "2026-05-25T18:33:14+09:00",
+      "completedAt": "2026-05-25T19:48:39+09:00",
+      "totalSteps": 1,
+      "totalAdditions": 252,
+      "totalDeletions": 0,
+      "prNumbers": [
+        61
+      ],
+      "fixLoopTotal": 1,
+      "carriedMajors": 3,
+      "testsBefore": 1092,
+      "testsAfter": 1107,
+      "note": "L-034 첫 적용 (meta-guard). 15 케이스 (12 초기 + 3 in-PR fix). assertion 강도 강화 + /i flag 회귀 가드 + 라인 번호 보존 검증. carry: A-1 tmpDirs race / A-2 spawn 헬퍼 DRY / D-1 CRLF 변형."
     }
   }
 }

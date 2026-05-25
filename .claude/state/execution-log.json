@@ -1379,5 +1379,34 @@
     "testCountAfter": 15,
     "note": "meta-guard 신뢰도 확보 — 4 MAJOR 모두 test 영역 in-PR fix. 전체 회귀 1092→1107.",
     "timestamp": "2026-05-25T19:47:41+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-041",
+    "stepNumber": 1,
+    "prNumber": 61,
+    "mergeMethod": "squash",
+    "mergedLines": 252,
+    "branchDeleted": true,
+    "isLastStep": true,
+    "fixLoop": 1,
+    "timestamp": "2026-05-25T19:48:39+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-041",
+    "totalSteps": 1,
+    "totalAdditions": 252,
+    "totalDeletions": 0,
+    "prNumbers": [
+      61
+    ],
+    "fixLoopTotal": 1,
+    "carriedMajors": 3,
+    "vitest": {
+      "passed": 1107,
+      "added": 15
+    },
+    "timestamp": "2026-05-25T19:48:39+09:00"
   }
 ]
