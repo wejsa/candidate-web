@@ -94,6 +94,12 @@ export const ERROR_CATALOG = {
   FILE_SIZE_EXCEEDED: { status: 422, message: '허용된 파일 크기를 초과했습니다.' },
   FILE_TYPE_NOT_ALLOWED: { status: 422, message: '허용되지 않은 파일 형식입니다.' },
   FILE_UPLOAD_FAILED: { status: 500, message: '파일 업로드에 실패했습니다.' },
+  // CANDID-016 Step 2: 활성 첨부 1건 partial UNIQUE 충돌 + 메타 미존재.
+  FILE_ALREADY_EXISTS: {
+    status: 409,
+    message: '이미 첨부된 파일이 있습니다. 교체 후 다시 시도해 주세요.',
+  },
+  FILE_NOT_FOUND: { status: 404, message: '파일을 찾을 수 없습니다.' },
 
   // 시스템 — SYS_
   SYS_INTERNAL_ERROR: { status: 500, message: '서버 내부 오류가 발생했습니다.' },
