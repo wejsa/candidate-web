@@ -132,7 +132,7 @@ describe('check-guard-wiring-consistency — clean cases', () => {
 });
 
 describe('check-guard-wiring-consistency — missing partners (SKILL.md row 있으나 partner 부재)', () => {
-  it('package.json check:* 부재 → exit 1 + missing-package-script', () => {
+  it('package.json check:* 부재 → exit 1 + missing-package-script (continue invariant 동결)', () => {
     const cwd = track(
       setupTempProject({
         skillTable: [ROW_MIG],
@@ -145,6 +145,9 @@ describe('check-guard-wiring-consistency — missing partners (SKILL.md row 있�
     expect(r.exitCode).toBe(1);
     expect(r.stderr).toContain('missing-package-script');
     expect(r.stderr).toContain('G-MIG-CONCURRENTLY');
+    // T-2/T-6 in-PR fix: missing-package-script 시 `continue`로 partner 검증 스킵 동결
+    expect(r.stderr).not.toContain('missing-script:');
+    expect(r.stderr).not.toContain('missing-test:');
   });
 
   it('scripts/check-*.mjs 파일 부재 → exit 1 + missing-script', () => {
@@ -243,6 +246,22 @@ describe('check-guard-wiring-consistency — orphans (SKILL.md row 없으나 par
     // 3개 self 항목 모두 보고되지 않아야 함 → exit 0
     expect(r.exitCode).toBe(0);
     expect(r.stderr).not.toContain('orphan');
+  });
+
+  it('T-5 in-PR fix: meta-guard self-integrity (self-test + self npm-script 동시 부재) → exit 1 (L-034 우회 차단)', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [],
+        scriptFiles: ['guard-wiring-consistency'], // self-script만 존재
+        testFiles: [], // self-test 부재
+        pkgScripts: {}, // self npm-script 부재
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('meta-guard self-test missing');
+    expect(r.stderr).toContain('meta-guard self npm-script missing');
+    expect(r.stderr).toContain('L-034');
   });
 });
 

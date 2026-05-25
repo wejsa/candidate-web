@@ -24,16 +24,22 @@
 // Exit: 0 = clean / 1 = 일관성 위반 / 2 = SKILL.md 파싱 실패.
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative, basename } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const SKILL_PATH = '.claude/skills/skill-review-pr/SKILL.md';
 const SCRIPTS_DIR = 'scripts';
 const TESTS_DIR = 'tests/scripts';
 const PKG_PATH = 'package.json';
 
-const META_SCRIPT_PATH = 'scripts/check-guard-wiring-consistency.mjs';
-const META_TEST_PATH = 'tests/scripts/check-guard-wiring-consistency.test.ts';
-const META_NPM_SCRIPT = 'check:guard-wiring';
+// D-2/T-5 in-PR fix: 동적 self-detection — `import.meta.url` 기반 SELF_BASE 도출.
+// 파일 rename(상수 stale silent failure) 차단 + self-test 부재(L-034 위반) 명시적 보고.
+// canonical 경로(cwd 상대)를 사용해 fixture(tmpdir) + 실 프로젝트 양쪽에서 일관 동작.
+const SELF_BASE = basename(fileURLToPath(import.meta.url))
+  .replace(/^check-/, '')
+  .replace(/\.mjs$/, '');
+const SELF_SCRIPT_PATH = `${SCRIPTS_DIR}/check-${SELF_BASE}.mjs`;
+const SELF_TEST_PATH = `${TESTS_DIR}/check-${SELF_BASE}.test.ts`;
 
 const SECTION_HEADER_RX = /^### 2\.4\. Pre-Review Guard Execution\b/m;
 const NEXT_SECTION_RX = /^### /m;
@@ -92,7 +98,29 @@ try {
   const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
   const rows = parseSkillTable(skillContent);
 
+  // D-2/T-5 in-PR fix: self npm script entry 동적 탐색.
+  const SELF_NPM_SCRIPT = Object.entries(pkg.scripts ?? {}).find(
+    ([, v]) => v === `node ${SELF_SCRIPT_PATH}`,
+  )?.[0];
+
   const violations = [];
+
+  // T-5 in-PR fix: meta-guard self-integrity 명시 검증 (L-034 self-application 우회 회피).
+  // canonical SELF_SCRIPT_PATH가 cwd에 존재할 때만 실행 (production에선 항상 존재, fixture는
+  // 자체적으로 self 파일을 만들 때만 trigger). rename 회귀는 SELF_BASE 동적 도출로 차단됨.
+  if (existsSync(SELF_SCRIPT_PATH)) {
+    if (!existsSync(SELF_TEST_PATH)) {
+      violations.push(
+        `meta-guard self-test missing: ${SELF_TEST_PATH} 부재 — L-034 self-application 위반`,
+      );
+    }
+    if (!SELF_NPM_SCRIPT) {
+      violations.push(
+        `meta-guard self npm-script missing: package.json scripts에 value === "node ${SELF_SCRIPT_PATH}"인 entry 부재`,
+      );
+    }
+  }
+
   const activeScriptFiles = new Set();
   const activeTestFiles = new Set();
   const activeNpmScripts = new Set();
@@ -131,19 +159,19 @@ try {
 
   // orphan 검출 (self-allowlist 적용)
   for (const file of listScriptFiles()) {
-    if (file === META_SCRIPT_PATH) continue;
+    if (file === SELF_SCRIPT_PATH) continue;
     if (!activeScriptFiles.has(file)) {
       violations.push(`orphan-script: ${file} 존재하나 SKILL.md §2.4 매핑 표에 row 없음`);
     }
   }
   for (const file of listTestFiles()) {
-    if (file === META_TEST_PATH) continue;
+    if (file === SELF_TEST_PATH) continue;
     if (!activeTestFiles.has(file)) {
       violations.push(`orphan-test: ${file} 존재하나 SKILL.md §2.4 매핑 표에 대응 row 없음`);
     }
   }
   for (const npmScript of listPkgCheckScripts(pkg)) {
-    if (npmScript === META_NPM_SCRIPT) continue;
+    if (npmScript === SELF_NPM_SCRIPT) continue;
     if (!activeNpmScripts.has(npmScript)) {
       violations.push(
         `orphan-package-script: package.json scripts["${npmScript}"] 존재하나 SKILL.md §2.4 row 없음`,
