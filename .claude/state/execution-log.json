@@ -1023,5 +1023,22 @@
       "S-MAJOR-2"
     ],
     "timestamp": "2026-05-25T09:55:00+09:00"
+  },
+  {
+    "event": "review_completed",
+    "taskId": "CANDID-016",
+    "stepNumber": 2,
+    "prNumber": 58,
+    "decision": "COMMENT",
+    "critical": 0,
+    "major": 10,
+    "minor": 8,
+    "info": 8,
+    "agents": [
+      "domain",
+      "security",
+      "test"
+    ],
+    "timestamp": "2026-05-25T10:05:00+09:00"
   }
 ]
