@@ -2,15 +2,15 @@
   "metadata": {
     "lastTaskNumber": 37,
     "projectPrefix": "CANDID",
-    "version": 208,
+    "version": 209,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T10:46:00+09:00"
+    "updatedAt": "2026-05-25T10:47:07+09:00"
   },
   "summary": {
     "total": 35,
-    "done": 18,
-    "inProgress": 1,
-    "review": 1,
+    "done": 19,
+    "inProgress": 0,
+    "review": 0,
     "todo": 16
   },
   "phases": {
@@ -1233,7 +1233,7 @@
       "id": "CANDID-016",
       "title": "이력서 파일 첨부 (Pre-signed URL, MIME 화이트리스트, UUID 재명명) (US-APP-003)",
       "description": "S3 Pre-signed URL 업로드(유효 5분, 단일 PUT). 확장자/MIME 이중 검증, UUID 재명명, 최대 10MB. 진행률 표시, 중단/재시도. 비동기 바이러스 스캔 큐 등록.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
@@ -1241,38 +1241,12 @@
         "CANDID-015"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260524-202030",
-      "assignedAt": "2026-05-25T10:30:00+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "prisma/schema.prisma",
-        "prisma/migrations/_candid_016_resume_unique/migration.sql",
-        "lib/env.ts",
-        "lib/files/storage.ts",
-        "lib/files/validation.ts",
-        "lib/files/resume.ts",
-        "lib/files/confirm.ts",
-        "lib/files/client.ts",
-        "lib/files/upload-state.ts",
-        "lib/errors/codes.ts",
-        "app/api/v1/files/resume/presign/route.ts",
-        "app/api/v1/files/resume/confirm/route.ts",
-        "app/jobs/[id]/apply/_components/ResumeUploadStep.tsx",
-        "app/jobs/[id]/apply/page.tsx",
-        "docker-compose.yml",
-        ".env.example",
-        "package.json",
-        "pnpm-lock.yaml"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 59,
-        "fixLoopCount": 1,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-25T10:43:00+09:00"
-      },
-      "updatedAt": "2026-05-25T10:30:00+09:00",
+      "lockedFiles": [],
+      "workflowState": null,
+      "updatedAt": "2026-05-25T10:47:07+09:00",
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-016-plan.md",
       "currentStep": 3,
@@ -1335,7 +1309,7 @@
         {
           "step": 3,
           "title": "UI — ResumeUploadStep + 클라이언트 업로드 + 진행률 + 상태머신 + RTL",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/files/client.ts",
             "lib/files/upload-state.ts",
@@ -1352,9 +1326,12 @@
           ],
           "branch": "feature/CANDID-016-step3",
           "prNumber": 59,
-          "actualLines": 950
+          "actualLines": 950,
+          "mergedAt": "2026-05-25T10:47:07+09:00",
+          "mergedLines": 950
         }
-      ]
+      ],
+      "completedAt": "2026-05-25T10:47:07+09:00"
     },
     "CANDID-017": {
       "id": "CANDID-017",

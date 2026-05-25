@@ -1133,5 +1133,25 @@
     "round": 2,
     "carriedIssues": 9,
     "timestamp": "2026-05-25T10:46:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-016",
+    "stepNumber": 3,
+    "prNumber": 59,
+    "mergeCommit": "a8ab03499475202e6d65825d12eb574a588eefa5",
+    "timestamp": "2026-05-25T10:47:07+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-016",
+    "totalSteps": 3,
+    "totalPRs": [
+      57,
+      58,
+      59
+    ],
+    "totalLines": 2658,
+    "timestamp": "2026-05-25T10:47:07+09:00"
   }
 ]

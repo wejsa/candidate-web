@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 21,
+    "version": 22,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-24T20:30:00+09:00"
+    "updatedAt": "2026-05-25T10:47:07+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -665,7 +665,11 @@
       "completedAt": "2026-05-24T17:17:14+09:00",
       "steps": 3,
       "totalLines": 1591,
-      "prNumbers": [47, 48, 49],
+      "prNumbers": [
+        47,
+        48,
+        49
+      ],
       "fixLoop": 0,
       "note": "US-JOB-001 완성. Step 1(partial index 4종 + 서비스/API) + Step 2(RSC + 메타데이터 + 카드/페이지네이션) + Step 3(JobFilters client + ClosedJobsSection + schema 분리). 자기 PR 3건 모두 CRITICAL 0 / fix loop 0. 테스트 752→812 (+60). carry MAJOR 17(Step1:11 + Step2:5 + Step3:6) → 회고에서 F-1~F-9 follow-up task 분리 예정."
     },
@@ -679,7 +683,11 @@
       "assignee": "jaese@hoji-20260524-172129",
       "steps": 3,
       "totalLines": 1479,
-      "prNumbers": [50, 51, 52],
+      "prNumbers": [
+        50,
+        51,
+        52
+      ],
       "fixLoop": 0,
       "note": "US-JOB-002 완성. Step 1(getJobDetail 서비스 + GET /api/v1/job-postings/[id] + serverComponentsExternalPackages: ['isomorphic-dompurify']) + Step 2(RSC 페이지 + 메타데이터 + JobDetailHeader/Body + ShareButton + L-019 D-MAJOR-1/2 fix) + Step 3(ApplyCta 5-state + RSC auth helper getOptionalAuthFromCookies + L-019 Step2 carry 4건 fix). 자기 PR 3건 모두 CRITICAL 0 / fix loop 0. 테스트 833→868 (+35). 핵심 설계: DRAFT 서비스 레이어 분기 / sanitize unstable_cache 내부 / isClosed 동적 계산 / view_count CANDID-027 위임 / 5-state CTA Promise.all 병렬. carry MAJOR 23 누적(Step1:9 + Step2:8 + Step3:6) → CANDID-014-FU1로 통합 분리 예정 (L-022 임계 초과)."
     },
@@ -693,9 +701,51 @@
       "assignee": "jaese@hoji-20260524-185141",
       "steps": 4,
       "totalLines": 2489,
-      "prNumbers": [53, 54, 55, 56],
+      "prNumbers": [
+        53,
+        54,
+        55,
+        56
+      ],
       "fixLoop": 0,
       "note": "US-APP-001/002/005 완성. Step 1(Draft 서비스 + GET/PUT API + lib/validation/age.ts 만 14세 SSOT + APP_USER_UNDER_MIN_AGE + 낙관적 락) + Step 2(User PII lazy prefill + Cache-Control private,no-store + assertUserMinAge cross-check + L-019 Step1 carry 4건 fix) + Step 3(/jobs/[id]/apply RSC + 3-step shell + PersonalInfoStep 폼 + L-019 Step2 carry 3건 fix) + Step 4(use-auto-save hook + AutoSaveIndicator + jsdom environmentMatchGlobs 인프라 도입 + L-019 Step3 carry 3건 fix). 자기 PR 4건 모두 CRITICAL 0 / fix loop 0. 테스트 868→960 (+92). 핵심 설계: payload_json schemaVersion=1 future-proofing / lazy prefill (payload 미러 ✗) / 만 14세 3-layer (zod + assertUserMinAge cross-check) / Promise.all → 순차 호출 (고아 Draft 차단) / debounce 3s + interval 30s + 409 paused + beforeunload. carry MAJOR 28+ 누적(Step1:12 + Step2:8 + Step3:7 + Step4:8) → CANDID-015-FU1로 통합 분리 예정 (L-022 큰 임계 초과). L-019 in-task self-correction 3회 누적 적용 (Step 2→3→4 carry 해소). jsdom 25.0.1 devDep 1차 도입 (vitest hook 테스트만)."
+    },
+    "CANDID-016": {
+      "id": "CANDID-016",
+      "title": "이력서 파일 첨부 (Pre-signed URL, MIME 화이트리스트, UUID 재명명) (US-APP-003)",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "assignee": "jaese@hoji-20260524-202030",
+      "completedAt": "2026-05-25T10:47:07+09:00",
+      "totalLines": 2658,
+      "prNumbers": [
+        57,
+        58,
+        59
+      ],
+      "fixLoop": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "인프라 - DB partial UNIQUE + S3 SDK + MinIO + ENV",
+          "mergedLines": 500,
+          "prNumber": 57
+        },
+        {
+          "step": 2,
+          "title": "presign+confirm API + 비즈니스 + Step 1 carry MAJOR 3건",
+          "mergedLines": 1208,
+          "prNumber": 58
+        },
+        {
+          "step": 3,
+          "title": "UI ResumeUploadStep + 상태머신 + 클라이언트 업로드 + carry MAJOR 4건",
+          "mergedLines": 950,
+          "prNumber": 59
+        }
+      ],
+      "note": "Step 1 in-PR fix 4건(D1/D3/S1/T1). Step 2 in-PR fix 5건(A1/D1/S1/S2/T1/T2/D2). Step 3 in-PR fix 4건(T-CRITICAL-1 + D2/A1/S2). 총 fixLoop 1회(Step 3 vitest config). D-MAJOR-2 정책 결정 (INFECTED row partial UNIQUE 평가 제외). 1092 테스트 통과."
     }
   }
 }
