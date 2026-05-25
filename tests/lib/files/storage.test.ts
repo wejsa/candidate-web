@@ -117,9 +117,10 @@ describe('isValidResumeStoredPath', () => {
 });
 
 describe('presignResumeUpload', () => {
-  it('S3 미구성 시 FILE_UPLOAD_FAILED throw', async () => {
+  it('S3 미구성 시 SYS_DEPENDENCY_UNAVAILABLE throw (A-MAJOR-2 fix)', async () => {
+    // 구성 미흡과 호출 실패를 분리 — 운영 알람 분기 가능 (503 vs 500).
     await expect(presignResumeUpload('a.pdf', 'application/pdf')).rejects.toMatchObject({
-      code: 'FILE_UPLOAD_FAILED',
+      code: 'SYS_DEPENDENCY_UNAVAILABLE',
     });
   });
 

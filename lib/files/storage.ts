@@ -7,13 +7,15 @@ import {
   S3ServiceException,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { getEnv } from '@/lib/env';
 import { AppError } from '@/lib/errors';
 
 // CANDID-016 Step 1 — S3/MinIO presigned PUT URL 발급 + 객체 삭제 헬퍼.
 // **호출 위치**: Route Handler / Server Action (Node runtime). middleware/Edge 금지.
 // **부분 설정 부팅 차단**: env.ts superRefine이 S3_* 4-tuple을 강제하므로 본 모듈은
-// "모두 set" 또는 "모두 unset" 두 상태만 가정. 후자에서는 호출 시 FILE_UPLOAD_FAILED throw.
+// "모두 set" 또는 "모두 unset" 두 상태만 가정. 후자에서는 SYS_DEPENDENCY_UNAVAILABLE throw
+// (A-MAJOR-2 fix: 구성 미흡과 호출 실패 코드 분리 — 운영 알람 분기 가능).
 
 let cachedClient: S3Client | null = null;
 
@@ -27,19 +29,43 @@ function isStorageConfigured(): boolean {
   );
 }
 
+// S-MAJOR-2 fix (PR #57 carry): S3 SDK 원본 에러를 직접 cause에 전달하지 않고 safe 필드만 추출.
+// requestId / endpoint / signature 등이 향후 로깅 sink(Sentry/pino) 직렬화로 누출되는 위험 차단.
+function safeS3Cause(cause: unknown): { name: string; statusCode?: number; requestId?: string } {
+  if (cause instanceof S3ServiceException) {
+    return {
+      name: cause.name,
+      statusCode: cause.$metadata?.httpStatusCode,
+      requestId: cause.$metadata?.requestId,
+    };
+  }
+  if (cause instanceof Error) return { name: cause.name };
+  return { name: 'UnknownError' };
+}
+
 function getClient(): { client: S3Client; bucket: string; ttlSec: number } {
   if (!isStorageConfigured()) {
-    // 저장소 비활성 모드 — env.ts superRefine 통과 (4개 모두 unset)했더라도
-    // 파일 API 호출은 차단 (운영 staging에서 누락 인지 보조).
-    throw new AppError('FILE_UPLOAD_FAILED', { message: '파일 저장소가 구성되지 않았습니다.' });
+    // A-MAJOR-2 fix: 구성 미흡은 운영 알람상 503(SYS_DEPENDENCY_UNAVAILABLE) — 호출 실패(500)와 분리.
+    throw new AppError('SYS_DEPENDENCY_UNAVAILABLE', {
+      message: '파일 저장소가 구성되지 않았습니다.',
+    });
   }
   const env = getEnv();
   if (cachedClient === null) {
+    // A-MAJOR-1 fix (PR #57 carry): connection/socket timeout + maxAttempts 명시.
+    // 외부 S3/MinIO 장애 시 Next.js Route Handler가 무한 대기 → worker hang 차단.
+    // presign은 네트워크 호출 없으나 deleteObject는 실제 PUT/DELETE → 본 핸들러 영향.
+    const requestHandler = new NodeHttpHandler({
+      connectionTimeout: 2_000, // TCP 연결 2초
+      socketTimeout: 10_000, // 응답 10초 (delete가 주 IO)
+    });
     cachedClient = new S3Client({
       endpoint: env.S3_ENDPOINT,
       region: 'auto',
       // MinIO 호환 — 일부 호환 스토리지는 path-style만 지원.
       forcePathStyle: true,
+      maxAttempts: 3,
+      requestHandler,
       credentials: {
         accessKeyId: env.S3_ACCESS_KEY as string,
         secretAccessKey: env.S3_SECRET_KEY as string,
@@ -115,9 +141,10 @@ export async function presignResumeUpload(
       expiresAt: new Date(signedAt.getTime() + ttlSec * 1000 - PRESIGN_SAFETY_MARGIN_MS),
     };
   } catch (cause) {
+    // S-MAJOR-2 fix: cause 정제 후 전달 — SDK 원본 메시지 leak 차단.
     throw new AppError('FILE_UPLOAD_FAILED', {
       message: 'presigned URL 발급에 실패했습니다.',
-      cause,
+      cause: safeS3Cause(cause),
     });
   }
 }
@@ -134,7 +161,11 @@ export async function deleteResumeObject(storedPath: string): Promise<void> {
   } catch (cause) {
     // 키가 이미 없으면 멱등 성공 — S3 DeleteObject는 NoSuchKey 시에도 204를 반환.
     if (cause instanceof S3ServiceException && cause.name === 'NoSuchKey') return;
-    throw new AppError('FILE_UPLOAD_FAILED', { message: '파일 삭제에 실패했습니다.', cause });
+    // S-MAJOR-2 fix: cause 정제 후 전달.
+    throw new AppError('FILE_UPLOAD_FAILED', {
+      message: '파일 삭제에 실패했습니다.',
+      cause: safeS3Cause(cause),
+    });
   }
 }
 
