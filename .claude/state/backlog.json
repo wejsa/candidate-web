@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 42,
     "projectPrefix": "CANDID",
-    "version": 223,
+    "version": 224,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T20:55:01+09:00"
+    "updatedAt": "2026-05-25T20:58:45+09:00"
   },
   "summary": {
     "total": 40,
@@ -2125,7 +2125,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260525-200000",
-      "assignedAt": "2026-05-25T20:55:01+09:00",
+      "assignedAt": "2026-05-25T20:58:45+09:00",
       "lockedFiles": [
         ".claude/skills/skill-review-pr/SKILL.md",
         ".claude/domains/_base/checklists/common.md",
@@ -2137,21 +2137,21 @@
       "createdAt": "2026-05-25T18:33:14+09:00",
       "source": "CANDID-038 retro Action Item HIGH-A2 (L-036)",
       "lockTTL": 3600,
-      "updatedAt": "2026-05-25T20:55:01+09:00",
+      "updatedAt": "2026-05-25T20:58:45+09:00",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 62,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-25T20:55:01+09:00"
+        "autoChainArgs": "62 --auto-fix",
+        "updatedAt": "2026-05-25T20:58:45+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "SKILL.md §2.4 추가 + 컨벤션 sync",
           "description": "skill-review-pr/SKILL.md에 Step 2.4 \"Pre-Review Guard Execution\" 신설 (declarative 매핑 표 + 실행 절차 + fail 시 PR 코멘트 포맷 + Trivial SKIP + Step 7 분기 1줄). _base/checklists/common.md L-036 항목 + _base/conventions/database.md §회귀 가드에 \"wiring 완료 (CANDID-042 SKILL.md §2.4)\" 표기.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             ".claude/skills/skill-review-pr/SKILL.md",
             ".claude/domains/_base/checklists/common.md",
@@ -2159,8 +2159,9 @@
           ],
           "estimatedLines": 80,
           "prLineLimit": 200,
-          "prNumber": null,
-          "mergedAt": null
+          "prNumber": 62,
+          "mergedAt": null,
+          "branch": "feature/CANDID-042-step1"
         }
       ],
       "currentStep": 1

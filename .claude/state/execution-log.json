@@ -1408,5 +1408,25 @@
       "added": 15
     },
     "timestamp": "2026-05-25T19:48:39+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-042",
+    "stepNumber": 1,
+    "prNumber": 62,
+    "branch": "feature/CANDID-042-step1",
+    "filesChanged": 3,
+    "additions": 65,
+    "deletions": 4,
+    "vitest": {
+      "passed": 1107,
+      "added": 0
+    },
+    "build": "skipped (policy-only)",
+    "lint": "skipped (no code change)",
+    "typecheck": "ok",
+    "isLastStep": true,
+    "note": "L-036 첫 적용 (self-referential). SKILL.md §2.4 declarative wiring + 컨벤션 sync 2건. SSOT는 SKILL.md 매핑 표.",
+    "timestamp": "2026-05-25T20:58:45+09:00"
   }
 ]
