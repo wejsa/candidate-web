@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 233,
+    "version": 234,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T23:34:34+09:00"
+    "updatedAt": "2026-05-25T23:54:51+09:00"
   },
   "summary": {
     "total": 43,
     "done": 23,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 20
+    "todo": 19
   },
   "phases": {
     "1": {
@@ -2203,18 +2203,28 @@
       "id": "CANDID-044",
       "title": "가드 fail 시 security 에이전트 부분 실행 옵션 (다른 보안 이슈 마스킹 회피)",
       "description": "CANDID-042 회고 Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2). 현재 §2.4 정책은 가드 fail 시 Rules + 3-에이전트 리뷰를 *전체* 스킵 → 같은 PR의 다른 보안 이슈(시크릿 노출/SQL Injection 등)가 마스킹됨. 정책 옵션 도입: 가드 fail이라도 `pr-reviewer-security` 1개는 백그라운드 실행 + 결과를 PR 코멘트에 합산. SKILL.md §2.4 절차에 \"가드 fail 시에도 security 단일 에이전트 실행\" 분기 추가 + 매핑 표에 옵션 컬럼 (선택). 추정 ~50줄.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "chore",
       "priority": "high",
       "phase": 1,
-      "assignee": null,
-      "assignedAt": null,
+      "assignee": "jaese@hoji-20260525-235431",
+      "assignedAt": "2026-05-25T23:54:51+09:00",
       "lockedFiles": [],
       "dependencies": [
         "CANDID-042"
       ],
       "createdAt": "2026-05-25T21:34:03+09:00",
-      "source": "CANDID-042 retro Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2)"
+      "source": "CANDID-042 retro Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2)",
+      "lockTTL": 1800,
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-25T23:54:51+09:00"
+      },
+      "updatedAt": "2026-05-25T23:54:51+09:00"
     },
     "CANDID-045": {
       "id": "CANDID-045",
