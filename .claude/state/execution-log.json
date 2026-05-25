@@ -1316,5 +1316,25 @@
     ],
     "source": "CANDID-038 retro",
     "timestamp": "2026-05-25T18:33:14+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-041",
+    "stepNumber": 1,
+    "prNumber": 61,
+    "branch": "feature/CANDID-041-step1",
+    "filesChanged": 1,
+    "additions": 210,
+    "deletions": 0,
+    "vitest": {
+      "passed": 1104,
+      "added": 12
+    },
+    "build": "skipped (test-only)",
+    "lint": "ok",
+    "typecheck": "ok",
+    "isLastStep": true,
+    "note": "L-034 첫 적용. 12 케이스 (clean/allowlist/comment/DETECT/edge). spawn+tmpdir 패턴. 가드 스크립트 변경 0.",
+    "timestamp": "2026-05-25T19:40:44+09:00"
   }
 ]

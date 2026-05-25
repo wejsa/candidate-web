@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 42,
     "projectPrefix": "CANDID",
-    "version": 218,
+    "version": 219,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T19:37:41+09:00"
+    "updatedAt": "2026-05-25T19:40:44+09:00"
   },
   "summary": {
     "total": 40,
@@ -2087,7 +2087,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260525-180000",
-      "assignedAt": "2026-05-25T19:37:41+09:00",
+      "assignedAt": "2026-05-25T19:40:44+09:00",
       "lockedFiles": [
         "tests/scripts/check-migrations-no-concurrently.test.ts"
       ],
@@ -2097,28 +2097,29 @@
       "createdAt": "2026-05-25T18:33:14+09:00",
       "source": "CANDID-038 retro Action Item HIGH-A1 (L-034)",
       "lockTTL": 3600,
-      "updatedAt": "2026-05-25T19:37:41+09:00",
+      "updatedAt": "2026-05-25T19:40:44+09:00",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 61,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-25T19:37:41+09:00"
+        "autoChainArgs": "61 --auto-fix",
+        "updatedAt": "2026-05-25T19:40:44+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "vitest 테스트 작성 + 통과 검증",
           "description": "tests/scripts/check-migrations-no-concurrently.test.ts 신설. mkdtempSync tmpdir fixture + execFileSync spawn 패턴으로 10건 케이스 (clean/allowlist/negative/line-comment/block-comment/multiline/UNIQUE/leading-tab/multiple-violations/dir-absent) 커버. 가드 스크립트(scripts/check-migrations-no-concurrently.mjs) 변경 금지.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "tests/scripts/check-migrations-no-concurrently.test.ts"
           ],
           "estimatedLines": 150,
           "prLineLimit": 250,
-          "prNumber": null,
-          "mergedAt": null
+          "prNumber": 61,
+          "mergedAt": null,
+          "branch": "feature/CANDID-041-step1"
         }
       ],
       "currentStep": 1
