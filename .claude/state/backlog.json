@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 40,
     "projectPrefix": "CANDID",
-    "version": 210,
+    "version": 211,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-25T11:00:00+09:00"
+    "updatedAt": "2026-05-25T16:50:11+09:00"
   },
   "summary": {
     "total": 38,
     "done": 19,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 19
+    "todo": 18
   },
   "phases": {
     "1": {
@@ -2008,16 +2008,26 @@
       "id": "CANDID-038",
       "title": "CANDID-013 마이그 CONCURRENTLY 제거 (L-029 회귀 위험)",
       "description": "CANDID-013 (20260524072500_candid_013_jobposting_list_indexes/migration.sql)이 `CREATE INDEX CONCURRENTLY`를 4건 사용. CANDID-016 회고(L-029)에서 발견된 동일 패턴 — Prisma migrate deploy의 트랜잭션 wrap 때문에 운영 첫 배포 시 100% 실패. 운영 적용 전 마이그 수정 필수. 옵션: (a) 일반 CREATE INDEX 변경 — job_postings 운영 초기 데이터량 평가 후 결정 (b) 별도 runbook으로 psql 사전 실행 + 마이그 IF NOT EXISTS no-op. 본 task로 결정 + 적용 + 회귀 가드 (grep -i concurrently prisma/migrations 자동 검사).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "bug",
       "priority": "critical",
       "phase": 1,
-      "assignee": null,
-      "assignedAt": null,
+      "assignee": "jaese@hoji-20260525-113000",
+      "assignedAt": "2026-05-25T16:50:11+09:00",
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-05-25T11:00:00+09:00",
-      "source": "CANDID-016 retro Action Item HIGH-1"
+      "source": "CANDID-016 retro Action Item HIGH-1",
+      "lockTTL": 1800,
+      "updatedAt": "2026-05-25T16:50:11+09:00",
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-25T16:50:11+09:00"
+      }
     },
     "CANDID-039": {
       "id": "CANDID-039",
