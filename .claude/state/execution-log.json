@@ -1724,5 +1724,18 @@
     "branch": "feature/CANDID-017-step1",
     "actualLines": 694,
     "testsAfter": 1195
+  },
+  {
+    "timestamp": "2026-05-26T23:07:24+09:00",
+    "taskId": "CANDID-017",
+    "stepNumber": 1,
+    "action": "request_changes",
+    "prNumber": 65,
+    "decision": "REQUEST_CHANGES (self-PR fallback COMMENT)",
+    "critical": 1,
+    "major": 9,
+    "minor": 9,
+    "info": 7,
+    "fixLoopCount": 1
   }
 ]
