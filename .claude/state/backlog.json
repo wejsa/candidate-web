@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 249,
+    "version": 250,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T23:50:05+09:00"
+    "updatedAt": "2026-05-26T23:56:25+09:00"
   },
   "summary": {
     "total": 43,
@@ -1423,7 +1423,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-234151",
-      "assignedAt": "2026-05-26T23:50:05+09:00",
+      "assignedAt": "2026-05-26T23:56:25+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
@@ -1440,21 +1440,21 @@
         "app/api/v1/applications/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 67,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-26T23:50:05+09:00"
+        "autoChainArgs": "67 --auto-fix",
+        "updatedAt": "2026-05-26T23:56:25+09:00"
       },
-      "updatedAt": "2026-05-26T23:50:05+09:00",
+      "updatedAt": "2026-05-26T23:56:25+09:00",
       "planPath": ".claude/temp/CANDID-018-plan.md",
       "currentStep": 1,
       "steps": [
         {
           "step": 1,
           "title": "DB 마이그 (IdempotencyKey) + number-generator + idempotency store + 단위 테스트",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "prisma/schema.prisma",
             "prisma/migrations",
@@ -1470,7 +1470,10 @@
           ],
           "estimatedLines": 500,
           "prLineLimit": 600,
-          "dependsOn": []
+          "dependsOn": [],
+          "branch": "feature/CANDID-018-step1",
+          "prNumber": 67,
+          "actualLines": 537
         },
         {
           "step": 2,
