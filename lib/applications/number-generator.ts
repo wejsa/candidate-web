@@ -33,15 +33,20 @@ function formatApplicationNumber(yearMonth: string, seq: number): string {
 }
 
 /**
- * application_number 발급. 호출 측 트랜잭션 client(tx)를 권장 — 트랜잭션 외부 호출 시
- * basePrisma 사용하나 sequence row가 다른 트랜잭션에 의해 lock되어 있으면 대기.
+ * application_number 발급.
  *
- * L-024 패턴: updateMany WHERE 조건절로 INCREMENT — 별도 SELECT FOR UPDATE 불필요.
- * PostgreSQL UPDATE는 row-level exclusive lock을 자동으로 잡음.
+ * D-H001 fix (PR #67 review): UPDATE ... RETURNING으로 atomic single-call 전환.
+ * 기존 updateMany + findUnique 분리 호출은 READ COMMITTED 격리에서 두 호출 사이
+ * autocommit 경계 race로 잘못된 seq 반환 가능. RETURNING은 같은 statement에서
+ * row-level lock + 새 값 회수를 보장한다.
  *
  * 동작:
- *   1) 해당 yearMonth row가 있으면 last_seq + 1 (updateMany count=1) → 새 seq 반환
- *   2) row 없음 (count=0): create 시도 → 동시 race로 P2002면 1로 재시도 (최대 3회)
+ *   1) UPDATE ... SET last_seq = last_seq + 1 ... RETURNING last_seq
+ *      - 1행 반환 → 새 seq 확정
+ *      - 0행 반환 (row 없음) → step 2
+ *   2) create 시도 (lastSeq=1) — 동시 race로 P2002면 step 1로 재시도 (최대 3회)
+ *
+ * 호출 측 트랜잭션 client(tx)를 권장 — 외부 호출 시에도 UPDATE RETURNING은 race-safe.
  */
 export async function issueApplicationNumber(
   now: Date = new Date(),
@@ -50,23 +55,20 @@ export async function issueApplicationNumber(
   const yearMonth = toYearMonth(now);
 
   for (let attempt = 0; attempt < 3; attempt++) {
-    // 1) row 존재 시 increment
-    const updated = await client.applicationNumberSequence.updateMany({
-      where: { yearMonth },
-      data: { lastSeq: { increment: 1 } },
-    });
-    if (updated.count === 1) {
-      const row = await client.applicationNumberSequence.findUnique({
-        where: { yearMonth },
-        select: { lastSeq: true },
-      });
-      if (row === null) {
-        // race로 row 삭제됨 — 재시도
-        continue;
-      }
+    // 1) UPDATE ... RETURNING으로 atomic single-call — race-safe.
+    // ESLint no-restricted-syntax(D6) — application_number_sequences는 PII 컬럼 미포함.
+    // eslint-disable-next-line no-restricted-syntax -- CANDID-018: application_number_sequences PII 없음. atomic UPDATE RETURNING 목적.
+    const rows = await client.$queryRaw<{ last_seq: number }[]>`
+      UPDATE application_number_sequences
+         SET last_seq = last_seq + 1, updated_at = NOW()
+       WHERE year_month = ${yearMonth}
+      RETURNING last_seq
+    `;
+    if (rows.length === 1 && rows[0] !== undefined) {
+      const seq = rows[0].last_seq;
       return {
-        value: formatApplicationNumber(yearMonth, row.lastSeq),
-        parts: { yearMonth, seq: row.lastSeq },
+        value: formatApplicationNumber(yearMonth, seq),
+        parts: { yearMonth, seq },
       };
     }
 
