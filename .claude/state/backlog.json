@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 239,
+    "version": 240,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T22:42:09+09:00"
+    "updatedAt": "2026-05-26T22:51:16+09:00"
   },
   "summary": {
     "total": 43,
@@ -1346,18 +1346,67 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-224209",
-      "assignedAt": "2026-05-26T22:42:09+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-26T22:51:16+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "lib/security/ssrf-guard.ts",
+        "lib/env.ts",
+        "lib/portfolios/types.ts",
+        "lib/portfolios/schema.ts",
+        "lib/portfolios/allowed-domains.ts",
+        "lib/portfolios/service.ts",
+        "lib/errors/codes.ts",
+        "app/api/v1/drafts/[jobPostingId]/portfolios/route.ts"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-26T22:42:09+09:00"
+        "updatedAt": "2026-05-26T22:51:16+09:00"
       },
-      "updatedAt": "2026-05-26T22:42:09+09:00"
+      "updatedAt": "2026-05-26T22:51:16+09:00",
+      "planPath": ".claude/temp/CANDID-017-plan.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "ssrf-guard 추출 + lib/portfolios (schema/service/allowed-domains) + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "lib/security/ssrf-guard.ts",
+            "lib/env.ts",
+            "lib/portfolios/types.ts",
+            "lib/portfolios/schema.ts",
+            "lib/portfolios/allowed-domains.ts",
+            "lib/portfolios/service.ts",
+            "lib/errors/codes.ts",
+            "tests/lib/security/ssrf-guard.test.ts",
+            "tests/lib/portfolios/schema.test.ts",
+            "tests/lib/portfolios/service.test.ts",
+            "tests/lib/portfolios/allowed-domains.test.ts"
+          ],
+          "estimatedLines": 550,
+          "prLineLimit": 700,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "Route Handler GET/PUT + 통합 테스트",
+          "status": "pending",
+          "files": [
+            "app/api/v1/drafts/[jobPostingId]/portfolios/route.ts",
+            "tests/app/api/v1/drafts/portfolios.test.ts"
+          ],
+          "estimatedLines": 350,
+          "prLineLimit": 500,
+          "dependsOn": [
+            1
+          ]
+        }
+      ],
+      "note": "Step 3 (UI PortfolioStep) 분리 — CANDID-039 RTL 도입 후 follow-up task로 진행 (사용자 plan 승인 시 결정)."
     },
     "CANDID-018": {
       "id": "CANDID-018",
