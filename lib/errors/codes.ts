@@ -89,6 +89,11 @@ export const ERROR_CATALOG = {
     status: 422,
     message: '만 14세 미만은 지원할 수 없습니다.',
   },
+  // CANDID-017 Step 1 — Draft 미존재 또는 권한 없음 (정보 누출 회피 위해 두 케이스 단일 코드).
+  APP_DRAFT_NOT_FOUND: {
+    status: 404,
+    message: '임시 저장된 지원서를 찾을 수 없습니다.',
+  },
 
   // 파일 — FILE_
   FILE_SIZE_EXCEEDED: { status: 422, message: '허용된 파일 크기를 초과했습니다.' },

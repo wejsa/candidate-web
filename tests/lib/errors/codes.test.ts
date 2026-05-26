@@ -14,7 +14,8 @@ describe('ERROR_CATALOG', () => {
     // CANDID-012 Step 1: AUTH_OAUTH_STATE_INVALID/PROVIDER_ERROR/EMAIL_TAKEN/USER_DENIED 추가로 28 → 32
     // CANDID-015 Step 1: APP_USER_UNDER_MIN_AGE 추가로 32 → 33 (BR-PII-05)
     // CANDID-016 Step 2: FILE_ALREADY_EXISTS, FILE_NOT_FOUND 추가로 33 → 35
-    expect(ALL_CODES).toHaveLength(35);
+    // CANDID-017 Step 1: APP_DRAFT_NOT_FOUND 추가로 35 → 36 (US-APP-004 portfolio 권한+미존재 통합)
+    expect(ALL_CODES).toHaveLength(36);
   });
 
   it('CANDID-016 Step 2 신규 코드: FILE_ALREADY_EXISTS=409, FILE_NOT_FOUND=404', () => {
@@ -112,6 +113,7 @@ describe('ERROR_CATALOG', () => {
       AUTH_OAUTH_EMAIL_TAKEN: 409,
       AUTH_OAUTH_USER_DENIED: 422,
       APP_USER_UNDER_MIN_AGE: 422,
+      APP_DRAFT_NOT_FOUND: 404,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);

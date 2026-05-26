@@ -1,21 +1,7 @@
 import { z } from 'zod';
-
-// S-MAJOR-1 fix (PR #57 in-PR): 사설/메타데이터/loopback IP 차단 — S3_ENDPOINT 검증 헬퍼.
-// CLAUDE.md 보안 강제 사항(SSRF 차단)과 동일 정책. cloud metadata(169.254.x.x) + RFC1918 사설 +
-// link-local + loopback(127.x.x.x) 차단. localhost/127.0.0.1은 *호출 측*에서 dev http 예외 처리.
-function isPrivateOrMetadataHost(hostname: string): boolean {
-  // IPv4 형태가 아니면 false (도메인이면 본 함수가 차단 안 함).
-  const m = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (m === null) return false;
-  const [a, b] = [Number(m[1]), Number(m[2])];
-  if (a === 10) return true; // 10.0.0.0/8
-  if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12
-  if (a === 192 && b === 168) return true; // 192.168.0.0/16
-  if (a === 169 && b === 254) return true; // 169.254.0.0/16 — link-local + cloud metadata
-  if (a === 127) return true; // 127.0.0.0/8 loopback (호출자가 dev에서 별도 허용)
-  if (a === 0) return true; // 0.0.0.0/8
-  return false;
-}
+// CANDID-017 Step 1: isPrivateOrMetadataHost를 lib/security/ssrf-guard로 이관 (모듈 승격).
+// 본 모듈은 S3_ENDPOINT 검증 컨텍스트에서 *재사용*만 한다 — 정의 SSOT는 ssrf-guard.
+import { isPrivateOrMetadataHost } from '@/lib/security/ssrf-guard';
 
 const envSchema = z
   .object({
