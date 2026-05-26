@@ -70,6 +70,7 @@ model User {
   applications           Application[]
   applicationDrafts      ApplicationDraft[]
   resumeFiles            ResumeFile[]
+  idempotencyKeys        IdempotencyKey[] // CANDID-018: 멱등성 키 저장소
   changedStatusHistories ApplicationStatusHistory[] @relation("changedBy")
 
   @@index([status], map: "idx_users_status")
@@ -364,13 +365,43 @@ model ApplicationDraft {
 }
 
 // 보조 테이블: application_number 월별 시퀀스 (BR-APP-05).
-// 앱 레이어 generator가 SELECT ... FOR UPDATE로 row lock 후 lastSeq 증가.
+// 앱 레이어 generator가 UPDATE ... SET last_seq = last_seq + 1 ... RETURNING으로
+// atomic single-call (CANDID-018 D-H001 fix — L-024 race-safe). 별도 SELECT FOR UPDATE 불필요.
 model ApplicationNumberSequence {
   yearMonth String   @id @map("year_month") @db.VarChar(6) // "202605" 등
   lastSeq   Int      @default(0) @map("last_seq")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("application_number_sequences")
+}
+
+// CANDID-018 — 멱등성 키 저장소 (BR-APP-06).
+// 클라이언트 Idempotency-Key 헤더 + user_id로 격리. 24시간 TTL.
+// composite PK (user_id, key) — 사용자 간 격리 강제 (다른 user의 같은 key는 별도 row).
+//
+// onDelete: Cascade 근거 (D-H004 — PR #67 review):
+//   BR-PII-03 회원 탈퇴 정리에서 hard delete 경로가 발생하면 idempotency_keys도 함께 삭제.
+//   대부분의 탈퇴 흐름은 익명화(soft)이지만 hard delete 시 잔존 데이터가 없도록 보장.
+//   response_json은 PII-free (store.ts StoreInput.responseJson JSDoc 참조)이나
+//   user_id 컬럼 자체가 잔존하면 BR-PII-03 위반 — CASCADE로 즉시 회수.
+//
+// cleanup wiring (D-H005 — PR #67 review):
+//   24h 경과 row는 (a) lookup 시 lazy delete (store.ts) + (b) CANDID-029 야간 배치로 양면 정리.
+//   본 PR 범위는 idx_idempotency_expires 인덱스만 제공 (배치 구현은 CANDID-029).
+model IdempotencyKey {
+  userId         Int      @map("user_id")
+  key            String   @db.VarChar(64) // UUID v4 권장 — schema 단에서 36자 length 강제 (lib/idempotency/schema.ts)
+  requestHash    String   @map("request_hash") @db.VarChar(64) // SHA-256 of stable-stringify(body)
+  responseJson   Json     @map("response_json") @db.JsonB // PII-free 강제 (S-H001 — store.ts JSDoc 참조)
+  responseStatus Int      @map("response_status") @db.SmallInt
+  expiresAt      DateTime @map("expires_at") // 24h after createdAt; <= now → 만료 (exclusive — D-H002)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, key], map: "pk_idempotency_keys")
+  @@index([expiresAt], map: "idx_idempotency_expires") // CANDID-029 야간 배치 정리용 + lookup lazy delete 보조
+  @@map("idempotency_keys")
 }
 
 // === CANDID-005 Step 2: 첨부/응답 ===
