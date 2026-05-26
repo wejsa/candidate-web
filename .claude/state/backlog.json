@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 240,
+    "version": 241,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T22:51:16+09:00"
+    "updatedAt": "2026-05-26T23:00:16+09:00"
   },
   "summary": {
     "total": 43,
@@ -1346,7 +1346,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-224209",
-      "assignedAt": "2026-05-26T22:51:16+09:00",
+      "assignedAt": "2026-05-26T23:00:16+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/security/ssrf-guard.ts",
@@ -1359,21 +1359,21 @@
         "app/api/v1/drafts/[jobPostingId]/portfolios/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 65,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-26T22:51:16+09:00"
+        "autoChainArgs": "65 --auto-fix",
+        "updatedAt": "2026-05-26T23:00:16+09:00"
       },
-      "updatedAt": "2026-05-26T22:51:16+09:00",
+      "updatedAt": "2026-05-26T23:00:16+09:00",
       "planPath": ".claude/temp/CANDID-017-plan.md",
       "currentStep": 1,
       "steps": [
         {
           "step": 1,
           "title": "ssrf-guard 추출 + lib/portfolios (schema/service/allowed-domains) + 단위 테스트",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/security/ssrf-guard.ts",
             "lib/env.ts",
@@ -1389,7 +1389,10 @@
           ],
           "estimatedLines": 550,
           "prLineLimit": 700,
-          "dependsOn": []
+          "dependsOn": [],
+          "branch": "feature/CANDID-017-step1",
+          "prNumber": 65,
+          "actualLines": 694
         },
         {
           "step": 2,
