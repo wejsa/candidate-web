@@ -1750,5 +1750,20 @@
     "major": 9,
     "testsAfter": 1212,
     "cumulativeLines": 993
+  },
+  {
+    "timestamp": "2026-05-26T23:28:35+09:00",
+    "taskId": "CANDID-017",
+    "stepNumber": 1,
+    "action": "review_completed",
+    "prNumber": 65,
+    "decision": "COMMENT (self-PR, CRITICAL 0 after fix loop 1)",
+    "critical": 0,
+    "majorAfterFix": 2,
+    "majorInPRFix": 2,
+    "minor": 4,
+    "info": 6,
+    "fixLoopCount": 1,
+    "testsAfter": 1212
   }
 ]

@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 242,
+    "version": 243,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T23:07:24+09:00"
+    "updatedAt": "2026-05-26T23:28:35+09:00"
   },
   "summary": {
     "total": 43,
@@ -1346,7 +1346,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-224209",
-      "assignedAt": "2026-05-26T23:07:24+09:00",
+      "assignedAt": "2026-05-26T23:28:35+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/security/ssrf-guard.ts",
@@ -1359,14 +1359,14 @@
         "app/api/v1/drafts/[jobPostingId]/portfolios/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-fix",
+        "currentSkill": "skill-merge-pr",
         "lastCompletedSkill": "skill-review-pr",
         "prNumber": 65,
         "fixLoopCount": 1,
         "autoChainArgs": "65",
-        "updatedAt": "2026-05-26T23:07:24+09:00"
+        "updatedAt": "2026-05-26T23:28:35+09:00"
       },
-      "updatedAt": "2026-05-26T23:07:24+09:00",
+      "updatedAt": "2026-05-26T23:28:35+09:00",
       "planPath": ".claude/temp/CANDID-017-plan.md",
       "currentStep": 1,
       "steps": [
@@ -1393,7 +1393,7 @@
           "branch": "feature/CANDID-017-step1",
           "prNumber": 65,
           "actualLines": 694,
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 1 (C001 트랜잭션 race) / MAJOR 9 / MINOR 9 / INFO 7. self-PR fallback COMMENT 등록. --auto-fix → skill-fix 진행.",
+          "reviewSummary": "fix loop 1: CRITICAL 1 (C001) + MAJOR 9 in-PR fix. 재리뷰: CRITICAL 0, 신규 MAJOR 2 (N001/N002) + MINOR 1 (N003) in-PR fix. INFO 6 carry. 자기 PR COMMENT 진행.",
           "fixLoop": 1
         },
         {
