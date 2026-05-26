@@ -158,11 +158,12 @@ PR diff에 등록된 파일 패턴이 포함되면 매핑된 npm script 가드�
 
 #### 가드 매핑 (declarative SSOT)
 
-| 파일 글롭 | npm script | 가드 ID | 도입 | 근거 |
-|-----------|------------|---------|------|------|
-| `prisma/migrations/**/migration.sql` | `pnpm check:migrations` | G-MIG-CONCURRENTLY | CANDID-038 (PR #60) | L-029, `_base/conventions/database.md` §"Prisma migrate deploy의 트랜잭션 wrap" |
+| 파일 글롭 | npm script | 가드 ID | 도입 | 근거 | partial-security |
+|-----------|------------|---------|------|------|------------------|
+| `prisma/migrations/**/migration.sql` | `pnpm check:migrations` | G-MIG-CONCURRENTLY | CANDID-038 (PR #60) | L-029, `_base/conventions/database.md` §"Prisma migrate deploy의 트랜잭션 wrap" | `on` |
 
 > **단일 SSOT**: 가드 매핑은 본 표가 유일한 진실 소스. README/conventions는 본 표를 *참조*한다 (역참조 없음).
+> **`partial-security` 컬럼 (CANDID-044)**: 가드 fail 시 `pr-reviewer-security` 1개 추가 실행 여부. 허용 값은 enum `on`/`off`만 (자유 텍스트 금지 — L-038 회귀 방어). 부재 시 `on`으로 간주하나, 표 일관성을 위해 행 추가 시 명시 의무. 정책 상세는 아래 §"partial-security 정책" 참조.
 >
 > **신규 가드 추가 절차 (L-034 + L-036 결합 — 같은 PR에서 3종 세트 필수)**:
 > 1. 가드 스크립트 작성 (`scripts/check-{name}.mjs`)
@@ -190,15 +191,38 @@ PR diff에 등록된 파일 패턴이 포함되면 매핑된 npm script 가드�
 3. 결과 분기:
    - **모든 가드 PASS (exit 0)**: 정상 진행 → Step 2.5 (Rules) 이동
    - **하나 이상 가드 FAIL (exit ≠ 0)**:
-     - 아래 §"가드 fail PR 코멘트" 포맷으로 `gh pr comment` 등록
+     - **partial-security 분기 평가 (CANDID-044)**: 실패한 가드 행의 `partial-security` 값을 수집하여 아래 §"partial-security 실행 절차" 적용. 결정(REQUEST_CHANGES)은 가드 fail로 이미 확정 — partial-security 결과는 *정보 추가*(요약 줄 + 인라인 코멘트)로만 합산. 1개 이상 `on`이면 실행, 모두 `off` 또는 부재 시 행 단위 디폴트 `on` 적용 후 실행.
+     - 아래 §"가드 fail PR 코멘트" 포맷으로 `gh pr comment` 등록 (partial-security 실행 시 요약 줄 포함)
      - `gh pr review --request-changes --body "..."` 즉시 실행
-     - **Step 2.5/3 (Rules + 3-에이전트 리뷰) 스킵** (가드가 이미 도메인 문제 명시 — 토큰 절감)
+     - **Step 2.5/3 (Rules + 도메인/테스트 에이전트) 스킵** (가드가 이미 도메인 문제 명시 — 토큰 절감). partial-security만 §2.4 안에서 별도 실행
      - **skill-fix 호출 금지** (--auto-fix 무관 — 가드 위반은 인간이 수동 수정 필수)
      - 사용자 안내: "가드 위반 수정 후 `/skill-review-pr {N}` 재실행"
      - 종료
    - **가드 자체 환경 오류 (exit 2, 스크립트 누락 등)**:
      - 기본: WARNING 출력 + PR 코멘트에 "⚠️ 가드 인프라 오류" 명시 + 정상 진행
      - **D-MAJOR-3/S-MAJOR-3 in-PR fix — 가드 인프라 변경 PR 감지 시 CRITICAL 격상**: PR diff에 `scripts/check-*.mjs` 삭제·변경 또는 `package.json`의 `check:*` script 삭제·변경이 포함되어 있으면 exit 2를 **REQUEST_CHANGES**로 격상 (사유: "가드 인프라 변경 감지 — 무력화 공격 방어"). 가드 인프라와 위반 동시 제출 공격 차단.
+
+#### partial-security 정책 (CANDID-044 — D-MAJOR-2 / S-MAJOR-2)
+
+가드 fail 시 같은 PR의 다른 보안 결함(시크릿 노출, SQL Injection, 잘못된 권한 검증 등)이 마스킹되는 위험을 회피하기 위해 `pr-reviewer-security` 1개만 별도 실행한다.
+
+- **디폴트**: 가드 행에 `partial-security: on` (보안 우선). `off`로 명시한 경우에만 비활성
+- **결정 불변**: 결정(REQUEST_CHANGES)은 가드 fail로 확정. partial-security CRITICAL 발견 여부와 무관하게 결정 변경 없음
+- **rules_paths 미전달**: 도메인 비즈니스 룰은 partial 범위 외 (도메인 검토는 가드 통과 후 본 플로우에서)
+- **자기 PR 무관**: partial-security 결과도 인라인 코멘트로 등록 (가드 fail은 이미 REQUEST_CHANGES 결정)
+- **모두 off**: 매칭된 가드 행이 전부 `partial-security: off`이면 partial-security 자체 SKIP (기존 동작 — 코멘트에 사유 명시)
+
+#### partial-security 실행 절차
+
+1. Task tool 호출: `pr-reviewer-security` (단일 에이전트)
+   - 전달: 변경 파일 목록, diff 파일 경로 `/tmp/pr-{N}-diff.txt`
+   - 미전달: `rules_paths` (도메인 룰 제외)
+2. 옵션: timeout 60s, retry 0회 (`--auto-fix` 시 자동 1회 재시도 후 스킵)
+3. 결과 캡처:
+   - 성공 → CRITICAL/MAJOR/MINOR 카운트 + 이슈 본문
+   - 실패/타임아웃 → skipped (사유 기록: `agent-fail` / `timeout`)
+4. 인라인 코멘트 등록: `gh api repos/.../pulls/{N}/comments` (정상 플로우와 동일 포맷)
+5. 가드 fail 코멘트 본문에 partial-security 요약 줄 삽입 (아래 포맷 참조)
 
 #### 가드 fail PR 코멘트 포맷
 
@@ -210,16 +234,26 @@ PR diff에 등록된 파일 패턴이 포함되면 매핑된 npm script 가드�
    stderr (요약, 첫 5줄):
      {stderr 본문}
 
+🛡️ partial-security 결과 (보안 마스킹 회피용 — CANDID-044)
+   CRITICAL: {N}건 / MAJOR: {N}건 / MINOR: {N}건
+   상세는 인라인 코멘트 참조.
+
 근거: {근거 — 본 표의 "근거" 컬럼 참조}
 대응: stderr의 위반 라인 수정 후 PR 갱신 → /skill-review-pr {prNumber} 재실행.
-3-에이전트 리뷰는 가드 통과 후 진행됩니다.
+도메인/테스트 에이전트 리뷰는 가드 통과 후 진행됩니다.
+```
+
+partial-security skipped 시 위 🛡️ 블록 대신 한 줄:
+```
+🛡️ partial-security: 스킵 (사유: all-off | agent-fail | timeout)
 ```
 
 #### 실행 로그
 
 execution-log.json에 추가:
 - 가드 실행: `action="guard_executed"`, `guards=[{id, exitCode, files, matchCount}]`
-- 가드 fail: `action="guard_failed"`, `failedGuards=[id, ...]`, `decision="REQUEST_CHANGES (guard-fail)"`
+- 가드 fail (partial-security 미실행): `action="guard_failed"`, `failedGuards=[id, ...]`, `decision="REQUEST_CHANGES (guard-fail)"`
+- 가드 fail (partial-security 실행 — CANDID-044): `action="guard_failed_with_partial_security"`, `failedGuards=[id, ...]`, `partialSecurity={triggered: true|false, criticalCount, majorCount, minorCount, skipReason?: "all-off"|"agent-fail"|"timeout"}`, `decision="REQUEST_CHANGES (guard-fail)"`
 
 ### 2.5. 도메인 × 언어 Rules 로드 (Phase 4)
 
@@ -305,8 +339,9 @@ execution-log.json: APPROVED → action="approved", REQUEST_CHANGES → action="
   - fixLoopCount 3회째 CRITICAL → skill-fix 호출 금지, REQUEST_CHANGES 즉시 중단 (루프 가드)
   - 직접 코드 수정 금지. skill-fix 없이 REQUEST_CHANGES 후 종료 금지.
 
-#### Pre-Review Guard fail (Step 2.4 — CANDID-042)
+#### Pre-Review Guard fail (Step 2.4 — CANDID-042 / CANDID-044)
 - skill-fix 호출 금지 (가드 위반은 인간 수동 수정 필수). 사용자가 직접 위반 라인 수정 후 `/skill-review-pr {N}` 재실행.
+- partial-security가 CRITICAL을 추가 발견해도 결정은 REQUEST_CHANGES로 동일 (가드 fail이 이미 차단). partial-security는 정보 합산만.
 
 ## 출력
 필수 포함: PR 번호/제목/작성자/브랜치, **리뷰 모드 + 실행 에이전트 목록**, **적용 Rules**(있을 때만), 체크리스트 결과, 관점별 리뷰 테이블(CRITICAL/MAJOR/MINOR 수), 주요 피드백 목록, 결정(APPROVED/REQUEST_CHANGES), 다음 자동 스킬
