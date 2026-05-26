@@ -70,6 +70,7 @@ model User {
   applications           Application[]
   applicationDrafts      ApplicationDraft[]
   resumeFiles            ResumeFile[]
+  idempotencyKeys        IdempotencyKey[] // CANDID-018: 멱등성 키 저장소
   changedStatusHistories ApplicationStatusHistory[] @relation("changedBy")
 
   @@index([status], map: "idx_users_status")
@@ -371,6 +372,25 @@ model ApplicationNumberSequence {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("application_number_sequences")
+}
+
+// CANDID-018 — 멱등성 키 저장소 (BR-APP-06).
+// 클라이언트 Idempotency-Key 헤더 + user_id로 격리. 24시간 TTL.
+// composite PK (user_id, key) — 사용자 간 격리 강제 (다른 user의 같은 key는 별도 row).
+model IdempotencyKey {
+  userId         Int      @map("user_id")
+  key            String   @db.VarChar(64) // UUID v4 권장
+  requestHash    String   @map("request_hash") @db.VarChar(64) // SHA-256 of body
+  responseJson   Json     @map("response_json") @db.JsonB
+  responseStatus Int      @map("response_status") @db.SmallInt
+  expiresAt      DateTime @map("expires_at") // 24h after createdAt
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, key], map: "pk_idempotency_keys")
+  @@index([expiresAt], map: "idx_idempotency_expires") // CANDID-029 야간 배치 정리용
+  @@map("idempotency_keys")
 }
 
 // === CANDID-005 Step 2: 첨부/응답 ===

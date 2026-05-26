@@ -94,6 +94,11 @@ export const ERROR_CATALOG = {
     status: 404,
     message: '임시 저장된 지원서를 찾을 수 없습니다.',
   },
+  // CANDID-018 — 제출 전 검증 실패 (이력서 누락 / 필수 필드 / 동의 false 등 — details에 항목 표시)
+  APP_SUBMIT_INCOMPLETE: {
+    status: 422,
+    message: '지원서 제출 조건이 충족되지 않았습니다.',
+  },
 
   // 파일 — FILE_
   FILE_SIZE_EXCEEDED: { status: 422, message: '허용된 파일 크기를 초과했습니다.' },
