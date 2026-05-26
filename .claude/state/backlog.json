@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 238,
+    "version": 239,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T22:37:20+09:00"
+    "updatedAt": "2026-05-26T22:42:09+09:00"
   },
   "summary": {
     "total": 43,
     "done": 24,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 19
+    "todo": 18
   },
   "phases": {
     "1": {
@@ -1337,14 +1337,27 @@
       "id": "CANDID-017",
       "title": "외부 포트폴리오 링크 5개 + URL 검증 + SSRF 차단 (US-APP-004)",
       "description": "타입(GITHUB/NOTION/BLOG/LINKEDIN/FIGMA/ETC) + URL + 메모. 최대 5개. https 검증, 도메인 화이트리스트. OG fetch는 P1(SSRF 차단: 내부망 IP, 3초 타임아웃, 1MB 본문 제한).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
       "dependencies": [
         "CANDID-015"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "jaese@hoji-20260526-224209",
+      "assignedAt": "2026-05-26T22:42:09+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-26T22:42:09+09:00"
+      },
+      "updatedAt": "2026-05-26T22:42:09+09:00"
     },
     "CANDID-018": {
       "id": "CANDID-018",
