@@ -1798,5 +1798,25 @@
     "minorInPRFix": 2,
     "info": 14,
     "fixLoopCount": 0
+  },
+  {
+    "timestamp": "2026-05-26T23:38:51+09:00",
+    "taskId": "CANDID-017",
+    "stepNumber": 2,
+    "action": "merged",
+    "prNumber": 66,
+    "mergedLines": 291
+  },
+  {
+    "timestamp": "2026-05-26T23:39:16+09:00",
+    "taskId": "CANDID-017",
+    "action": "task_completed",
+    "totalSteps": 2,
+    "phase": 2,
+    "prNumbers": [
+      65,
+      66
+    ],
+    "fixLoopTotal": 1
   }
 ]

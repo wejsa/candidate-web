@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 246,
+    "version": 247,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T23:38:05+09:00"
+    "updatedAt": "2026-05-26T23:39:16+09:00"
   },
   "summary": {
     "total": 43,
-    "done": 24,
-    "inProgress": 1,
+    "done": 25,
+    "inProgress": 0,
     "review": 0,
     "todo": 18
   },
@@ -1337,7 +1337,7 @@
       "id": "CANDID-017",
       "title": "외부 포트폴리오 링크 5개 + URL 검증 + SSRF 차단 (US-APP-004)",
       "description": "타입(GITHUB/NOTION/BLOG/LINKEDIN/FIGMA/ETC) + URL + 메모. 최대 5개. https 검증, 도메인 화이트리스트. OG fetch는 P1(SSRF 차단: 내부망 IP, 3초 타임아웃, 1MB 본문 제한).",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
@@ -1345,21 +1345,12 @@
         "CANDID-015"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260526-224209",
-      "assignedAt": "2026-05-26T23:38:05+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "app/api/v1/drafts/[jobPostingId]/portfolios/route.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 66,
-        "fixLoopCount": 0,
-        "autoChainArgs": "66",
-        "updatedAt": "2026-05-26T23:38:05+09:00"
-      },
-      "updatedAt": "2026-05-26T23:38:05+09:00",
+      "lockedFiles": [],
+      "workflowState": null,
+      "updatedAt": "2026-05-26T23:39:16+09:00",
       "planPath": ".claude/temp/CANDID-017-plan.md",
       "currentStep": 2,
       "steps": [
@@ -1395,7 +1386,7 @@
         {
           "step": 2,
           "title": "Route Handler GET/PUT + 통합 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "app/api/v1/drafts/[jobPostingId]/portfolios/route.ts",
             "tests/app/api/v1/drafts/portfolios.test.ts"
@@ -1408,10 +1399,14 @@
           "branch": "feature/CANDID-017-step2",
           "prNumber": 66,
           "actualLines": 290,
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 0 / MINOR 5 (Test 2건 in-PR fix afb7709, 나머지 carry) / INFO 14. self-PR COMMENT. fix loop 미진입."
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 0 / MINOR 5 (Test 2건 in-PR fix afb7709, 나머지 carry) / INFO 14. self-PR COMMENT. fix loop 미진입.",
+          "mergedAt": "2026-05-26T23:38:51+09:00",
+          "mergedLines": 291,
+          "testsAfter": 1226
         }
       ],
-      "note": "Step 3 (UI PortfolioStep) 분리 — CANDID-039 RTL 도입 후 follow-up task로 진행 (사용자 plan 승인 시 결정)."
+      "note": "Step 3 (UI PortfolioStep) 분리 — CANDID-039 RTL 도입 후 follow-up task로 진행 (사용자 plan 승인 시 결정).",
+      "completedAt": "2026-05-26T23:39:16+09:00"
     },
     "CANDID-018": {
       "id": "CANDID-018",

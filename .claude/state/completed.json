@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 27,
+    "version": 28,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-26T22:37:20+09:00"
+    "updatedAt": "2026-05-26T23:39:16+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -865,6 +865,31 @@
       "carriedMinors": 4,
       "testsAfter": 1119,
       "note": "단일 PR 정책 도입. CRITICAL 0 / MAJOR 5 (in-PR fix 3: H001 domain 전달, H002 --auto-fix 무관, H004 self-PR fallback; carry 2: H003 enum meta-guard → CANDID-045, H005 dryrun → A3). MINOR 8 (in-PR 통합 4: 분기 매핑, 결정 불변 SSOT, skipReason enum, timeout SSOT). 자기 PR COMMENT 진행. L-019 적용."
+    },
+    "CANDID-017": {
+      "id": "CANDID-017",
+      "title": "외부 포트폴리오 링크 5개 + URL 검증 + SSRF 차단 (US-APP-004)",
+      "description": "lib/security/ssrf-guard 추출 + lib/portfolios 모듈 + Route Handler GET/PUT. P0 백엔드 완성, UI(Step 3)는 분리.",
+      "type": "feature",
+      "priority": "high",
+      "phase": 2,
+      "dependencies": [
+        "CANDID-015"
+      ],
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "completedAt": "2026-05-26T23:39:16+09:00",
+      "totalSteps": 2,
+      "totalAdditions": 1038,
+      "totalDeletions": 58,
+      "prNumbers": [
+        65,
+        66
+      ],
+      "fixLoopTotal": 1,
+      "carriedMajors": 0,
+      "carriedMinors": 7,
+      "testsAfter": 1226,
+      "note": "Step 1 (lib/portfolios + ssrf-guard 추출): CRITICAL 1 (C001 race) + MAJOR 11 모두 in-PR fix (1 fix loop). Step 2 (Route Handler): CRITICAL 0 / MAJOR 0 / MINOR 2 in-PR fix. UI(Step 3)는 CANDID-039 RTL 도입 후 follow-up으로 분리. P0 백엔드 완성 + ssrf-guard 모듈 OG fetch P1 재사용 가능."
     }
   }
 }
