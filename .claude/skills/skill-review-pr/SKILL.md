@@ -207,22 +207,28 @@ PR diff에 등록된 파일 패턴이 포함되면 매핑된 npm script 가드�
 가드 fail 시 같은 PR의 다른 보안 결함(시크릿 노출, SQL Injection, 잘못된 권한 검증 등)이 마스킹되는 위험을 회피하기 위해 `pr-reviewer-security` 1개만 별도 실행한다.
 
 - **디폴트**: 가드 행에 `partial-security: on` (보안 우선). `off`로 명시한 경우에만 비활성
-- **결정 불변**: 결정(REQUEST_CHANGES)은 가드 fail로 확정. partial-security CRITICAL 발견 여부와 무관하게 결정 변경 없음
+- **결정 불변** (canonical 정의): 결정(REQUEST_CHANGES)은 가드 fail로 확정. partial-security CRITICAL 발견 여부와 무관하게 결정 변경 없음. 다른 위치(§2.4 절차, §"다음 스킬")는 본 정의를 참조한다 (SSOT — L-040)
+- **--auto-fix 무관** (H002 in-PR fix): partial-security가 CRITICAL을 발견해도 `skill-fix` 호출 금지. 가드 fail 경로는 인간 수동 수정 필수 — 보안 CRITICAL도 가드 위반과 함께 사용자가 수정 후 `/skill-review-pr {N}` 재실행해야 한다 (재실행 시 가드 PASS → §2.5/§3 정상 진행 → 동일 보안 결함이 정상 보안 에이전트에 의해 다시 차단됨)
 - **rules_paths 미전달**: 도메인 비즈니스 룰은 partial 범위 외 (도메인 검토는 가드 통과 후 본 플로우에서)
-- **자기 PR 무관**: partial-security 결과도 인라인 코멘트로 등록 (가드 fail은 이미 REQUEST_CHANGES 결정)
+- **자기 PR + 가드 fail fallback** (H004 in-PR fix): `gh pr review --request-changes`가 자기 PR로 인해 실패할 가능성에 대비 — fallback으로 `gh pr review --comment` + 본문 첫 줄에 "⛔ REQUEST_CHANGES (guard-fail, self-PR fallback)" 명시. execution-log의 `decision`은 그대로 "REQUEST_CHANGES (guard-fail)" 유지. skill-merge-pr 측에서 execution-log의 `action="guard_failed"`/`guard_failed_with_partial_security"` 감지 시 머지 거부 책임(별도 후속 task 검토)
+- **자기 PR 인라인 코멘트**: partial-security 결과는 인라인 코멘트로 등록 (자기 PR 무관 — 결정은 이미 REQUEST_CHANGES)
 - **모두 off**: 매칭된 가드 행이 전부 `partial-security: off`이면 partial-security 자체 SKIP (기존 동작 — 코멘트에 사유 명시)
+- **skipReason enum (SSOT)**: `"all-off" | "agent-fail" | "timeout"` — PR 코멘트 포맷과 execution-log 양쪽이 본 enum을 참조 (외 값 입력 시 `"agent-fail"`로 정규화)
 
 #### partial-security 실행 절차
 
 1. Task tool 호출: `pr-reviewer-security` (단일 에이전트)
-   - 전달: 변경 파일 목록, diff 파일 경로 `/tmp/pr-{N}-diff.txt`
-   - 미전달: `rules_paths` (도메인 룰 제외)
-2. 옵션: timeout 60s, retry 0회 (`--auto-fix` 시 자동 1회 재시도 후 스킵)
+   - 전달: 변경 파일 목록, diff 파일 경로 `/tmp/pr-{N}-diff.txt`, **`project.json`의 `domain` 값** (정상 플로우와 동일 — 도메인별 보안 체크리스트 `.claude/domains/{domain}/checklists/`를 에이전트가 로드. 미전달 시 도메인 보안 누락 → 정책 의도 훼손, H001 in-PR fix)
+   - 미전달: `rules_paths` (도메인 비즈니스 룰만 분리)
+2. 옵션: §3 "N관점 병렬 리뷰" 표의 timeout/retry 정책을 그대로 적용 (SSOT 단일화 — 본 절차에 별도 값 두지 않음)
 3. 결과 캡처:
    - 성공 → CRITICAL/MAJOR/MINOR 카운트 + 이슈 본문
    - 실패/타임아웃 → skipped (사유 기록: `agent-fail` / `timeout`)
 4. 인라인 코멘트 등록: `gh api repos/.../pulls/{N}/comments` (정상 플로우와 동일 포맷)
-5. 가드 fail 코멘트 본문에 partial-security 요약 줄 삽입 (아래 포맷 참조)
+5. 가드 fail 코멘트 본문에 partial-security 결과 삽입 — 아래 분기 매핑 적용:
+   - **5a. 정상 실행 (CRITICAL/MAJOR/MINOR 카운트 확보)** → 🛡️ 블록 (3줄)
+   - **5b. skipped (`all-off` / `agent-fail` / `timeout`)** → 🛡️ 단일 줄 (스킵 사유)
+6. `gh pr comment` 등록 → `gh pr review --request-changes` 실행 (자기 PR 시 §"자기 PR + 가드 fail fallback" 정책 적용)
 
 #### 가드 fail PR 코멘트 포맷
 
