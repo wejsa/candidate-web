@@ -365,7 +365,8 @@ model ApplicationDraft {
 }
 
 // 보조 테이블: application_number 월별 시퀀스 (BR-APP-05).
-// 앱 레이어 generator가 SELECT ... FOR UPDATE로 row lock 후 lastSeq 증가.
+// 앱 레이어 generator가 UPDATE ... SET last_seq = last_seq + 1 ... RETURNING으로
+// atomic single-call (CANDID-018 D-H001 fix — L-024 race-safe). 별도 SELECT FOR UPDATE 불필요.
 model ApplicationNumberSequence {
   yearMonth String   @id @map("year_month") @db.VarChar(6) // "202605" 등
   lastSeq   Int      @default(0) @map("last_seq")
