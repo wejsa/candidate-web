@@ -7,17 +7,24 @@ import type { LinkType } from '@/lib/portfolios/types';
 /**
  * linkType별 호스트 화이트리스트 (regex). null이면 자유 도메인(https + ssrf-guard만).
  *
- * - GITHUB: github.com + gist (개인/저장소/조직)
+ * - GITHUB: github.com / www.github.com / gist.github.com
  * - NOTION: notion.so / www.notion.so / *.notion.site (workspace subdomain)
- * - LINKEDIN: ([cc].)linkedin.com (지역 서브도메인 허용)
- * - FIGMA: ([cc].)figma.com
+ * - LINKEDIN: linkedin.com / www.linkedin.com / [cc].linkedin.com / (careers|learning|business|talent).linkedin.com
+ * - FIGMA: figma.com / www.figma.com / [cc].figma.com
  * - BLOG/ETC: null (자유 도메인 — https + private IP 차단으로만 방어)
+ *
+ * H003 fix (PR #65 review): www. 정식 진입점 + LinkedIn 비즈니스 서브도메인이 거부되던 회귀를 보강.
  */
 export const ALLOWED_HOSTS: Record<LinkType, readonly RegExp[] | null> = {
-  GITHUB: [/^github\.com$/, /^gist\.github\.com$/],
+  GITHUB: [/^github\.com$/, /^www\.github\.com$/, /^gist\.github\.com$/],
   NOTION: [/^notion\.so$/, /^www\.notion\.so$/, /^[a-z0-9-]+\.notion\.site$/],
-  LINKEDIN: [/^([a-z]{2}\.)?linkedin\.com$/],
-  FIGMA: [/^([a-z]{2}\.)?figma\.com$/],
+  LINKEDIN: [
+    /^linkedin\.com$/,
+    /^www\.linkedin\.com$/,
+    /^[a-z]{2}\.linkedin\.com$/,
+    /^(careers|learning|business|talent)\.linkedin\.com$/,
+  ],
+  FIGMA: [/^figma\.com$/, /^www\.figma\.com$/, /^[a-z]{2}\.figma\.com$/],
   BLOG: null,
   ETC: null,
 };

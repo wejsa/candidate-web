@@ -4,6 +4,7 @@
 
 import { z } from 'zod';
 import { safeExternalUrl } from '@/lib/security/ssrf-guard';
+import { sanitizeHtml } from '@/lib/security/sanitize';
 import { isAllowedHost } from '@/lib/portfolios/allowed-domains';
 import { LINK_TYPES, MAX_PORTFOLIO_LINKS } from '@/lib/portfolios/types';
 
@@ -13,7 +14,8 @@ const LinkTypeSchema = z.enum(LINK_TYPES);
  * 단일 portfolio link 입력 검증.
  * - linkType: enum
  * - url: https + ssrf-guard 통과 + linkType별 도메인 화이트리스트
- * - memo: 선택, ≤500자, 공백만이면 null로 정규화
+ * - memo: 선택, ≤500자, sanitize('plain')로 HTML 제거 후 공백만이면 null로 정규화
+ *         (H005 fix PR #65 review — CLAUDE.md 보안: 저장+출력 이중 방어)
  */
 export const PortfolioLinkInputSchema = z
   .object({
@@ -24,8 +26,8 @@ export const PortfolioLinkInputSchema = z
       .optional()
       .transform((v) => {
         if (v === undefined || v === null) return null;
-        const trimmed = v.trim();
-        return trimmed === '' ? null : trimmed;
+        const sanitized = sanitizeHtml(v, 'plain').trim();
+        return sanitized === '' ? null : sanitized;
       }),
   })
   .superRefine((data, ctx) => {

@@ -1,24 +1,38 @@
 // CANDID-017 Step 1 — Portfolio link 서비스 (US-APP-004).
 // Draft 기반 CRUD. application_id로의 이전은 CANDID-018 트랜잭션 책임.
-// L-019 in-task: assertDraftOwned 헬퍼로 권한+존재 검사 단일화 (정보 누출 차단 — 두 케이스 동일 코드).
+// L-019 in-task self-correction (PR #65 fix loop 1):
+//   - C001 fix: replaceForDraft에 row-level lock (L-024 drafts/service.ts 선례 답습)
+//     → 동시 PUT race로 인한 중복 row + BR-LINK-04 위반 차단
+//   - H001 fix: MAX_PORTFOLIO_LINKS 상수 사용 (L-006 3-layer 동질성 보장)
+//   - H002 fix: assertDraftOwned 헬퍼가 tx client도 받도록 일반화 (DRY)
 
 import 'server-only';
 import { Prisma } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
-import type { PortfolioLinkInput, PortfolioLinkOutput } from '@/lib/portfolios/types';
+import {
+  MAX_PORTFOLIO_LINKS,
+  type PortfolioLinkInput,
+  type PortfolioLinkOutput,
+} from '@/lib/portfolios/types';
 
 interface OwnedDraftKey {
   userId: number;
   jobPostingId: number;
 }
 
+type PrismaLike = typeof basePrisma | Prisma.TransactionClient;
+
 /**
  * Draft 존재 + ownership 검사 → draft.id 반환.
- * 미존재 또는 다른 사용자의 draft → APP_DRAFT_NOT_FOUND (정보 누출 차단).
+ * - 미존재 또는 다른 사용자의 draft → APP_DRAFT_NOT_FOUND (정보 누출 차단)
+ * - 트랜잭션 컨텍스트에서 호출 시 tx 클라이언트를 넘기면 같은 격리 안에서 검증
  */
-async function assertDraftOwned({ userId, jobPostingId }: OwnedDraftKey): Promise<number> {
-  const draft = await basePrisma.applicationDraft.findUnique({
+async function assertDraftOwned(
+  { userId, jobPostingId }: OwnedDraftKey,
+  client: PrismaLike = basePrisma,
+): Promise<number> {
+  const draft = await client.applicationDraft.findUnique({
     where: { userId_jobPostingId: { userId, jobPostingId } },
     select: { id: true },
   });
@@ -28,7 +42,7 @@ async function assertDraftOwned({ userId, jobPostingId }: OwnedDraftKey): Promis
 
 /**
  * Draft에 저장된 portfolio link 목록을 sortOrder 오름차순으로 반환.
- * Draft 미존재 → APP_DRAFT_NOT_FOUND.
+ * Draft 미존재 또는 권한 없음 → APP_DRAFT_NOT_FOUND.
  */
 export async function listByDraft({
   userId,
@@ -61,53 +75,74 @@ interface ReplaceInput extends OwnedDraftKey {
 
 /**
  * Draft의 portfolio link 전체 교체 (replace strategy).
- * - 트랜잭션: 1) ownership 검사 2) delete all 3) insert N (sort_order = 배열 순서)
- * - 빈 배열 입력은 모든 링크 삭제로 처리됨.
- * - schema에서 max 5 검증되었지만 service에서 한번 더 방어 (L-006 런타임 layer).
+ *
+ * C001 fix (PR #65 review): SELECT ... FOR UPDATE로 draft row를 트랜잭션 시작 시 잠가
+ * 동시 PUT 인터리브를 직렬화한다. L-024 drafts/service.ts의 row-level lock 패턴과 동일.
+ *   - delete-then-insert + ReadCommitted 격리 + (draftId) UNIQUE 부재 조합은
+ *     양쪽 트랜잭션이 phantom write를 commit하여 중복 row + sortOrder 충돌 발생
+ *   - SELECT FOR UPDATE는 application_drafts 테이블의 row를 잡아 두 번째 트랜잭션이
+ *     첫 트랜잭션 commit 후에 진행되도록 직렬화 (BR-LINK-04 DB 일관성 보장)
+ *
+ * - 빈 배열 입력은 모든 링크 삭제로 처리됨
+ * - schema에서 max 5 검증되었지만 service 런타임에서도 방어 (L-006)
  */
 export async function replaceForDraft({
   userId,
   jobPostingId,
   links,
 }: ReplaceInput): Promise<PortfolioLinkOutput[]> {
-  if (links.length > 5) {
+  if (links.length > MAX_PORTFOLIO_LINKS) {
     throw new AppError('SYS_VALIDATION_FAILED');
   }
-  return basePrisma.$transaction(async (tx) => {
-    const draft = await tx.applicationDraft.findUnique({
-      where: { userId_jobPostingId: { userId, jobPostingId } },
-      select: { id: true },
-    });
-    if (draft === null) throw new AppError('APP_DRAFT_NOT_FOUND');
-    await tx.portfolioLink.deleteMany({ where: { draftId: draft.id } });
-    if (links.length === 0) return [];
-    await tx.portfolioLink.createMany({
-      data: links.map((link, index) => ({
-        draftId: draft.id,
-        applicationId: null,
-        linkType: link.linkType,
-        url: link.url,
-        memo: link.memo,
-        sortOrder: index,
-      })),
-    });
-    const rows = await tx.portfolioLink.findMany({
-      where: { draftId: draft.id },
-      orderBy: { sortOrder: 'asc' },
-      select: {
-        id: true,
-        linkType: true,
-        url: true,
-        memo: true,
-        sortOrder: true,
-      },
-    });
-    return rows.map((r) => ({
-      id: r.id,
-      linkType: r.linkType,
-      url: r.url,
-      memo: r.memo,
-      sortOrder: r.sortOrder,
-    })) satisfies PortfolioLinkOutput[];
-  }, { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted });
+  return basePrisma.$transaction(
+    async (tx) => {
+      // C001 fix: row-level lock으로 동시 PUT 직렬화 (L-024 drafts/service.ts 패턴).
+      // 미존재 draft는 빈 결과 → 일반 ownership 검증으로 APP_DRAFT_NOT_FOUND throw.
+      // ESLint no-restricted-syntax(D6)는 PII wrapper 우회 차단 목적이며 본 쿼리는
+      // application_drafts 테이블의 id만 조회 (PII 컬럼 미포함) — 의도된 raw SQL.
+      // eslint-disable-next-line no-restricted-syntax
+      const locked = await tx.$queryRaw<{ id: number }[]>`
+        SELECT id FROM application_drafts
+        WHERE user_id = ${userId} AND job_posting_id = ${jobPostingId}
+        FOR UPDATE
+      `;
+      if (locked.length === 0 || locked[0] === undefined) {
+        throw new AppError('APP_DRAFT_NOT_FOUND');
+      }
+      const draftId = locked[0].id;
+      // ownership 재확인 (raw query 결과를 prisma findUnique와 정합 검증 — defense-in-depth)
+      await assertDraftOwned({ userId, jobPostingId }, tx);
+      await tx.portfolioLink.deleteMany({ where: { draftId } });
+      if (links.length === 0) return [];
+      await tx.portfolioLink.createMany({
+        data: links.map((link, index) => ({
+          draftId,
+          applicationId: null,
+          linkType: link.linkType,
+          url: link.url,
+          memo: link.memo,
+          sortOrder: index,
+        })),
+      });
+      const rows = await tx.portfolioLink.findMany({
+        where: { draftId },
+        orderBy: { sortOrder: 'asc' },
+        select: {
+          id: true,
+          linkType: true,
+          url: true,
+          memo: true,
+          sortOrder: true,
+        },
+      });
+      return rows.map((r) => ({
+        id: r.id,
+        linkType: r.linkType,
+        url: r.url,
+        memo: r.memo,
+        sortOrder: r.sortOrder,
+      })) satisfies PortfolioLinkOutput[];
+    },
+    { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
+  );
 }

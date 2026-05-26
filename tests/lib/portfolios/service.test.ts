@@ -8,6 +8,8 @@ vi.mock('@/lib/prisma', () => {
   const portfolioFindMany = vi.fn();
   const portfolioDeleteMany = vi.fn();
   const portfolioCreateMany = vi.fn();
+  // C001 fix: $queryRaw로 SELECT FOR UPDATE를 시뮬레이션. mock은 결과 배열을 반환.
+  const txQueryRaw = vi.fn();
   const $transaction = vi.fn(async (cb: (tx: unknown) => Promise<unknown>) =>
     cb({
       applicationDraft: { findUnique: draftFindUnique },
@@ -16,6 +18,7 @@ vi.mock('@/lib/prisma', () => {
         deleteMany: portfolioDeleteMany,
         createMany: portfolioCreateMany,
       },
+      $queryRaw: txQueryRaw,
     }),
   );
   return {
@@ -27,6 +30,7 @@ vi.mock('@/lib/prisma', () => {
         createMany: portfolioCreateMany,
       },
       $transaction,
+      __txQueryRaw: txQueryRaw,
     },
     prisma: {},
   };
@@ -37,6 +41,7 @@ const { basePrisma } = (await import('@/lib/prisma')) as unknown as {
     applicationDraft: { findUnique: Mock };
     portfolioLink: { findMany: Mock; deleteMany: Mock; createMany: Mock };
     $transaction: Mock;
+    __txQueryRaw: Mock;
   };
 };
 const { listByDraft, replaceForDraft } = await import('@/lib/portfolios/service');
@@ -51,6 +56,7 @@ beforeEach(() => {
   basePrisma.portfolioLink.findMany.mockReset();
   basePrisma.portfolioLink.deleteMany.mockReset();
   basePrisma.portfolioLink.createMany.mockReset();
+  basePrisma.__txQueryRaw.mockReset();
   basePrisma.$transaction.mockClear();
 });
 
@@ -89,7 +95,8 @@ describe('listByDraft', () => {
 });
 
 describe('replaceForDraft', () => {
-  it('정상 replace: delete → create N + sortOrder 0..N-1', async () => {
+  it('정상 replace: SELECT FOR UPDATE → delete → create N + sortOrder 0..N-1', async () => {
+    basePrisma.__txQueryRaw.mockResolvedValueOnce([{ id: DRAFT_ID }]);
     basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: DRAFT_ID });
     basePrisma.portfolioLink.deleteMany.mockResolvedValueOnce({ count: 3 });
     basePrisma.portfolioLink.createMany.mockResolvedValueOnce({ count: 2 });
@@ -106,6 +113,11 @@ describe('replaceForDraft', () => {
       ],
     });
     expect(result).toHaveLength(2);
+    // C001 fix 검증: tagged template은 첫 인자가 strings 배열, 이후 값은 별도 인자.
+    expect(basePrisma.__txQueryRaw).toHaveBeenCalledTimes(1);
+    const queryRawArgs = basePrisma.__txQueryRaw.mock.calls[0]!;
+    expect(queryRawArgs[1]).toBe(USER_ID);
+    expect(queryRawArgs[2]).toBe(JOB_POSTING_ID);
     expect(basePrisma.portfolioLink.deleteMany).toHaveBeenCalledWith({ where: { draftId: DRAFT_ID } });
     expect(basePrisma.portfolioLink.createMany).toHaveBeenCalledWith({
       data: expect.arrayContaining([
@@ -116,6 +128,7 @@ describe('replaceForDraft', () => {
   });
 
   it('빈 배열 replace: deleteMany만 호출, createMany 호출 안 됨', async () => {
+    basePrisma.__txQueryRaw.mockResolvedValueOnce([{ id: DRAFT_ID }]);
     basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: DRAFT_ID });
     basePrisma.portfolioLink.deleteMany.mockResolvedValueOnce({ count: 2 });
     const result = await replaceForDraft({
@@ -127,8 +140,8 @@ describe('replaceForDraft', () => {
     expect(basePrisma.portfolioLink.createMany).not.toHaveBeenCalled();
   });
 
-  it('Draft 미존재 → APP_DRAFT_NOT_FOUND', async () => {
-    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce(null);
+  it('Draft 미존재 → APP_DRAFT_NOT_FOUND (SELECT FOR UPDATE 빈 결과)', async () => {
+    basePrisma.__txQueryRaw.mockResolvedValueOnce([]);
     await expect(
       replaceForDraft({
         userId: USER_ID,
@@ -139,7 +152,7 @@ describe('replaceForDraft', () => {
     expect(basePrisma.portfolioLink.deleteMany).not.toHaveBeenCalled();
   });
 
-  it('6개 입력은 service 런타임에서도 거부 (L-006 layer)', async () => {
+  it('6개 입력은 service 런타임에서도 거부 (L-006 layer + MAX_PORTFOLIO_LINKS 상수)', async () => {
     const sixLinks = Array.from({ length: 6 }, () => ({
       linkType: 'BLOG' as const,
       url: 'https://example.com',
@@ -149,5 +162,32 @@ describe('replaceForDraft', () => {
       replaceForDraft({ userId: USER_ID, jobPostingId: JOB_POSTING_ID, links: sixLinks }),
     ).rejects.toMatchObject({ code: 'SYS_VALIDATION_FAILED' });
     expect(basePrisma.$transaction).not.toHaveBeenCalled();
+  });
+});
+
+// H007 fix (PR #65 review) — ownership boundary 단언: composite key가 정확히 전달되는지 검증.
+// userId가 누락되거나 jobPostingId만 lookup되도록 변경되면 본 케이스가 fail하여 회귀 차단.
+describe('listByDraft ownership boundary (H007 fix)', () => {
+  it('listByDraft는 userId+jobPostingId composite key로 findUnique 호출', async () => {
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: DRAFT_ID });
+    basePrisma.portfolioLink.findMany.mockResolvedValueOnce([]);
+    await listByDraft({ userId: USER_ID, jobPostingId: JOB_POSTING_ID });
+    expect(basePrisma.applicationDraft.findUnique).toHaveBeenCalledWith({
+      where: { userId_jobPostingId: { userId: USER_ID, jobPostingId: JOB_POSTING_ID } },
+      select: { id: true },
+    });
+  });
+
+  it('다른 user의 listByDraft → APP_DRAFT_NOT_FOUND (정보 누출 회피, 미존재와 동일 코드)', async () => {
+    const OTHER_USER = 999;
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce(null);
+    await expect(
+      listByDraft({ userId: OTHER_USER, jobPostingId: JOB_POSTING_ID }),
+    ).rejects.toMatchObject({ code: 'APP_DRAFT_NOT_FOUND' });
+    expect(basePrisma.applicationDraft.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_jobPostingId: { userId: OTHER_USER, jobPostingId: JOB_POSTING_ID } },
+      }),
+    );
   });
 });

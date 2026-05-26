@@ -40,14 +40,19 @@ export function isHttpsUrl(input: string): boolean {
 }
 
 /**
- * 외부 fetch에 사용 가능한지 검증한 후 URL 객체 반환.
+ * 외부 fetch / 사용자 공유 가능한지 검증한 후 URL 객체 반환.
  * - 파싱 실패 → null
  * - https 아님 → null
+ * - **user-info(`user:pass@`) 포함** → null (피싱 URL 차단, H006 fix PR #65 review)
+ *   WHATWG URL은 `https://attacker.com@github.com/`을 hostname=github.com으로 파싱하므로
+ *   화이트리스트 통과 후 사용자가 클릭하면 attacker.com user-info가 활성화될 수 있음.
+ * - **non-standard port** → null (443 표준 포트만 허용, BR-LINK-02 보강)
  * - hostname이 사설/metadata/loopback IPv4 → null
  * - 그 외 → URL 객체
  *
  * 도메인의 경우 DNS rebinding은 본 함수가 차단하지 못한다 — 호출자가 fetch 시
- * DNS 해석 후 isPrivateOrMetadataHost 재검사 권장 (OG fetch P1에서 처리).
+ * DNS 해석 후 isPrivateOrMetadataHost 재검사 필수.
+ * TODO(og-fetch-p1): BR-LINK-03 OG fetch 도입 시 resolveAndRecheckForFetch() 헬퍼 추가.
  */
 export function safeExternalUrl(input: string): URL | null {
   let u: URL;
@@ -57,6 +62,8 @@ export function safeExternalUrl(input: string): URL | null {
     return null;
   }
   if (u.protocol !== 'https:') return null;
+  if (u.username !== '' || u.password !== '') return null;
+  if (u.port !== '' && u.port !== '443') return null;
   if (isPrivateOrMetadataHost(u.hostname)) return null;
   return u;
 }

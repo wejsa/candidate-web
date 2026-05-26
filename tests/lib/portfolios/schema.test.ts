@@ -97,6 +97,47 @@ describe('PortfolioLinkInputSchema', () => {
     });
     expect(parsed.success).toBe(false);
   });
+
+  // H009 fix (PR #65 review) — inclusive boundary 케이스.
+  it('memo 정확히 500자는 통과 (inclusive boundary)', () => {
+    const parsed = PortfolioLinkInputSchema.safeParse({
+      linkType: 'BLOG',
+      url: 'https://example.com',
+      memo: 'x'.repeat(500),
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('url 정확히 1000자는 통과, 1001자는 거부 (inclusive boundary)', () => {
+    const padded = 'https://example.com/' + 'a'.repeat(1000 - 'https://example.com/'.length);
+    expect(padded.length).toBe(1000);
+    expect(PortfolioLinkInputSchema.safeParse({ linkType: 'BLOG', url: padded }).success).toBe(true);
+    expect(PortfolioLinkInputSchema.safeParse({ linkType: 'BLOG', url: padded + 'b' }).success).toBe(false);
+  });
+
+  // H005 fix 검증 — memo HTML이 sanitize('plain')으로 제거됨.
+  it('memo의 HTML 태그는 sanitize로 제거됨 (저장 시점 이중 방어, H005 fix)', () => {
+    const parsed = PortfolioLinkInputSchema.safeParse({
+      linkType: 'BLOG',
+      url: 'https://example.com',
+      memo: '<script>alert(1)</script>안녕<b>강조</b>',
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.memo).not.toContain('<script>');
+      expect(parsed.data.memo).not.toContain('<b>');
+      expect(parsed.data.memo).toContain('안녕');
+    }
+  });
+
+  // H006 fix 검증 — user-info / non-standard port 차단.
+  it.each([
+    'https://attacker.com@github.com/ok/repo',
+    'https://user:pass@github.com/repo',
+    'https://github.com:8443/repo',
+  ])('user-info 또는 non-standard port URL 거부: %s (H006 fix)', (badUrl) => {
+    expect(PortfolioLinkInputSchema.safeParse({ linkType: 'GITHUB', url: badUrl }).success).toBe(false);
+  });
 });
 
 describe('PortfolioLinksRequestSchema', () => {

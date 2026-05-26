@@ -89,4 +89,16 @@ describe('safeExternalUrl', () => {
   it('도메인은 통과 (호출 측이 DNS 해석 후 재검사 — OG fetch P1 책임)', () => {
     expect(safeExternalUrl('https://notion.so/page')).not.toBeNull();
   });
+
+  // H006 fix (PR #65 review) — user-info / non-standard port 거부.
+  it('user-info(`user@host`) 포함 URL은 차단 (피싱 회피)', () => {
+    expect(safeExternalUrl('https://attacker.com@github.com/repo')).toBeNull();
+    expect(safeExternalUrl('https://user:pass@github.com/repo')).toBeNull();
+  });
+
+  it('non-standard port(443 아님)는 차단, 명시적 443은 허용', () => {
+    expect(safeExternalUrl('https://github.com:8443/repo')).toBeNull();
+    expect(safeExternalUrl('https://github.com:80/repo')).toBeNull();
+    expect(safeExternalUrl('https://github.com:443/repo')).not.toBeNull();
+  });
 });
