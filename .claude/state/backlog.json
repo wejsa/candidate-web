@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 251,
+    "version": 252,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T00:07:12+09:00"
+    "updatedAt": "2026-05-27T00:11:30+09:00"
   },
   "summary": {
     "total": 43,
@@ -1423,7 +1423,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-234151",
-      "assignedAt": "2026-05-27T00:07:12+09:00",
+      "assignedAt": "2026-05-27T00:11:30+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
@@ -1440,14 +1440,14 @@
         "app/api/v1/applications/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-fix",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 67,
         "fixLoopCount": 1,
         "autoChainArgs": "67",
-        "updatedAt": "2026-05-27T00:07:12+09:00"
+        "updatedAt": "2026-05-27T00:11:30+09:00"
       },
-      "updatedAt": "2026-05-27T00:07:12+09:00",
+      "updatedAt": "2026-05-27T00:11:30+09:00",
       "planPath": ".claude/temp/CANDID-018-plan.md",
       "currentStep": 1,
       "steps": [
@@ -1475,7 +1475,7 @@
           "prNumber": 67,
           "actualLines": 537,
           "fixLoop": 1,
-          "reviewSummary": "fix loop 1: CRITICAL 1 (C001 멱등성 invariant) + MAJOR 10 in-PR fix (커밋 96a0fc3). self-PR fallback COMMENT. 재리뷰 진행."
+          "reviewSummary": "fix loop 1: CRITICAL 1 (C001) + MAJOR 9 → 모두 해소. 재리뷰: CRITICAL 0 / MAJOR 0 / MINOR 6 (N002 in-PR fix 3fb859a; 5건 carry) / INFO 5. self-PR COMMENT 진행."
         },
         {
           "step": 2,
