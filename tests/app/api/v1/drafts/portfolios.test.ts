@@ -116,9 +116,10 @@ describe('PUT /api/v1/drafts/[jobPostingId]/portfolios', () => {
     );
     const res = await PUT(putRequest(String(JOB_POSTING_ID), { links }), routeCtx(String(JOB_POSTING_ID)));
     expect(res.status).toBe(200);
+    expect(res.headers.get('Cache-Control')).toBe('private, no-store'); // PR #66 Test MINOR-1
     const body = (await res.json()) as { links: { sortOrder: number }[] };
     expect(body.links).toHaveLength(5);
-    expect(body.links[4]?.sortOrder).toBe(4);
+    expect(body.links.map((l) => l.sortOrder)).toEqual([0, 1, 2, 3, 4]); // PR #66 Test MINOR-2
     expect(replaceForDraft).toHaveBeenCalledWith({
       userId: USER_ID,
       jobPostingId: JOB_POSTING_ID,
