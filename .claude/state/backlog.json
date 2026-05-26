@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 243,
+    "version": 244,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T23:28:35+09:00"
+    "updatedAt": "2026-05-26T23:29:39+09:00"
   },
   "summary": {
     "total": 43,
@@ -1346,34 +1346,27 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-224209",
-      "assignedAt": "2026-05-26T23:28:35+09:00",
+      "assignedAt": "2026-05-26T23:29:39+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/security/ssrf-guard.ts",
-        "lib/env.ts",
-        "lib/portfolios/types.ts",
-        "lib/portfolios/schema.ts",
-        "lib/portfolios/allowed-domains.ts",
-        "lib/portfolios/service.ts",
-        "lib/errors/codes.ts",
         "app/api/v1/drafts/[jobPostingId]/portfolios/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 65,
-        "fixLoopCount": 1,
-        "autoChainArgs": "65",
-        "updatedAt": "2026-05-26T23:28:35+09:00"
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-26T23:29:39+09:00"
       },
-      "updatedAt": "2026-05-26T23:28:35+09:00",
+      "updatedAt": "2026-05-26T23:29:39+09:00",
       "planPath": ".claude/temp/CANDID-017-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "steps": [
         {
           "step": 1,
           "title": "ssrf-guard 추출 + lib/portfolios (schema/service/allowed-domains) + 단위 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/security/ssrf-guard.ts",
             "lib/env.ts",
@@ -1394,7 +1387,10 @@
           "prNumber": 65,
           "actualLines": 694,
           "reviewSummary": "fix loop 1: CRITICAL 1 (C001) + MAJOR 9 in-PR fix. 재리뷰: CRITICAL 0, 신규 MAJOR 2 (N001/N002) + MINOR 1 (N003) in-PR fix. INFO 6 carry. 자기 PR COMMENT 진행.",
-          "fixLoop": 1
+          "fixLoop": 1,
+          "mergedAt": "2026-05-26T23:29:17+09:00",
+          "mergedLines": 1006,
+          "testsAfter": 1212
         },
         {
           "step": 2,
