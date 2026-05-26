@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 237,
+    "version": 238,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T22:35:20+09:00"
+    "updatedAt": "2026-05-26T22:37:20+09:00"
   },
   "summary": {
     "total": 43,
-    "done": 23,
-    "inProgress": 1,
+    "done": 24,
+    "inProgress": 0,
     "review": 0,
     "todo": 19
   },
@@ -2203,37 +2203,28 @@
       "id": "CANDID-044",
       "title": "가드 fail 시 security 에이전트 부분 실행 옵션 (다른 보안 이슈 마스킹 회피)",
       "description": "CANDID-042 회고 Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2). 현재 §2.4 정책은 가드 fail 시 Rules + 3-에이전트 리뷰를 *전체* 스킵 → 같은 PR의 다른 보안 이슈(시크릿 노출/SQL Injection 등)가 마스킹됨. 정책 옵션 도입: 가드 fail이라도 `pr-reviewer-security` 1개는 백그라운드 실행 + 결과를 PR 코멘트에 합산. SKILL.md §2.4 절차에 \"가드 fail 시에도 security 단일 에이전트 실행\" 분기 추가 + 매핑 표에 옵션 컬럼 (선택). 추정 ~50줄.",
-      "status": "in_progress",
+      "status": "done",
       "type": "chore",
       "priority": "high",
       "phase": 1,
-      "assignee": "jaese@hoji-20260525-235431",
-      "assignedAt": "2026-05-26T22:35:20+09:00",
-      "lockedFiles": [
-        ".claude/skills/skill-review-pr/SKILL.md"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-042"
       ],
       "createdAt": "2026-05-25T21:34:03+09:00",
       "source": "CANDID-042 retro Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2)",
       "lockTTL": 3600,
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 64,
-        "fixLoopCount": 0,
-        "autoChainArgs": "64",
-        "updatedAt": "2026-05-26T22:35:20+09:00"
-      },
-      "updatedAt": "2026-05-26T22:35:20+09:00",
+      "workflowState": null,
+      "updatedAt": "2026-05-26T22:37:20+09:00",
       "planPath": ".claude/temp/CANDID-044-plan.md",
       "currentStep": 1,
       "steps": [
         {
           "step": 1,
           "title": "partial-security 정책 도입 (매핑 표 컬럼 + 가드 fail 분기 + 코멘트 포맷 + 실행 로그)",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             ".claude/skills/skill-review-pr/SKILL.md"
           ],
@@ -2244,9 +2235,12 @@
           "prNumber": 64,
           "actualLines": 74,
           "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 5 (3 in-PR fix: H001 domain 전달 + H002 --auto-fix 무관 + H004 self-PR fallback; carry 2: H003 enum meta-guard → CANDID-045, H005 dryrun → A3) / MINOR 8 (4 in-PR 통합) / INFO 6. 자기 PR이므로 COMMENT. 보안 결함 0. L-019 적용.",
-          "fixLoop": 0
+          "fixLoop": 0,
+          "mergedAt": "2026-05-26T22:36:33+09:00",
+          "mergedLines": 74
         }
-      ]
+      ],
+      "completedAt": "2026-05-26T22:37:20+09:00"
     },
     "CANDID-045": {
       "id": "CANDID-045",

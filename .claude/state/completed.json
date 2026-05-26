@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 26,
+    "version": 27,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-25T23:09:03+09:00"
+    "updatedAt": "2026-05-26T22:37:20+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -840,6 +840,31 @@
       "carriedMajors": 8,
       "testsAfter": 1120,
       "note": "Layer 4 방어 완성. binding 모델 + dynamic self-detection (rename 회귀 자동 차단). 12 vitest fixture. L-037 self-application 통과. carry 10건 → 향후 2번째 META 가드 도입 시점 처리. closed loop: CANDID-038(layer 1) → 041(layer 2) → 042(layer 3) → 043(layer 4) 완성."
+    },
+    "CANDID-044": {
+      "id": "CANDID-044",
+      "title": "가드 fail 시 security 에이전트 부분 실행 옵션 (다른 보안 이슈 마스킹 회피)",
+      "description": "CANDID-042 회고 Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2). skill-review-pr SKILL.md §2.4에 partial-security 정책 도입 — 가드 fail 시 pr-reviewer-security 1개 별도 실행 + 결과 합산.",
+      "type": "chore",
+      "priority": "high",
+      "phase": 1,
+      "source": "CANDID-042 retro Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2)",
+      "dependencies": [
+        "CANDID-042"
+      ],
+      "createdAt": "2026-05-25T21:34:03+09:00",
+      "completedAt": "2026-05-26T22:37:20+09:00",
+      "totalSteps": 1,
+      "totalAdditions": 49,
+      "totalDeletions": 8,
+      "prNumbers": [
+        64
+      ],
+      "fixLoopTotal": 0,
+      "carriedMajors": 2,
+      "carriedMinors": 4,
+      "testsAfter": 1119,
+      "note": "단일 PR 정책 도입. CRITICAL 0 / MAJOR 5 (in-PR fix 3: H001 domain 전달, H002 --auto-fix 무관, H004 self-PR fallback; carry 2: H003 enum meta-guard → CANDID-045, H005 dryrun → A3). MINOR 8 (in-PR 통합 4: 분기 매핑, 결정 불변 SSOT, skipReason enum, timeout SSOT). 자기 PR COMMENT 진행. L-019 적용."
     }
   }
 }
