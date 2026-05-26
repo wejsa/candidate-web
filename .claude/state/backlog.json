@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 236,
+    "version": 237,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T22:26:29+09:00"
+    "updatedAt": "2026-05-26T22:35:20+09:00"
   },
   "summary": {
     "total": 43,
@@ -2208,7 +2208,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260525-235431",
-      "assignedAt": "2026-05-26T22:26:29+09:00",
+      "assignedAt": "2026-05-26T22:35:20+09:00",
       "lockedFiles": [
         ".claude/skills/skill-review-pr/SKILL.md"
       ],
@@ -2219,14 +2219,14 @@
       "source": "CANDID-042 retro Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2)",
       "lockTTL": 3600,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 64,
         "fixLoopCount": 0,
-        "autoChainArgs": "64 --auto-fix",
-        "updatedAt": "2026-05-26T22:26:29+09:00"
+        "autoChainArgs": "64",
+        "updatedAt": "2026-05-26T22:35:20+09:00"
       },
-      "updatedAt": "2026-05-26T22:26:29+09:00",
+      "updatedAt": "2026-05-26T22:35:20+09:00",
       "planPath": ".claude/temp/CANDID-044-plan.md",
       "currentStep": 1,
       "steps": [
@@ -2242,7 +2242,9 @@
           "dependsOn": [],
           "branch": "feature/CANDID-044-step1",
           "prNumber": 64,
-          "actualLines": 51
+          "actualLines": 74,
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 5 (3 in-PR fix: H001 domain 전달 + H002 --auto-fix 무관 + H004 self-PR fallback; carry 2: H003 enum meta-guard → CANDID-045, H005 dryrun → A3) / MINOR 8 (4 in-PR 통합) / INFO 6. 자기 PR이므로 COMMENT. 보안 결함 0. L-019 적용.",
+          "fixLoop": 0
         }
       ]
     },

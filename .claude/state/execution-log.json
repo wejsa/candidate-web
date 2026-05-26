@@ -1685,5 +1685,19 @@
     "prNumber": 64,
     "branch": "feature/CANDID-044-step1",
     "actualLines": 51
+  },
+  {
+    "timestamp": "2026-05-26T22:35:20+09:00",
+    "taskId": "CANDID-044",
+    "stepNumber": 1,
+    "action": "review_completed",
+    "prNumber": 64,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "critical": 0,
+    "major": 5,
+    "majorInPRFix": 3,
+    "majorCarry": 2,
+    "minor": 8,
+    "info": 6
   }
 ]
