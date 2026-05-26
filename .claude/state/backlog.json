@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 248,
+    "version": 249,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T23:41:51+09:00"
+    "updatedAt": "2026-05-26T23:50:05+09:00"
   },
   "summary": {
     "total": 43,
@@ -1423,18 +1423,89 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-234151",
-      "assignedAt": "2026-05-26T23:41:51+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-26T23:50:05+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "prisma/schema.prisma",
+        "lib/idempotency/types.ts",
+        "lib/idempotency/schema.ts",
+        "lib/idempotency/store.ts",
+        "lib/applications/types.ts",
+        "lib/applications/schema.ts",
+        "lib/applications/number-generator.ts",
+        "lib/applications/validate.ts",
+        "lib/applications/submit.ts",
+        "lib/email/templates/application-confirm.ts",
+        "lib/errors/codes.ts",
+        "app/api/v1/applications/route.ts"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-26T23:41:51+09:00"
+        "updatedAt": "2026-05-26T23:50:05+09:00"
       },
-      "updatedAt": "2026-05-26T23:41:51+09:00"
+      "updatedAt": "2026-05-26T23:50:05+09:00",
+      "planPath": ".claude/temp/CANDID-018-plan.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "DB 마이그 (IdempotencyKey) + number-generator + idempotency store + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations",
+            "lib/idempotency/types.ts",
+            "lib/idempotency/schema.ts",
+            "lib/idempotency/store.ts",
+            "lib/applications/types.ts",
+            "lib/applications/number-generator.ts",
+            "lib/errors/codes.ts",
+            "tests/lib/idempotency/store.test.ts",
+            "tests/lib/applications/number-generator.test.ts",
+            "tests/lib/errors/codes.test.ts"
+          ],
+          "estimatedLines": 500,
+          "prLineLimit": 600,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "submit 비즈니스 + validate + 트랜잭션 + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "lib/applications/validate.ts",
+            "lib/applications/submit.ts",
+            "lib/applications/schema.ts",
+            "lib/email/templates/application-confirm.ts",
+            "tests/lib/applications/validate.test.ts",
+            "tests/lib/applications/submit.test.ts"
+          ],
+          "estimatedLines": 700,
+          "prLineLimit": 800,
+          "dependsOn": [
+            1
+          ]
+        },
+        {
+          "step": 3,
+          "title": "Route Handler POST + 통합 테스트 + 멱등성 미들웨어",
+          "status": "pending",
+          "files": [
+            "app/api/v1/applications/route.ts",
+            "tests/app/api/v1/applications/submit.test.ts"
+          ],
+          "estimatedLines": 500,
+          "prLineLimit": 600,
+          "dependsOn": [
+            1,
+            2
+          ]
+        }
+      ]
     },
     "CANDID-019": {
       "id": "CANDID-019",
