@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 235,
+    "version": 236,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T22:21:50+09:00"
+    "updatedAt": "2026-05-26T22:26:29+09:00"
   },
   "summary": {
     "total": 43,
@@ -2208,7 +2208,7 @@
       "priority": "high",
       "phase": 1,
       "assignee": "jaese@hoji-20260525-235431",
-      "assignedAt": "2026-05-26T22:21:50+09:00",
+      "assignedAt": "2026-05-26T22:26:29+09:00",
       "lockedFiles": [
         ".claude/skills/skill-review-pr/SKILL.md"
       ],
@@ -2219,27 +2219,30 @@
       "source": "CANDID-042 retro Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2)",
       "lockTTL": 3600,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 64,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-26T22:21:50+09:00"
+        "autoChainArgs": "64 --auto-fix",
+        "updatedAt": "2026-05-26T22:26:29+09:00"
       },
-      "updatedAt": "2026-05-26T22:21:50+09:00",
+      "updatedAt": "2026-05-26T22:26:29+09:00",
       "planPath": ".claude/temp/CANDID-044-plan.md",
       "currentStep": 1,
       "steps": [
         {
           "step": 1,
           "title": "partial-security 정책 도입 (매핑 표 컬럼 + 가드 fail 분기 + 코멘트 포맷 + 실행 로그)",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             ".claude/skills/skill-review-pr/SKILL.md"
           ],
           "estimatedLines": 48,
           "prLineLimit": 100,
-          "dependsOn": []
+          "dependsOn": [],
+          "branch": "feature/CANDID-044-step1",
+          "prNumber": 64,
+          "actualLines": 51
         }
       ]
     },
