@@ -1866,5 +1866,14 @@
     "info": 5,
     "fixLoopCount": 1,
     "testsAfter": 1270
+  },
+  {
+    "timestamp": "2026-05-27T00:12:04+09:00",
+    "taskId": "CANDID-018",
+    "stepNumber": 1,
+    "action": "merged",
+    "prNumber": 67,
+    "mergedLines": 762,
+    "fixLoopCount": 1
   }
 ]
