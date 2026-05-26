@@ -1784,5 +1784,19 @@
     "branch": "feature/CANDID-017-step2",
     "actualLines": 290,
     "testsAfter": 1226
+  },
+  {
+    "timestamp": "2026-05-26T23:38:05+09:00",
+    "taskId": "CANDID-017",
+    "stepNumber": 2,
+    "action": "review_completed",
+    "prNumber": 66,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "critical": 0,
+    "major": 0,
+    "minor": 5,
+    "minorInPRFix": 2,
+    "info": 14,
+    "fixLoopCount": 0
   }
 ]
