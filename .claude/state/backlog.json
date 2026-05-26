@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 247,
+    "version": 248,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-26T23:39:16+09:00"
+    "updatedAt": "2026-05-26T23:41:51+09:00"
   },
   "summary": {
     "total": 43,
     "done": 25,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 18
+    "todo": 17
   },
   "phases": {
     "1": {
@@ -1412,7 +1412,7 @@
       "id": "CANDID-018",
       "title": "지원서 최종 제출 (Idempotency-Key, 마감 검증, 트랜잭션, application_number) (US-APP-006)",
       "description": "제출 직전 검증(필수 필드/이력서/이메일 인증/동의). Idempotency-Key 24h 멱등 처리. closes_at < now 시 422. 단일 트랜잭션: Application 생성 + Draft 삭제 + 이력 생성. application_number(A-YYYYMM-NNNNN) 발급. 확인 이메일 발송.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
@@ -1421,7 +1421,20 @@
         "CANDID-016",
         "CANDID-017"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "jaese@hoji-20260526-234151",
+      "assignedAt": "2026-05-26T23:41:51+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-26T23:41:51+09:00"
+      },
+      "updatedAt": "2026-05-26T23:41:51+09:00"
     },
     "CANDID-019": {
       "id": "CANDID-019",
