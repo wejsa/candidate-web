@@ -2066,5 +2066,50 @@
     "branch": "feature/CANDID-019-step2",
     "actualLines": 989,
     "testsAfter": 1390
+  },
+  {
+    "timestamp": "2026-05-27T22:22:00+09:00",
+    "taskId": "CANDID-019",
+    "stepNumber": 2,
+    "action": "request_changes",
+    "prNumber": 71,
+    "decision": "REQUEST_CHANGES (self-PR fallback)",
+    "critical": 1,
+    "major": 5,
+    "minor": 4,
+    "info": 4,
+    "fixLoopCount": 0
+  },
+  {
+    "timestamp": "2026-05-27T22:23:30+09:00",
+    "taskId": "CANDID-019",
+    "stepNumber": 2,
+    "action": "fix_completed",
+    "prNumber": 71,
+    "fixLoopCount": 1,
+    "issueCount": 1,
+    "issues": [
+      "C1"
+    ]
+  },
+  {
+    "timestamp": "2026-05-27T22:24:30+09:00",
+    "taskId": "CANDID-019",
+    "stepNumber": 2,
+    "action": "approved",
+    "prNumber": 71,
+    "decision": "APPROVED (self-PR → COMMENT)",
+    "reviewMode": "full",
+    "agentsRun": [
+      "domain",
+      "security"
+    ],
+    "critical": 0,
+    "major": 5,
+    "minor": 4,
+    "info": 4,
+    "fixLoopCount": 1,
+    "guardWiring": "passed",
+    "rulesApplied": null
   }
 ]
