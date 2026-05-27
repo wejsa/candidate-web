@@ -9,6 +9,20 @@
 //   - 같은 키 + 다른 body 재요청 → 400 SYS_VALIDATION_FAILED (mismatch)
 //   - 다른 키 + 같은 body 재요청 → 새 제출 (UNIQUE 제약이 차후 단계에서 409 처리)
 //
+// 멱등성 캐싱 정책 (D-01 review fix loop 1 — 정책 명시):
+//   - **성공(201)만 캐시**: storeResponse는 정상 path에서만 호출됨
+//   - **비즈니스 실패(409/422/403/404 등)는 캐시 안 함**: withErrorHandler가 표준 에러로 변환할 뿐
+//     storeResponse 호출은 일어나지 않음. 사유: ALREADY_SUBMITTED 후 다른 사용자의 지원이
+//     철회/만료되어 상태가 바뀔 수 있음. 실패를 캐시하면 stale 응답을 24h 강제하게 됨.
+//   - **SYS_INTERNAL_ERROR(500)도 캐시 안 함**: transient 오류를 24h 캐시하면 운영 사고.
+//   - cache hit는 lookupAndVerify가 반환한 status를 그대로 반영 — 향후 정책 변경 여지를 위한 일반화
+//     (현재 store는 201만 호출하므로 production에서 cache hit status는 항상 201).
+//
+// Rate Limit (review fix loop 1 carry — A-01):
+//   현재 본 라우터는 withRateLimit/enforceUserRateLimit 미적용. signup/login 패턴과 불일치.
+//   별도 follow-up task에서 USER_POLICIES.APP_SUBMIT_USER 신설 + enforceUserRateLimit 적용 예정.
+//   임시 방어: Idempotency-Key 24h 보존 + BR-APP-01 활성 지원서 UNIQUE 제약이 부분 차단.
+//
 // 응답 본문은 PII-free: applicationNumber + submittedAt + currentStage (submitApplication 반환).
 
 import { NextResponse, type NextRequest } from 'next/server';
