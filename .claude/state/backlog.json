@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 264,
+    "version": 265,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T22:10:30+09:00"
+    "updatedAt": "2026-05-27T22:11:30+09:00"
   },
   "summary": {
     "total": 43,
@@ -1528,12 +1528,8 @@
       "assignedAt": "2026-05-27T21:32:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/my-page/types.ts",
-        "lib/my-page/stage-labels.ts",
-        "lib/my-page/list-service.ts",
         "lib/my-page/detail-service.ts",
         "lib/my-page/ics.ts",
-        "app/api/v1/applications/me/route.ts",
         "app/api/v1/applications/me/[id]/route.ts",
         "app/api/v1/applications/me/[id]/interview.ics/route.ts",
         "app/me/page.tsx",
@@ -1545,21 +1541,21 @@
         "app/me/loading.tsx"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 70,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "70",
-        "updatedAt": "2026-05-27T22:10:30+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-27T22:11:30+09:00"
       },
-      "updatedAt": "2026-05-27T22:10:30+09:00",
+      "updatedAt": "2026-05-27T22:11:30+09:00",
       "planPath": ".claude/temp/CANDID-019-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "steps": [
         {
           "step": 1,
           "title": "리스트 서비스 + GET /api/v1/applications/me + 단위 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/my-page/types.ts",
             "lib/my-page/stage-labels.ts",
@@ -1575,7 +1571,10 @@
           "prNumber": 70,
           "actualLines": 623,
           "fixLoop": 0,
-          "reviewSummary": "CRITICAL 0 / MAJOR 5 (A-01 carry + Test 4 carry) / MINOR 8 / INFO 13. self-PR COMMENT. 회고 follow-up."
+          "reviewSummary": "CRITICAL 0 / MAJOR 5 (A-01 carry + Test 4 carry) / MINOR 8 / INFO 13. self-PR COMMENT. 회고 follow-up.",
+          "mergedAt": "2026-05-27T22:10:53+09:00",
+          "mergedLines": 623,
+          "mergeCommit": "1cbf802e83422452139c6cdc8bea70ebb5befd62"
         },
         {
           "step": 2,
