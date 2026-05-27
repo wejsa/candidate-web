@@ -9,7 +9,6 @@ import { z } from 'zod';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
 import { getMyApplicationDetail } from '@/lib/my-page/detail-service';
 import { AppError } from '@/lib/errors';
-import { stageLabel, resultLabel } from '@/lib/my-page/stage-labels';
 import { ApplicationCard } from '@/app/me/_components/SectionCard';
 import { Timeline } from '@/app/me/_components/Timeline';
 import { InterviewBlock } from '@/app/me/_components/InterviewBlock';
@@ -57,14 +56,16 @@ export default async function MyApplicationDetailPage({ params }: PageProps) {
   }
 
   // 단계/결과 라벨은 lib service에서 한국어 매핑되어 옴.
-  // 추가 UI 라벨이 필요할 경우 stageLabel/resultLabel 직접 호출.
-  void stageLabel;
-  void resultLabel;
 
   return (
     <main>
-      <h1>지원 상세</h1>
-      <ApplicationCard card={detail.summary} />
+      <h1>지원 상세 — {detail.summary.jobTitle}</h1>
+
+      <section aria-labelledby="summary-title">
+        {/* h1 다음 h2로 진입 — heading hierarchy 회귀 가드 (review fix loop 1, A11y MAJOR) */}
+        <h2 id="summary-title">지원 정보</h2>
+        <ApplicationCard card={detail.summary} />
+      </section>
 
       <section aria-labelledby="timeline-title">
         <h2 id="timeline-title">전형 진행 타임라인</h2>
