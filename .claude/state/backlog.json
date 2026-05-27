@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 258,
+    "version": 259,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T21:15:30+09:00"
+    "updatedAt": "2026-05-27T21:26:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1429,14 +1429,14 @@
         "app/api/v1/applications/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 69,
-        "fixLoopCount": 0,
-        "autoChainArgs": "69 --auto-fix",
-        "updatedAt": "2026-05-27T21:15:30+09:00"
+        "fixLoopCount": 1,
+        "autoChainArgs": "69",
+        "updatedAt": "2026-05-27T21:26:00+09:00"
       },
-      "updatedAt": "2026-05-27T21:15:30+09:00",
+      "updatedAt": "2026-05-27T21:26:00+09:00",
       "planPath": ".claude/temp/CANDID-018-plan.md",
       "currentStep": 3,
       "steps": [

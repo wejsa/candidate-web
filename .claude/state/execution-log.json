@@ -1917,7 +1917,11 @@
     "prNumber": 68,
     "decision": "APPROVED (self-PR → COMMENT)",
     "reviewMode": "full",
-    "agentsRun": ["domain", "security", "test"],
+    "agentsRun": [
+      "domain",
+      "security",
+      "test"
+    ],
     "critical": 0,
     "major": 1,
     "minor": 5,
@@ -1945,5 +1949,51 @@
     "branch": "feature/CANDID-018-step3",
     "actualLines": 499,
     "testsAfter": 1326
+  },
+  {
+    "timestamp": "2026-05-27T21:20:00+09:00",
+    "taskId": "CANDID-018",
+    "stepNumber": 3,
+    "action": "request_changes",
+    "prNumber": 69,
+    "decision": "REQUEST_CHANGES (self-PR fallback)",
+    "critical": 0,
+    "major": 7,
+    "minor": 9,
+    "info": 6,
+    "fixLoopCount": 0
+  },
+  {
+    "timestamp": "2026-05-27T21:23:00+09:00",
+    "taskId": "CANDID-018",
+    "stepNumber": 3,
+    "action": "fix_completed",
+    "prNumber": 69,
+    "fixLoopCount": 1,
+    "issueCount": 1,
+    "issues": [
+      "D-01"
+    ]
+  },
+  {
+    "timestamp": "2026-05-27T21:25:57+09:00",
+    "taskId": "CANDID-018",
+    "stepNumber": 3,
+    "action": "approved",
+    "prNumber": 69,
+    "decision": "APPROVED (self-PR → COMMENT)",
+    "reviewMode": "full",
+    "agentsRun": [
+      "domain",
+      "security",
+      "test"
+    ],
+    "critical": 0,
+    "major": 6,
+    "minor": 9,
+    "info": 6,
+    "fixLoopCount": 1,
+    "guardWiring": "passed",
+    "rulesApplied": null
   }
 ]
