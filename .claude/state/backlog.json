@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 267,
+    "version": 268,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T22:24:30+09:00"
+    "updatedAt": "2026-05-27T22:26:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1528,10 +1528,6 @@
       "assignedAt": "2026-05-27T21:32:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/my-page/detail-service.ts",
-        "lib/my-page/ics.ts",
-        "app/api/v1/applications/me/[id]/route.ts",
-        "app/api/v1/applications/me/[id]/interview.ics/route.ts",
         "app/me/page.tsx",
         "app/me/[applicationId]/page.tsx",
         "app/me/_components/SectionCard.tsx",
@@ -1541,16 +1537,16 @@
         "app/me/loading.tsx"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 71,
-        "fixLoopCount": 1,
-        "autoChainArgs": "71",
-        "updatedAt": "2026-05-27T22:24:30+09:00"
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-27T22:26:00+09:00"
       },
-      "updatedAt": "2026-05-27T22:24:30+09:00",
+      "updatedAt": "2026-05-27T22:26:00+09:00",
       "planPath": ".claude/temp/CANDID-019-plan.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -1579,7 +1575,7 @@
         {
           "step": 2,
           "title": "상세 서비스 + .ics 빌더 + 2 endpoints + 단위 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/my-page/detail-service.ts",
             "lib/my-page/ics.ts",
@@ -1599,7 +1595,10 @@
           "prNumber": 71,
           "actualLines": 989,
           "fixLoop": 1,
-          "reviewSummary": "fix loop 1: CRITICAL 1 (C1 FILE_NOT_FOUND → APP_INTERVIEW_NOT_FOUND) in-PR fix. MAJOR 5 carry (M1 1h 고정 / M2 DONE STATUS / M3 응집도 / M4 URL 하드코딩 / A-01 rate limit) / MINOR 4 / INFO 4. self-PR COMMENT."
+          "reviewSummary": "fix loop 1: CRITICAL 1 (C1 FILE_NOT_FOUND → APP_INTERVIEW_NOT_FOUND) in-PR fix. MAJOR 5 carry (M1 1h 고정 / M2 DONE STATUS / M3 응집도 / M4 URL 하드코딩 / A-01 rate limit) / MINOR 4 / INFO 4. self-PR COMMENT.",
+          "mergedAt": "2026-05-27T22:25:24+09:00",
+          "mergedLines": 1007,
+          "mergeCommit": "dde5c0da4ccbea738af182453343166aefca75ac"
         },
         {
           "step": 3,
