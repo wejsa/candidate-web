@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 29,
+    "version": 30,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-27T21:27:30+09:00"
+    "updatedAt": "2026-05-27T22:36:00+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -950,6 +950,69 @@
           "L-022",
           "L-024",
           "L-030"
+        ]
+      }
+    },
+    "CANDID-019": {
+      "id": "CANDID-019",
+      "title": "마이페이지: 지원 내역 리스트 + 전형 진행 타임라인 (US-MY-001/002)",
+      "phase": 2,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-27T22:36:00+09:00",
+      "assignee": "jaese@hoji-20260527-212800",
+      "prs": [
+        {
+          "number": 70,
+          "stepNumber": 1,
+          "stepTitle": "리스트 서비스 + GET /api/v1/applications/me + 단위 테스트",
+          "mergedAt": "2026-05-27T22:10:53+09:00",
+          "additions": 623,
+          "fixLoop": 0,
+          "branch": "feature/CANDID-019-step1",
+          "note": "CRITICAL 0 / MAJOR 5 (A-01 carry + Test 4 carry) / MINOR 8 / INFO 13. self-PR COMMENT. 회고 follow-up."
+        },
+        {
+          "number": 71,
+          "stepNumber": 2,
+          "stepTitle": "상세 서비스 + .ics 빌더 + 2 endpoints + 단위 테스트",
+          "mergedAt": "2026-05-27T22:25:24+09:00",
+          "additions": 1007,
+          "fixLoop": 1,
+          "branch": "feature/CANDID-019-step2",
+          "note": "fix loop 1: CRITICAL 1 (C1 FILE_NOT_FOUND → APP_INTERVIEW_NOT_FOUND) in-PR fix. MAJOR 5 carry (M1 1h 고정 / M2 DONE STATUS / M3 응집도 / M4 URL 하드코딩 / A-01 rate limit) / MINOR 4 / INFO 4. self-PR COMMENT."
+        },
+        {
+          "number": 72,
+          "stepNumber": 3,
+          "stepTitle": "UI RSC 페이지 + 컴포넌트 (마이페이지 + 상세)",
+          "mergedAt": "2026-05-27T22:35:10+09:00",
+          "additions": 348,
+          "fixLoop": 1,
+          "branch": "feature/CANDID-019-step3",
+          "note": "fix loop 1: MAJOR 1 (A-MAJOR-1 heading hierarchy a11y) in-PR fix (커밋 b795fe1). MINOR 4 carry / INFO 2. self-PR COMMENT."
+        }
+      ],
+      "summary": {
+        "totalSteps": 3,
+        "totalFixLoops": 2,
+        "totalLines": 1978,
+        "carry": [
+          "A-01 (Security MAJOR): rate limit (CANDID-018과 통합)",
+          "Step 2 carry: 면접 1h 고정 / DONE STATUS 매핑 / getMyInterviewSchedule 응집도 / icsDownloadUrl URL 하드코딩",
+          "Step 3 MINOR: runtime 선언 일관성 / Timeline fromStage 라벨 통합 / DraftCard jobStatus 화이트리스트",
+          "Sec INFO: locationOrUrl 스킴 화이트리스트",
+          "F-5: React 컴포넌트 단위 테스트 인프라 (RTL+jsdom)",
+          "T-01: stage-labels.ts 단독 테스트 + Step 1 test MAJOR 5건"
+        ],
+        "appliedLessons": [
+          "L-006",
+          "L-019",
+          "L-022",
+          "L-030"
+        ],
+        "newErrorCodes": [
+          "APP_INTERVIEW_NOT_FOUND"
         ]
       }
     }

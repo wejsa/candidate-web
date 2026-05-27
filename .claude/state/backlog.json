@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 270,
+    "version": 271,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T22:34:30+09:00"
+    "updatedAt": "2026-05-27T22:36:00+09:00"
   },
   "summary": {
     "total": 43,
-    "done": 29,
-    "inProgress": 1,
+    "done": 30,
+    "inProgress": 0,
     "review": 0,
     "todo": 15
   },
@@ -22,7 +22,7 @@
     "2": {
       "name": "핵심 도메인",
       "description": "회원가입/로그인/OAuth, 공고 조회, 지원서 3단계 작성 + 임시저장 + 파일 첨부 + 포트폴리오 + 최종 제출, 마이페이지 진행 타임라인",
-      "status": "todo"
+      "status": "done"
     },
     "3": {
       "name": "부가 기능",
@@ -1516,7 +1516,7 @@
       "id": "CANDID-019",
       "title": "마이페이지: 지원 내역 리스트 + 전형 진행 타임라인 (US-MY-001/002)",
       "description": "작성 중/진행 중/종료 섹션 + 카드 UI. 상태 변경일 최신순. 타임라인 UI(서류→면접→처우협의). 면접 일정 일시/장소·URL 표시, .ics 다운로드. 점수/평가 코멘트 절대 비노출.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
@@ -1524,27 +1524,12 @@
         "CANDID-018"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260527-212800",
-      "assignedAt": "2026-05-27T21:32:00+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "app/me/page.tsx",
-        "app/me/[applicationId]/page.tsx",
-        "app/me/_components/SectionCard.tsx",
-        "app/me/_components/Timeline.tsx",
-        "app/me/_components/InterviewBlock.tsx",
-        "app/me/_components/EmptyState.tsx",
-        "app/me/loading.tsx"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 72,
-        "fixLoopCount": 1,
-        "autoChainArgs": "72",
-        "updatedAt": "2026-05-27T22:34:30+09:00"
-      },
-      "updatedAt": "2026-05-27T22:34:30+09:00",
+      "lockedFiles": [],
+      "workflowState": null,
+      "updatedAt": "2026-05-27T22:36:00+09:00",
       "planPath": ".claude/temp/CANDID-019-plan.md",
       "currentStep": 3,
       "steps": [
@@ -1603,7 +1588,7 @@
         {
           "step": 3,
           "title": "UI RSC 페이지 + 컴포넌트 (마이페이지 + 상세)",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "app/me/page.tsx",
             "app/me/[applicationId]/page.tsx",
@@ -1623,9 +1608,13 @@
           "prNumber": 72,
           "actualLines": 342,
           "fixLoop": 1,
-          "reviewSummary": "fix loop 1: MAJOR 1 (A-MAJOR-1 heading hierarchy a11y) in-PR fix (커밋 b795fe1). MINOR 4 carry / INFO 2. self-PR COMMENT."
+          "reviewSummary": "fix loop 1: MAJOR 1 (A-MAJOR-1 heading hierarchy a11y) in-PR fix (커밋 b795fe1). MINOR 4 carry / INFO 2. self-PR COMMENT.",
+          "mergedAt": "2026-05-27T22:35:10+09:00",
+          "mergedLines": 348,
+          "mergeCommit": "2005822de80b677c5f58b9da3f68be186e7a80be"
         }
-      ]
+      ],
+      "completedAt": "2026-05-27T22:36:00+09:00"
     },
     "CANDID-020": {
       "id": "CANDID-020",
