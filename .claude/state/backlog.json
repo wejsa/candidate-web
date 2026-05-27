@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 272,
+    "version": 273,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T23:13:37+09:00"
+    "updatedAt": "2026-05-27T23:19:42+09:00"
   },
   "summary": {
     "total": 43,
@@ -1878,9 +1878,50 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "assignee": "jaese@hoji-20260527-231337",
-      "assignedAt": "2026-05-27T23:13:37+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": []
+      "assignedAt": "2026-05-27T23:19:42+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "tests/integration/prisma-extends-user-roundtrip.test.ts",
+        "tests/integration/prisma-extends-user-write-guard.test.ts",
+        "tests/integration/prisma-extends-user-raw-bypass.test.ts",
+        "tests/integration/prisma-singleton-wiring.test.ts",
+        "vitest.config.ts"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "title": "User PII round-trip + write guard 매트릭스",
+          "files": [
+            "tests/integration/prisma-extends-user-roundtrip.test.ts",
+            "tests/integration/prisma-extends-user-write-guard.test.ts"
+          ],
+          "estimatedLines": 400,
+          "prLineLimit": 700,
+          "status": "pending"
+        },
+        {
+          "stepNumber": 2,
+          "title": "Raw query 우회 + 운영 singleton wiring smoke (L-005)",
+          "files": [
+            "tests/integration/prisma-extends-user-raw-bypass.test.ts",
+            "tests/integration/prisma-singleton-wiring.test.ts",
+            "vitest.config.ts"
+          ],
+          "estimatedLines": 180,
+          "prLineLimit": 500,
+          "status": "pending"
+        }
+      ],
+      "currentStep": 1,
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-27T23:19:42+09:00"
+      },
+      "updatedAt": "2026-05-27T23:19:42+09:00"
     },
     "CANDID-033": {
       "id": "CANDID-033",
