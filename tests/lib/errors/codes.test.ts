@@ -16,7 +16,8 @@ describe('ERROR_CATALOG', () => {
     // CANDID-016 Step 2: FILE_ALREADY_EXISTS, FILE_NOT_FOUND 추가로 33 → 35
     // CANDID-017 Step 1: APP_DRAFT_NOT_FOUND 추가로 35 → 36 (US-APP-004 portfolio 권한+미존재 통합)
     // CANDID-018 Step 1: APP_SUBMIT_INCOMPLETE 추가로 36 → 37 (US-APP-006 제출 전 검증)
-    expect(ALL_CODES).toHaveLength(37);
+    // CANDID-019 Step 2 review C1: APP_INTERVIEW_NOT_FOUND 추가로 37 → 38 (US-MY-002 .ics 시맨틱 분리)
+    expect(ALL_CODES).toHaveLength(38);
   });
 
   it('CANDID-016 Step 2 신규 코드: FILE_ALREADY_EXISTS=409, FILE_NOT_FOUND=404', () => {
@@ -116,6 +117,7 @@ describe('ERROR_CATALOG', () => {
       APP_USER_UNDER_MIN_AGE: 422,
       APP_DRAFT_NOT_FOUND: 404,
       APP_SUBMIT_INCOMPLETE: 422,
+      APP_INTERVIEW_NOT_FOUND: 404,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);
