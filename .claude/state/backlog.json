@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 253,
+    "version": 254,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T00:12:18+09:00"
+    "updatedAt": "2026-05-27T20:39:52+09:00"
   },
   "summary": {
     "total": 43,
@@ -1423,7 +1423,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-234151",
-      "assignedAt": "2026-05-27T00:12:18+09:00",
+      "assignedAt": "2026-05-27T20:39:52+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
@@ -1440,14 +1440,14 @@
         "app/api/v1/applications/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 68,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-27T00:12:18+09:00"
+        "autoChainArgs": "68 --auto-fix",
+        "updatedAt": "2026-05-27T20:39:52+09:00"
       },
-      "updatedAt": "2026-05-27T00:12:18+09:00",
+      "updatedAt": "2026-05-27T20:39:52+09:00",
       "planPath": ".claude/temp/CANDID-018-plan.md",
       "currentStep": 2,
       "steps": [
@@ -1483,7 +1483,7 @@
         {
           "step": 2,
           "title": "submit 비즈니스 + validate + 트랜잭션 + 단위 테스트",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/applications/validate.ts",
             "lib/applications/submit.ts",
@@ -1496,7 +1496,10 @@
           "prLineLimit": 800,
           "dependsOn": [
             1
-          ]
+          ],
+          "branch": "feature/CANDID-018-step2",
+          "prNumber": 68,
+          "actualLines": 1031
         },
         {
           "step": 3,
