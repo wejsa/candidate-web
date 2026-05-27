@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 261,
+    "version": 262,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T21:28:00+09:00"
+    "updatedAt": "2026-05-27T21:32:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1525,18 +1525,94 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260527-212800",
-      "assignedAt": "2026-05-27T21:28:00+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-27T21:32:00+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "lib/my-page/types.ts",
+        "lib/my-page/stage-labels.ts",
+        "lib/my-page/list-service.ts",
+        "lib/my-page/detail-service.ts",
+        "lib/my-page/ics.ts",
+        "app/api/v1/applications/me/route.ts",
+        "app/api/v1/applications/me/[id]/route.ts",
+        "app/api/v1/applications/me/[id]/interview.ics/route.ts",
+        "app/me/page.tsx",
+        "app/me/[applicationId]/page.tsx",
+        "app/me/_components/SectionCard.tsx",
+        "app/me/_components/Timeline.tsx",
+        "app/me/_components/InterviewBlock.tsx",
+        "app/me/_components/EmptyState.tsx",
+        "app/me/loading.tsx"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-27T21:28:00+09:00"
+        "updatedAt": "2026-05-27T21:32:00+09:00"
       },
-      "updatedAt": "2026-05-27T21:28:00+09:00"
+      "updatedAt": "2026-05-27T21:32:00+09:00",
+      "planPath": ".claude/temp/CANDID-019-plan.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "리스트 서비스 + GET /api/v1/applications/me + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "lib/my-page/types.ts",
+            "lib/my-page/stage-labels.ts",
+            "lib/my-page/list-service.ts",
+            "app/api/v1/applications/me/route.ts",
+            "tests/lib/my-page/list-service.test.ts",
+            "tests/app/api/v1/applications/me/route.test.ts"
+          ],
+          "estimatedLines": 550,
+          "prLineLimit": 600,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "상세 서비스 + .ics 빌더 + 2 endpoints + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "lib/my-page/detail-service.ts",
+            "lib/my-page/ics.ts",
+            "app/api/v1/applications/me/[id]/route.ts",
+            "app/api/v1/applications/me/[id]/interview.ics/route.ts",
+            "tests/lib/my-page/detail-service.test.ts",
+            "tests/lib/my-page/ics.test.ts",
+            "tests/app/api/v1/applications/me/[id]/route.test.ts",
+            "tests/app/api/v1/applications/me/[id]/interview-ics.test.ts"
+          ],
+          "estimatedLines": 750,
+          "prLineLimit": 800,
+          "dependsOn": [
+            1
+          ]
+        },
+        {
+          "step": 3,
+          "title": "UI RSC 페이지 + 컴포넌트 (마이페이지 + 상세)",
+          "status": "pending",
+          "files": [
+            "app/me/page.tsx",
+            "app/me/[applicationId]/page.tsx",
+            "app/me/_components/SectionCard.tsx",
+            "app/me/_components/Timeline.tsx",
+            "app/me/_components/InterviewBlock.tsx",
+            "app/me/_components/EmptyState.tsx",
+            "app/me/loading.tsx"
+          ],
+          "estimatedLines": 550,
+          "prLineLimit": 700,
+          "dependsOn": [
+            1,
+            2
+          ]
+        }
+      ]
     },
     "CANDID-020": {
       "id": "CANDID-020",
