@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 262,
+    "version": 263,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T21:32:00+09:00"
+    "updatedAt": "2026-05-27T22:05:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1545,21 +1545,21 @@
         "app/me/loading.tsx"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 70,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-27T21:32:00+09:00"
+        "autoChainArgs": "70 --auto-fix",
+        "updatedAt": "2026-05-27T22:05:00+09:00"
       },
-      "updatedAt": "2026-05-27T21:32:00+09:00",
+      "updatedAt": "2026-05-27T22:05:00+09:00",
       "planPath": ".claude/temp/CANDID-019-plan.md",
       "currentStep": 1,
       "steps": [
         {
           "step": 1,
           "title": "리스트 서비스 + GET /api/v1/applications/me + 단위 테스트",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/my-page/types.ts",
             "lib/my-page/stage-labels.ts",
@@ -1570,7 +1570,11 @@
           ],
           "estimatedLines": 550,
           "prLineLimit": 600,
-          "dependsOn": []
+          "dependsOn": [],
+          "branch": "feature/CANDID-019-step1",
+          "prNumber": 70,
+          "actualLines": 623,
+          "fixLoop": 0
         },
         {
           "step": 2,
