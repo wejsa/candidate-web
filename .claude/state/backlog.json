@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 259,
+    "version": 260,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T21:26:00+09:00"
+    "updatedAt": "2026-05-27T21:27:30+09:00"
   },
   "summary": {
     "total": 43,
-    "done": 25,
-    "inProgress": 1,
+    "done": 29,
+    "inProgress": 0,
     "review": 0,
-    "todo": 17
+    "todo": 16
   },
   "phases": {
     "1": {
@@ -1412,7 +1412,7 @@
       "id": "CANDID-018",
       "title": "지원서 최종 제출 (Idempotency-Key, 마감 검증, 트랜잭션, application_number) (US-APP-006)",
       "description": "제출 직전 검증(필수 필드/이력서/이메일 인증/동의). Idempotency-Key 24h 멱등 처리. closes_at < now 시 422. 단일 트랜잭션: Application 생성 + Draft 삭제 + 이력 생성. application_number(A-YYYYMM-NNNNN) 발급. 확인 이메일 발송.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "high",
       "phase": 2,
@@ -1422,21 +1422,12 @@
         "CANDID-017"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260526-234151",
-      "assignedAt": "2026-05-27T20:52:33+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "app/api/v1/applications/route.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 69,
-        "fixLoopCount": 1,
-        "autoChainArgs": "69",
-        "updatedAt": "2026-05-27T21:26:00+09:00"
-      },
-      "updatedAt": "2026-05-27T21:26:00+09:00",
+      "lockedFiles": [],
+      "workflowState": null,
+      "updatedAt": "2026-05-27T21:27:30+09:00",
       "planPath": ".claude/temp/CANDID-018-plan.md",
       "currentStep": 3,
       "steps": [
@@ -1498,7 +1489,7 @@
         {
           "step": 3,
           "title": "Route Handler POST + 통합 테스트 + 멱등성 미들웨어",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "app/api/v1/applications/route.ts",
             "tests/app/api/v1/applications/submit.test.ts"
@@ -1512,9 +1503,14 @@
           "branch": "feature/CANDID-018-step3",
           "prNumber": 69,
           "actualLines": 499,
-          "fixLoop": 0
+          "fixLoop": 1,
+          "mergedAt": "2026-05-27T21:27:10+09:00",
+          "mergedLines": 513,
+          "mergeCommit": "692cf8d72ad4283f4a7d603b8ad9524a5542d33a",
+          "reviewSummary": "fix loop 1: D-01 정책 주석 보강. A-01(rate limit) + Test MAJOR 5건 carry. self-PR COMMENT. CRITICAL 0 / MAJOR 6 / MINOR 9 / INFO 6."
         }
-      ]
+      ],
+      "completedAt": "2026-05-27T21:27:30+09:00"
     },
     "CANDID-019": {
       "id": "CANDID-019",

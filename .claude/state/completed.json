@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 28,
+    "version": 29,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-26T23:39:16+09:00"
+    "updatedAt": "2026-05-27T21:27:30+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -890,6 +890,68 @@
       "carriedMinors": 7,
       "testsAfter": 1226,
       "note": "Step 1 (lib/portfolios + ssrf-guard 추출): CRITICAL 1 (C001 race) + MAJOR 11 모두 in-PR fix (1 fix loop). Step 2 (Route Handler): CRITICAL 0 / MAJOR 0 / MINOR 2 in-PR fix. UI(Step 3)는 CANDID-039 RTL 도입 후 follow-up으로 분리. P0 백엔드 완성 + ssrf-guard 모듈 OG fetch P1 재사용 가능."
+    },
+    "CANDID-018": {
+      "id": "CANDID-018",
+      "title": "지원서 최종 제출 (Idempotency-Key, 마감 검증, 트랜잭션, application_number) (US-APP-006)",
+      "phase": 2,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-05-27T21:27:30+09:00",
+      "assignee": "jaese@hoji-20260526-234151",
+      "prs": [
+        {
+          "number": 67,
+          "stepNumber": 1,
+          "stepTitle": "DB 마이그 (IdempotencyKey) + number-generator + idempotency store + 단위 테스트",
+          "mergedAt": "2026-05-27T00:12:04+09:00",
+          "additions": 762,
+          "fixLoop": 1,
+          "branch": "feature/CANDID-018-step1",
+          "note": "fix loop 1: CRITICAL 1 (C001) + MAJOR 9 → 모두 해소. 재리뷰: CRITICAL 0 / MAJOR 0 / MINOR 6 (N002 in-PR fix 3fb859a; 5건 carry) / INFO 5. self-PR COMMENT 진행."
+        },
+        {
+          "number": 68,
+          "stepNumber": 2,
+          "stepTitle": "submit 비즈니스 + validate + 트랜잭션 + 단위 테스트",
+          "mergedAt": "2026-05-27T21:06:21+09:00",
+          "additions": 1088,
+          "fixLoop": 1,
+          "branch": "feature/CANDID-018-step2",
+          "note": "fix loop 1: CRITICAL 2 (C001 PII 헬퍼 오용 / C002 D8 가드 우회) + MAJOR 6 in-PR fix. 재리뷰: CRITICAL 0 / MAJOR 1 (H001 validate.ts basePrisma default — follow-up) / MINOR 5 / INFO 6. self-PR COMMENT 진행."
+        },
+        {
+          "number": 69,
+          "stepNumber": 3,
+          "stepTitle": "Route Handler POST + 통합 테스트 + 멱등성 미들웨어",
+          "mergedAt": "2026-05-27T21:27:10+09:00",
+          "additions": 513,
+          "fixLoop": 1,
+          "branch": "feature/CANDID-018-step3",
+          "note": "fix loop 1: D-01 정책 주석 in-PR fix. Carry 6 MAJOR (A-01 rate limit + T-M01~T-M05 테스트 보강). self-PR COMMENT. 통합 테스트 25 케이스.",
+          "mergeCommit": "692cf8d72ad4283f4a7d603b8ad9524a5542d33a"
+        }
+      ],
+      "summary": {
+        "totalSteps": 3,
+        "totalFixLoops": 3,
+        "totalLines": 2363,
+        "carry": [
+          "A-01 (Architecture+Security MAJOR): USER_POLICIES.APP_SUBMIT_USER rate limit 신설 follow-up task",
+          "Step 2 H001 (Architecture MAJOR): validate.ts basePrisma → wrappedPrisma default",
+          "Step 2 carry: application-confirm.ts 단위 테스트, application snapshot read extension",
+          "Step 3 Test MAJOR 5 (T-M01~M05): P2002 정확 mock, content-type, 헤더 case, storeResponse 실패, hash 일관성",
+          "MINOR/INFO 다수 — 회고에서 정리"
+        ],
+        "appliedLessons": [
+          "L-006",
+          "L-007",
+          "L-019",
+          "L-022",
+          "L-024",
+          "L-030"
+        ]
+      }
     }
   }
 }

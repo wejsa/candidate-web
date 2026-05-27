@@ -1995,5 +1995,25 @@
     "fixLoopCount": 1,
     "guardWiring": "passed",
     "rulesApplied": null
+  },
+  {
+    "timestamp": "2026-05-27T21:27:10+09:00",
+    "taskId": "CANDID-018",
+    "stepNumber": 3,
+    "action": "merged",
+    "prNumber": 69,
+    "mergeCommit": "692cf8d72ad4283f4a7d603b8ad9524a5542d33a",
+    "mergedLines": 513,
+    "branch": "feature/CANDID-018-step3 (deleted)"
+  },
+  {
+    "timestamp": "2026-05-27T21:27:30+09:00",
+    "taskId": "CANDID-018",
+    "action": "task_completed",
+    "totalSteps": 3,
+    "totalFixLoops": 3,
+    "totalLines": 2363,
+    "phase": 2,
+    "phaseProgress": "11/12 done"
   }
 ]
