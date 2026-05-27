@@ -2025,5 +2025,26 @@
     "branch": "feature/CANDID-019-step1",
     "actualLines": 623,
     "testsAfter": 1345
+  },
+  {
+    "timestamp": "2026-05-27T22:10:30+09:00",
+    "taskId": "CANDID-019",
+    "stepNumber": 1,
+    "action": "approved",
+    "prNumber": 70,
+    "decision": "APPROVED (self-PR → COMMENT)",
+    "reviewMode": "full",
+    "agentsRun": [
+      "domain",
+      "security",
+      "test"
+    ],
+    "critical": 0,
+    "major": 5,
+    "minor": 8,
+    "info": 13,
+    "fixLoopCount": 0,
+    "guardWiring": "passed",
+    "rulesApplied": null
   }
 ]

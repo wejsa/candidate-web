@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 263,
+    "version": 264,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T22:05:00+09:00"
+    "updatedAt": "2026-05-27T22:10:30+09:00"
   },
   "summary": {
     "total": 43,
@@ -1545,14 +1545,14 @@
         "app/me/loading.tsx"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 70,
         "fixLoopCount": 0,
-        "autoChainArgs": "70 --auto-fix",
-        "updatedAt": "2026-05-27T22:05:00+09:00"
+        "autoChainArgs": "70",
+        "updatedAt": "2026-05-27T22:10:30+09:00"
       },
-      "updatedAt": "2026-05-27T22:05:00+09:00",
+      "updatedAt": "2026-05-27T22:10:30+09:00",
       "planPath": ".claude/temp/CANDID-019-plan.md",
       "currentStep": 1,
       "steps": [
@@ -1574,7 +1574,8 @@
           "branch": "feature/CANDID-019-step1",
           "prNumber": 70,
           "actualLines": 623,
-          "fixLoop": 0
+          "fixLoop": 0,
+          "reviewSummary": "CRITICAL 0 / MAJOR 5 (A-01 carry + Test 4 carry) / MINOR 8 / INFO 13. self-PR COMMENT. 회고 follow-up."
         },
         {
           "step": 2,
