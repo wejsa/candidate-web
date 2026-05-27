@@ -1885,5 +1885,28 @@
     "branch": "feature/CANDID-018-step2",
     "actualLines": 1031,
     "testsAfter": 1295
+  },
+  {
+    "timestamp": "2026-05-27T20:50:00+09:00",
+    "taskId": "CANDID-018",
+    "stepNumber": 2,
+    "action": "request_changes",
+    "prNumber": 68,
+    "decision": "REQUEST_CHANGES (self-PR fallback)",
+    "critical": 2,
+    "major": 13,
+    "minor": 7,
+    "info": 5,
+    "fixLoopCount": 1
+  },
+  {
+    "timestamp": "2026-05-27T20:52:00+09:00",
+    "taskId": "CANDID-018",
+    "stepNumber": 2,
+    "action": "fix_completed",
+    "prNumber": 68,
+    "fixLoopCount": 1,
+    "issueCount": 8,
+    "testsAfter": 1301
   }
 ]

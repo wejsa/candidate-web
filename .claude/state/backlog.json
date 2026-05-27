@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 254,
+    "version": 255,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T20:39:52+09:00"
+    "updatedAt": "2026-05-27T20:52:33+09:00"
   },
   "summary": {
     "total": 43,
@@ -1423,7 +1423,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260526-234151",
-      "assignedAt": "2026-05-27T20:39:52+09:00",
+      "assignedAt": "2026-05-27T20:52:33+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "prisma/schema.prisma",
@@ -1441,13 +1441,13 @@
       ],
       "workflowState": {
         "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "lastCompletedSkill": "skill-fix",
         "prNumber": 68,
-        "fixLoopCount": 0,
-        "autoChainArgs": "68 --auto-fix",
-        "updatedAt": "2026-05-27T20:39:52+09:00"
+        "fixLoopCount": 1,
+        "autoChainArgs": "68",
+        "updatedAt": "2026-05-27T20:52:33+09:00"
       },
-      "updatedAt": "2026-05-27T20:39:52+09:00",
+      "updatedAt": "2026-05-27T20:52:33+09:00",
       "planPath": ".claude/temp/CANDID-018-plan.md",
       "currentStep": 2,
       "steps": [
@@ -1499,7 +1499,9 @@
           ],
           "branch": "feature/CANDID-018-step2",
           "prNumber": 68,
-          "actualLines": 1031
+          "actualLines": 1031,
+          "fixLoop": 1,
+          "reviewSummary": "fix loop 1: CRITICAL 2 (C001 PII 헬퍼 오용 / C002 D8 가드 우회) + MAJOR 6 in-PR fix. Idempotency/payload 일부 MAJOR는 carry."
         },
         {
           "step": 3,
