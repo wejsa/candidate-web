@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 256,
+    "version": 257,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-27T21:03:45+09:00"
+    "updatedAt": "2026-05-27T21:06:30+09:00"
   },
   "summary": {
     "total": 43,
@@ -1426,30 +1426,19 @@
       "assignedAt": "2026-05-27T20:52:33+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "prisma/schema.prisma",
-        "lib/idempotency/types.ts",
-        "lib/idempotency/schema.ts",
-        "lib/idempotency/store.ts",
-        "lib/applications/types.ts",
-        "lib/applications/schema.ts",
-        "lib/applications/number-generator.ts",
-        "lib/applications/validate.ts",
-        "lib/applications/submit.ts",
-        "lib/email/templates/application-confirm.ts",
-        "lib/errors/codes.ts",
         "app/api/v1/applications/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 68,
-        "fixLoopCount": 1,
-        "autoChainArgs": "68",
-        "updatedAt": "2026-05-27T21:03:45+09:00"
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-27T21:06:30+09:00"
       },
-      "updatedAt": "2026-05-27T21:03:45+09:00",
+      "updatedAt": "2026-05-27T21:06:30+09:00",
       "planPath": ".claude/temp/CANDID-018-plan.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -1483,7 +1472,7 @@
         {
           "step": 2,
           "title": "submit 비즈니스 + validate + 트랜잭션 + 단위 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/applications/validate.ts",
             "lib/applications/submit.ts",
@@ -1501,7 +1490,10 @@
           "prNumber": 68,
           "actualLines": 1031,
           "fixLoop": 1,
-          "reviewSummary": "fix loop 1: CRITICAL 2 (C001 PII 헬퍼 오용 / C002 D8 가드 우회) + MAJOR 6 in-PR fix. Idempotency/payload 일부 MAJOR는 carry."
+          "reviewSummary": "fix loop 1: CRITICAL 2 (C001 PII 헬퍼 오용 / C002 D8 가드 우회) + MAJOR 6 in-PR fix. 재리뷰: CRITICAL 0 / MAJOR 1 (H001 validate.ts basePrisma default — follow-up) / MINOR 5 / INFO 6. self-PR COMMENT 진행.",
+          "mergedAt": "2026-05-27T21:06:21+09:00",
+          "mergedLines": 1088,
+          "mergeCommit": "501875407e4c13f4a6a07ef41cc288d9c48afb45"
         },
         {
           "step": 3,
