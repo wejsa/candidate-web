@@ -188,7 +188,7 @@ describe('getMyApplicationDetail — PII select 화이트리스트 + 어드민 �
 });
 
 describe('getMyInterviewSchedule — ownership 강제', () => {
-  it('null 반환 → AppError(FILE_NOT_FOUND) 404', async () => {
+  it('null 반환 → AppError(APP_INTERVIEW_NOT_FOUND) 404 (review C1 fix)', async () => {
     basePrisma.interviewSchedule.findFirst.mockResolvedValueOnce(null);
     let caught: unknown;
     try {
@@ -197,7 +197,8 @@ describe('getMyInterviewSchedule — ownership 강제', () => {
       caught = err;
     }
     expect(isAppError(caught)).toBe(true);
-    expect((caught as AppError).code).toBe('FILE_NOT_FOUND');
+    expect((caught as AppError).code).toBe('APP_INTERVIEW_NOT_FOUND');
+    expect((caught as AppError).status).toBe(404);
   });
 
   it('where 절에 ownership + status != CANCELLED 명시', async () => {

@@ -105,10 +105,12 @@ describe('GET interview.ics — 인증/권한', () => {
     expect(getMyInterviewSchedule).not.toHaveBeenCalled();
   });
 
-  it('FILE_NOT_FOUND (ownership 위반/스케줄 미존재) → 404', async () => {
-    getMyInterviewSchedule.mockRejectedValueOnce(new AppError('FILE_NOT_FOUND'));
+  it('APP_INTERVIEW_NOT_FOUND (ownership 위반/스케줄 미존재) → 404 (review C1 fix)', async () => {
+    getMyInterviewSchedule.mockRejectedValueOnce(new AppError('APP_INTERVIEW_NOT_FOUND'));
     const response = await GET(getRequest(), { params: { id: '100' } });
     expect(response.status).toBe(404);
+    const body = await response.json();
+    expect(body.code).toBe('APP_INTERVIEW_NOT_FOUND');
   });
 });
 

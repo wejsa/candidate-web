@@ -99,6 +99,11 @@ export const ERROR_CATALOG = {
     status: 422,
     message: '지원서 제출 조건이 충족되지 않았습니다.',
   },
+  // CANDID-019 Step 2 review C1 fix — 면접 일정 미존재 / 권한 없음 / CANCELLED (단일 코드, 정보 누출 회피)
+  APP_INTERVIEW_NOT_FOUND: {
+    status: 404,
+    message: '면접 일정을 찾을 수 없습니다.',
+  },
 
   // 파일 — FILE_
   FILE_SIZE_EXCEEDED: { status: 422, message: '허용된 파일 크기를 초과했습니다.' },

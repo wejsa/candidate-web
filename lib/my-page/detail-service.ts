@@ -192,7 +192,9 @@ export async function getMyInterviewSchedule(
     },
   });
   if (row === null) {
-    throw new AppError('FILE_NOT_FOUND');
+    // C1 fix (review fix loop 1): 면접 도메인 전용 코드 (FILE_NOT_FOUND 시맨틱 충돌 해소).
+    // 부재 + 권한 없음 + CANCELLED 모두 동일 코드 (정보 누출 회피, CANDID-017 패턴).
+    throw new AppError('APP_INTERVIEW_NOT_FOUND');
   }
   return {
     id: row.id,
