@@ -11,7 +11,12 @@ import { sha256Hex } from '@/lib/auth/token-hash';
 // Node 전용 모듈 (node:crypto + Prisma) — Edge middleware는 import 금지 (계획서 R6).
 
 /** revoked_reason 컬럼(@db.VarChar(50))에 기록하는 무효화 사유 — refresh_tokens 스키마 주석과 일치. */
-export type RevokeReason = 'rotated' | 'logout' | 'password_change' | 'reuse_detected';
+export type RevokeReason =
+  | 'rotated'
+  | 'logout'
+  | 'password_change'
+  | 'reuse_detected'
+  | 'user_withdrawn';
 
 export type RefreshSessionError = 'invalid' | 'expired' | 'revoked' | 'not_found';
 
