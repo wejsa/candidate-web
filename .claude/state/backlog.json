@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 276,
+    "version": 277,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-28T23:17:50+09:00"
+    "updatedAt": "2026-05-28T23:23:14+09:00"
   },
   "summary": {
     "total": 43,
@@ -1878,7 +1878,7 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "assignee": "jaese@hoji-20260527-231337",
-      "assignedAt": "2026-05-28T23:17:50+09:00",
+      "assignedAt": "2026-05-28T23:23:14+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "tests/integration/prisma-extends-user-raw-bypass.test.ts",
@@ -1909,19 +1909,20 @@
           ],
           "estimatedLines": 180,
           "prLineLimit": 500,
-          "status": "pending"
+          "status": "pr_created",
+          "prNumber": 74
         }
       ],
       "currentStep": 2,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 74,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-28T23:17:50+09:00"
+        "autoChainArgs": "74 --auto-fix",
+        "updatedAt": "2026-05-28T23:23:14+09:00"
       },
-      "updatedAt": "2026-05-28T23:17:50+09:00"
+      "updatedAt": "2026-05-28T23:23:14+09:00"
     },
     "CANDID-033": {
       "id": "CANDID-033",
