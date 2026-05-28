@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 287,
+    "version": 288,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T00:15:30+09:00"
+    "updatedAt": "2026-05-29T00:25:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 76,
         "fixLoopCount": 0,
-        "autoChainArgs": "76 --auto-fix",
-        "updatedAt": "2026-05-28T15:15:30Z"
+        "autoChainArgs": "76",
+        "updatedAt": "2026-05-28T15:25:00Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1692,7 +1692,7 @@
         {
           "step": 1,
           "title": "Foundation: 마이그(anonymizedAt + audit enum 2종 + 인덱스) + 에러 코드 3종",
-          "status": "pr_created",
+          "status": "reviewed",
           "files": [
             "prisma/schema.prisma",
             "prisma/migrations/20260529001100_candid_022_user_withdraw/migration.sql",
@@ -1704,7 +1704,9 @@
           "prLineLimit": 200,
           "dependsOn": [],
           "branch": "feature/CANDID-022-step1",
-          "prNumber": 76
+          "prNumber": 76,
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 1 (H001 마이그 회귀 가드, Step 2 또는 FU 위임) / MINOR 7 (M001 partial index, M002 USER_REAUTH 메시지 정합, M003 ALTER TYPE 적용 순서, M004 USER_ALREADY_WITHDRAWN USAGE 주석, M005 USER_REAUTH 식별 단서, M006 Prisma client 노출 단정, M007 테스트 네이밍 — 모두 carry) / INFO 6. self-PR COMMENT. 보안 결함 0건. Pre-Review Guard(check:guard-wiring + check:migrations) 통과.",
+          "fixLoop": 0
         },
         {
           "step": 2,
