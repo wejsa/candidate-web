@@ -154,6 +154,8 @@ ALTER TABLE resume_files
 
 ## 민감 컬럼(PII) 메타데이터는 SSOT 상수에서 derive
 
+> PII 암호화 운영 SSOT (알고리즘 / 저장 포맷 / 키 회전 / 사고 대응 / 컴플라이언스): [`docs/security/pii-encryption.md`](../../../../docs/security/pii-encryption.md)
+
 PII로 분류되는 컬럼명(예: `phone`, `birthDate`)은 모듈 곳곳에 *하드코딩*되는 경향이 있다 — 암호화 헬퍼, 마스킹 직렬화, write 런타임 가드, 응답 schema 등. 신규 PII 컬럼이 추가될 때 한 위치만 갱신하고 다른 위치를 누락하면 누설 위험이 발생한다.
 
 대신 **단일 상수 (SSOT)** 에서 derive하여 모든 보호 계층이 동일한 필드 집합을 참조하도록 한다.
