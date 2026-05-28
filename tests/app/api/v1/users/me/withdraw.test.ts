@@ -125,6 +125,30 @@ describe('POST /api/v1/users/me/withdraw — 인증/검증 에러', () => {
     expect(response.status).toBe(400);
     expect(withdrawUser).not.toHaveBeenCalled();
   });
+
+  // H001 fix (review): reason 500자 경계 회귀 가드 — zod .max(500) 정확성 검증.
+  it('reason 501자 → 400 SYS_VALIDATION_FAILED (max 500 경계)', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    const response = await POST(
+      postRequest({ passwordConfirmation: 'pw', reason: 'x'.repeat(501) }),
+      undefined,
+    );
+    expect(response.status).toBe(400);
+    expect(withdrawUser).not.toHaveBeenCalled();
+  });
+
+  it('reason 정확히 500자 → 통과 (withdrawUser 호출)', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    withdrawUser.mockResolvedValueOnce(happyResult);
+    const response = await POST(
+      postRequest({ passwordConfirmation: 'pw', reason: 'x'.repeat(500) }),
+      undefined,
+    );
+    expect(response.status).toBe(204);
+    expect(withdrawUser).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: 'x'.repeat(500) }),
+    );
+  });
 });
 
 describe('POST /api/v1/users/me/withdraw — withdrawUser 에러 전파', () => {
@@ -172,13 +196,13 @@ describe('POST /api/v1/users/me/withdraw — Rate Limit', () => {
     expect(withdrawUser).toHaveBeenCalledTimes(USER_POLICIES.WITHDRAW_USER.maxRequests);
   });
 
-  it('IP-bucket: 같은 IP에서 LOGIN 정책(10/분) 초과 시 429', async () => {
+  // H002 fix (review): 테스트 의도 명확화 — 동일 사용자 4회는 user-bucket(3/시간)이 IP-bucket(LOGIN 10/분)보다
+  // 먼저 적중. 정책 우선순위(inner user-bucket이 outer IP-bucket보다 먼저 차단) 회귀 가드.
+  // IP-bucket 단독 적중(4명 사용자 × 10회 동일 IP)은 별도 무관 테스트로 분리 권장 (CANDID-022 FU).
+  it('정책 우선순위 회귀: user-bucket(3/시간)이 IP-bucket(LOGIN 10/분)보다 먼저 적중', async () => {
     requireAuth.mockResolvedValue({ userId: 42 });
     withdrawUser.mockResolvedValue(happyResult);
 
-    // user-bucket 한도(3)보다 큰 LOGIN(10) — IP 초과는 별도 사용자 시뮬레이션 필요.
-    // 본 테스트는 정책 분리 검증만 — 4회 동일 사용자 호출은 user-bucket 한도 적중을 먼저 트리거함.
-    // → 정책 우선순위 회귀 가드: user-bucket이 IP-bucket보다 먼저 적중하는지.
     for (let i = 0; i < 3; i++) {
       await POST(postRequest({ passwordConfirmation: 'pw' }, '198.51.100.1'), undefined);
     }
@@ -186,7 +210,8 @@ describe('POST /api/v1/users/me/withdraw — Rate Limit', () => {
       postRequest({ passwordConfirmation: 'pw' }, '198.51.100.1'),
       undefined,
     );
-    // 4번째는 user-bucket이 먼저 차단 (정책명 회귀 가드)
+    // 4번째는 user-bucket이 IP-bucket(아직 6회 여유)보다 먼저 차단 — 정책명 회귀 가드.
+    expect(limited.status).toBe(429);
     expect(limited.headers.get('X-RateLimit-Policy')).toBe(USER_POLICIES.WITHDRAW_USER.name);
   });
 });
