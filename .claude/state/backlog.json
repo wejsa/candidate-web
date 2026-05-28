@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 285,
+    "version": 286,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T00:03:18+09:00"
+    "updatedAt": "2026-05-29T00:10:42+09:00"
   },
   "summary": {
     "total": 43,
@@ -1651,23 +1651,105 @@
       "priority": "critical",
       "phase": 3,
       "assignee": "jaese@hoji-20260529-000318",
-      "assignedAt": "2026-05-28T15:03:18Z",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-28T15:10:42Z",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "prisma/schema.prisma",
+        "prisma/migrations",
+        "lib/errors/codes.ts",
+        "lib/users/types.ts",
+        "lib/users/schema.ts",
+        "lib/users/withdraw.ts",
+        "lib/users/labels.ts",
+        "lib/security/rate-limit.ts",
+        "lib/auth/cookies.ts",
+        "app/api/v1/users/me/withdraw/route.ts",
+        "app/me/withdraw/page.tsx",
+        "app/me/withdraw/_components/WithdrawForm.tsx",
+        "app/me/withdraw/_components/ConfirmModal.tsx",
+        "tests/lib/errors/codes.test.ts",
+        "tests/lib/users/withdraw.test.ts",
+        "tests/lib/users/labels.test.ts",
+        "tests/lib/security/rate-limit.test.ts",
+        "tests/app/api/v1/users/me/withdraw.test.ts"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-28T15:03:18Z"
+        "updatedAt": "2026-05-28T15:10:42Z"
       },
       "dependencies": [
         "CANDID-008",
         "CANDID-018"
       ],
+      "specFile": "docs/sample-requirement.md",
+      "planPath": ".claude/temp/CANDID-022-plan.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "Foundation: 마이그(anonymizedAt + audit enum 2종 + 인덱스) + 에러 코드 3종",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations/20260529_candid_022_user_withdraw/migration.sql",
+            "lib/errors/codes.ts",
+            "tests/lib/errors/codes.test.ts"
+          ],
+          "estimatedLines": 130,
+          "prLineLimit": 200,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "비즈니스 코어: anonymize/hardDelete/withdraw dispatcher + 단위 테스트",
+          "status": "pending",
+          "files": [
+            "lib/users/types.ts",
+            "lib/users/schema.ts",
+            "lib/users/withdraw.ts",
+            "tests/lib/users/withdraw.test.ts"
+          ],
+          "estimatedLines": 600,
+          "prLineLimit": 700,
+          "dependsOn": [1]
+        },
+        {
+          "step": 3,
+          "title": "Route Handler POST + USER_POLICIES.WITHDRAW + clearAuthCookies + 통합 테스트",
+          "status": "pending",
+          "files": [
+            "app/api/v1/users/me/withdraw/route.ts",
+            "lib/security/rate-limit.ts",
+            "lib/auth/cookies.ts",
+            "tests/lib/security/rate-limit.test.ts",
+            "tests/app/api/v1/users/me/withdraw.test.ts"
+          ],
+          "estimatedLines": 450,
+          "prLineLimit": 600,
+          "dependsOn": [1, 2]
+        },
+        {
+          "step": 4,
+          "title": "UI 슬라이스: /me/withdraw RSC + 폼 + 확인 모달 + 라벨 SSOT",
+          "status": "pending",
+          "files": [
+            "app/me/withdraw/page.tsx",
+            "app/me/withdraw/_components/WithdrawForm.tsx",
+            "app/me/withdraw/_components/ConfirmModal.tsx",
+            "lib/users/labels.ts",
+            "tests/lib/users/labels.test.ts"
+          ],
+          "estimatedLines": 300,
+          "prLineLimit": 400,
+          "dependsOn": [1, 2, 3]
+        }
+      ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-28T15:03:18Z"
+      "updatedAt": "2026-05-28T15:10:42Z"
     },
     "CANDID-023": {
       "id": "CANDID-023",
