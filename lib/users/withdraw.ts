@@ -100,8 +100,13 @@ async function anonymizeUser(
 ): Promise<void> {
   // PII NULL 직접 설정 — encryptUserPiiInput은 입력 평문이 있을 때만 의미가 있고, null 경로는 컬럼 NULL을
   // 그대로 받는다. D8 런타임 가드(assertUserPiiInputShape)는 string 평문만 차단 — null/Buffer는 통과.
-  await tx.user.update({
-    where: { id: params.userId },
+  //
+  // H002 fix (review TOCTOU): 진입 가드(findUnique → verifyPassword)와 tx 사이의 race에서
+  // 동시 password_change/withdraw가 발생해도 anonymizedAt=null 조건으로 atomic 차단. 충돌 시
+  // updateMany.count=0 → throw로 tx rollback. 보존 컬럼(emailVerifiedAt / *AgreedAt)은 data에
+  // 명시하지 않아 자동 보존된다 (M005 회귀 가드는 테스트 부재 단정으로 박제).
+  const updated = await tx.user.updateMany({
+    where: { id: params.userId, anonymizedAt: null },
     data: {
       email: buildAnonymizedEmail(params.userId),
       name: '탈퇴회원',
@@ -117,6 +122,10 @@ async function anonymizeUser(
       birthDateKeyVersion: null,
     },
   });
+  if (updated.count === 0) {
+    // 동시 익명화/삭제 race — tx rollback 후 호출자가 재시도 또는 USER_ALREADY_WITHDRAWN 응답.
+    throw new AppError('USER_ALREADY_WITHDRAWN');
+  }
 
   await emitAudit(tx, {
     userId: params.userId,
@@ -233,11 +242,20 @@ export async function withdrawUser(input: WithdrawInput): Promise<WithdrawResult
 
   // 트랜잭션 외부 — 활성 RefreshToken 일괄 revoke (BR-AUTH-05).
   // hard_deleted 경로는 CASCADE로 이미 삭제됨 — count 0 기대.
+  //
+  // H001 fix (review): revoke 실패는 사용자 응답을 차단하지 않으나(BR-TX-02), structured log로
+  // 운영 가시성 확보. PII-free 키만 기록(userId/mode/error message). verifyRefreshSession이
+  // user.status=WITHDRAWN을 검증하지 않는 잠재 위험은 Step 3 또는 별도 task(verifyRefreshSession 가드)에 위임.
   let revokedSessionCount = 0;
   try {
     revokedSessionCount = await revokeAllForUser(input.userId, 'user_withdrawn');
-  } catch {
-    // revoke 실패는 사용자 응답을 차단하지 않음. 운영 모니터링 의존.
+  } catch (err) {
+    // eslint-disable-next-line no-console -- 운영 환경 pino/winston 도입 전까지 console.error로 SRE 가시성 확보.
+    console.error('[CANDID-022] withdraw.revokeAllForUser_failed', {
+      userId: input.userId,
+      mode,
+      error: err instanceof Error ? err.message : String(err),
+    });
     revokedSessionCount = 0;
   }
 

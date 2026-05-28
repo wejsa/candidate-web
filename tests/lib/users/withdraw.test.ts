@@ -7,7 +7,7 @@ import type { Mock } from 'vitest';
 vi.mock('@/lib/prisma', () => {
   const tx = {
     application: { count: vi.fn() },
-    user: { update: vi.fn(), delete: vi.fn() },
+    user: { updateMany: vi.fn(), delete: vi.fn() },
     resumeFile: { deleteMany: vi.fn() },
     auditLog: { create: vi.fn() },
   };
@@ -34,7 +34,7 @@ const { prisma } = (await import('@/lib/prisma')) as unknown as {
     $transaction: Mock;
     __tx: {
       application: { count: Mock };
-      user: { update: Mock; delete: Mock };
+      user: { updateMany: Mock; delete: Mock };
       resumeFile: { deleteMany: Mock };
       auditLog: { create: Mock };
     };
@@ -58,7 +58,7 @@ const baseUser = {
 beforeEach(() => {
   prisma.user.findUnique.mockReset();
   prisma.__tx.application.count.mockReset();
-  prisma.__tx.user.update.mockReset();
+  prisma.__tx.user.updateMany.mockReset();
   prisma.__tx.user.delete.mockReset();
   prisma.__tx.resumeFile.deleteMany.mockReset();
   prisma.__tx.auditLog.create.mockReset();
@@ -127,7 +127,7 @@ describe('withdrawUser — 분기 (applications count)', () => {
   beforeEach(() => {
     prisma.user.findUnique.mockResolvedValue(baseUser);
     verifyPassword.mockResolvedValue(true);
-    prisma.__tx.user.update.mockResolvedValue({});
+    prisma.__tx.user.updateMany.mockResolvedValue({ count: 1 });
     prisma.__tx.user.delete.mockResolvedValue({});
     prisma.__tx.resumeFile.deleteMany.mockResolvedValue({ count: 0 });
     prisma.__tx.auditLog.create.mockResolvedValue({});
@@ -145,7 +145,7 @@ describe('withdrawUser — 분기 (applications count)', () => {
 
     expect(result.mode).toBe('anonymized');
     expect(result.userId).toBe(42);
-    expect(prisma.__tx.user.update).toHaveBeenCalledTimes(1);
+    expect(prisma.__tx.user.updateMany).toHaveBeenCalledTimes(1);
     expect(prisma.__tx.user.delete).not.toHaveBeenCalled();
     expect(prisma.__tx.resumeFile.deleteMany).not.toHaveBeenCalled();
 
@@ -164,7 +164,7 @@ describe('withdrawUser — 분기 (applications count)', () => {
       where: { ownerUserId: 42, applicationId: null, draftId: null },
     });
     expect(prisma.__tx.user.delete).toHaveBeenCalledWith({ where: { id: 42 } });
-    expect(prisma.__tx.user.update).not.toHaveBeenCalled();
+    expect(prisma.__tx.user.updateMany).not.toHaveBeenCalled();
 
     const events = prisma.__tx.auditLog.create.mock.calls.map(
       (c) => (c[0] as { data: { eventType: string } }).data.eventType,
@@ -186,6 +186,22 @@ describe('withdrawUser — 분기 (applications count)', () => {
     await withdrawUser({ userId: 42, passwordConfirmation: 'pw' });
     expect(order).toEqual(['audit', 'audit', 'delete']);
   });
+
+  // M007 fix (review): application.count는 status 좁힘 없이 userId 단일 조건 — BR-PII-03이 종결 포함을 요구.
+  it('applications.count는 { where: { userId } }로만 호출 (BR-PII-03 — 종결 application도 분기 대상)', async () => {
+    prisma.__tx.application.count.mockResolvedValue(0);
+    await withdrawUser({ userId: 42, passwordConfirmation: 'pw' });
+    expect(prisma.__tx.application.count).toHaveBeenCalledWith({ where: { userId: 42 } });
+  });
+
+  // H002 fix (review TOCTOU): updateMany.count=0 → 동시 race 감지 → USER_ALREADY_WITHDRAWN throw.
+  it('동시 익명화 race (updateMany.count=0) → USER_ALREADY_WITHDRAWN으로 tx rollback', async () => {
+    prisma.__tx.application.count.mockResolvedValue(1);
+    prisma.__tx.user.updateMany.mockResolvedValue({ count: 0 });
+    await expect(
+      withdrawUser({ userId: 42, passwordConfirmation: 'pw' }),
+    ).rejects.toMatchObject({ code: 'USER_ALREADY_WITHDRAWN' });
+  });
 });
 
 describe('withdrawUser — 익명화 매트릭스 (BR-PII-03)', () => {
@@ -193,13 +209,17 @@ describe('withdrawUser — 익명화 매트릭스 (BR-PII-03)', () => {
     prisma.user.findUnique.mockResolvedValue(baseUser);
     verifyPassword.mockResolvedValue(true);
     prisma.__tx.application.count.mockResolvedValue(1);
-    prisma.__tx.user.update.mockResolvedValue({});
+    prisma.__tx.user.updateMany.mockResolvedValue({ count: 1 });
     prisma.__tx.auditLog.create.mockResolvedValue({});
   });
 
   it('익명화 페이로드: email rotate + name="탈퇴회원" + PII NULL + passwordHash NULL + status WITHDRAWN + withdrawnAt/anonymizedAt + 카운터 리셋', async () => {
     await withdrawUser({ userId: 42, passwordConfirmation: 'pw' });
-    const call = prisma.__tx.user.update.mock.calls[0] as [{ data: Record<string, unknown> }];
+    const call = prisma.__tx.user.updateMany.mock.calls[0] as [
+      { where: Record<string, unknown>; data: Record<string, unknown> },
+    ];
+    // H002 fix (review TOCTOU): atomic 조건부 update — anonymizedAt=null row만 갱신.
+    expect(call[0].where).toEqual({ id: 42, anonymizedAt: null });
     const data = call[0].data;
     expect(data.email).toMatch(/^withdrawn\+42\+[0-9a-f]{16}@anonymized\.invalid$/);
     expect(data.name).toBe('탈퇴회원');
@@ -214,6 +234,12 @@ describe('withdrawUser — 익명화 매트릭스 (BR-PII-03)', () => {
     expect(data.withdrawnAt).toBeInstanceOf(Date);
     expect(data.anonymizedAt).toBeInstanceOf(Date);
     expect(data.withdrawnAt).toEqual(data.anonymizedAt);
+    // M005 fix (review): 보존 컬럼은 data에 명시되지 않음 — 회귀 발생 시 누군가 익명화하면 즉시 감지.
+    expect(data).not.toHaveProperty('emailVerifiedAt');
+    expect(data).not.toHaveProperty('termsAgreedAt');
+    expect(data).not.toHaveProperty('privacyAgreedAt');
+    expect(data).not.toHaveProperty('marketingAgreedAt');
+    expect(data).not.toHaveProperty('ageConfirmedAt');
   });
 
   it('buildAnonymizedEmail은 호출마다 다른 hex를 사용 (UNIQUE 충돌 회피)', () => {
@@ -229,7 +255,7 @@ describe('withdrawUser — AuditLog 회귀 가드 (BR-PII-02)', () => {
   beforeEach(() => {
     prisma.user.findUnique.mockResolvedValue(baseUser);
     verifyPassword.mockResolvedValue(true);
-    prisma.__tx.user.update.mockResolvedValue({});
+    prisma.__tx.user.updateMany.mockResolvedValue({ count: 1 });
     prisma.__tx.user.delete.mockResolvedValue({});
     prisma.__tx.resumeFile.deleteMany.mockResolvedValue({ count: 0 });
     prisma.__tx.auditLog.create.mockResolvedValue({});
@@ -250,6 +276,27 @@ describe('withdrawUser — AuditLog 회귀 가드 (BR-PII-02)', () => {
       expect(metadata).toHaveProperty('reasonLength');
       expect(typeof metadata.reasonLength).toBe('number');
     }
+  });
+
+  // H005 fix (review): metadataJson 키 화이트리스트 회귀 가드.
+  // 후속 PR에서 평문 reason/email/passwordHash 등이 슬며시 추가되어도 본 단정이 차단.
+  it('metadataJson 키는 화이트리스트 {reasonLength, mode}만 허용 (회귀 방지)', async () => {
+    const ALLOWED_KEYS = ['reasonLength', 'mode'];
+    prisma.__tx.application.count.mockResolvedValue(1);
+    await withdrawUser({ userId: 42, passwordConfirmation: 'pw' });
+    for (const call of prisma.__tx.auditLog.create.mock.calls) {
+      const metadata = (call[0] as { data: { metadataJson: Record<string, unknown> } }).data
+        .metadataJson;
+      const keys = Object.keys(metadata);
+      for (const key of keys) {
+        expect(ALLOWED_KEYS).toContain(key);
+      }
+    }
+    // 분기별 mode 값 박제 — anonymized 경로
+    const withdrawCall = prisma.__tx.auditLog.create.mock.calls[0] as [
+      { data: { metadataJson: Record<string, unknown> } },
+    ];
+    expect(withdrawCall[0].data.metadataJson).toMatchObject({ mode: 'anonymized' });
   });
 
   it('reason 미전달 시 reasonLength=0', async () => {
@@ -298,7 +345,7 @@ describe('withdrawUser — RefreshToken revoke (BR-AUTH-05)', () => {
   beforeEach(() => {
     prisma.user.findUnique.mockResolvedValue(baseUser);
     verifyPassword.mockResolvedValue(true);
-    prisma.__tx.user.update.mockResolvedValue({});
+    prisma.__tx.user.updateMany.mockResolvedValue({ count: 1 });
     prisma.__tx.user.delete.mockResolvedValue({});
     prisma.__tx.resumeFile.deleteMany.mockResolvedValue({ count: 0 });
     prisma.__tx.auditLog.create.mockResolvedValue({});
@@ -318,5 +365,18 @@ describe('withdrawUser — RefreshToken revoke (BR-AUTH-05)', () => {
     const result = await withdrawUser({ userId: 42, passwordConfirmation: 'pw' });
     expect(result.mode).toBe('anonymized');
     expect(result.revokedSessionCount).toBe(0);
+  });
+
+  // H001 fix (review): revoke 실패 시 structured log로 SRE 가시성 확보 — PII-free 키만.
+  it('revokeAllForUser 실패 시 console.error에 PII-free 메타 기록 (운영 가시성)', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    prisma.__tx.application.count.mockResolvedValue(1);
+    revokeAllForUser.mockRejectedValue(new Error('redis down'));
+    await withdrawUser({ userId: 42, passwordConfirmation: 'pw' });
+    expect(consoleSpy).toHaveBeenCalledWith(
+      '[CANDID-022] withdraw.revokeAllForUser_failed',
+      expect.objectContaining({ userId: 42, mode: 'anonymized', error: 'redis down' }),
+    );
+    consoleSpy.mockRestore();
   });
 });
