@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 30,
+    "version": 31,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-27T22:36:00+09:00"
+    "updatedAt": "2026-05-28T23:32:11+09:00"
   },
   "tasks": {
     "CANDID-005": {
@@ -1015,6 +1015,31 @@
           "APP_INTERVIEW_NOT_FOUND"
         ]
       }
+    },
+    "CANDID-032": {
+      "id": "CANDID-032",
+      "title": "CANDID-008 FU3: piiExtension 실제 PrismaClient 통합 테스트 + plan 시나리오 보강",
+      "type": "chore",
+      "priority": "medium",
+      "phase": 1,
+      "createdAt": "2026-05-12T21:35:00+09:00",
+      "completedAt": "2026-05-28T23:32:11+09:00",
+      "specFile": "docs/retro/CANDID-008-retro.md",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "prNumber": 73,
+          "mergedAt": "2026-05-28T23:17:50+09:00",
+          "title": "User PII round-trip + write guard 매트릭스"
+        },
+        {
+          "stepNumber": 2,
+          "prNumber": 74,
+          "mergedAt": "2026-05-28T23:32:11+09:00",
+          "title": "Raw query 우회 + 운영 singleton wiring smoke (L-005)"
+        }
+      ],
+      "description": "CANDID-008 Step 2 review MAJOR D9. CANDID-008 plan.md의 통합 테스트 시나리오 0/5 반영률 보강. testcontainer (PostgreSQL) 또는 SQLite + Prisma 메모리 모드로 실제 prisma.user.create({ data: { ...encryptUserPiiInput(...) } }) → findUnique roundtrip 검증. needs 누락 / 컬럼명 오타 같은 result extension 등록 회귀를 차단. updateMany 시나리오 + raw query 우회 경로 negative test 포함. vitest.config.ts coverage exclude를 좁히거나 lib/prisma.ts smoke test 추가하여 100% 커버리지 통계의 안전성 보강 (L-005)."
     }
   }
 }

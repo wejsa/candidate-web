@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 278,
+    "version": 279,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-28T23:30:55+09:00"
+    "updatedAt": "2026-05-28T23:32:11+09:00"
   },
   "summary": {
     "total": 43,
@@ -1868,7 +1868,7 @@
       "id": "CANDID-032",
       "title": "CANDID-008 FU3: piiExtension 실제 PrismaClient 통합 테스트 + plan 시나리오 보강",
       "description": "CANDID-008 Step 2 review MAJOR D9. CANDID-008 plan.md의 통합 테스트 시나리오 0/5 반영률 보강. testcontainer (PostgreSQL) 또는 SQLite + Prisma 메모리 모드로 실제 prisma.user.create({ data: { ...encryptUserPiiInput(...) } }) → findUnique roundtrip 검증. needs 누락 / 컬럼명 오타 같은 result extension 등록 회귀를 차단. updateMany 시나리오 + raw query 우회 경로 negative test 포함. vitest.config.ts coverage exclude를 좁히거나 lib/prisma.ts smoke test 추가하여 100% 커버리지 통계의 안전성 보강 (L-005).",
-      "status": "in_progress",
+      "status": "done",
       "type": "chore",
       "priority": "medium",
       "phase": 1,
@@ -1877,14 +1877,10 @@
       ],
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
-      "assignee": "jaese@hoji-20260527-231337",
-      "assignedAt": "2026-05-28T23:30:55+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 7200,
-      "lockedFiles": [
-        "tests/integration/prisma-extends-user-raw-bypass.test.ts",
-        "tests/integration/prisma-singleton-wiring.test.ts",
-        "vitest.config.ts"
-      ],
+      "lockedFiles": [],
       "steps": [
         {
           "stepNumber": 1,
@@ -1909,20 +1905,15 @@
           ],
           "estimatedLines": 180,
           "prLineLimit": 500,
-          "status": "pr_created",
-          "prNumber": 74
+          "status": "merged",
+          "prNumber": 74,
+          "mergedAt": "2026-05-28T23:32:11+09:00"
         }
       ],
-      "currentStep": 2,
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 74,
-        "fixLoopCount": 0,
-        "autoChainArgs": "74",
-        "updatedAt": "2026-05-28T23:30:55+09:00"
-      },
-      "updatedAt": "2026-05-28T23:30:55+09:00"
+      "currentStep": null,
+      "workflowState": null,
+      "updatedAt": "2026-05-28T23:30:55+09:00",
+      "completedAt": "2026-05-28T23:32:11+09:00"
     },
     "CANDID-033": {
       "id": "CANDID-033",
