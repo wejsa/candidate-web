@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 286,
+    "version": 287,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T00:10:42+09:00"
+    "updatedAt": "2026-05-29T00:15:30+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 76,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-28T15:10:42Z"
+        "autoChainArgs": "76 --auto-fix",
+        "updatedAt": "2026-05-28T15:15:30Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1692,16 +1692,19 @@
         {
           "step": 1,
           "title": "Foundation: 마이그(anonymizedAt + audit enum 2종 + 인덱스) + 에러 코드 3종",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "prisma/schema.prisma",
-            "prisma/migrations/20260529_candid_022_user_withdraw/migration.sql",
+            "prisma/migrations/20260529001100_candid_022_user_withdraw/migration.sql",
             "lib/errors/codes.ts",
             "tests/lib/errors/codes.test.ts"
           ],
           "estimatedLines": 130,
+          "actualLines": 55,
           "prLineLimit": 200,
-          "dependsOn": []
+          "dependsOn": [],
+          "branch": "feature/CANDID-022-step1",
+          "prNumber": 76
         },
         {
           "step": 2,
