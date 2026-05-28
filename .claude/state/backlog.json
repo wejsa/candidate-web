@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 281,
+    "version": 282,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-28T23:39:26+09:00"
+    "updatedAt": "2026-05-28T23:45:05+09:00"
   },
   "summary": {
     "total": 43,
@@ -1929,7 +1929,7 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "assignee": "jaese@hoji-20260528-233553",
-      "assignedAt": "2026-05-28T23:39:26+09:00",
+      "assignedAt": "2026-05-28T23:45:05+09:00",
       "lockTTL": 3600,
       "lockedFiles": [
         "docs/security/pii-encryption.md",
@@ -1945,19 +1945,20 @@
           ],
           "estimatedLines": 450,
           "prLineLimit": 1000,
-          "status": "pending"
+          "status": "pr_created",
+          "prNumber": 75
         }
       ],
       "currentStep": 1,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 75,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-28T23:39:26+09:00"
+        "autoChainArgs": "75 --auto-fix",
+        "updatedAt": "2026-05-28T23:45:05+09:00"
       },
-      "updatedAt": "2026-05-28T23:39:26+09:00"
+      "updatedAt": "2026-05-28T23:45:05+09:00"
     },
     "CANDID-034": {
       "id": "CANDID-034",

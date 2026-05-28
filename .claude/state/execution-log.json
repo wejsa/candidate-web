@@ -2256,5 +2256,13 @@
     "action": "task_completed",
     "taskId": "CANDID-032",
     "totalSteps": 2
+  },
+  {
+    "timestamp": "2026-05-28T23:45:05.385338+09:00",
+    "action": "pr_created",
+    "taskId": "CANDID-033",
+    "stepNumber": 1,
+    "prNumber": 75,
+    "branch": "feature/CANDID-033-step1"
   }
 ]
