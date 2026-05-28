@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 292,
+    "version": 293,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T00:47:00+09:00"
+    "updatedAt": "2026-05-29T00:55:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 78,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-28T15:47:00Z"
+        "autoChainArgs": "78 --auto-fix",
+        "updatedAt": "2026-05-28T15:55:00Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1736,17 +1736,20 @@
         {
           "step": 3,
           "title": "Route Handler POST + USER_POLICIES.WITHDRAW + clearAuthCookies + 통합 테스트",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/api/v1/users/me/withdraw/route.ts",
             "lib/security/rate-limit.ts",
-            "lib/auth/cookies.ts",
             "tests/lib/security/rate-limit.test.ts",
             "tests/app/api/v1/users/me/withdraw.test.ts"
           ],
           "estimatedLines": 450,
+          "actualLines": 292,
           "prLineLimit": 600,
-          "dependsOn": [1, 2]
+          "dependsOn": [1, 2],
+          "branch": "feature/CANDID-022-step3",
+          "prNumber": 78,
+          "note": "lib/auth/cookies.ts: clearAuthCookies가 이미 CANDID-006 Step 2에서 export됨 — 본 Step에선 import만 사용 (변경 0)."
         },
         {
           "step": 4,
