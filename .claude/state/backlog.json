@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 296,
+    "version": 297,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T01:05:00+09:00"
+    "updatedAt": "2026-05-29T01:10:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 79,
         "fixLoopCount": 0,
-        "autoChainArgs": "79 --auto-fix",
-        "updatedAt": "2026-05-28T16:05:00Z"
+        "autoChainArgs": "79",
+        "updatedAt": "2026-05-28T16:10:00Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1758,7 +1758,7 @@
         {
           "step": 4,
           "title": "UI 슬라이스: /me/withdraw RSC + 폼 + 확인 모달 + 라벨 SSOT",
-          "status": "pr_created",
+          "status": "reviewed",
           "files": [
             "app/me/withdraw/page.tsx",
             "app/me/withdraw/_components/WithdrawForm.tsx",
@@ -1767,12 +1767,14 @@
             "tests/lib/users/labels.test.ts"
           ],
           "estimatedLines": 300,
-          "actualLines": 323,
+          "actualLines": 347,
           "prLineLimit": 400,
           "dependsOn": [1, 2, 3],
           "branch": "feature/CANDID-022-step4",
           "prNumber": 79,
-          "note": "마지막 스텝. RSC/Client 컴포넌트 RTL 테스트는 CANDID-039 인프라 도입 후 별도 보강 (carry)."
+          "fixLoop": 0,
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 4 + 1 무효 (in-PR fix 2건: H001 fetch reject try/catch state 고착 방지 + H002 409 → router.replace('/me') 멱등 일관성; carry: H_arch1 RSC prisma 직접 호출 → repository 분리 별도 task, H_test4 fetch payload 가드 + H_test5 RSC 3-분기 → CANDID-039 RTL 인프라 후) / MINOR 7 (in-PR fix 1: M_test satisfies Record 컴파일 가드; carry 6건) / INFO 12. H_dom1 ANONYMIZED enum 환각 무효 처리. self-PR COMMENT. 보안 결함 0건. 본 PR 머지로 CANDID-022 Task 완료.",
+          "note": "마지막 스텝. RSC/Client 컴포넌트 RTL 테스트는 CANDID-039 인프라 도입 후 별도 보강 (carry). in-PR fix 3건 +24 LOC → 323 → 347."
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
