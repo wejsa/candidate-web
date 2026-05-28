@@ -1,11 +1,79 @@
 {
   "metadata": {
-    "version": 32,
+    "version": 33,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-28T23:56:16+09:00"
+    "updatedAt": "2026-05-29T01:11:30+09:00"
   },
   "tasks": {
+    "CANDID-022": {
+      "id": "CANDID-022",
+      "title": "회원 탈퇴 + 익명화/철회 정책 (GDPR 잊혀질 권리)",
+      "phase": 3,
+      "priority": "critical",
+      "type": "feature",
+      "completedAt": "2026-05-29T01:11:30+09:00",
+      "assignee": "jaese@hoji-20260529-000318",
+      "prs": [
+        {
+          "number": 76,
+          "title": "feat: CANDID-022 Step 1 - Foundation (anonymizedAt + audit enums + error codes)",
+          "mergedAt": "2026-05-28T15:23:43Z",
+          "additions": 55,
+          "deletions": 2,
+          "note": "User.anonymizedAt + idx_users_anonymized_at + AuditEventType +2 (USER_ANONYMIZED/USER_HARD_DELETED) + ERROR_CATALOG +3 (USER_ALREADY_WITHDRAWN/PASSWORD_RECONFIRM_REQUIRED/REAUTH_REQUIRED). 리뷰 CRITICAL 0/MAJOR 1(carry)/MINOR 7(carry). self-PR COMMENT."
+        },
+        {
+          "number": 77,
+          "title": "feat: CANDID-022 Step 2 - 비즈니스 코어 (anonymize/hardDelete dispatcher)",
+          "mergedAt": "2026-05-28T15:46:38Z",
+          "additions": 711,
+          "deletions": 1,
+          "note": "lib/users/withdraw.ts: withdrawUser/anonymizeUser/hardDeleteUser/buildAnonymizedEmail + zod schema + 21 단위 케이스. 리뷰 CRITICAL 0/MAJOR 5(in-PR fix 2: H001 revoke console.error + H002 atomic race; carry 3)/MINOR 7(in-PR fix 3: H005 metadata whitelist + M005 보존 컬럼 + M007 count 인자; carry 4). self-PR COMMENT. L-019 적용."
+        },
+        {
+          "number": 78,
+          "title": "feat: CANDID-022 Step 3 - Route Handler POST /api/v1/users/me/withdraw + USER_POLICIES.WITHDRAW_USER",
+          "mergedAt": "2026-05-28T15:59:24Z",
+          "additions": 317,
+          "deletions": 0,
+          "note": "POST handler + USER_POLICIES.WITHDRAW_USER(3/시간) + 15 통합 테스트(가드/검증/에러 전파/RL/PII 누설). deep-defense 7-layer 완전. Step 1/2 H004 oracle 정책 결정 명시로 종결. 리뷰 CRITICAL 0/MAJOR 2(in-PR fix 2: H001 reason 경계 + H002 RL 테스트 명확화)/MINOR 6(carry). self-PR COMMENT."
+        },
+        {
+          "number": 79,
+          "title": "feat: CANDID-022 Step 4 (마지막) - UI 슬라이스 /me/withdraw + ConfirmModal + 라벨 SSOT",
+          "mergedAt": "2026-05-28T16:11:20Z",
+          "additions": 347,
+          "deletions": 0,
+          "note": "lib/users/labels.ts(SSOT) + page.tsx(RSC) + WithdrawForm(Client) + ConfirmModal(Client) + 4 라벨 테스트. 리뷰 CRITICAL 0/MAJOR 4 + 1 무효(H_dom1 ANONYMIZED enum 환각)/in-PR fix 3건(H001 fetch try/catch + H002 409 redirect + M_test satisfies Record). carry 6건 → CANDID-039 RTL 인프라 후. self-PR COMMENT. Task 완료."
+        }
+      ],
+      "totalMergedLines": 1430,
+      "stepCount": 4,
+      "reviewSummary": {
+        "critical": 0,
+        "major": 13,
+        "majorInPRFix": 5,
+        "majorInvalid": 1,
+        "majorCarry": 7,
+        "minor": 27,
+        "minorInPRFix": 6,
+        "info": 29
+      },
+      "carry": [
+        "Step 1 H001: 마이그 회귀 가드 (CANDID-035 패턴 미러) — CANDID-022-FU1 또는 후속 통합 task",
+        "Step 2 H003 Saga 보상: tx 외부 revoke outbox 패턴 — outbox 인프라 도입 후",
+        "Step 2 H004 USER_REAUTH oracle: Step 3 주석으로 종결",
+        "Step 2 M001 revokedSessionCount audit: 운영 메트릭과 함께 통합",
+        "Step 2 M002 withdraw.ts SRP: 재사용 시점 분리",
+        "Step 3 M1/M2: invalid JSON 매핑 + Content-Type 검증 — 전역 백로그 (withErrorHandler 확장)",
+        "Step 3 M3/M4/M5: PII regex 강화 + content-type 누락 + empty body — Step 4 또는 FU",
+        "Step 4 H_arch1: RSC prisma 직접 호출 → repository 분리 — 별도 cleanup task",
+        "Step 4 H_test4/5: fetch payload 가드 + RSC 3-분기 — CANDID-039 RTL 인프라 후",
+        "Step 4 M_arch2: WithdrawForm SRP (useWithdrawSubmit 훅) — RTL 도입 후",
+        "소셜 전용 OAuth re-auth flow — CANDID-022-FU1 (PRD §8 미결사항 합류)"
+      ]
+    },
     "CANDID-005": {
       "id": "CANDID-005",
       "title": "DB 스키마: applications + drafts + answers + resume_files + portfolio_links + status_history + interview_schedules + audit_logs",

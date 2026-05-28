@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 297,
+    "version": 298,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T01:10:00+09:00"
+    "updatedAt": "2026-05-29T01:11:30+09:00"
   },
   "summary": {
     "total": 43,
-    "done": 30,
-    "inProgress": 1,
+    "done": 31,
+    "inProgress": 0,
     "review": 0,
     "todo": 14
   },
@@ -1646,13 +1646,13 @@
       "id": "CANDID-022",
       "title": "회원 탈퇴 + 익명화/철회 정책 (GDPR 잊혀질 권리)",
       "description": "비밀번호 재확인(소셜은 재인증). 진행 중 지원 있으면 PII 익명화·보존, 없으면 즉시 삭제. 채용 종료 후 1년 자동 파기 배치. audit_log 기록.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "critical",
       "phase": 3,
-      "assignee": "jaese@hoji-20260529-000318",
-      "assignedAt": "2026-05-28T15:10:42Z",
-      "lockTTL": 10800,
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": null,
       "lockedFiles": [
         "prisma/schema.prisma",
         "prisma/migrations",
@@ -1673,14 +1673,7 @@
         "tests/lib/security/rate-limit.test.ts",
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 79,
-        "fixLoopCount": 0,
-        "autoChainArgs": "79",
-        "updatedAt": "2026-05-28T16:10:00Z"
-      },
+      "workflowState": null,
       "dependencies": [
         "CANDID-008",
         "CANDID-018"
@@ -1758,7 +1751,7 @@
         {
           "step": 4,
           "title": "UI 슬라이스: /me/withdraw RSC + 폼 + 확인 모달 + 라벨 SSOT",
-          "status": "reviewed",
+          "status": "merged",
           "files": [
             "app/me/withdraw/page.tsx",
             "app/me/withdraw/_components/WithdrawForm.tsx",
@@ -1768,17 +1761,20 @@
           ],
           "estimatedLines": 300,
           "actualLines": 347,
+          "mergedLines": 347,
           "prLineLimit": 400,
           "dependsOn": [1, 2, 3],
           "branch": "feature/CANDID-022-step4",
           "prNumber": 79,
           "fixLoop": 0,
+          "mergedAt": "2026-05-28T16:11:20Z",
           "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 4 + 1 무효 (in-PR fix 2건: H001 fetch reject try/catch state 고착 방지 + H002 409 → router.replace('/me') 멱등 일관성; carry: H_arch1 RSC prisma 직접 호출 → repository 분리 별도 task, H_test4 fetch payload 가드 + H_test5 RSC 3-분기 → CANDID-039 RTL 인프라 후) / MINOR 7 (in-PR fix 1: M_test satisfies Record 컴파일 가드; carry 6건) / INFO 12. H_dom1 ANONYMIZED enum 환각 무효 처리. self-PR COMMENT. 보안 결함 0건. 본 PR 머지로 CANDID-022 Task 완료.",
           "note": "마지막 스텝. RSC/Client 컴포넌트 RTL 테스트는 CANDID-039 인프라 도입 후 별도 보강 (carry). in-PR fix 3건 +24 LOC → 323 → 347."
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-28T15:10:42Z"
+      "updatedAt": "2026-05-29T01:11:30+09:00",
+      "completedAt": "2026-05-29T01:11:30+09:00"
     },
     "CANDID-023": {
       "id": "CANDID-023",
