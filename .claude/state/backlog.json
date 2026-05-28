@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 275,
+    "version": 276,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-28T23:16:33+09:00"
+    "updatedAt": "2026-05-28T23:17:50+09:00"
   },
   "summary": {
     "total": 43,
@@ -1878,19 +1878,12 @@
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
       "assignee": "jaese@hoji-20260527-231337",
-      "assignedAt": "2026-05-28T23:16:33+09:00",
+      "assignedAt": "2026-05-28T23:17:50+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "tests/integration/prisma-extends-user-roundtrip.test.ts",
-        "tests/integration/prisma-extends-user-write-guard.test.ts",
         "tests/integration/prisma-extends-user-raw-bypass.test.ts",
         "tests/integration/prisma-singleton-wiring.test.ts",
-        "vitest.config.ts",
-        "lib/prisma/extends.ts",
-        "tests/integration/helpers/seed.ts",
-        "tests/integration/helpers/raw.ts",
-        "tests/integration/prisma-extends-application-roundtrip.test.ts",
-        "tests/integration/prisma-extends-application-nested-write.test.ts"
+        "vitest.config.ts"
       ],
       "steps": [
         {
@@ -1902,8 +1895,9 @@
           ],
           "estimatedLines": 400,
           "prLineLimit": 700,
-          "status": "pr_created",
-          "prNumber": 73
+          "status": "merged",
+          "prNumber": 73,
+          "mergedAt": "2026-05-28T23:17:50+09:00"
         },
         {
           "stepNumber": 2,
@@ -1918,16 +1912,16 @@
           "status": "pending"
         }
       ],
-      "currentStep": 1,
+      "currentStep": 2,
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 73,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "73",
-        "updatedAt": "2026-05-28T23:16:33+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-28T23:17:50+09:00"
       },
-      "updatedAt": "2026-05-28T23:16:33+09:00"
+      "updatedAt": "2026-05-28T23:17:50+09:00"
     },
     "CANDID-033": {
       "id": "CANDID-033",
