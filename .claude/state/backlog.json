@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 279,
+    "version": 280,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-28T23:32:11+09:00"
+    "updatedAt": "2026-05-28T23:35:53+09:00"
   },
   "summary": {
     "total": 43,
@@ -1919,7 +1919,7 @@
       "id": "CANDID-033",
       "title": "CANDID-008 FU4: docs/security/pii-encryption.md SSOT 문서 작성",
       "description": "CANDID-008 Step 2 review MAJOR D10. README + migration.sql이 참조 중인 `docs/security/pii-encryption.md` 파일이 존재하지 않음 → broken reference 해소. 포함 내용: AES-256-GCM 알고리즘 사양, [iv 12B][tag 16B][ciphertext] 포맷, encryptPii/decryptPii API, *_key_version 컬럼 의미, 키 회전 SOP (4단계 무중단 M1~M4), 사고 대응 (키 유출 시 즉시 회전 절차), 컴플라이언스 매핑 (개인정보보호법 / GDPR Art. 32). docs/architecture/pii-data-flow.md (시퀀스 다이어그램)도 함께 검토.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "chore",
       "priority": "medium",
       "phase": 1,
@@ -1927,7 +1927,11 @@
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T21:35:00+09:00",
-      "specFile": "docs/retro/CANDID-008-retro.md"
+      "specFile": "docs/retro/CANDID-008-retro.md",
+      "assignee": "jaese@hoji-20260528-233553",
+      "assignedAt": "2026-05-28T23:35:53+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": []
     },
     "CANDID-034": {
       "id": "CANDID-034",
