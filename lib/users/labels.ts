@@ -29,6 +29,8 @@ export const WITHDRAW_LABELS = Object.freeze({
   errorAlreadyWithdrawn: '이미 탈퇴된 계정입니다.',
   errorRateLimited: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.',
   errorGeneric: '탈퇴 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
-} as const);
+} as const satisfies Record<string, string>);
+// M_test fix (review): satisfies Record<string, string>로 모든 값 string 타입 컴파일 가드.
+// 신규 키 추가 시 typo/잘못된 타입 즉시 감지 (`as const` literal 보존 + 타입 강제 결합).
 
 export type WithdrawLabelKey = keyof typeof WITHDRAW_LABELS;

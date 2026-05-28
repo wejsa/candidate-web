@@ -42,14 +42,21 @@ export function WithdrawForm({ isSocialOnly }: Props): React.JSX.Element {
     setState({ status: 'pending', error: null });
     setModalOpen(false);
 
-    const response = await fetch('/api/v1/users/me/withdraw', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        passwordConfirmation,
-        reason: reason.trim() === '' ? undefined : reason.trim(),
-      }),
-    });
+    // H001 fix (review): 네트워크 예외 시 state.status='pending' 영구 고착 방지. try/catch 흡수.
+    let response: Response;
+    try {
+      response = await fetch('/api/v1/users/me/withdraw', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          passwordConfirmation,
+          reason: reason.trim() === '' ? undefined : reason.trim(),
+        }),
+      });
+    } catch {
+      setState({ status: 'error', error: WITHDRAW_LABELS.errorGeneric });
+      return;
+    }
 
     if (response.status === 204) {
       // 탈퇴 성공 — 쿠키는 Set-Cookie Max-Age=0으로 만료됨. /로 redirect.
@@ -57,10 +64,15 @@ export function WithdrawForm({ isSocialOnly }: Props): React.JSX.Element {
       return;
     }
 
+    // H002 fix (review): 409 이미 탈퇴됨 → 인라인 에러가 아닌 /me redirect (page.tsx 멱등 처리와 일관).
+    if (response.status === 409) {
+      router.replace('/me');
+      return;
+    }
+
     let message: string = WITHDRAW_LABELS.errorGeneric;
     if (response.status === 401) message = WITHDRAW_LABELS.errorPasswordMismatch;
     else if (response.status === 422) message = WITHDRAW_LABELS.errorPasswordRequired;
-    else if (response.status === 409) message = WITHDRAW_LABELS.errorAlreadyWithdrawn;
     else if (response.status === 429) message = WITHDRAW_LABELS.errorRateLimited;
     setState({ status: 'error', error: message });
   }
