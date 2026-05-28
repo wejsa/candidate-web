@@ -2,6 +2,7 @@ import {
   encryptApplicationPiiSnapshotInput,
   encryptUserPiiInput,
   type ApplicationPiiSnapshotPlaintextInput,
+  type UserPiiPlaintextInput,
 } from '@/lib/prisma/extends';
 
 import { getTestPrisma } from './prisma';
@@ -97,6 +98,19 @@ export function encryptApplicationSnapshotForPrisma(
     birthDateSnapshotKeyVersion: e.birthDateSnapshotKeyVersion,
     addressSnapshot: toUint8(e.addressSnapshot),
     addressSnapshotKeyVersion: e.addressSnapshotKeyVersion,
+  };
+}
+
+// Prisma create-compatible 형태로 User PII 2쌍 암호화 결과를 반환.
+// `encryptApplicationSnapshotForPrisma` 미러 — `encryptUserPiiInput`의 Buffer 반환을 toUint8 변환.
+// CANDID-032 User 통합 테스트(round-trip / write-guard)에서 재사용.
+export function encryptUserPiiInputForPrisma(plaintext: UserPiiPlaintextInput) {
+  const e = encryptUserPiiInput(plaintext);
+  return {
+    phone: toUint8(e.phone),
+    phoneKeyVersion: e.phoneKeyVersion,
+    birthDate: toUint8(e.birthDate),
+    birthDateKeyVersion: e.birthDateKeyVersion,
   };
 }
 

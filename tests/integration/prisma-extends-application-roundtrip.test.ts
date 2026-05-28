@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { APPLICATION_PII_SNAPSHOT_FIELDS } from '@/lib/pii/fields';
-import { piiExtension } from '@/lib/prisma/extends';
+import { piiExtensionDefinition } from '@/lib/prisma/extends';
 
 import { disconnectTestPrisma, getTestPrisma, truncateAll } from './helpers/prisma';
 import {
@@ -115,18 +115,14 @@ describe('integration: piiExtension result.application round-trip (V2 + V4)', ()
       addressSnapshot: { addressSnapshot: true, addressSnapshotKeyVersion: true },
     } as const;
 
-    it('runtime: piiExtension.result.application[X].needs matches expected shape', () => {
-      // piiExtension is a Prisma extension definition object — read via record indexing.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- internal extension shape inspection
-      const result = (piiExtension as any).result as Record<
-        string,
-        Record<string, { needs: Record<string, true> }> | undefined
-      >;
-      const appResult = result.application;
+    it('runtime: piiExtensionDefinition.result.application[X].needs matches expected shape', () => {
+      // CANDID-032: Prisma 6 `defineExtension`은 클로저를 반환해 internal shape 직접 접근 불가.
+      // raw definition 객체(piiExtensionDefinition)로 needs/컬럼명 회귀를 단정한다.
+      const appResult = piiExtensionDefinition.result.application;
       expect(appResult).toBeDefined();
       for (const field of APPLICATION_PII_SNAPSHOT_FIELDS) {
-        expect(appResult![field]).toBeDefined();
-        expect(appResult![field]!.needs).toEqual(expectedNeeds[field]);
+        expect(appResult[field]).toBeDefined();
+        expect(appResult[field].needs).toEqual(expectedNeeds[field]);
       }
     });
 
