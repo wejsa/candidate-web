@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 289,
+    "version": 290,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T00:24:30+09:00"
+    "updatedAt": "2026-05-29T00:35:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 77,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-28T15:24:30Z"
+        "autoChainArgs": "77 --auto-fix",
+        "updatedAt": "2026-05-28T15:35:00Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1713,16 +1713,21 @@
         {
           "step": 2,
           "title": "비즈니스 코어: anonymize/hardDelete/withdraw dispatcher + 단위 테스트",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/users/types.ts",
             "lib/users/schema.ts",
             "lib/users/withdraw.ts",
-            "tests/lib/users/withdraw.test.ts"
+            "tests/lib/users/withdraw.test.ts",
+            "lib/auth/session.ts"
           ],
           "estimatedLines": 600,
+          "actualLines": 611,
           "prLineLimit": 700,
-          "dependsOn": [1]
+          "dependsOn": [1],
+          "branch": "feature/CANDID-022-step2",
+          "prNumber": 77,
+          "note": "lib/auth/session.ts +5 LOC (RevokeReason 'user_withdrawn' 추가) — plan files에 미포함이었으나 비즈니스 요구로 추가."
         },
         {
           "step": 3,
