@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 283,
+    "version": 284,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-28T23:55:12+09:00"
+    "updatedAt": "2026-05-28T23:56:16+09:00"
   },
   "summary": {
     "total": 43,
@@ -1919,7 +1919,7 @@
       "id": "CANDID-033",
       "title": "CANDID-008 FU4: docs/security/pii-encryption.md SSOT 문서 작성",
       "description": "CANDID-008 Step 2 review MAJOR D10. README + migration.sql이 참조 중인 `docs/security/pii-encryption.md` 파일이 존재하지 않음 → broken reference 해소. 포함 내용: AES-256-GCM 알고리즘 사양, [iv 12B][tag 16B][ciphertext] 포맷, encryptPii/decryptPii API, *_key_version 컬럼 의미, 키 회전 SOP (4단계 무중단 M1~M4), 사고 대응 (키 유출 시 즉시 회전 절차), 컴플라이언스 매핑 (개인정보보호법 / GDPR Art. 32). docs/architecture/pii-data-flow.md (시퀀스 다이어그램)도 함께 검토.",
-      "status": "in_progress",
+      "status": "done",
       "type": "chore",
       "priority": "medium",
       "phase": 1,
@@ -1928,13 +1928,10 @@
       ],
       "createdAt": "2026-05-12T21:35:00+09:00",
       "specFile": "docs/retro/CANDID-008-retro.md",
-      "assignee": "jaese@hoji-20260528-233553",
-      "assignedAt": "2026-05-28T23:55:12+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 3600,
-      "lockedFiles": [
-        "docs/security/pii-encryption.md",
-        "README.md"
-      ],
+      "lockedFiles": [],
       "steps": [
         {
           "stepNumber": 1,
@@ -1945,20 +1942,15 @@
           ],
           "estimatedLines": 450,
           "prLineLimit": 1000,
-          "status": "pr_created",
-          "prNumber": 75
+          "status": "merged",
+          "prNumber": 75,
+          "mergedAt": "2026-05-28T23:56:16+09:00"
         }
       ],
-      "currentStep": 1,
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 75,
-        "fixLoopCount": 0,
-        "autoChainArgs": "75",
-        "updatedAt": "2026-05-28T23:55:12+09:00"
-      },
-      "updatedAt": "2026-05-28T23:55:12+09:00"
+      "currentStep": null,
+      "workflowState": null,
+      "updatedAt": "2026-05-28T23:55:12+09:00",
+      "completedAt": "2026-05-28T23:56:16+09:00"
     },
     "CANDID-034": {
       "id": "CANDID-034",
