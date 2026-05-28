@@ -237,6 +237,16 @@ describe('CANDID-036 — USER_POLICIES.RESEND_VERIFICATION_USER (user 3회/시�
   });
 });
 
+describe('CANDID-022 Step 3 — USER_POLICIES.WITHDRAW_USER (user 3회/시간)', () => {
+  it('정의 검증 — 3회/시간/user, keyExtractor 없음 (비밀번호 brute force + 다중 호출 차단)', async () => {
+    const { USER_POLICIES } = await import('@/lib/security/rate-limit');
+    expect(USER_POLICIES.WITHDRAW_USER.name).toBe('withdraw_user');
+    expect(USER_POLICIES.WITHDRAW_USER.windowMs).toBe(3_600_000);
+    expect(USER_POLICIES.WITHDRAW_USER.maxRequests).toBe(3);
+    expect('keyExtractor' in USER_POLICIES.WITHDRAW_USER).toBe(false);
+  });
+});
+
 describe('CANDID-036 — checkUserRateLimit', () => {
   it('3회 통과, 4회째 차단 (동일 userId)', async () => {
     const { USER_POLICIES, checkUserRateLimit } = await import('@/lib/security/rate-limit');

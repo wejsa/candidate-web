@@ -118,6 +118,15 @@ export const USER_POLICIES = Object.freeze({
     windowMs: 3_600_000,
     maxRequests: 3,
   } satisfies UserRateLimitPolicy),
+  /**
+   * CANDID-022 Step 3 — 회원 탈퇴 user-bucket. 비밀번호 무차별 + 의도치 않은 다중 호출 차단.
+   * 시간당 3회: 정상 사용자는 한 번이면 충분, 우발/스크립트 오류 케이스만 흡수.
+   */
+  WITHDRAW_USER: Object.freeze({
+    name: 'withdraw_user',
+    windowMs: 3_600_000,
+    maxRequests: 3,
+  } satisfies UserRateLimitPolicy),
 });
 
 /** Map<`${policy}:${key}`, timestamps[]> — 모듈 lifetime 동안 in-memory 유지. */
