@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 291,
+    "version": 292,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T00:50:00+09:00"
+    "updatedAt": "2026-05-29T00:47:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 77,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "77",
-        "updatedAt": "2026-05-28T15:50:00Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-28T15:47:00Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1687,7 +1687,7 @@
       ],
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-022-plan.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -1713,7 +1713,7 @@
         {
           "step": 2,
           "title": "비즈니스 코어: anonymize/hardDelete/withdraw dispatcher + 단위 테스트",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/users/types.ts",
             "lib/users/schema.ts",
@@ -1728,7 +1728,8 @@
           "branch": "feature/CANDID-022-step2",
           "prNumber": 77,
           "fixLoop": 0,
-          "status_review": "reviewed",
+          "mergedAt": "2026-05-28T15:46:38Z",
+          "mergedLines": 711,
           "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 5 (in-PR fix 2건: H001 revoke 실패 console.error PII-free + H002 anonymize updateMany atomic race 가드 USER_ALREADY_WITHDRAWN; carry 3건: H003 Saga 보상 FU outbox 패턴, H004 USER_REAUTH 식별 oracle Step 3, M001 revokedCount audit FU) / MINOR 7 (in-PR fix 3건: H005 metadata 키 화이트리스트 ALLOWED_KEYS + M005 보존 컬럼 5종 negative + M007 application.count 인자 단정; carry 4건) / INFO 5. self-PR COMMENT. L-019 적용. 711 LOC = 강력 경고 구간 101.6% × 700 (1.4× = 980 차단선 미접근). 테스트 1408→1412(+4).",
           "note": "lib/auth/session.ts +5 LOC (RevokeReason 'user_withdrawn' 추가) — plan files에 미포함이었으나 비즈니스 요구로 추가. 611 → 711 LOC (in-PR fix 5건 +100 LOC)."
         },
