@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 288,
+    "version": 289,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T00:25:00+09:00"
+    "updatedAt": "2026-05-29T00:24:30+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 76,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "76",
-        "updatedAt": "2026-05-28T15:25:00Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-28T15:24:30Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1687,12 +1687,12 @@
       ],
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-022-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "steps": [
         {
           "step": 1,
           "title": "Foundation: 마이그(anonymizedAt + audit enum 2종 + 인덱스) + 에러 코드 3종",
-          "status": "reviewed",
+          "status": "merged",
           "files": [
             "prisma/schema.prisma",
             "prisma/migrations/20260529001100_candid_022_user_withdraw/migration.sql",
@@ -1701,10 +1701,12 @@
           ],
           "estimatedLines": 130,
           "actualLines": 55,
+          "mergedLines": 55,
           "prLineLimit": 200,
           "dependsOn": [],
           "branch": "feature/CANDID-022-step1",
           "prNumber": 76,
+          "mergedAt": "2026-05-28T15:23:43Z",
           "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 1 (H001 마이그 회귀 가드, Step 2 또는 FU 위임) / MINOR 7 (M001 partial index, M002 USER_REAUTH 메시지 정합, M003 ALTER TYPE 적용 순서, M004 USER_ALREADY_WITHDRAWN USAGE 주석, M005 USER_REAUTH 식별 단서, M006 Prisma client 노출 단정, M007 테스트 네이밍 — 모두 carry) / INFO 6. self-PR COMMENT. 보안 결함 0건. Pre-Review Guard(check:guard-wiring + check:migrations) 통과.",
           "fixLoop": 0
         },
