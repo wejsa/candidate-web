@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 295,
+    "version": 296,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T01:00:30+09:00"
+    "updatedAt": "2026-05-29T01:05:00+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 79,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-28T16:00:30Z"
+        "autoChainArgs": "79 --auto-fix",
+        "updatedAt": "2026-05-28T16:05:00Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1758,7 +1758,7 @@
         {
           "step": 4,
           "title": "UI 슬라이스: /me/withdraw RSC + 폼 + 확인 모달 + 라벨 SSOT",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/me/withdraw/page.tsx",
             "app/me/withdraw/_components/WithdrawForm.tsx",
@@ -1767,8 +1767,12 @@
             "tests/lib/users/labels.test.ts"
           ],
           "estimatedLines": 300,
+          "actualLines": 323,
           "prLineLimit": 400,
-          "dependsOn": [1, 2, 3]
+          "dependsOn": [1, 2, 3],
+          "branch": "feature/CANDID-022-step4",
+          "prNumber": 79,
+          "note": "마지막 스텝. RSC/Client 컴포넌트 RTL 테스트는 CANDID-039 인프라 도입 후 별도 보강 (carry)."
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
