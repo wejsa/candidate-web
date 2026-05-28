@@ -172,6 +172,8 @@ return Response.json({
 - 키 회전은 별도 마이그레이션(`*_key_version` 업데이트 + 백필) 필요. 현재 모듈은 v1 단일 키.
 - 운영 진입 시 컬럼 타입 변경은 4단계 무중단 절차(M1 add → M2 backfill → M3 deploy → M4 drop+rename) 필수. dev-only 단일 마이그레이션은 PHASE-1에 한정.
 
+> 📖 **상세 가이드**: 알고리즘 사양, 저장 포맷, 3-Layer Defense(D6/D7/D8), 키 회전 SOP(M1~M4), 사고 대응 절차, 컴플라이언스 매핑(개인정보보호법 §28 / GDPR Art. 32)은 [docs/security/pii-encryption.md](docs/security/pii-encryption.md) 참조.
+
 ### Claude Code 워크플로우
 
 ```bash
