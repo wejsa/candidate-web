@@ -96,6 +96,60 @@ export function computeDecryptedAddressSnapshot(application: {
 }
 
 /**
+ * CANDID-032: result 정의를 별도 export하여 통합 테스트(V4)에서 needs/컬럼명을 직접 단정할 수 있게 한다.
+ *
+ * 배경: Prisma 6의 `Prisma.defineExtension`은 `(client) => Client` 형태의 클로저를 반환하므로
+ * `piiExtension.result.user.X.needs` 같은 직접 introspection이 불가능하다. 본 객체를 별도 hoist하면
+ * 통합 테스트가 컴파일타임 + 런타임 양쪽에서 needs 시그니처를 검증할 수 있다.
+ *
+ * query hook 정의는 `Prisma.defineExtension` 인수 안에서만 callback 파라미터 타입이 추론되므로
+ * 본 hoist에서 제외한다 (result만 통합 테스트가 필요).
+ */
+export const piiExtensionResultDefinition = {
+  user: {
+    phone: {
+      needs: { phone: true, phoneKeyVersion: true },
+      compute: computeDecryptedPhone,
+    },
+    birthDate: {
+      needs: { birthDate: true, birthDateKeyVersion: true },
+      compute: computeDecryptedBirthDate,
+    },
+  },
+  application: {
+    applicantNameSnapshot: {
+      needs: { applicantNameSnapshot: true, applicantNameSnapshotKeyVersion: true },
+      compute: computeDecryptedApplicantName,
+    },
+    applicantEmailSnapshot: {
+      needs: { applicantEmailSnapshot: true, applicantEmailSnapshotKeyVersion: true },
+      compute: computeDecryptedApplicantEmail,
+    },
+    phoneSnapshot: {
+      needs: { phoneSnapshot: true, phoneSnapshotKeyVersion: true },
+      compute: computeDecryptedPhoneSnapshot,
+    },
+    birthDateSnapshot: {
+      needs: { birthDateSnapshot: true, birthDateSnapshotKeyVersion: true },
+      compute: computeDecryptedBirthDateSnapshot,
+    },
+    addressSnapshot: {
+      needs: { addressSnapshot: true, addressSnapshotKeyVersion: true },
+      compute: computeDecryptedAddressSnapshot,
+    },
+  },
+} as const;
+
+/**
+ * 통합 테스트(V4)가 piiExtensionDefinition.result.{model}.{field}.needs로 introspect할 수 있도록
+ * name + result를 한 객체로 묶어 export. query는 `Prisma.defineExtension` 호출부에서 별도 정의.
+ */
+export const piiExtensionDefinition = {
+  name: 'pii-encryption',
+  result: piiExtensionResultDefinition,
+} as const;
+
+/**
  * Prisma User + Application 모델의 PII 컬럼을 자동 복호화하는 result extension.
  * needs에 *_key_version 컬럼을 포함하여 키 회전 분기 시 시그니처 안정성 보장.
  *
@@ -109,40 +163,7 @@ export function computeDecryptedAddressSnapshot(application: {
  */
 export const piiExtension = Prisma.defineExtension({
   name: 'pii-encryption',
-  result: {
-    user: {
-      phone: {
-        needs: { phone: true, phoneKeyVersion: true },
-        compute: computeDecryptedPhone,
-      },
-      birthDate: {
-        needs: { birthDate: true, birthDateKeyVersion: true },
-        compute: computeDecryptedBirthDate,
-      },
-    },
-    application: {
-      applicantNameSnapshot: {
-        needs: { applicantNameSnapshot: true, applicantNameSnapshotKeyVersion: true },
-        compute: computeDecryptedApplicantName,
-      },
-      applicantEmailSnapshot: {
-        needs: { applicantEmailSnapshot: true, applicantEmailSnapshotKeyVersion: true },
-        compute: computeDecryptedApplicantEmail,
-      },
-      phoneSnapshot: {
-        needs: { phoneSnapshot: true, phoneSnapshotKeyVersion: true },
-        compute: computeDecryptedPhoneSnapshot,
-      },
-      birthDateSnapshot: {
-        needs: { birthDateSnapshot: true, birthDateSnapshotKeyVersion: true },
-        compute: computeDecryptedBirthDateSnapshot,
-      },
-      addressSnapshot: {
-        needs: { addressSnapshot: true, addressSnapshotKeyVersion: true },
-        compute: computeDecryptedAddressSnapshot,
-      },
-    },
-  },
+  result: piiExtensionResultDefinition,
   // CANDID-031 (D8) — write 런타임 가드.
   // User: assertUserPiiInputShape — string 평문 phone/birthDate 입력 차단.
   // Application: assertApplicationPiiInputShape — string 평문 5쌍 snapshot 입력 차단 (CANDID-034 Step 3).

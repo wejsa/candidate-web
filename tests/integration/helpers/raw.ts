@@ -32,6 +32,25 @@ export async function getApplicationSnapshotRaw(
   return rows[0] ?? null;
 }
 
+export interface UserPiiRaw {
+  phone: Buffer | null;
+  phone_key_version: number | null;
+  birth_date: Buffer | null;
+  birth_date_key_version: number | null;
+}
+
+// CANDID-032 — User PII 2쌍 raw BYTEA 조회. piiExtension 우회 의도(GCM ciphertext 길이/keyVersion 단정용).
+export async function getUserPiiRaw(userId: number): Promise<UserPiiRaw | null> {
+  const prisma = getTestPrisma();
+  // eslint-disable-next-line no-restricted-syntax -- CANDID-032: BYTEA 원본 검증 (piiExtension 우회 의도)
+  const rows = await prisma.$queryRaw<UserPiiRaw[]>`
+    SELECT phone, phone_key_version, birth_date, birth_date_key_version
+    FROM users
+    WHERE id = ${userId}
+  `;
+  return rows[0] ?? null;
+}
+
 export interface ColumnInfo {
   column_name: string;
   data_type: string;
