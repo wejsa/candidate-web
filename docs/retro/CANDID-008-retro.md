@@ -124,7 +124,7 @@
 - **FU1**: 마이그레이션 가드 / 키 버전-payload 결합 / env reset / 입력 정규화 / mask 회귀 케이스 (5건 묶음)
 - **FU2**: `$queryRaw` 가드 / 응답 마스킹 강제 / write 런타임 가드 (방어 깊이)
 - **FU3**: piiExtension 실제 prisma 통합 테스트 (plan 시나리오 0/5 반영)
-- **FU4**: `docs/security/pii-encryption.md` (README/migration.sql 참조 중인 파일 부재)
+- **FU4**: `docs/security/pii-encryption.md` (README/migration.sql 참조 중인 파일 부재) — **종결**: CANDID-033 PR #75 머지 (2026-05-28)
 
 ## 5. Lessons (교훈)
 

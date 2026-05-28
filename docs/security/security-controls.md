@@ -2,7 +2,9 @@
 
 본 문서는 candidate-web의 보안 미들웨어/헬퍼/정책을 정리한다. 후속 라우트(CANDID-010~018)는 본 가이드의 헬퍼를 호출해 BR-SEC-01~07을 충족한다.
 
-## 3-Layer Defense 개요
+> 본 문서의 3-Layer는 *요청 흐름 축* (Edge → Route → Application). **PII 데이터 보호의 3-Layer Defense** (D6 정적 / D7 직렬화 / D8 런타임)는 별도 축이며 [docs/security/pii-encryption.md §5](pii-encryption.md) 참조.
+
+## 3-Layer Defense 개요 (요청 흐름)
 
 | 계층 | 위치 | 책임 |
 |------|------|------|
