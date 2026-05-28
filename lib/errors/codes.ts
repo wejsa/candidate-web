@@ -71,6 +71,21 @@ export const ERROR_CATALOG = {
   // 사용자 — USER_
   USER_EMAIL_DUPLICATED: { status: 409, message: '이미 가입된 이메일입니다.' },
   USER_NOT_FOUND: { status: 404, message: '사용자를 찾을 수 없습니다.' },
+  // CANDID-022 — 회원 탈퇴 (US-AUTH-005, BR-PII-03)
+  USER_ALREADY_WITHDRAWN: {
+    status: 409,
+    message: '이미 탈퇴 처리된 계정입니다.',
+  },
+  // 비밀번호 보유 사용자는 탈퇴 시 비밀번호 재확인 필수 — 누락 시 422 (계정 열거 무관, 본인 인증 단계).
+  USER_PASSWORD_RECONFIRM_REQUIRED: {
+    status: 422,
+    message: '본인 확인을 위해 비밀번호를 다시 입력해 주세요.',
+  },
+  // 소셜 전용 사용자(passwordHash NULL)는 OAuth 재인증 후 탈퇴 가능 — MVP에선 명시 차단.
+  USER_REAUTH_REQUIRED: {
+    status: 422,
+    message: '소셜 계정 재인증 후 탈퇴를 진행해 주세요.',
+  },
 
   // 공고 — JOB_
   JOB_NOT_FOUND: { status: 404, message: '채용 공고를 찾을 수 없습니다.' },

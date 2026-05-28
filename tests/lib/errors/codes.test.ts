@@ -7,7 +7,7 @@ const PREFIXES = ['AUTH_', 'USER_', 'JOB_', 'APP_', 'FILE_', 'SYS_'];
 const VALID_STATUSES = new Set([400, 401, 403, 404, 409, 410, 422, 429, 500, 502, 503]);
 
 describe('ERROR_CATALOG', () => {
-  it('contains 35 codes', () => {
+  it('contains 41 codes', () => {
     // CANDID-009 Step 2: SYS_RATE_LIMITED, SYS_FORBIDDEN_ORIGIN 추가로 22 → 24
     // CANDID-010 Step 3: AUTH_VERIFICATION_TOKEN_INVALID/EXPIRED/RESEND_COOLDOWN 추가로 24 → 27
     // CANDID-037 Step 2: AUTH_EMAIL_ALREADY_VERIFIED 추가로 27 → 28
@@ -17,7 +17,17 @@ describe('ERROR_CATALOG', () => {
     // CANDID-017 Step 1: APP_DRAFT_NOT_FOUND 추가로 35 → 36 (US-APP-004 portfolio 권한+미존재 통합)
     // CANDID-018 Step 1: APP_SUBMIT_INCOMPLETE 추가로 36 → 37 (US-APP-006 제출 전 검증)
     // CANDID-019 Step 2 review C1: APP_INTERVIEW_NOT_FOUND 추가로 37 → 38 (US-MY-002 .ics 시맨틱 분리)
-    expect(ALL_CODES).toHaveLength(38);
+    // CANDID-022 Step 1: USER_ALREADY_WITHDRAWN, USER_PASSWORD_RECONFIRM_REQUIRED, USER_REAUTH_REQUIRED 추가로 38 → 41 (US-AUTH-005)
+    expect(ALL_CODES).toHaveLength(41);
+  });
+
+  it('CANDID-022 Step 1 신규 코드: USER_ALREADY_WITHDRAWN=409, USER_PASSWORD_RECONFIRM_REQUIRED=422, USER_REAUTH_REQUIRED=422', () => {
+    expect(ERROR_CATALOG.USER_ALREADY_WITHDRAWN.status).toBe(409);
+    expect(ERROR_CATALOG.USER_PASSWORD_RECONFIRM_REQUIRED.status).toBe(422);
+    expect(ERROR_CATALOG.USER_REAUTH_REQUIRED.status).toBe(422);
+    expect(errorMessage('USER_ALREADY_WITHDRAWN')).toMatch(/이미 탈퇴/);
+    expect(errorMessage('USER_PASSWORD_RECONFIRM_REQUIRED')).toMatch(/비밀번호/);
+    expect(errorMessage('USER_REAUTH_REQUIRED')).toMatch(/소셜|재인증/);
   });
 
   it('CANDID-016 Step 2 신규 코드: FILE_ALREADY_EXISTS=409, FILE_NOT_FOUND=404', () => {
@@ -118,6 +128,9 @@ describe('ERROR_CATALOG', () => {
       APP_DRAFT_NOT_FOUND: 404,
       APP_SUBMIT_INCOMPLETE: 422,
       APP_INTERVIEW_NOT_FOUND: 404,
+      USER_ALREADY_WITHDRAWN: 409,
+      USER_PASSWORD_RECONFIRM_REQUIRED: 422,
+      USER_REAUTH_REQUIRED: 422,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);
