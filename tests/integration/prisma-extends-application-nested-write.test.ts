@@ -18,13 +18,17 @@ import { buildApplicationNumber, seedJobPosting, seedUser } from './helpers/seed
 //
 // 우회 방지 컨벤션: `.claude/domains/_base/conventions/database.md`에 추가.
 
-// CANDID-032: Prisma 6.19+에서 BYTEA 컬럼은 client-side coercion이 엄격해져
-// `applicantNameSnapshot: '홍길동' as any` 같은 string→Bytes 자동 변환이
+// CANDID-032 (PR #73 리뷰 D-MAJOR-1 응답): Prisma 6.19+에서 BYTEA 컬럼은 client-side coercion이
+// 엄격해져 `applicantNameSnapshot: '홍길동' as any` 같은 string→Bytes 자동 변환이
 // "Could not convert from base64 encoded bytes to PrismaValue::Bytes"로 거부된다.
 // 즉 본 V3 증거 테스트의 "평문 string이 BYTEA에 저장됨" 단정 자체가 Prisma 6에서 비현실적이 되었다.
 // L-007 nested write 한계 자체는 여전히 유효(query.application 후크 미발동)하지만,
 // 증거 코드 경로가 driver-level에서 차단되어 본 형태의 회귀 가드는 의미를 잃었다.
-// .skip 처리하고 별도 follow-up task로 검증 형태 재설계 위임.
+//
+// follow-up 추적 task: CANDID-005-FU2 (`lib/prisma/extends.ts` L-007 주석에 기존 명시).
+//   본 .skip은 *Prisma 6 driver 변경*에 의한 일시 보류이며 L-007 nested write 차단 follow-up과 통합
+//   진행. 신규 검증 형태(예: `$queryRawUnsafe`로 BYTEA에 raw bytes INSERT 후 piiExtension wiring
+//   우회 입증)는 본 FU2 안에서 재설계한다.
 describe.skip('integration: L-007 nested write regression witness (V3) — Prisma 6 BYTEA coercion 변경으로 skip', () => {
   beforeEach(async () => {
     await truncateAll();

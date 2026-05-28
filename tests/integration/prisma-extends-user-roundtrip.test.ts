@@ -165,8 +165,15 @@ describe('integration: piiExtension result.user round-trip (V2 + V4)', () => {
 
     // 컴파일타임 단정 — 2 필드 needs에 `*KeyVersion` 컬럼명이 모두 포함되어야 함.
     // TS satisfies로 키 누락/오타 컴파일 실패 회귀 차단.
-    it('compile-time: needs keys include both field + keyVersion via satisfies', () => {
-      const _typeGuard = expectedNeeds satisfies Record<'phone' | 'birthDate', Record<string, true>>;
+    //
+    // T-MINOR-1 응답 (CANDID-032 리뷰): `Record<string, true>`는 키 *추가*는 잡되 *누락*은 잡지
+    // 못한다 (예: `{phone: true}`만 있어도 통과). 각 필드별 literal union으로 좁혀 누락도
+    // 컴파일에서 차단한다 — D9 가드 완성도 보강.
+    it('compile-time: needs keys include both field + keyVersion via satisfies (literal union 좁힘)', () => {
+      const _typeGuard = expectedNeeds satisfies {
+        phone: Record<'phone' | 'phoneKeyVersion', true>;
+        birthDate: Record<'birthDate' | 'birthDateKeyVersion', true>;
+      };
       // _typeGuard는 위 satisfies 통과 자체가 검증이므로 runtime no-op로 사용 표시만.
       expect(_typeGuard).toBe(expectedNeeds);
     });
@@ -188,11 +195,30 @@ describe('integration: piiExtension result.user round-trip (V2 + V4)', () => {
     // 본 raw client도 동일 schema에 연결된다.
     const rawPrisma = new PrismaClient();
     try {
+      // S-MAJOR-3 응답 (CANDID-032 리뷰): raw client는 helpers/prisma.ts의 `current_schema()`
+      // fail-fast 가드를 거치지 않으므로 본 위치에서 명시 단정한다. setup 회귀 / DATABASE_URL
+      // override 누락 시 dev/prod schema 접근 사고를 차단.
+      // eslint-disable-next-line no-restricted-syntax -- CANDID-032: schema 메타 조회 (PII 우회와 무관)
+      const schemaRows = await rawPrisma.$queryRaw<Array<{ current_schema: string }>>`
+        SELECT current_schema()
+      `;
+      const currentSchema = schemaRows[0]?.current_schema;
+      if (currentSchema !== 'test_integration') {
+        throw new Error(
+          `[integration] raw PrismaClient connected to schema='${currentSchema}' (expected 'test_integration'). ` +
+            `setup.ts의 DATABASE_URL override를 확인하세요.`,
+        );
+      }
+
       const rawUser = await rawPrisma.user.findUnique({ where: { id: created.id } });
       expect(rawUser).not.toBeNull();
       // extension이 없으면 BYTEA 컬럼은 driver가 Uint8Array(Buffer는 Uint8Array의 subclass)로 반환
       expect(rawUser!.phone).toBeInstanceOf(Uint8Array);
       expect(rawUser!.birthDate).toBeInstanceOf(Uint8Array);
+      // T-MINOR-5 응답: driver가 향후 hex/base64 string으로 반환해도 "확장 없으면 평문 아니다"
+      // 의도가 유지되도록 string 동등성 부정도 함께 단정.
+      expect(rawUser!.phone).not.toBe(PLAINTEXT_2.phone);
+      expect(rawUser!.birthDate).not.toBe(PLAINTEXT_2.birthDate);
       // 그리고 확장 client는 string으로 반환 — 같은 row가 client 종류에 따라 다르게 보임을 직접 증명
       const extendedUser = await prisma.user.findUnique({ where: { id: created.id } });
       expect(typeof extendedUser!.phone).toBe('string');

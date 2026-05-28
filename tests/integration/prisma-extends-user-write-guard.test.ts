@@ -55,7 +55,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
             email: uniqEmail(),
             name: '홍길동',
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 의도적 평문 주입으로 가드 발동 검증
-            phone: '01012345678' as any,
+            phone: '09099999999' as any,
           },
         }),
       ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
@@ -70,7 +70,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
             email: uniqEmail(),
             name: '홍길동',
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 가드 발동 검증
-            birthDate: '1995-03-15' as any,
+            birthDate: '1900-01-01' as any,
           },
         }),
       ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
@@ -110,7 +110,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
         prisma.user.update({
           where: { id: created.id },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 가드 발동 검증
-          data: { phone: '01099998888' as any },
+          data: { phone: '09188888888' as any },
         }),
       ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
     });
@@ -147,7 +147,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
         prisma.user.update({
           where: { id: created.id },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- wrapper 분기 발동
-          data: { birthDate: { set: '1995-03-15' } as any },
+          data: { birthDate: { set: '1900-01-01' } as any },
         }),
       ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
     });
@@ -165,7 +165,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
             email,
             name: '홍길동',
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            phone: '01012345678' as any,
+            phone: '09099999999' as any,
           },
           update: {},
         }),
@@ -185,7 +185,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
           where: { email },
           create: { email, name: '홍길동' },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          update: { birthDate: '1995-03-15' as any },
+          update: { birthDate: '1900-01-01' as any },
         }),
       ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
     });
@@ -203,7 +203,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
         prisma.user.updateMany({
           where: {},
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          data: { phone: '01012345678' as any },
+          data: { phone: '09099999999' as any },
         }),
       ).rejects.toThrow(PLAINTEXT_VIOLATION_PATTERN);
     });
@@ -220,7 +220,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
               email: uniqEmail(),
               name: '홍길동',
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              birthDate: '1995-03-15' as any,
+              birthDate: '1900-01-01' as any,
             },
           ],
         }),
@@ -240,7 +240,7 @@ describe('integration: piiExtension query.user write guard (V1)', () => {
               email: dirtyEmail,
               name: '위반',
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              phone: '01012345678' as any,
+              phone: '09099999999' as any,
             },
           ],
         }),
