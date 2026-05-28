@@ -2227,5 +2227,20 @@
     "stepNumber": 2,
     "prNumber": 74,
     "branch": "feature/CANDID-032-step2"
+  },
+  {
+    "timestamp": "2026-05-28T23:30:55.371424+09:00",
+    "action": "review_commented",
+    "taskId": "CANDID-032",
+    "stepNumber": 2,
+    "prNumber": 74,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "inPrFixes": [
+      "D-MAJOR-1",
+      "T-MAJOR-2",
+      "T-MAJOR-3",
+      "T-MAJOR-4",
+      "INFO-1"
+    ]
   }
 ]
