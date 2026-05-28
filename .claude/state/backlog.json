@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 284,
+    "version": 285,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-28T23:56:16+09:00"
+    "updatedAt": "2026-05-29T00:03:18+09:00"
   },
   "summary": {
     "total": 43,
     "done": 30,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 15
+    "todo": 14
   },
   "phases": {
     "1": {
@@ -1646,15 +1646,28 @@
       "id": "CANDID-022",
       "title": "회원 탈퇴 + 익명화/철회 정책 (GDPR 잊혀질 권리)",
       "description": "비밀번호 재확인(소셜은 재인증). 진행 중 지원 있으면 PII 익명화·보존, 없으면 즉시 삭제. 채용 종료 후 1년 자동 파기 배치. audit_log 기록.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "critical",
       "phase": 3,
+      "assignee": "jaese@hoji-20260529-000318",
+      "assignedAt": "2026-05-28T15:03:18Z",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-28T15:03:18Z"
+      },
       "dependencies": [
         "CANDID-008",
         "CANDID-018"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "updatedAt": "2026-05-28T15:03:18Z"
     },
     "CANDID-023": {
       "id": "CANDID-023",
