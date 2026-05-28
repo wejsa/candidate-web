@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { decryptUserPiiField } from '@/lib/prisma/extends';
@@ -25,10 +26,10 @@ const PLAINTEXT = {
   birthDate: '1900-01-01',
 } as const;
 
-let uniqCounter = 0;
+// CANDID-032 리뷰 T-MAJOR-3 응답: counter 기반 uniq는 vitest pool 변화에 취약.
+// crypto.randomUUID() 사용으로 정족수 충돌 0 보장 (현재 singleFork이지만 향후 변경 대비).
 function uniqEmail(): string {
-  uniqCounter += 1;
-  return `user-raw-${Date.now()}-${uniqCounter}@example.test`;
+  return `user-raw-${crypto.randomUUID().slice(0, 8)}@example.test`;
 }
 
 describe('integration: piiExtension raw query bypass (positive + negative + PostgreSQL guard)', () => {
@@ -87,12 +88,16 @@ describe('integration: piiExtension raw query bypass (positive + negative + Post
     expect(rawPhone).not.toBe(PLAINTEXT.phone);
   });
 
-  it('PostgreSQL 1차 방어: $executeRaw로 string을 BYTEA에 INSERT 시도하면 driver/DB 거부', async () => {
+  it('PostgreSQL 1차 방어: $executeRaw로 string을 BYTEA에 INSERT 시도하면 driver/DB 거부 + 정상 경로는 통과', async () => {
     // 우회 시도 시나리오:
-    //   '01012345678' 같은 평문 string을 phone(BYTEA) 컬럼에 INSERT.
+    //   '01012345678' 같은 *실 platform 형식 평문* string을 phone(BYTEA) 컬럼에 INSERT.
+    //   본 한 줄만 운영-형식을 의도적으로 사용하는 이유는, BYTEA driver coercion이 11자리 ASCII
+    //   string을 어떻게 거부하는지가 단정 대상이기 때문 ($executeRaw가 throw → row 미커밋 →
+    //   DB 잔존 0). 다른 모든 fixture는 09099999999/1900-01-01 컨벤션을 따른다 (INFO-1 응답).
+    //
     //   piiExtension query.user.create 후크는 raw 경로에서 발동하지 않으므로 1차 방어는 driver/DB.
-    //   Prisma 6.19+ BYTEA driver coercion이 string 입력을 거부하거나 (Tagged Template literal에 ${string})
-    //   PostgreSQL이 invalid byte sequence를 throw → 두 경로 모두 throw로 수렴.
+    //   Prisma 6.19+ BYTEA driver coercion이 string 입력을 거부하거나 PostgreSQL이 invalid byte
+    //   sequence를 throw → 두 경로 모두 throw로 수렴.
     //
     // 본 단정은 *어떤* 에러든 throw됨만 확인 — driver/DB 양쪽 변경에 대한 회복력을 위해
     // 메시지 매칭은 피한다 (T-MINOR-5 회복력 원칙).
@@ -108,8 +113,24 @@ describe('integration: piiExtension raw query bypass (positive + negative + Post
       `,
     ).rejects.toThrow();
 
-    // throw 후에는 row가 미커밋이어야 함 (1차 방어가 트랜잭션성 동작)
+    // throw 후에는 row가 미커밋이어야 함 (PostgreSQL은 statement 단위 auto-rollback)
     const count = await prisma.user.count({ where: { email } });
     expect(count).toBe(0);
+
+    // S-MINOR-1 / T-MAJOR-2 응답 — 보강 단정:
+    //   "throw 원인이 BYTEA 타입 거부였음을 간접 증명".
+    //   같은 email로 정상 BYTEA 입력으로 INSERT 시 성공 — throw가 unique 제약/syntax 등
+    //   다른 원인이었다면 본 정상 경로도 실패할 수밖에 없다 (false-positive 방어).
+    const ok = await prisma.user.create({
+      data: {
+        email,
+        name: '테스트',
+        ...encryptUserPiiInputForPrisma(PLAINTEXT),
+      },
+    });
+    expect(ok.id).toBeGreaterThan(0);
+    // 정상 경로로 들어간 BYTEA는 round-trip 시 평문 복원
+    const verified = await prisma.user.findUnique({ where: { id: ok.id } });
+    expect(verified!.phone).toBe(PLAINTEXT.phone);
   });
 });
