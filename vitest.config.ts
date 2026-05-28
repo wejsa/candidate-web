@@ -24,6 +24,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['lib/**/*.ts'],
+      // L-005 (CANDID-008 retro §5.2.4 / CANDID-032 Step 2 대응):
+      //   `lib/env.ts`는 부팅 시점 zod refine으로 단위 테스트 커버 불가.
+      //   `lib/prisma.ts`는 `server-only` import + Next.js singleton(globalThis.__prisma)이라
+      //     단위 테스트 환경에서 운영 인스턴스를 실수로 import할 위험. 단, exclude로 인해
+      //     `$extends(piiExtension)` wiring이 100% 통계 뒤에 숨는 부작용 발생 →
+      //     **통합 테스트 `prisma-singleton-wiring.test.ts`가 운영 모듈 경로의 wiring을 직접 증명**.
       exclude: ['lib/env.ts', 'lib/prisma.ts'],
       thresholds: {
         lines: 80,
