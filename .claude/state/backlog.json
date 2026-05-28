@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 294,
+    "version": 295,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T01:00:00+09:00"
+    "updatedAt": "2026-05-29T01:00:30+09:00"
   },
   "summary": {
     "total": 43,
@@ -1674,12 +1674,12 @@
         "tests/app/api/v1/users/me/withdraw.test.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 78,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "78",
-        "updatedAt": "2026-05-28T16:00:00Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-28T16:00:30Z"
       },
       "dependencies": [
         "CANDID-008",
@@ -1687,7 +1687,7 @@
       ],
       "specFile": "docs/sample-requirement.md",
       "planPath": ".claude/temp/CANDID-022-plan.md",
-      "currentStep": 3,
+      "currentStep": 4,
       "steps": [
         {
           "step": 1,
@@ -1736,7 +1736,7 @@
         {
           "step": 3,
           "title": "Route Handler POST + USER_POLICIES.WITHDRAW + clearAuthCookies + 통합 테스트",
-          "status": "reviewed",
+          "status": "merged",
           "files": [
             "app/api/v1/users/me/withdraw/route.ts",
             "lib/security/rate-limit.ts",
@@ -1745,11 +1745,13 @@
           ],
           "estimatedLines": 450,
           "actualLines": 317,
+          "mergedLines": 317,
           "prLineLimit": 600,
           "dependsOn": [1, 2],
           "branch": "feature/CANDID-022-step3",
           "prNumber": 78,
           "fixLoop": 0,
+          "mergedAt": "2026-05-28T15:59:24Z",
           "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 2 (in-PR fix 2건: H001 reason 500자 경계 회귀 가드 + H002 IP-bucket 테스트 명확화) / MINOR 6 (carry — M1/M2 전역 백로그 invalid JSON 매핑 + Content-Type 검증, M3 PII regex 강화 Step 4 또는 FU, M4 content-type 누락 케이스, M5 empty body 분기 FU, M6 ipAddress=null CANDID-026) / INFO 6. Step 1/2 carry H004 USER_REAUTH_REQUIRED 식별 oracle 정책 결정 명시로 종결. self-PR COMMENT. 보안 결함 0. deep-defense 7-layer 완전. 테스트 1426→1428(+2).",
           "note": "lib/auth/cookies.ts: clearAuthCookies가 이미 CANDID-006 Step 2에서 export됨 — 본 Step에선 import만 사용 (변경 0). in-PR fix 2건 +25 LOC → 292 → 317."
         },
