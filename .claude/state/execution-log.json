@@ -2365,5 +2365,12 @@
     "stepNumber": 3,
     "prNumber": 83,
     "at": "2026-05-29T20:15:20+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-020",
+    "stepNumber": 1,
+    "prNumber": 81,
+    "at": "2026-05-29T20:17:09+09:00"
   }
 ]
