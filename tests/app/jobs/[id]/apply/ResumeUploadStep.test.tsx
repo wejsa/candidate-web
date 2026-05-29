@@ -240,9 +240,29 @@ describe('ResumeUploadStep — 서버 메시지 화이트리스트 (S-MAJOR-2 �
     await user.upload(fileInput(), pdf());
 
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent(/서버에서 문제가 발생했습니다/);
-    // 서버 raw message는 절대 노출되지 않아야 함.
+    // 앵커 정규식으로 일반화 메시지와 '정확히' 일치 — 부분 누출(컬럼명/경로 등)까지 원천 차단.
+    expect(alert).toHaveTextContent(
+      /^⚠️\s*서버에서 문제가 발생했습니다\. 잠시 후 다시 시도해 주세요\.$/,
+    );
     expect(screen.queryByText(/ZodError/)).not.toBeInTheDocument();
+    expect(alert).not.toHaveTextContent('$.fileSize');
     expect(alert).not.toHaveTextContent('stack trace');
+  });
+
+  it('403(forbidden) → 서버 message 비노출 + 일반화 메시지만 (422 외 누출 차단 완결)', async () => {
+    // S-MAJOR-2의 본질은 "422를 제외한 모든 status에서 서버 raw message 누출 차단".
+    mockUpload.mockRejectedValue(
+      new HttpStatusError(403, 'token sub=user-9931 lacks scope file:write', 'AUTH_FORBIDDEN'),
+    );
+    const user = userEvent.setup();
+    renderStep();
+
+    await user.upload(fileInput(), pdf());
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(/권한이 없습니다/);
+    // 서버가 보낸 권한/주체 식별자는 절대 노출되지 않아야 함.
+    expect(screen.queryByText(/user-9931/)).not.toBeInTheDocument();
+    expect(alert).not.toHaveTextContent('file:write');
   });
 });
