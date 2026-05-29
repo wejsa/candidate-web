@@ -2456,5 +2456,12 @@
     "prNumber": 86,
     "decision": "APPROVED (self-PR COMMENT, MAJOR resolved in-PR)",
     "at": "2026-05-29T21:03:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-020",
+    "stepNumber": 4,
+    "prNumber": 86,
+    "at": "2026-05-29T21:03:00+09:00"
   }
 ]
