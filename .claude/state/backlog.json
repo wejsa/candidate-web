@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 323,
+    "version": 324,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T21:03:00+09:00"
+    "updatedAt": "2026-05-29T21:07:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -1625,7 +1625,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260529-193508",
-      "assignedAt": "2026-05-29T21:03:00+09:00",
+      "assignedAt": "2026-05-29T21:07:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/password/reset/page.tsx",
@@ -1703,21 +1703,22 @@
           "number": 5,
           "title": "reset UI (토큰 폼 · 전체 흐름 완성)",
           "description": "쿼리스트링 토큰 수신 → 새 비번/확인 폼(클라 정책 검증) → reset API 호출 → 성공 시 로그인 유도, 실패(만료/무효) 시 재요청 안내. 접근성. 데모 가능 지점②(전체 흐름).",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/password/reset/page.tsx"
           ],
           "estimatedLines": 350,
-          "prLineLimit": 450
+          "prLineLimit": 450,
+          "prNumber": 87
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 87,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-29T21:03:00+09:00"
+        "autoChainArgs": "87 --auto-fix",
+        "updatedAt": "2026-05-29T21:07:00+09:00"
       }
     },
     "CANDID-021": {
