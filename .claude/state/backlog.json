@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 300,
+    "version": 301,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T19:32:00+09:00"
+    "updatedAt": "2026-05-29T19:35:08+09:00"
   },
   "summary": {
     "total": 43,
     "done": 31,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 14
+    "todo": 13
   },
   "phases": {
     "1": {
@@ -1620,10 +1620,14 @@
       "id": "CANDID-020",
       "title": "비밀번호 재설정 (US-AUTH-004)",
       "description": "이메일 입력 → 재설정 메일 발송(존재 여부 무관 동일 응답, 계정 열거 방지). 토큰 30분 일회용. 완료 시 모든 Refresh Token 무효화.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
+      "assignee": "wejsa-u@hoji-20260529-193508",
+      "assignedAt": "2026-05-29T19:35:08+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-010"
       ],
