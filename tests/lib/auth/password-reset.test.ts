@@ -248,6 +248,42 @@ describe('resetPassword — 정상 (consume + 비번 변경 + 세션 무효화)'
     expect(updateArg.where.tokenHash).not.toBe(PLAIN_TOKEN);
     expect(updateArg.where.consumedAt).toBeNull();
   });
+
+  it('활성 세션 없음(revokedCount=0) — 정상 처리 + revokedSessions:0', async () => {
+    const tx = makeResetTxMock({ consumeCount: 1, userId: 7, revokedCount: 0 });
+    prisma.$transaction.mockImplementation(async (fn: (t: typeof tx) => unknown) => fn(tx));
+
+    const result = await resetPassword(PLAIN_TOKEN, 'NewPassw0rd!', NOW);
+
+    expect(result).toEqual({ userId: 7, revokedSessions: 0 });
+    // 세션이 없어도 passwordHash는 갱신된다.
+    expect(tx.user.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('동시 클릭 double-consume — winner만 비번 변경, loser는 INVALID (race 회귀 가드)', async () => {
+    // 첫 트랜잭션 consume count=1(승자), 두 번째 count=0 + consumedAt set(패자 — 이미 소진).
+    const winnerTx = makeResetTxMock({ consumeCount: 1, userId: 7, revokedCount: 1 });
+    const loserTx = makeResetTxMock({ consumeCount: 0, postRow: { consumedAt: NOW } });
+    prisma.$transaction
+      .mockImplementationOnce(async (fn: (t: typeof winnerTx) => unknown) => fn(winnerTx))
+      .mockImplementationOnce(async (fn: (t: typeof loserTx) => unknown) => fn(loserTx));
+
+    const results = await Promise.allSettled([
+      resetPassword(PLAIN_TOKEN, 'NewPassw0rd!', NOW),
+      resetPassword(PLAIN_TOKEN, 'NewPassw0rd!', NOW),
+    ]);
+
+    // 정확히 하나만 성공, 다른 하나는 INVALID. 비번 변경은 winner에서 1회만.
+    const fulfilled = results.filter((r) => r.status === 'fulfilled');
+    const rejected = results.filter((r) => r.status === 'rejected');
+    expect(fulfilled).toHaveLength(1);
+    expect(rejected).toHaveLength(1);
+    expect((rejected[0] as PromiseRejectedResult).reason).toMatchObject({
+      code: 'AUTH_RESET_TOKEN_INVALID',
+    });
+    expect(winnerTx.user.update).toHaveBeenCalledTimes(1);
+    expect(loserTx.user.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('resetPassword — 토큰 무효/만료/일회용', () => {
