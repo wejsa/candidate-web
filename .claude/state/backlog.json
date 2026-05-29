@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 315,
+    "version": 316,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T20:32:00+09:00"
+    "updatedAt": "2026-05-29T20:40:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -1639,7 +1639,9 @@
         "tests/lib/auth/password-reset.test.ts",
         "lib/security/rate-limit.ts",
         "tests/lib/errors/codes.test.ts",
-        "tests/lib/security/rate-limit.test.ts"
+        "tests/lib/security/rate-limit.test.ts",
+        "tests/app/api/v1/auth/password/reset-request.test.ts",
+        "docs/security/security-controls.md"
       ],
       "dependencies": [
         "CANDID-010"
@@ -1716,12 +1718,12 @@
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 84,
         "fixLoopCount": 0,
-        "autoChainArgs": "84 --auto-fix",
-        "updatedAt": "2026-05-29T20:32:00+09:00"
+        "autoChainArgs": "84",
+        "updatedAt": "2026-05-29T20:40:00+09:00"
       }
     },
     "CANDID-021": {
