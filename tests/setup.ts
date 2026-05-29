@@ -3,6 +3,10 @@
 // PII 암호화 키를 테스트 전용 값으로 고정한다.
 // NODE_ENV는 vitest가 자동으로 'test'로 설정하므로 여기서 다루지 않는다 (readonly 타입).
 
+// CANDID-039 Step 1 — RTL 도입. jest-dom 커스텀 matcher(toBeInTheDocument 등) 확장.
+// jsdom 환경 테스트(.test.tsx)에서만 실제 사용되며, node 환경 테스트에는 무해(matcher 등록만).
+import '@testing-library/jest-dom/vitest';
+
 process.env.DATABASE_URL ??= 'postgresql://test:test@localhost:5432/test_db';
 
 // 32 bytes hex — 테스트 전용 고정 키.
