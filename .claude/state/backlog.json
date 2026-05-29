@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 336,
+    "version": 337,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T01:34:12+09:00"
+    "updatedAt": "2026-05-30T01:35:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -2807,15 +2807,11 @@
       "priority": "medium",
       "phase": 1,
       "assignee": "wejsa-u@hoji-20260530-004524",
-      "assignedAt": "2026-05-30T01:33:00+09:00",
+      "assignedAt": "2026-05-30T01:35:00+09:00",
       "lockedFiles": [
-        "scripts/meta/check-guard-wiring-consistency.mjs",
-        "scripts/check-guard-wiring-consistency.mjs",
-        "package.json",
-        ".claude/skills/skill-review-pr/SKILL.md",
+        "tests/scripts/_helpers/spawn-guard.ts",
         "tests/scripts/check-guard-wiring-consistency.test.ts",
         "tests/scripts/check-migrations-no-concurrently.test.ts",
-        "tests/scripts/_helpers/spawn-guard.ts",
         ".claude/domains/_base/checklists/common.md"
       ],
       "dependencies": [
@@ -2825,21 +2821,21 @@
       "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 89,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "89",
-        "updatedAt": "2026-05-30T01:33:00+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-30T01:35:00+09:00"
       },
-      "updatedAt": "2026-05-30T01:33:00+09:00",
+      "updatedAt": "2026-05-30T01:35:00+09:00",
       "planPath": ".claude/temp/CANDID-045-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "steps": [
         {
           "step": 1,
           "title": "메타가드 디렉토리 분리(D-5) + 검증 룰 강화(D-1/D-3/D-4/D-6) + lifecycle-hook 보안(M-SEC)",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "scripts/meta/check-guard-wiring-consistency.mjs",
             "scripts/check-guard-wiring-consistency.mjs",
@@ -2852,7 +2848,9 @@
           "dependsOn": [],
           "prNumber": 89,
           "branch": "feature/CANDID-045-step1",
-          "note": "PR #88 상태-푸시 실수로 리뷰 없이 자동 머지 → revert(bebc101) 후 #89로 정식 재진행. 변경 동일."
+          "note": "PR #88 상태-푸시 실수로 리뷰 없이 자동 머지 → revert(bebc101) 후 #89로 정식 재진행. 변경 동일.",
+          "mergedAt": "2026-05-30T01:34:39+09:00",
+          "mergedLines": 333
         },
         {
           "step": 2,
