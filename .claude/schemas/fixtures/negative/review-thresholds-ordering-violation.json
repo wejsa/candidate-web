@@ -1,0 +1,12 @@
+{
+  "name": "review-thresholds-ordering-violation",
+  "domain": "general",
+  "version": "2.3.0",
+  "review": {
+    "thresholds": {
+      "critical": 60,
+      "major": 90,
+      "minor": 30
+    }
+  }
+}

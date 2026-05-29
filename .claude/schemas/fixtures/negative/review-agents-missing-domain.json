@@ -1,0 +1,8 @@
+{
+  "name": "review-agents-missing-domain-violation",
+  "domain": "general",
+  "version": "2.3.0",
+  "review": {
+    "agents": ["security", "test"]
+  }
+}

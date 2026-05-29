@@ -32,8 +32,18 @@ ERROR_LOG="$STATE_DIR/hook-errors.log"
 BACKLOG="$STATE_DIR/backlog.json"
 DISABLE_FLAG="$STATE_DIR/hook-disabled.flag"
 COUNTER_FILE="$STATE_DIR/hook-trigger-count"
-TRIGGER_WINDOW_SECONDS=10
-TRIGGER_MAX=3
+INIT_FLAG="$STATE_DIR/init-in-progress.flag"
+INIT_FLAG_TTL_SECONDS=3600  # 마커 미회수(SKILL 비정상 종료) 대비 1시간 후 stale로 간주
+
+# 임계값/윈도우 외부화 (v2.1.3): 멀티파일 Edit이 잦은 단독 작업자가 자체적으로 완화 가능.
+# 기본값은 TFT R1/R2 권장값 그대로 유지 → 미설정 시 회귀 0.
+# 비숫자/0 이하 입력은 무시하고 기본값 사용.
+TRIGGER_WINDOW_SECONDS="${CCK_HOOK_WINDOW_SEC:-10}"
+TRIGGER_MAX="${CCK_HOOK_THRESHOLD:-3}"
+case "$TRIGGER_WINDOW_SECONDS" in ''|*[!0-9]*) TRIGGER_WINDOW_SECONDS=10 ;; esac
+case "$TRIGGER_MAX" in ''|*[!0-9]*) TRIGGER_MAX=3 ;; esac
+[ "$TRIGGER_WINDOW_SECONDS" -lt 1 ] 2>/dev/null && TRIGGER_WINDOW_SECONDS=10
+[ "$TRIGGER_MAX" -lt 1 ] 2>/dev/null && TRIGGER_MAX=3
 
 mkdir -p "$STATE_DIR" 2>/dev/null || exit 0
 
@@ -45,6 +55,21 @@ log_err() {
 # ── 0단계: 자동 비활성화 플래그 ──────────────────────
 if [ -f "$DISABLE_FLAG" ]; then
   exit 0
+fi
+
+# ── 0-A단계: init/onboard 트리거 보호 마커 (v2.2.0) ─────
+# skill-init/onboard 트랜잭션 동안은 초기 셋업 폭주(다수 Write)가 정상이므로
+# 카운터 진입 자체를 차단하여 false-positive 자동 비활성화 방지.
+# 마커는 SKILL이 시작 시 생성·종료 시 제거하지만, 비정상 종료 대비 TTL 자동 회수.
+if [ -f "$INIT_FLAG" ]; then
+  flag_mtime="$(stat -c %Y "$INIT_FLAG" 2>/dev/null || stat -f %m "$INIT_FLAG" 2>/dev/null || echo 0)"
+  flag_age=$(( $(date -u +%s) - flag_mtime ))
+  if [ "$flag_age" -lt "$INIT_FLAG_TTL_SECONDS" ] 2>/dev/null; then
+    exit 0
+  fi
+  # stale 마커 (TTL 초과) — SKILL이 정리 못 하고 종료된 케이스. 자동 회수.
+  rm -f "$INIT_FLAG" 2>/dev/null
+  log_err "init-in-progress.flag stale 회수 (age=${flag_age}s > ${INIT_FLAG_TTL_SECONDS}s)"
 fi
 
 # jq 미설치 graceful skip
@@ -149,13 +174,18 @@ if [ -f "$BACKLOG" ]; then
   ' "$BACKLOG" 2>/dev/null || echo false)"
 
   if [ "$HAS_OWNED" = "true" ] && command -v atomic_write >/dev/null 2>&1; then
+    # schema는 .tasks를 object(dict, key=Task ID)로 정의. jq `map(f)`는 array 변환 연산자이므로
+    # dict에 적용하면 [{...},{...}]로 평탄화되어 키가 영구 손실됨. `with_entries(.value |= ...)`로
+    # dict 의미를 유지하면서 값만 in-place 갱신. v1 array fixture에는 무동작(early skip)으로 안전.
     atomic_write "$BACKLOG" jq \
       --arg sid "$SESSION_ID" \
       --arg now "$NOW_ISO" \
-      '.tasks |= map(
-        if .status == "in_progress" and (.lockedBy // "") == $sid
-        then . + {lockedAt: $now}
-        else . end
+      '.tasks |= with_entries(
+        .value |= (
+          if .status == "in_progress" and (.lockedBy // "") == $sid
+          then . + {lockedAt: $now}
+          else . end
+        )
       )' "$BACKLOG"
   fi
 fi

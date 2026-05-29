@@ -366,6 +366,63 @@
         }
       },
       "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "description": "리뷰 모드/임계치 설정 (skill-review-pr). 미설정 시 자동 Tier 분류 적용. mode와 agents는 상호 배타. thresholds는 critical ≥ major ≥ minor 강제, critical ≥ 50 강제(false-positive 게이트 무력화 방지).",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["full", "standard"],
+          "description": "프리셋 모드 (full: 3-agent, standard: domain+security 2-agent). 명시 시 자동 Tier 분류 비활성화"
+        },
+        "agents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["domain", "security", "test"]
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "contains": {
+            "const": "domain"
+          },
+          "description": "커스텀 에이전트 조합. domain은 schema-level 필수(contains 강제). config 서브커맨드 외 수동 편집 경로에서도 우회 불가."
+        },
+        "thresholds": {
+          "type": "object",
+          "description": "confidence score (0-100) 게시·결정 임계치. 미설정 키는 디폴트(80/60/50)로 독립 fallback. 각 키 값은 critical ≥ major ≥ minor 순서 강제 + critical ≥ 50 (rubric anchor 50과 정렬, false-positive 게이트 무력화 방지)",
+          "properties": {
+            "critical": {
+              "type": "integer",
+              "minimum": 50,
+              "maximum": 100,
+              "default": 80,
+              "description": "CRITICAL 이슈가 머지 차단 + 게시되는 최소 confidence. minimum=50 (rubric 'minor nitpick'을 CRITICAL 차단 임계로 두는 것 차단). 미만은 MAJOR로 강등 게시 (드롭 X)"
+            },
+            "major": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 60,
+              "description": "원래-MAJOR 이슈가 게시되는 최소 confidence (미만은 드롭). 강등된 CRITICAL은 이 임계치 무시(항상 게시)"
+            },
+            "minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 50,
+              "description": "MINOR 이슈가 게시되는 최소 confidence (미만은 드롭)"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "not": {
+        "required": ["mode", "agents"]
+      },
+      "$comment": "critical ≥ major ≥ minor ordering: JSON Schema Draft-07은 cross-field 숫자 비교 불가 — schema 표면 강제 X. 검증은 (a) skill-review-pr Step 4 진입 시 sanity check + 디폴트 강제 + 경고, (b) scripts/validate-schema.sh의 ordering 추가 검사, (c) negative fixture(review-thresholds-ordering-violation.json) 회귀 보호 — 3중 방어선."
     }
   },
   "additionalProperties": false,

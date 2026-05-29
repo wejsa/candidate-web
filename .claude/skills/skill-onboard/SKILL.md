@@ -43,6 +43,17 @@ complexity-hint: medium
 
 ## 실행 플로우
 
+### Step 0: 트리거 보호 마커 생성 (v2.2.0+)
+
+PostToolUse hook의 자동 비활성화(10초/3회 임계)를 일시 차단합니다. skill-onboard는 다수 Write를 짧은 시간에 발생시키므로 기본 임계값에서 false-positive 비활성화가 발생하기 쉽습니다.
+
+```bash
+mkdir -p .claude/state 2>/dev/null
+touch .claude/state/init-in-progress.flag 2>/dev/null || true
+```
+
+> `post-tool-use.sh`는 본 마커 존재 시 0-A단계에서 즉시 exit 0. 마커는 1시간 TTL 자동 회수. Step 7 종료 시 명시적 제거.
+
 ### Step 1: 코드베이스 스캔
 
 **선행 가드**: `src/`/`app/`/`lib/` 디렉토리 또는 빌드 파일(`build.gradle*`, `pom.xml`, `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`) 중 하나도 없는 빈 디렉토리면 다음 안내 후 종료 옵션 제시:
@@ -110,6 +121,16 @@ skill-init Step 10 동일: project.json (buildCommands 포함), backlog.json (�
 
 ### Step 7: 완료 리포트
 필수 포함: 프로젝트 정보, 생성된 파일, 백업된 파일, 다음 단계 (/skill-feature, /skill-backlog, /skill-plan)
+
+#### 트리거 보호 마커 제거 (v2.2.0+, 필수)
+
+Step 0에서 생성한 마커를 명시적으로 제거하여 다음 일반 Edit/Write에 hook 임계가 다시 정상 동작하도록 합니다. 사용자 보고 출력 *직후* 실행:
+
+```bash
+rm -f .claude/state/init-in-progress.flag 2>/dev/null || true
+```
+
+> 제거 실패해도 1시간 TTL로 hook이 stale 회수. Step 1~6 도중 abort된 경우(예: 빈 디렉토리 N 선택, 사용자 거절)에도 가능한 한 본 명령을 실행하고 종료.
 
 ## 주의사항
 - 기존 코드/파일은 절대 수정하지 않음 (AI Crew Kit 설정만 추가)

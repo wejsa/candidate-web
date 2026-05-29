@@ -1,0 +1,8 @@
+{
+  "name": "review-agents-unknown-violation",
+  "domain": "general",
+  "version": "2.3.0",
+  "review": {
+    "agents": ["domain", "perf"]
+  }
+}

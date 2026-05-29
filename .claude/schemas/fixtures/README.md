@@ -7,18 +7,28 @@
 ```
 fixtures/
 ├── positive/          스키마가 ✅ 통과해야 하는 케이스
-│   ├── v1-legacy-no-hooks.json     v1.x 프로젝트 — hooks 필드 부재 (하위호환)
-│   ├── v2-empty-hooks.json         v2.0.0-alpha.1 Step 1 예약 구조 (빈 배열)
-│   ├── v2-full-hooks.json          v2.0.0-alpha.2 Step 2~3 전체 훅 등록
-│   └── v2-future-events.json       v2.1+ PreToolUse/UserPromptSubmit 확장 경로
+│   ├── v1-legacy-no-hooks.json         v1.x 프로젝트 — hooks 필드 부재 (하위호환)
+│   ├── v2-empty-hooks.json             v2.0.0-alpha.1 Step 1 예약 구조 (빈 배열)
+│   ├── v2-full-hooks.json              v2.0.0-alpha.2 Step 2~3 전체 훅 등록
+│   ├── v2-future-events.json           v2.1+ PreToolUse/UserPromptSubmit 확장 경로
+│   ├── v2-review-mode-full.json        v2.3+ review.mode='full' 명시
+│   ├── v2-review-agents-custom.json    v2.3+ review.agents 커스텀 조합
+│   ├── v2-review-thresholds-full.json  v2.3+ review.thresholds 3키 모두 명시
+│   └── v2-review-thresholds-partial.json v2.3+ review.thresholds 부분(critical만) — 나머지는 독립 fallback
 │
 └── negative/          스키마가 ❌ 거부해야 하는 케이스
-    ├── unknown-event.json          정의되지 않은 훅 이벤트명
-    ├── missing-command.json        hooks[].command 필드 누락 (required 위반)
-    ├── timeout-out-of-range.json   timeout > 60 (maximum 위반)
-    ├── empty-hooks-array.json      hooks[] 배열 비어있음 (minItems 1 위반)
-    ├── additional-property.json    허용되지 않은 필드 포함
-    └── excludepaths-legacy.json    TFT R1에서 제거된 excludePaths 커스텀 키
+    ├── unknown-event.json              정의되지 않은 훅 이벤트명
+    ├── missing-command.json            hooks[].command 필드 누락 (required 위반)
+    ├── timeout-out-of-range.json       timeout > 60 (maximum 위반)
+    ├── empty-hooks-array.json          hooks[] 배열 비어있음 (minItems 1 위반)
+    ├── additional-property.json        허용되지 않은 필드 포함
+    ├── excludepaths-legacy.json        TFT R1에서 제거된 excludePaths 커스텀 키
+    ├── review-mode-and-agents-both.json review.mode + review.agents 동시 설정 (not 제약 위반)
+    ├── review-critical-below-minimum.json review.thresholds.critical < 50 (minimum 위반 — false-positive 게이트 무력화 차단)
+    ├── review-agents-unknown.json      review.agents에 enum 외 값 (domain/security/test 외 'perf' 등)
+    ├── review-agents-missing-domain.json review.agents에 domain 누락 (contains 제약 위반)
+    └── review-thresholds-ordering-violation.json review.thresholds 순서 위반 (critical=60 < major=90).
+                                          JSON Schema cross-field 비교 불가하므로 validate-schema.sh의 별도 ordering 검증 블록에서 처리.
 ```
 
 ## 추가 규칙

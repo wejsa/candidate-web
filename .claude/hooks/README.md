@@ -17,6 +17,7 @@ Claude Code 네이티브 훅으로 ai-crew-kit 워크플로우 자동화를 구�
 ├── README.md                     이 파일
 ├── lib/
 │   └── atomic-write.sh           flock/mkdir 기반 원자적 쓰기 helper (R5)
+├── diagnose.sh                   v2.1.3: read-only hook 진단 도구
 ├── session-start.sh              SessionStart: git sync + 상태 로드
 ├── stop.sh                       Stop: 만료 잠금 해제 + continuation-plan 갱신
 └── post-tool-use.sh              PostToolUse: lockedAt heartbeat + 3단계 무한 루프 방어
@@ -62,8 +63,11 @@ exec 0</dev/null                  # stdin을 /dev/null로 — 자식 프로세�
 1. git sync (워크트리면 `git fetch + merge --ff-only`, 일반 클론이면 `git pull --ff-only`)
 2. `.claude/state/continuation-plan.md` 존재 시 stdout 출력
 3. `.claude/state/backlog.json`의 `in_progress` Task 목록 안내
+4. **develop 미반영 워크트리 claim 감지** (다중 워크트리 동시 선택 안전장치) — `origin/worktree-*` 브랜치를 직접 스캔해, 거기서는 `in_progress`인데 현재 backlog에는 `todo`로 남은 Task(= claim이 아직 develop SSOT까지 전파되지 않은 윈도우)를 경고. 같은 Task를 복수 워크트리가 claim하면 🔴, 단일이면 🔶. 현재 세션 자신의 브랜치는 제외하고, develop에서 이미 `in_progress`(정상 전파됨)거나 `done`/`merged`(머지 후 잔존 브랜치의 stale claim)면 경고하지 않는다.
 
-**graceful skip 시나리오**: git 미설치, jq 미설치, 비-git 디렉토리 → 경고 로그 후 계속.
+> 4단계는 `worktree-<name>` 네이티브 브랜치 명명만 감지한다. 임의 브랜치명을 쓰는 수동 worktree는 잡지 못한다. 또한 두 워크트리가 같은 Task를 claim했고 그 중 하나가 이미 develop에 전파된 경우는 §1.5 claim-time 충돌 검사가 1차로 막는 영역이다 — hook은 todo 윈도우만 보완한다.
+
+**graceful skip 시나리오**: git 미설치, jq 미설치, 비-git 디렉토리, `origin/worktree-*` 브랜치 부재 → 경고 로그 또는 조용히 스킵 후 계속.
 
 ### Stop (`stop.sh`)
 
@@ -84,26 +88,108 @@ exec 0</dev/null                  # stdin을 /dev/null로 — 자식 프로세�
 **발동 시점**: `Edit` / `Write` 도구 호출 완료 직후
 **timeout**: 10초
 **매처**: `Edit|Write`
-**동작**: 현재 세션이 `lockedBy`로 소유한 `in_progress` Task의 `lockedAt`을 현재 시각으로 갱신(heartbeat). stop.sh 만료 감지(10분 TTL)와 연동.
+**동작**: 현재 세션이 `lockedBy`로 소유한 `in_progress` Task의 `lockedAt`을 현재 시각으로 갱신(heartbeat). stop.sh 만료 감지(10분 TTL)와 연동. `lockedBy`/`lockedAt`은 v2.2.0부터 `backlog.schema.json`에 정식 필드로 정의(가변 잠금 의미, `assignee`/`assignedAt`(불변 할당)와 구분).
 
-**3단계 무한 루프 방어** (TFT R1/R2):
+**3단계 무한 루프 방어 + init 보호 마커** (TFT R1/R2 + v2.2.0):
 
 | 단계 | 트리거 | 동작 |
 |------|--------|------|
 | 0 | `hook-disabled.flag` 존재 | 즉시 exit 0 |
+| 0-A | `init-in-progress.flag` 존재 (mtime ≤ 1h) | 즉시 exit 0. skill-init/onboard 트랜잭션 동안 카운터 진입 자체 차단 (v2.2.0). TTL 초과 마커는 자동 회수. |
 | 1 | `file_path`가 `.claude/state/*` 또는 `.claude/temp/*` | 즉시 exit 0 (네이티브 path 필터 부재 — 스크립트 레벨) |
 | 2 | 세션별 락(`$TMPDIR/ack-hook-<sid>.lock`) 존재 | 재진입으로 판단, 즉시 exit 0. 정상 경로는 `trap EXIT`로 정리 |
-| 3 | 10초 윈도우 내 3회 초과 | `hook-disabled.flag` 생성 + stderr 경고 로그 |
+| 3 | `CCK_HOOK_WINDOW_SEC` 윈도우 내 `CCK_HOOK_THRESHOLD` 초과 (기본 10초/3회) | `hook-disabled.flag` 생성 + stderr 경고 로그 |
 
 **graceful skip**: jq 미설치, stdin 비어있음, 소유 Task 없음 → 쓰기 없이 exit 0.
 
-**수동 복구**: 자동 비활성화 발동 시 원인 점검 후 플래그 삭제:
+**임계값/윈도우 외부화 (v2.1.3+)**: 환경변수로 기본값을 override 가능. 멀티파일 Edit이 잦은 단독 작업자가 자동 비활성화를 자주 보면 완화하세요.
+
+| 환경변수 | 기본값 | 의미 |
+|---------|--------|------|
+| `CCK_HOOK_THRESHOLD` | 3 | 윈도우 내 허용 호출 횟수 — 이를 **초과**하면 자동 비활성화 |
+| `CCK_HOOK_WINDOW_SEC` | 10 | 카운트 누적 윈도우(초) |
+
+비숫자/0 이하 값은 무시되고 기본값으로 폴백합니다. 미설정 시 회귀 0 (TFT R1/R2 권장값).
+
+**수동 복구**: 자동 비활성화 발동 시 원인 점검 후 플래그 삭제. 점검은 `diagnose.sh` 권장(아래 §진단 도구).
 ```bash
 rm .claude/state/hook-disabled.flag
 rm .claude/state/hook-trigger-count
 ```
 
 ---
+
+## 진단 도구 (v2.1.3+)
+
+`diagnose.sh`는 **read-only** 진단입니다. flag/counter/lock/log/settings를 한 번에 점검하고 현재 상태의 영향과 행동 옵션을 단정합니다. 어떤 파일도 mutate하지 않습니다.
+
+```bash
+bash .claude/hooks/diagnose.sh
+```
+
+출력 예시:
+```
+[등록 상태]   SessionStart/PostToolUse/Stop 등록 + 스크립트 존재
+[PostToolUse] status: 🔴 DISABLED since 2026-05-12T11:55:50Z (3d ago)
+              trigger-count: window_start=... count=4
+              추정 원인: 응답 1회당 Edit/Write ≥4회 호출
+[Stop]        continuation-plan.md: absent (idle 스킵 정상)
+              만료된 lock: 0건 / 만료 임박: 0건
+[영향 평가]   in_progress 1건 (lockedBy 0건) → 🟢 비활성 영향 없음
+[행동 옵션]   [A] 그대로 / [B] 복구 / [C] 임계값 완화
+```
+
+## 자동 비활성화 진단 가이드
+
+### 흔한 원인 TOP 3
+
+기본 임계값 `10초/3회 초과`는 다음 패턴에서 쉽게 깨집니다.
+
+1. **응답 1회에 Edit/Write 4회 이상 연속** — 멀티파일 리팩토링 시 가장 흔함
+2. **MultiEdit 1회 + 후속 Edit 2~3회** — MultiEdit도 같은 매처에 잡힘
+3. **자동화 스크립트 / 워크플로우 일괄 수정** — 짧은 시간 다발 호출
+
+### `hook-trigger-count` 포맷 해석
+
+파일 내용 예시: `1778586941 4`
+- 첫 숫자 = 윈도우 시작 Unix epoch (UTC)
+- 두 번째 숫자 = 누적 카운트
+- 디코딩: `date -u -d @1778586941` 또는 `diagnose.sh`가 ISO8601로 변환해 표시
+
+### 복구 결정 트리
+
+```
+현재 in_progress Task 중 lockedBy 설정된 게 있나?
+├─ 없음 → 영향 0. 복구 불필요 (그대로 진행 가능)
+└─ 있음 → 작업 예상 시간이 10분 초과 예정?
+          ├─ 아니오 → 그대로 가능 (stop.sh가 만료된 lock만 해제, 단기 작업은 무영향)
+          └─ 예    → 복구 권장 (heartbeat 갱신으로 lock 강제 해제 방지)
+                    또는 임계값 완화 (CCK_HOOK_THRESHOLD=8 등)
+```
+
+`diagnose.sh`가 위 트리를 자동 판정해서 `[영향 평가]` 섹션에 결론을 출력합니다.
+
+### Stop 부재 ≠ 미동작
+
+`continuation-plan.md`가 없는 건 **Stop 미동작이 아니라** `workflowState=idle` 또는 `in_progress=0건` 시 의도적 스킵의 결과입니다. Stop 실제 동작을 확인하려면:
+
+```bash
+# 능동 검증 (mutate 가능 — 만료된 lock이 있다면 해제됨)
+echo '{"stop_hook_active": false}' | bash .claude/hooks/stop.sh
+
+# 또는 read-only로 만료 후보만 확인
+bash .claude/hooks/diagnose.sh  # [Stop] 섹션
+```
+
+### 임계값 권장값
+
+| 사용 패턴 | `CCK_HOOK_THRESHOLD` | 비고 |
+|----------|---------------------:|------|
+| 단독 작업, 멀티파일 흔함 | 8 | 응답당 Edit 다수 일반적 |
+| 팀 작업, 동시 세션 운용 | 3 (기본) | TFT R1/R2 권장값 |
+| 자동화 스크립트 다발 | flag 영구화 | `touch .claude/state/hook-disabled.flag` |
+
+영구 적용은 `.claude/settings.json`의 hook 정의에 `env`를 추가하거나, shell rc 파일에 export하세요.
 
 ## 디버깅
 
@@ -164,7 +250,7 @@ bash .claude/hooks/tests/run-all.sh           # 전체
 bash .claude/hooks/tests/test-stop-recursion.sh  # 개별
 ```
 
-커버: 재귀 방지, jq/git 미설치, 워크트리 동시 write(flock), 만료 lock 해제, continuation-plan 디바운스/idle 스킵, HI-04 체커 자체.
+커버: 재귀 방지, jq/git 미설치, 워크트리 동시 write(flock), 만료 lock 해제, continuation-plan 디바운스/idle 스킵, develop 미반영 워크트리 claim 감지(이중 claim/자기 제외/stale 무시), HI-04 체커 자체.
 
 ---
 

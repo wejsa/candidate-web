@@ -122,12 +122,21 @@
         },
         "assignee": {
           "type": ["string", "null"],
-          "description": "담당자 식별자 (형식: user@hostname-YYYYMMDD-HHmmss)"
+          "description": "담당자 식별자 — Task가 처음 할당된 세션/사용자 (형식: user@hostname-YYYYMMDD-HHmmss). **불변**: 할당 시점에 1회 설정, 이후 해제 전까지 변경 안 됨. 가변 잠금 보유자는 `lockedBy` 참조."
         },
         "assignedAt": {
           "type": ["string", "null"],
           "format": "date-time",
-          "description": "할당 시각"
+          "description": "할당 시각 — assignee가 처음 설정된 시각. **불변**: 할당 시점에 1회 기록, 만료/해제 시점은 별도(`lockedAt` 기반 TTL)."
+        },
+        "lockedBy": {
+          "type": ["string", "null"],
+          "description": "현재 잠금 보유 세션 식별자 — heartbeat 갱신 주체. **가변**: 다른 세션이 lock을 인수하거나 stop.sh 만료 해제 시 null. assignee와 의미 분리(동일 값일 수 있으나 라이프사이클 다름). v2.2.0 도입 (PostToolUse heartbeat / Stop 만료 해제 hook이 직접 참조)."
+        },
+        "lockedAt": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "마지막 heartbeat 시각 — PostToolUse hook이 Edit/Write마다 갱신. **가변**: Stop hook이 10분(EXPIRY_SECONDS) 초과 시 null로 해제하여 lock 강제 회수. assignedAt(불변)과 의미 구분. v2.2.0 도입."
         },
         "lockTTL": {
           "type": ["integer", "null"],
