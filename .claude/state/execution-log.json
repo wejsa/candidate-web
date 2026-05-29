@@ -2367,6 +2367,13 @@
     "at": "2026-05-29T20:15:20+09:00"
   },
   {
+    "event": "merged",
+    "taskId": "CANDID-020",
+    "stepNumber": 1,
+    "prNumber": 81,
+    "at": "2026-05-29T20:17:09+09:00"
+  },
+  {
     "event": "approved",
     "taskId": "CANDID-039",
     "stepNumber": 3,
@@ -2390,5 +2397,20 @@
       83
     ],
     "at": "2026-05-29T20:19:04+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-020",
+    "stepNumber": 2,
+    "prNumber": 84,
+    "at": "2026-05-29T20:32:00+09:00"
+  },
+  {
+    "event": "approved",
+    "taskId": "CANDID-020",
+    "stepNumber": 2,
+    "prNumber": 84,
+    "decision": "APPROVED (self-PR COMMENT, 3 MAJOR resolved in-PR)",
+    "at": "2026-05-29T20:40:00+09:00"
   }
 ]

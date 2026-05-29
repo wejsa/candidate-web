@@ -48,6 +48,16 @@ export const ERROR_CATALOG = {
     status: 409,
     message: '이미 인증된 이메일입니다. 재발송이 필요하지 않습니다.',
   },
+  // CANDID-020 — 비밀번호 재설정 (US-AUTH-004). reset-request는 계정 열거 방지로 항상 200이라
+  // 별도 코드 없음. 아래 두 코드는 reset(consume) 단계(Step 4)에서 토큰 무효/만료 시 사용.
+  AUTH_RESET_TOKEN_INVALID: {
+    status: 400,
+    message: '유효하지 않은 비밀번호 재설정 토큰입니다. 재설정을 다시 요청해 주세요.',
+  },
+  AUTH_RESET_TOKEN_EXPIRED: {
+    status: 410,
+    message: '비밀번호 재설정 토큰이 만료되었습니다. 재설정을 다시 요청해 주세요.',
+  },
   // CANDID-012 Step 1 — OAuth2 소셜 로그인 (Google/GitHub, US-AUTH-003)
   AUTH_OAUTH_STATE_INVALID: {
     status: 400,

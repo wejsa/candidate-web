@@ -40,7 +40,10 @@ BR-SEC-04 정책 카탈로그 (`lib/security/rate-limit.ts`):
 |------|:----:|:------:|---|------------|
 | `POLICIES.LOGIN` | 10회 | 1분 | IP | POST `/api/v1/auth/login` (CANDID-011) |
 | `POLICIES.SIGNUP` | 5회 | 1시간 | IP | POST `/api/v1/auth/signup` (CANDID-010) |
+| `POLICIES.PASSWORD_RESET` | 5회 | 1시간 | IP | POST `/api/v1/auth/password/reset-request` (CANDID-020) |
 | ❌ FILE_UPLOAD | 30회 | 1시간 | **사용자** | (미정의 — CANDID-016에서 시그니처 확장과 함께 도입) |
+
+> `PASSWORD_RESET`은 토큰/메일 폭주 차단과 함께 계정 열거 탐침(이메일 대량 조회)을 완화한다. 단, 라우터가 계정 존재 여부와 무관하게 항상 동일한 200을 반환(uniform response)하므로 rate-limit은 보조 방어선이며 1차 방어는 응답 균일화다.
 
 ### 사용 예시 (CANDID-011 로그인 라우트)
 
