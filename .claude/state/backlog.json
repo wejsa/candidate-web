@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 330,
+    "version": 331,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T00:53:28+09:00"
+    "updatedAt": "2026-05-30T01:05:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -2807,7 +2807,7 @@
       "priority": "medium",
       "phase": 1,
       "assignee": "wejsa-u@hoji-20260530-004524",
-      "assignedAt": "2026-05-30T00:47:30+09:00",
+      "assignedAt": "2026-05-30T01:05:00+09:00",
       "lockedFiles": [
         "scripts/meta/check-guard-wiring-consistency.mjs",
         "scripts/check-guard-wiring-consistency.mjs",
@@ -2825,21 +2825,21 @@
       "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 88,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-30T00:47:30+09:00"
+        "autoChainArgs": "88 --auto-fix",
+        "updatedAt": "2026-05-30T01:05:00+09:00"
       },
-      "updatedAt": "2026-05-30T00:47:30+09:00",
+      "updatedAt": "2026-05-30T01:05:00+09:00",
       "planPath": ".claude/temp/CANDID-045-plan.md",
       "currentStep": 1,
       "steps": [
         {
           "step": 1,
           "title": "메타가드 디렉토리 분리(D-5) + 검증 룰 강화(D-1/D-3/D-4/D-6) + lifecycle-hook 보안(M-SEC)",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "scripts/meta/check-guard-wiring-consistency.mjs",
             "scripts/check-guard-wiring-consistency.mjs",
@@ -2849,7 +2849,9 @@
           ],
           "estimatedLines": 110,
           "prLineLimit": 250,
-          "dependsOn": []
+          "dependsOn": [],
+          "prNumber": 88,
+          "branch": "worktree-abundant-seeking-quasar"
         },
         {
           "step": 2,
