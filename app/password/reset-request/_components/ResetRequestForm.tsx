@@ -106,10 +106,12 @@ export function ResetRequestForm(): React.JSX.Element {
             autoComplete="email"
             required
             disabled={state.status === 'pending'}
+            aria-invalid={state.status === 'error'}
+            aria-describedby={state.status === 'error' ? 'reset-request-error' : undefined}
           />
         </label>
         {state.status === 'error' && state.message !== null && (
-          <p role="alert" aria-live="polite">
+          <p id="reset-request-error" role="alert" aria-live="polite">
             {state.message}
           </p>
         )}

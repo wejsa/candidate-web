@@ -77,6 +77,54 @@ describe('ResetRequestForm', () => {
     });
   });
 
+  it('네트워크 실패 — fetch reject 시 일반 안내 + 폼 유지(재시도 가능)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('Failed to fetch');
+      }),
+    );
+    const user = userEvent.setup();
+    render(<ResetRequestForm />);
+
+    await user.type(screen.getByLabelText('이메일'), 'user@example.com');
+    await user.click(screen.getByRole('button', { name: '재설정 메일 받기' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('잠시 후 다시 시도해 주세요.');
+    });
+    // 폼이 유지되어 재시도 가능 (pending 고착 방지).
+    expect(screen.getByLabelText('이메일')).toBeInTheDocument();
+  });
+
+  it('서버 오류(500) — generic 안내', async () => {
+    mockFetch(500, { code: 'SYS_INTERNAL_ERROR' });
+    const user = userEvent.setup();
+    render(<ResetRequestForm />);
+
+    await user.type(screen.getByLabelText('이메일'), 'user@example.com');
+    await user.click(screen.getByRole('button', { name: '재설정 메일 받기' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('잠시 후 다시 시도해 주세요.');
+    });
+  });
+
+  it('성공(200) message 없음 — 존재여부 무구분 기본 안내로 fallback + 폼 사라짐', async () => {
+    mockFetch(200, {}); // 서버 message 미포함
+    const user = userEvent.setup();
+    render(<ResetRequestForm />);
+
+    await user.type(screen.getByLabelText('이메일'), 'nobody@example.com');
+    await user.click(screen.getByRole('button', { name: '재설정 메일 받기' }));
+
+    await waitFor(() => {
+      // 계정 존재를 단정하지 않는 "가입되어 있다면" 톤의 기본 안내.
+      expect(screen.getByRole('status')).toHaveTextContent('가입되어 있다면');
+    });
+    expect(screen.queryByLabelText('이메일')).toBeNull();
+  });
+
   it('빈 이메일 — fetch 미호출 + 필수 입력 안내', async () => {
     const fetchMock = mockFetch(200, { message: UNIFORM });
     const user = userEvent.setup();
