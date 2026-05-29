@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 46,
     "projectPrefix": "CANDID",
-    "version": 306,
+    "version": 307,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T20:05:00+09:00"
+    "updatedAt": "2026-05-29T20:07:41+09:00"
   },
   "summary": {
     "total": 46,
@@ -2575,7 +2575,7 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260529-192652",
-      "assignedAt": "2026-05-29T20:01:44+09:00",
+      "assignedAt": "2026-05-29T20:07:41+09:00",
       "lockedFiles": [
         "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
         "tests/lib/drafts/use-auto-save.test.ts"
@@ -2587,12 +2587,12 @@
       "source": "CANDID-016 retro Action Item HIGH-2",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 82,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-29T20:01:44+09:00"
+        "autoChainArgs": "82 --auto-fix",
+        "updatedAt": "2026-05-29T20:07:41+09:00"
       },
       "currentStep": 2,
       "steps": [
@@ -2613,11 +2613,12 @@
         {
           "step": 2,
           "title": "ResumeUploadStep.test.tsx (10 시나리오)",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 500,
           "files": [
             "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx"
-          ]
+          ],
+          "prNumber": 82
         },
         {
           "step": 3,
