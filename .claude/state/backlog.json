@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "lastTaskNumber": 45,
+    "lastTaskNumber": 46,
     "projectPrefix": "CANDID",
-    "version": 300,
+    "version": 301,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T19:29:39+09:00"
+    "updatedAt": "2026-05-29T19:53:15+09:00"
   },
   "summary": {
-    "total": 45,
+    "total": 46,
     "done": 33,
     "inProgress": 1,
     "review": 0,
-    "todo": 11
+    "todo": 12
   },
   "phases": {
     "1": {
@@ -2738,6 +2738,21 @@
       ],
       "createdAt": "2026-05-25T23:34:34+09:00",
       "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)"
+    },
+    "CANDID-046": {
+      "id": "CANDID-046",
+      "title": "auth 테스트 격리 플래키 수정 (vi.mock prisma 워커 간 오염)",
+      "description": "tests/lib/auth/*.test.ts들이 공유하는 vi.mock('@/lib/prisma') + afterEach(vi.restoreAllMocks()) 조합이 동일 vitest 워커에서 파일이 섞일 때 모듈 모킹 상태를 오염시켜 signup.test.ts 등이 간헐 실패('Cannot read properties of undefined'). 파일 단독 실행은 통과. clean develop 3회 반복 중 2회 실패 확인. 해결: 워커 격리(isolate)/vi.mock per-file 재설정/restoreAllMocks→clearAllMocks 정합 또는 test.isolate 설정 검토. CANDID-039(RTL)에서 발견.",
+      "status": "todo",
+      "type": "bug",
+      "priority": "high",
+      "phase": 4,
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
+      "dependencies": [],
+      "createdAt": "2026-05-29T19:53:15+09:00",
+      "source": "CANDID-039 구현 중 발견 (test flakiness)"
     }
   }
 }
