@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 327,
+    "version": 328,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T00:42:39+09:00"
+    "updatedAt": "2026-05-30T00:45:24+09:00"
   },
   "summary": {
     "total": 47,
     "done": 35,
-    "inProgress": 1,
+    "inProgress": 2,
     "review": 0,
-    "todo": 11
+    "todo": 10
   },
   "phases": {
     "1": {
@@ -2802,18 +2802,28 @@
       "id": "CANDID-045",
       "title": "meta-guard refinement 통합 (carry 10건)",
       "description": "CANDID-043 회고 Action Item A1. CANDID-043에서 carry된 10건 통합 처리: (D-1) exit 2 시 스크립트 자체 보고 메시지 추가 + (D-3) binding alias 일관성 검증 룰 (npm name ↔ file base 의미 매칭) + (D-4) PKG_VALUE_RX runner 화이트리스트 (node + tsx 등 확장) + (D-5) META 가드 디렉토리 분리 (scripts/meta/check-*.mjs) + (D-6) SKILL.md 섹션 번호 결합 → 헤더 텍스트만 사용 (재배치 견고성) + (T-1) 다중 row 동시 위반 fixture + (T-3) ROW_RX 헤더/구분선 회귀 가드 fixture + (T-4) parseNpmScriptName 실패 경로 (exit 2) fixture + (MINOR) `tests/scripts/_helpers/spawn-guard.ts` DRY 추출 (CANDID-041 + 043 패턴) + (MINOR Security) npm script lifecycle hook(prepublish 등) 화이트리스트 가드. 추정 ~200줄 (script ~50 + tests ~80 + DRY helper ~40 + 컨벤션 ~30).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "chore",
       "priority": "medium",
       "phase": 1,
-      "assignee": null,
-      "assignedAt": null,
+      "assignee": "wejsa-u@hoji-20260530-004524",
+      "assignedAt": "2026-05-30T00:45:24+09:00",
       "lockedFiles": [],
       "dependencies": [
         "CANDID-043"
       ],
       "createdAt": "2026-05-25T23:34:34+09:00",
-      "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)"
+      "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)",
+      "lockTTL": 1800,
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-30T00:45:24+09:00"
+      },
+      "updatedAt": "2026-05-30T00:45:24+09:00"
     },
     "CANDID-046": {
       "id": "CANDID-046",
