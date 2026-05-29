@@ -2550,5 +2550,22 @@
     "decision": "APPROVED (CRITICAL 0; self-PR COMMENT)",
     "note": "3관점 MAJOR in-task 수정(L-019) 후 승인 수준",
     "at": "2026-05-30T01:33:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-046",
+    "stepNumber": 1,
+    "prNumber": 90,
+    "mergeMethod": "squash",
+    "at": "2026-05-30T01:34:12+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-046",
+    "prs": [
+      90
+    ],
+    "stepCount": 1,
+    "at": "2026-05-30T01:34:12+09:00"
   }
 ]
