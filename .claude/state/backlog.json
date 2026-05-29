@@ -2,7 +2,7 @@
   "metadata": {
     "lastTaskNumber": 46,
     "projectPrefix": "CANDID",
-    "version": 304,
+    "version": 306,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-05-29T20:05:00+09:00"
   },
@@ -2575,12 +2575,8 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260529-192652",
-      "assignedAt": "2026-05-29T19:54:14+09:00",
+      "assignedAt": "2026-05-29T20:01:44+09:00",
       "lockedFiles": [
-        "package.json",
-        "pnpm-lock.yaml",
-        "tests/setup.ts",
-        "vitest.config.ts",
         "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
         "tests/lib/drafts/use-auto-save.test.ts"
       ],
@@ -2591,19 +2587,19 @@
       "source": "CANDID-016 retro Action Item HIGH-2",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 80,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "80 --auto-fix",
-        "updatedAt": "2026-05-29T19:54:14+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-29T20:01:44+09:00"
       },
-      "currentStep": 1,
+      "currentStep": 2,
       "steps": [
         {
           "step": 1,
           "title": "RTL 인프라 도입 + jsdom 매핑 + smoke",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 200,
           "files": [
             "package.json",
@@ -2611,7 +2607,8 @@
             "tests/setup.ts",
             "vitest.config.ts"
           ],
-          "prNumber": 80
+          "prNumber": 80,
+          "mergedAt": "2026-05-29T11:00:48Z"
         },
         {
           "step": 2,

@@ -7,16 +7,19 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    // CANDID-016 Step 3: .test.tsx 포함 (RTL-less minimal renderer 패턴).
+    // CANDID-016 Step 3 + CANDID-039 Step 1: .test.tsx 포함. RTL 도입 후 컴포넌트 테스트의 표준 경로.
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
     // CANDID-035 Step 1: 통합 테스트는 별도 runner(`vitest.config.integration.ts`)에서 실행.
     exclude: ['tests/integration/**', 'node_modules/**', 'dist/**', '.next/**'],
     setupFiles: ['tests/setup.ts'],
     // CANDID-015 Step 4 + CANDID-016 Step 3: 브라우저 환경(XHR/window/event) 필요 테스트만 jsdom.
     // 다른 테스트는 node 환경 유지.
-    // T-CRITICAL-1 fix (PR #59 회차 1): ResumeUploadStep.test.tsx dead reference 제거.
-    // RTL 컴포넌트 테스트는 follow-up task로 carry — 도입 시 본 배열에 다시 추가.
+    // environmentMatchGlobs는 first-match. 광역 패턴(.tsx)을 선두에, 파일 단위 예외를 그 아래에 둔다.
     environmentMatchGlobs: [
+      // CANDID-039 Step 1: 컴포넌트 테스트(.test.tsx)는 항상 jsdom (RTL render 필요).
+      //   T-CRITICAL-1으로 제거됐던 ResumeUploadStep.test.tsx가 본 Task에서 RTL로 부활.
+      ['tests/**/*.test.tsx', 'jsdom'],
+      // 아래는 .test.ts지만 브라우저 API(XHR/window/event) 의존 — 파일 단위 예외.
       ['tests/lib/drafts/use-auto-save.test.ts', 'jsdom'],
       ['tests/lib/files/client.test.ts', 'jsdom'],
     ],
@@ -45,5 +48,11 @@ export default defineConfig({
       // `server-only`는 Next.js 런타임 가드. Node 테스트 환경에서는 비활성화.
       'server-only': path.resolve(__dirname, 'tests/stubs/server-only.ts'),
     },
+  },
+  // CANDID-039 Step 1: `.test.tsx`의 JSX를 automatic runtime(react/jsx-runtime)으로 변환.
+  // (Next.js 컴파일러가 아닌 esbuild가 테스트를 트랜스폼하므로 명시 필요 — 미설정 시
+  //  classic runtime이 React 전역을 요구해 "React is not defined" 발생.)
+  esbuild: {
+    jsx: 'automatic',
   },
 });
