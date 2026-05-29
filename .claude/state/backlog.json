@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 322,
+    "version": 325,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T21:03:00+09:00"
+    "updatedAt": "2026-05-29T21:12:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -1625,21 +1625,18 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260529-193508",
-      "assignedAt": "2026-05-29T20:59:00+09:00",
+      "assignedAt": "2026-05-29T21:07:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/auth/password-reset.ts",
-        "app/api/v1/auth/password/reset/route.ts",
-        "lib/auth/validation.ts",
-        "tests/lib/auth/password-reset.test.ts",
         "app/password/reset/page.tsx",
-        "tests/app/api/v1/auth/password/reset.test.ts"
+        "app/password/reset/_components/ResetForm.tsx",
+        "tests/app/password/reset/ResetForm.test.tsx"
       ],
       "dependencies": [
         "CANDID-010"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "currentStep": 4,
+      "currentStep": 5,
       "steps": [
         {
           "number": 1,
@@ -1690,7 +1687,7 @@
           "number": 4,
           "title": "reset 백엔드 (consume + 단일 TX + 리프레시 무효화)",
           "description": "resetPassword: 토큰 race-safe consume(updateMany WHERE consumedAt=null AND expiresAt>now) → 새 비번 bcrypt 해시 → 단일 TX(users.passwordHash 갱신 + 토큰 consume + revokeAllForUser('password_change')). 만료/무효 → AUTH_RESET_TOKEN_*. POST /api/v1/auth/password/reset. 단위 테스트 포함.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/auth/password-reset.ts",
             "app/api/v1/auth/password/reset/route.ts",
@@ -1699,27 +1696,29 @@
           ],
           "estimatedLines": 420,
           "prLineLimit": 500,
-          "prNumber": 86
+          "prNumber": 86,
+          "mergedAt": "2026-05-29T21:03:00+09:00"
         },
         {
           "number": 5,
           "title": "reset UI (토큰 폼 · 전체 흐름 완성)",
           "description": "쿼리스트링 토큰 수신 → 새 비번/확인 폼(클라 정책 검증) → reset API 호출 → 성공 시 로그인 유도, 실패(만료/무효) 시 재요청 안내. 접근성. 데모 가능 지점②(전체 흐름).",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/password/reset/page.tsx"
           ],
           "estimatedLines": 350,
-          "prLineLimit": 450
+          "prLineLimit": 450,
+          "prNumber": 87
         }
       ],
       "workflowState": {
         "currentSkill": "skill-merge-pr",
         "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 86,
+        "prNumber": 87,
         "fixLoopCount": 0,
-        "autoChainArgs": "86",
-        "updatedAt": "2026-05-29T21:03:00+09:00"
+        "autoChainArgs": "87",
+        "updatedAt": "2026-05-29T21:12:00+09:00"
       }
     },
     "CANDID-021": {
