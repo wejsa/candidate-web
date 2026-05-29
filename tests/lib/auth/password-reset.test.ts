@@ -12,6 +12,10 @@ vi.mock('@/lib/prisma', () => ({
     user: { findUnique: vi.fn() },
   },
 }));
+// bcrypt는 느리므로(~250ms) 단위 테스트에서 mock — 해시 호출 여부/값 전달만 검증.
+vi.mock('@/lib/auth/password', () => ({
+  hashPassword: vi.fn(async () => '$2b$12$mockedhashmockedhashmockedhashmockedhash'),
+}));
 
 const { prisma } = (await import('@/lib/prisma')) as unknown as {
   prisma: {
@@ -19,7 +23,10 @@ const { prisma } = (await import('@/lib/prisma')) as unknown as {
     user: { findUnique: Mock };
   };
 };
-const { requestPasswordReset } = await import('@/lib/auth/password-reset');
+const { hashPassword } = (await import('@/lib/auth/password')) as unknown as {
+  hashPassword: Mock;
+};
+const { requestPasswordReset, resetPassword } = await import('@/lib/auth/password-reset');
 
 /** tx mock — passwordResetToken.updateMany + create. create는 기본 성공.
  * mock fn에 인자 타입(`unknown`)을 부여해 `.mock.calls[0][0]` 인덱싱이 가능하도록 한다. */
@@ -52,8 +59,12 @@ const ELIGIBLE_USER = {
 };
 const NOW = new Date('2026-05-29T20:00:00.000Z');
 
+const MOCK_HASH = '$2b$12$mockedhashmockedhashmockedhashmockedhash';
+
 beforeEach(() => {
   vi.resetAllMocks();
+  // resetAllMocks가 factory 기본 impl을 초기화하므로 bcrypt mock을 재설정.
+  hashPassword.mockResolvedValue(MOCK_HASH);
 });
 
 afterEach(() => {
@@ -171,5 +182,103 @@ describe('requestPasswordReset — 동시 발급 race / 에러 매핑', () => {
     prisma.$transaction.mockImplementation(async (fn: (t: typeof tx) => unknown) => fn(tx));
 
     await expect(requestPasswordReset('user@example.com', NOW)).rejects.toThrow();
+  });
+});
+
+/** resetPassword용 tx mock — consume(updateMany) + findUnique + user.update + refreshToken.updateMany. */
+function makeResetTxMock(opts: {
+  consumeCount: number;
+  /** count=0일 때 사후 findUnique 결과 (consumedAt). null이면 부재. */
+  postRow?: { consumedAt: Date | null } | null;
+  userId?: number;
+  revokedCount?: number;
+}) {
+  const tx = {
+    passwordResetToken: {
+      updateMany: vi.fn(async (_args: unknown) => ({ count: opts.consumeCount })),
+      // count=1이면 userId row, count=0이면 사후 분류용 postRow.
+      findUnique: vi.fn(async (_args: unknown) =>
+        opts.consumeCount > 0 ? { userId: opts.userId ?? 7 } : (opts.postRow ?? null),
+      ),
+    },
+    user: { update: vi.fn(async (_args: unknown) => ({})) },
+    refreshToken: { updateMany: vi.fn(async (_args: unknown) => ({ count: opts.revokedCount ?? 0 })) },
+  };
+  return tx;
+}
+
+const PLAIN_TOKEN = 'c'.repeat(64);
+
+describe('resetPassword — 정상 (consume + 비번 변경 + 세션 무효화)', () => {
+  it('count=1 승자: passwordHash 갱신 + 모든 refresh revoke(password_change) + 결과 반환', async () => {
+    const tx = makeResetTxMock({ consumeCount: 1, userId: 7, revokedCount: 3 });
+    prisma.$transaction.mockImplementation(async (fn: (t: typeof tx) => unknown) => fn(tx));
+
+    const result = await resetPassword(PLAIN_TOKEN, 'NewPassw0rd!', NOW);
+
+    expect(result).toEqual({ userId: 7, revokedSessions: 3 });
+    // bcrypt 해시는 트랜잭션 외부에서 1회 호출.
+    expect(hashPassword).toHaveBeenCalledWith('NewPassw0rd!');
+    // 새 해시로 user.passwordHash 갱신.
+    const userUpdateArg = tx.user.update.mock.calls[0]![0] as {
+      where: { id: number };
+      data: { passwordHash: string };
+    };
+    expect(userUpdateArg.where.id).toBe(7);
+    expect(userUpdateArg.data.passwordHash).toBe(
+      '$2b$12$mockedhashmockedhashmockedhashmockedhash',
+    );
+    // BR-AUTH-05 — 활성 refresh 전체 revoke(password_change).
+    expect(tx.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { userId: 7, revokedAt: null },
+      data: { revokedAt: NOW, revokedReason: 'password_change' },
+    });
+  });
+
+  it('consume는 평문이 아닌 sha256(token_hash) 기준으로 수행', async () => {
+    const tx = makeResetTxMock({ consumeCount: 1, userId: 7 });
+    prisma.$transaction.mockImplementation(async (fn: (t: typeof tx) => unknown) => fn(tx));
+
+    await resetPassword(PLAIN_TOKEN, 'NewPassw0rd!', NOW);
+
+    const updateArg = tx.passwordResetToken.updateMany.mock.calls[0]![0] as {
+      where: { tokenHash: string; consumedAt: null; expiresAt: { gt: Date } };
+    };
+    expect(updateArg.where.tokenHash).toBe(sha256Hex(PLAIN_TOKEN));
+    expect(updateArg.where.tokenHash).not.toBe(PLAIN_TOKEN);
+    expect(updateArg.where.consumedAt).toBeNull();
+  });
+});
+
+describe('resetPassword — 토큰 무효/만료/일회용', () => {
+  it('부재 토큰(count=0, row=null) → AUTH_RESET_TOKEN_INVALID', async () => {
+    const tx = makeResetTxMock({ consumeCount: 0, postRow: null });
+    prisma.$transaction.mockImplementation(async (fn: (t: typeof tx) => unknown) => fn(tx));
+
+    await expect(resetPassword(PLAIN_TOKEN, 'NewPassw0rd!', NOW)).rejects.toMatchObject({
+      code: 'AUTH_RESET_TOKEN_INVALID',
+    });
+    expect(tx.user.update).not.toHaveBeenCalled();
+    expect(tx.refreshToken.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('이미 소진된 토큰 재사용(count=0, consumedAt set) → AUTH_RESET_TOKEN_INVALID (일회용)', async () => {
+    const tx = makeResetTxMock({ consumeCount: 0, postRow: { consumedAt: NOW } });
+    prisma.$transaction.mockImplementation(async (fn: (t: typeof tx) => unknown) => fn(tx));
+
+    await expect(resetPassword(PLAIN_TOKEN, 'NewPassw0rd!', NOW)).rejects.toMatchObject({
+      code: 'AUTH_RESET_TOKEN_INVALID',
+    });
+    expect(tx.user.update).not.toHaveBeenCalled();
+  });
+
+  it('만료 토큰(count=0, consumedAt=null) → AUTH_RESET_TOKEN_EXPIRED', async () => {
+    const tx = makeResetTxMock({ consumeCount: 0, postRow: { consumedAt: null } });
+    prisma.$transaction.mockImplementation(async (fn: (t: typeof tx) => unknown) => fn(tx));
+
+    await expect(resetPassword(PLAIN_TOKEN, 'NewPassw0rd!', NOW)).rejects.toMatchObject({
+      code: 'AUTH_RESET_TOKEN_EXPIRED',
+    });
+    expect(tx.user.update).not.toHaveBeenCalled();
   });
 });

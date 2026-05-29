@@ -1,6 +1,8 @@
 import 'server-only';
 import { prisma } from '@/lib/prisma';
+import { AppError } from '@/lib/errors';
 import { generateTokenHex, sha256Hex } from '@/lib/auth/token-hash';
+import { hashPassword } from '@/lib/auth/password';
 import { isUniqueViolationOn } from '@/lib/prisma/errors';
 
 // CANDID-020 Step 2 — 비밀번호 재설정 요청 (US-AUTH-004).
@@ -86,4 +88,81 @@ export async function requestPasswordReset(
   }
 
   return { email: user.email, name: user.name, resetToken };
+}
+
+export interface ResetPasswordResult {
+  userId: number;
+  /** 무효화된 활성 refresh 세션 수 (BR-AUTH-05). */
+  revokedSessions: number;
+}
+
+/**
+ * 비밀번호 재설정 토큰을 소진하고 새 비밀번호로 변경한다 (US-AUTH-004, BR-AUTH-05).
+ *
+ * 흐름:
+ *   1. bcrypt 해시는 **트랜잭션 외부**에서 계산 (~250ms — DB 커넥션 점유 회피, password.ts 주석).
+ *   2. 단일 트랜잭션:
+ *      a. race-free consume — `updateMany WHERE consumedAt=null AND expiresAt>now` (count=1 승자).
+ *         email-verification.consumeVerificationToken과 동일한 직렬화 패턴 (CANDID-036).
+ *      b. count=0 사후 분류: 부재 → INVALID(400), 이미 소진 → INVALID(400, 일회용), 만료 → EXPIRED(410).
+ *      c. user.passwordHash 갱신.
+ *      d. 해당 user의 모든 활성 refresh 토큰 일괄 revoke(`password_change`) — BR-AUTH-05.
+ *         (revokeAllForUser와 동일 쿼리를 tx로 인라인 — 단일 트랜잭션 원자성 보장.)
+ *
+ * 동시 클릭 race: 두 요청이 같은 토큰을 소진해도 UPDATE row lock으로 첫 요청만 count=1,
+ *   두 번째는 count=0 → 이미 소진(INVALID)로 분류. 비밀번호가 두 번 변경되지 않는다.
+ */
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+  now: Date = new Date(),
+): Promise<ResetPasswordResult> {
+  const tokenHash = sha256Hex(token);
+  // bcrypt는 트랜잭션 외부 (DB 커넥션 점유 회피).
+  const passwordHash = await hashPassword(newPassword);
+
+  return prisma.$transaction(async (tx) => {
+    // race-free 직렬화 — UPDATE row lock이 동시 두 요청 중 하나만 통과시킨다.
+    const consumed = await tx.passwordResetToken.updateMany({
+      where: { tokenHash, consumedAt: null, expiresAt: { gt: now } },
+      data: { consumedAt: now },
+    });
+
+    if (consumed.count === 0) {
+      // 사후 분류 — 부재 / 이미 소진(일회용 위반) / 만료
+      const row = await tx.passwordResetToken.findUnique({
+        where: { tokenHash },
+        select: { consumedAt: true },
+      });
+      if (row === null) {
+        throw new AppError('AUTH_RESET_TOKEN_INVALID');
+      }
+      if (row.consumedAt !== null) {
+        // 이미 사용된 토큰 재사용 — 일회용 위반.
+        throw new AppError('AUTH_RESET_TOKEN_INVALID');
+      }
+      // consumedAt=null인데 count=0 → WHERE 불일치 사유는 expiresAt만 남음 (만료).
+      throw new AppError('AUTH_RESET_TOKEN_EXPIRED');
+    }
+
+    // count=1 — 직렬화 승자. userId 조회.
+    const row = await tx.passwordResetToken.findUnique({
+      where: { tokenHash },
+      select: { userId: true },
+    });
+    if (row === null) {
+      // 방어적 — 동일 트랜잭션 내 ghost row (이론상 불가).
+      throw new AppError('SYS_INTERNAL_ERROR');
+    }
+
+    await tx.user.update({ where: { id: row.userId }, data: { passwordHash } });
+
+    // BR-AUTH-05 — 비밀번호 변경 시 모든 활성 refresh 세션 일괄 무효화 (단일 트랜잭션 내).
+    const revoked = await tx.refreshToken.updateMany({
+      where: { userId: row.userId, revokedAt: null },
+      data: { revokedAt: now, revokedReason: 'password_change' },
+    });
+
+    return { userId: row.userId, revokedSessions: revoked.count };
+  });
 }
