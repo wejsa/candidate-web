@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { Prisma } from '@prisma/client';
 import { sha256Hex } from '@/lib/auth/token-hash';
@@ -67,9 +67,8 @@ beforeEach(() => {
   hashPassword.mockResolvedValue(MOCK_HASH);
 });
 
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+// CANDID-046: afterEach(vi.restoreAllMocks()) 제거 — 전역 restore가 워커 공유 시 다음 파일의
+//   prisma mock 상태를 비워 간헐 실패를 유발했다. beforeEach의 resetAllMocks+default로 파일 내 격리 충분.
 
 describe('requestPasswordReset — 적격 사용자', () => {
   it('토큰 발급 + 메일 인자 반환 (email/name/평문 토큰)', async () => {

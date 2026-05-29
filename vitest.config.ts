@@ -7,6 +7,12 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
+    // CANDID-046: 파일 격리를 **명시**한다. vitest 기본값(isolate:true)에 암묵 의존하면
+    //   향후 `--no-isolate`/pool 변경 시 vi.mock('@/lib/prisma') 모듈 모킹 상태가 워커를
+    //   공유한 다음 파일로 누수되어("Cannot read properties of undefined") 간헐 실패한다.
+    //   (전역 mockReset은 factory 기본 impl을 쓰는 auth 테스트를 깨므로 채택하지 않고,
+    //    원인이던 afterEach(vi.restoreAllMocks()) 오용을 해당 파일들에서 제거했다.)
+    isolate: true,
     // CANDID-016 Step 3 + CANDID-039 Step 1: .test.tsx 포함. RTL 도입 후 컴포넌트 테스트의 표준 경로.
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
     // CANDID-035 Step 1: 통합 테스트는 별도 runner(`vitest.config.integration.ts`)에서 실행.

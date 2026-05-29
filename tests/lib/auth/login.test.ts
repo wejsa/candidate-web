@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 // Prisma + verifyPassword + JWT + session 모두 mock — DB 의존 제거.
@@ -93,9 +93,8 @@ beforeEach(() => {
   });
 });
 
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+// CANDID-046: afterEach(vi.restoreAllMocks()) 제거 — beforeEach의 resetAllMocks+default 재설정으로
+//   파일 내 격리는 충분하며, 전역 restore는 워커 공유 시 다음 파일의 prisma mock을 비워 간헐 실패를 유발했다.
 
 describe('signin — 정상 로그인 (US-AUTH-002 happy path)', () => {
   it('이메일/비밀번호 일치 → 토큰 발급 + failedLoginCount/lockedUntil 리셋', async () => {

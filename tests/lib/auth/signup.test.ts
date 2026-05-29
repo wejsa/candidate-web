@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { Prisma } from '@prisma/client';
 import { AppError } from '@/lib/errors';
@@ -51,11 +51,13 @@ const validInput = {
 };
 
 beforeEach(() => {
+  // clearAllMocks(호출 이력만 초기화)로 factory 기본 impl(jwt/session)을 보존한다.
+  // CANDID-046: 기존 afterEach(vi.restoreAllMocks()) 제거 — 전역 restore가 워커 공유 시
+  //   다음 파일의 vi.mock('@/lib/prisma') 상태를 비워 간헐 실패를 유발했다.
+  // 불변식(CANDID-046 리뷰 M001): clearAllMocks는 impl/`*Once` 큐를 비우지 않으므로,
+  //   이 파일의 모든 mockImplementationOnce / mock*ValueOnce는 같은 테스트 내에서 1회씩
+  //   소비되어야 한다 (미소비 once 큐가 다음 테스트로 누수되면 순서 의존 실패 발생).
   vi.clearAllMocks();
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
 });
 
 describe('createUserAndIssueTokens', () => {
