@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 35,
+    "version": 36,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-29T21:13:00+09:00"
+    "updatedAt": "2026-05-30T01:34:12+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1175,6 +1175,26 @@
         "revoke 쿼리 tx 헬퍼(revokeAllForUserTx) 추출로 SSOT — arch MINOR",
         "비밀번호 재설정 발급/완료 감사 로그 — PHASE-4(compliance)",
         "reset UI 400 불일치/강도 메시지 세분화 + page token 배열/undefined 폴백 테스트 — domain/test MINOR"
+      ]
+    },
+    "CANDID-046": {
+      "id": "CANDID-046",
+      "title": "auth 테스트 격리 플래키 수정 (vi.mock prisma 워커 간 오염)",
+      "phase": 4,
+      "priority": "high",
+      "type": "bug",
+      "completedAt": "2026-05-30T01:34:12+09:00",
+      "assignee": "wejsa-u@hoji-20260530-004239",
+      "prs": [
+        90
+      ],
+      "totalMergedLines": 22,
+      "stepCount": 1,
+      "reviewSummary": "full 3관점 리뷰 CRITICAL 0 / MAJOR 0 / MINOR 2 (self-PR COMMENT). vitest.config.ts isolate:true 명시 + 4개 auth 테스트 restoreAllMocks 오용 제거. M001(signup once-큐 불변식 주석) in-PR 해소. 기본 config flaky는 본 환경(Node20/vitest2.1.9/8CPU)에서 재현 불가(default 19회 green) — 강제 --no-isolate에서 실증된 mock 안티패턴 제거 + 격리 잠금이며 보고된 flaky 직접 해소는 단언하지 않음. typecheck/lint/build/test(1490) 통과 + 셔플 8회 green.",
+      "carry": [
+        "M002: vi.mock(@/lib/prisma) 22+개 파일 reset 전략(clear/reset) 3종 혼재 — 선택 기준을 tests/setup.ts 또는 테스트 컨벤션 문서로 일원화 (follow-up)",
+        "INFO: --no-isolate 성능 전환 시 미수정 파일 동일 클래스 누수 노출 — 단일 공유 prisma mock 재구조화 검토(범위 외)",
+        "원본 flaky 미재현 — CI 환경(CPU/pool)에서 재발 시 추가 조사 필요"
       ]
     }
   }

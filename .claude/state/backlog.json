@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 334,
+    "version": 336,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T01:31:57+09:00"
+    "updatedAt": "2026-05-30T01:34:12+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 35,
-    "inProgress": 2,
+    "done": 36,
+    "inProgress": 1,
     "review": 0,
     "todo": 10
   },
@@ -2807,7 +2807,7 @@
       "priority": "medium",
       "phase": 1,
       "assignee": "wejsa-u@hoji-20260530-004524",
-      "assignedAt": "2026-05-30T01:24:00+09:00",
+      "assignedAt": "2026-05-30T01:33:00+09:00",
       "lockedFiles": [
         "scripts/meta/check-guard-wiring-consistency.mjs",
         "scripts/check-guard-wiring-consistency.mjs",
@@ -2825,14 +2825,14 @@
       "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 89,
         "fixLoopCount": 0,
-        "autoChainArgs": "89 --auto-fix",
-        "updatedAt": "2026-05-30T01:24:00+09:00"
+        "autoChainArgs": "89",
+        "updatedAt": "2026-05-30T01:33:00+09:00"
       },
-      "updatedAt": "2026-05-30T01:24:00+09:00",
+      "updatedAt": "2026-05-30T01:33:00+09:00",
       "planPath": ".claude/temp/CANDID-045-plan.md",
       "currentStep": 1,
       "steps": [
@@ -2876,40 +2876,26 @@
       "id": "CANDID-046",
       "title": "auth 테스트 격리 플래키 수정 (vi.mock prisma 워커 간 오염)",
       "description": "tests/lib/auth/*.test.ts들이 공유하는 vi.mock('@/lib/prisma') + afterEach(vi.restoreAllMocks()) 조합이 동일 vitest 워커에서 파일이 섞일 때 모듈 모킹 상태를 오염시켜 signup.test.ts 등이 간헐 실패('Cannot read properties of undefined'). 파일 단독 실행은 통과. clean develop 3회 반복 중 2회 실패 확인. 해결: 워커 격리(isolate)/vi.mock per-file 재설정/restoreAllMocks→clearAllMocks 정합 또는 test.isolate 설정 검토. CANDID-039(RTL)에서 발견.",
-      "status": "in_progress",
+      "status": "done",
       "type": "bug",
       "priority": "high",
       "phase": 4,
-      "assignee": "wejsa-u@hoji-20260530-004239",
-      "assignedAt": "2026-05-30T01:31:57+09:00",
-      "lockedFiles": [
-        "vitest.config.ts",
-        "tests/lib/auth/signup.test.ts",
-        "tests/lib/auth/login.test.ts",
-        "tests/lib/auth/email-verification.test.ts",
-        "tests/lib/auth/password-reset.test.ts",
-        "tests/lib/auth/session.test.ts"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-05-29T19:53:15+09:00",
       "source": "CANDID-039 구현 중 발견 (test flakiness)",
-      "updatedAt": "2026-05-30T01:31:57+09:00",
-      "lockTTL": 7200,
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 90,
-        "fixLoopCount": 0,
-        "autoChainArgs": "90",
-        "updatedAt": "2026-05-30T01:31:57+09:00"
-      },
-      "currentStep": 1,
+      "updatedAt": "2026-05-30T01:34:12+09:00",
+      "lockTTL": null,
+      "workflowState": null,
+      "currentStep": 2,
       "steps": [
         {
           "number": 1,
           "title": "vitest 모킹 생명주기 SSOT(mockReset+isolate) + auth 테스트 정합화",
           "description": "vitest.config.ts에 test.mockReset:true + test.isolate:true 명시(모킹 생명주기 SSOT). prisma-mock 5개 auth 테스트의 오용된 afterEach(restoreAllMocks)/ad-hoc beforeEach 훅 제거→전역 위임. 운영 코드 무변경. reproduce-first 후 pnpm test 5회 연속 green + 단일 워커 강제 실행으로 결정론적 입증.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "vitest.config.ts",
             "tests/lib/auth/signup.test.ts",
@@ -2921,9 +2907,11 @@
           "estimatedLines": 180,
           "prLineLimit": 250,
           "prNumber": 90,
-          "branch": "worktree-purring-sparking-key"
+          "branch": "worktree-purring-sparking-key",
+          "mergedAt": "2026-05-30T01:34:12+09:00"
         }
-      ]
+      ],
+      "completedAt": "2026-05-30T01:34:12+09:00"
     },
     "CANDID-047": {
       "id": "CANDID-047",
