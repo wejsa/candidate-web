@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 46,
     "projectPrefix": "CANDID",
-    "version": 301,
+    "version": 302,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T19:53:15+09:00"
+    "updatedAt": "2026-05-29T19:54:14+09:00"
   },
   "summary": {
     "total": 46,
@@ -2484,7 +2484,7 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260529-192652",
-      "assignedAt": "2026-05-29T19:29:39+09:00",
+      "assignedAt": "2026-05-29T19:54:14+09:00",
       "lockedFiles": [
         "package.json",
         "pnpm-lock.yaml",
@@ -2500,26 +2500,27 @@
       "source": "CANDID-016 retro Action Item HIGH-2",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 80,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-29T19:29:39+09:00"
+        "autoChainArgs": "80 --auto-fix",
+        "updatedAt": "2026-05-29T19:54:14+09:00"
       },
       "currentStep": 1,
       "steps": [
         {
           "step": 1,
           "title": "RTL 인프라 도입 + jsdom 매핑 + smoke",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 200,
           "files": [
             "package.json",
             "pnpm-lock.yaml",
             "tests/setup.ts",
             "vitest.config.ts"
-          ]
+          ],
+          "prNumber": 80
         },
         {
           "step": 2,
