@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 333,
+    "version": 334,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T01:25:48+09:00"
+    "updatedAt": "2026-05-30T01:31:57+09:00"
   },
   "summary": {
     "total": 47,
@@ -2881,7 +2881,7 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260530-004239",
-      "assignedAt": "2026-05-30T01:25:48+09:00",
+      "assignedAt": "2026-05-30T01:31:57+09:00",
       "lockedFiles": [
         "vitest.config.ts",
         "tests/lib/auth/signup.test.ts",
@@ -2893,15 +2893,15 @@
       "dependencies": [],
       "createdAt": "2026-05-29T19:53:15+09:00",
       "source": "CANDID-039 구현 중 발견 (test flakiness)",
-      "updatedAt": "2026-05-30T01:25:48+09:00",
+      "updatedAt": "2026-05-30T01:31:57+09:00",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 90,
         "fixLoopCount": 0,
-        "autoChainArgs": "90 --auto-fix",
-        "updatedAt": "2026-05-30T01:25:48+09:00"
+        "autoChainArgs": "90",
+        "updatedAt": "2026-05-30T01:31:57+09:00"
       },
       "currentStep": 1,
       "steps": [
