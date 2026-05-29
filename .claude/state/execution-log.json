@@ -2412,5 +2412,27 @@
     "prNumber": 84,
     "decision": "APPROVED (self-PR COMMENT, 3 MAJOR resolved in-PR)",
     "at": "2026-05-29T20:40:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-020",
+    "stepNumber": 2,
+    "prNumber": 84,
+    "at": "2026-05-29T20:40:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-020",
+    "stepNumber": 3,
+    "prNumber": 85,
+    "at": "2026-05-29T20:44:00+09:00"
+  },
+  {
+    "event": "approved",
+    "taskId": "CANDID-020",
+    "stepNumber": 3,
+    "prNumber": 85,
+    "decision": "APPROVED (self-PR COMMENT, 2 MAJOR + a11y resolved in-PR)",
+    "at": "2026-05-29T20:50:00+09:00"
   }
 ]
