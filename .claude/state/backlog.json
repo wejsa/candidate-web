@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 298,
+    "version": 299,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T01:11:30+09:00"
+    "updatedAt": "2026-05-29T19:30:06+09:00"
   },
   "summary": {
     "total": 43,
     "done": 31,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 14
+    "todo": 13
   },
   "phases": {
     "1": {
@@ -2470,12 +2470,13 @@
       "id": "CANDID-039",
       "title": "RTL 인프라 도입 + ResumeUploadStep.test.tsx + use-auto-save 마이그",
       "description": "React Testing Library 도입(@testing-library/react + @testing-library/jest-dom + @testing-library/user-event) + ResumeUploadStep.test.tsx 작성(파일 선택/검증/진행률/취소/재시도/교체/INFECTED 시나리오). 기존 CANDID-015 use-auto-save.test.ts 도 minimal renderer에서 RTL로 마이그 검토. vitest config에 .test.tsx jsdom 추가 + tests/app/jobs/apply/ 디렉토리 정착. 회귀 가드: CANDID-016 D-MAJOR-2 INFECTED UI 표시 + S-MAJOR-2 422 message 화이트리스트 + abort/retry 흐름.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "test",
       "priority": "high",
       "phase": 4,
-      "assignee": null,
-      "assignedAt": null,
+      "assignee": "wejsa-u@hoji-20260529-193006",
+      "assignedAt": "2026-05-29T19:30:06+09:00",
+      "lockTTL": 1800,
       "lockedFiles": [],
       "dependencies": [
         "CANDID-016"
