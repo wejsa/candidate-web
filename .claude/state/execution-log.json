@@ -2373,5 +2373,22 @@
     "prNumber": 83,
     "decision": "APPROVED (self-PR COMMENT)",
     "at": "2026-05-29T20:17:45+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-039",
+    "stepNumber": 3,
+    "prNumber": 83,
+    "at": "2026-05-29T20:19:04+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-039",
+    "prs": [
+      80,
+      82,
+      83
+    ],
+    "at": "2026-05-29T20:19:04+09:00"
   }
 ]
