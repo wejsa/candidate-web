@@ -1,8 +1,9 @@
-import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+// CANDID-045 Step 2: spawn/cleanup 공통 로직은 _helpers/spawn-guard로 추출(DRY).
+import { createTmpTracker, runGuard as runGuardScript } from './_helpers/spawn-guard';
 
 // CANDID-043: scripts/check-guard-wiring-consistency.mjs (4자 일치 meta-guard) 무결성 검증.
 // L-034 두 번째 적용 (첫 번째: CANDID-041) — meta-guard도 자체 vitest 동반 필수.
@@ -79,36 +80,12 @@ function setupTempProject(opts: Fixtures): string {
   return cwd;
 }
 
-function runGuard(cwd: string): { exitCode: number; stdout: string; stderr: string } {
-  try {
-    const stdout = execFileSync('node', [SCRIPT_PATH], {
-      cwd,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    return { exitCode: 0, stdout, stderr: '' };
-  } catch (e) {
-    const err = e as { status?: number; stdout?: Buffer | string; stderr?: Buffer | string };
-    return {
-      exitCode: err.status ?? -1,
-      stdout: err.stdout?.toString() ?? '',
-      stderr: err.stderr?.toString() ?? '',
-    };
-  }
-}
+// 본 테스트 파일 전용 래퍼 — SCRIPT_PATH를 바인딩 (호출부는 runGuard(cwd) 유지).
+const runGuard = (cwd: string) => runGuardScript(SCRIPT_PATH, cwd);
 
-const tmpDirs: string[] = [];
-function track(cwd: string): string {
-  tmpDirs.push(cwd);
-  return cwd;
-}
-
-afterEach(() => {
-  while (tmpDirs.length > 0) {
-    const dir = tmpDirs.pop()!;
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
+const tmp = createTmpTracker();
+const track = tmp.track;
+afterEach(() => tmp.cleanupAll());
 
 // 실제 프로젝트 매핑을 모방하는 row (SKILL.md npmScript와 파일 base가 다른 케이스 포함)
 const ROW_MIG: Row = {
@@ -471,5 +448,61 @@ describe('check-guard-wiring-consistency — CANDID-045 review fix (negative/bou
     expect(r.exitCode).toBe(1);
     expect(r.stderr).toContain('orphan-script');
     expect(r.stderr).toContain('scripts/meta/check-rogue-meta-guard.mjs');
+  });
+});
+
+describe('check-guard-wiring-consistency — CANDID-045 Step 2 (T-1/T-3/T-4)', () => {
+  it('T-1: 여러 row가 동시에 위반해도 모두 수집 → exit 1 + 다건 보고', () => {
+    // row A: package script 부재(missing-package-script), row B: 파일 부재(missing-script).
+    const ROW_A: Row = { glob: 'src/a/**', scriptCmd: 'pnpm check:alpha', id: 'G-ALPHA' };
+    const ROW_B: Row = { glob: 'src/b/**', scriptCmd: 'pnpm check:beta', id: 'G-BETA' };
+    const cwd = track(
+      setupTempProject({
+        skillTable: [ROW_A, ROW_B],
+        // alpha는 pkg 부재, beta는 pkg 존재하나 스크립트 파일 부재.
+        pkgScripts: { 'check:beta': 'node scripts/check-beta.mjs' },
+        scriptFiles: [],
+        testFiles: ['beta'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('위반 2건');
+    expect(r.stderr).toContain('missing-package-script');
+    expect(r.stderr).toContain('G-ALPHA');
+    expect(r.stderr).toContain('missing-script');
+    expect(r.stderr).toContain('G-BETA');
+  });
+
+  it('T-3: 표 헤더 행과 구분선(|---|)은 data row로 오파싱되지 않음 → 정확히 1건만 집계', () => {
+    // 기본 빌더가 헤더 + 구분선 + 데이터 1행을 생성한다. ROW_RX가 백틱+대문자 가드ID를
+    // 요구하므로 헤더("| 파일 글롭 |...")와 구분선("|---|")은 매칭되지 않아야 한다.
+    const cwd = track(
+      setupTempProject({
+        skillTable: [ROW_MIG],
+        pkgScripts: { 'check:migrations': 'node scripts/check-migrations-no-concurrently.mjs' },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(0);
+    // 헤더/구분선이 data row로 셈됐다면 "1개"가 아닌 값이 나온다.
+    expect(r.stdout).toContain('1개 guard entry');
+  });
+
+  it('T-4: scriptCmd가 "pnpm check:*" 형식이 아니면 parseNpmScriptName 실패 → exit 2', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [{ glob: 'src/**', scriptCmd: 'pnpm test', id: 'G-BAD' }],
+        pkgScripts: { 'check:migrations': 'node scripts/check-migrations-no-concurrently.mjs' },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(2);
+    expect(r.stderr).toContain('환경 오류');
+    expect(r.stderr).toContain('script command 파싱 실패');
   });
 });
