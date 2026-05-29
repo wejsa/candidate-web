@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 329,
+    "version": 330,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T00:47:30+09:00"
+    "updatedAt": "2026-05-30T00:53:28+09:00"
   },
   "summary": {
     "total": 47,
@@ -2878,21 +2878,47 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260530-004239",
-      "assignedAt": "2026-05-30T00:42:39+09:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-05-30T00:53:28+09:00",
+      "lockedFiles": [
+        "vitest.config.ts",
+        "tests/lib/auth/signup.test.ts",
+        "tests/lib/auth/login.test.ts",
+        "tests/lib/auth/email-verification.test.ts",
+        "tests/lib/auth/password-reset.test.ts",
+        "tests/lib/auth/session.test.ts"
+      ],
       "dependencies": [],
       "createdAt": "2026-05-29T19:53:15+09:00",
       "source": "CANDID-039 구현 중 발견 (test flakiness)",
-      "updatedAt": "2026-05-30T00:42:39+09:00",
-      "lockTTL": 1800,
+      "updatedAt": "2026-05-30T00:53:28+09:00",
+      "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-30T00:42:39+09:00"
-      }
+        "updatedAt": "2026-05-30T00:53:28+09:00"
+      },
+      "currentStep": 1,
+      "steps": [
+        {
+          "number": 1,
+          "title": "vitest 모킹 생명주기 SSOT(mockReset+isolate) + auth 테스트 정합화",
+          "description": "vitest.config.ts에 test.mockReset:true + test.isolate:true 명시(모킹 생명주기 SSOT). prisma-mock 5개 auth 테스트의 오용된 afterEach(restoreAllMocks)/ad-hoc beforeEach 훅 제거→전역 위임. 운영 코드 무변경. reproduce-first 후 pnpm test 5회 연속 green + 단일 워커 강제 실행으로 결정론적 입증.",
+          "status": "pending",
+          "files": [
+            "vitest.config.ts",
+            "tests/lib/auth/signup.test.ts",
+            "tests/lib/auth/login.test.ts",
+            "tests/lib/auth/email-verification.test.ts",
+            "tests/lib/auth/password-reset.test.ts",
+            "tests/lib/auth/session.test.ts"
+          ],
+          "estimatedLines": 180,
+          "prLineLimit": 250
+        }
+      ]
     },
     "CANDID-047": {
       "id": "CANDID-047",
