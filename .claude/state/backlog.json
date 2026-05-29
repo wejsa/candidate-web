@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 325,
+    "version": 326,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T21:12:00+09:00"
+    "updatedAt": "2026-05-29T21:13:00+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 34,
-    "inProgress": 1,
+    "done": 35,
+    "inProgress": 0,
     "review": 0,
     "todo": 12
   },
@@ -1620,18 +1620,14 @@
       "id": "CANDID-020",
       "title": "비밀번호 재설정 (US-AUTH-004)",
       "description": "이메일 입력 → 재설정 메일 발송(존재 여부 무관 동일 응답, 계정 열거 방지). 토큰 30분 일회용. 완료 시 모든 Refresh Token 무효화.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260529-193508",
       "assignedAt": "2026-05-29T21:07:00+09:00",
       "lockTTL": 10800,
-      "lockedFiles": [
-        "app/password/reset/page.tsx",
-        "app/password/reset/_components/ResetForm.tsx",
-        "tests/app/password/reset/ResetForm.test.tsx"
-      ],
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-010"
       ],
@@ -1703,23 +1699,18 @@
           "number": 5,
           "title": "reset UI (토큰 폼 · 전체 흐름 완성)",
           "description": "쿼리스트링 토큰 수신 → 새 비번/확인 폼(클라 정책 검증) → reset API 호출 → 성공 시 로그인 유도, 실패(만료/무효) 시 재요청 안내. 접근성. 데모 가능 지점②(전체 흐름).",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "app/password/reset/page.tsx"
           ],
           "estimatedLines": 350,
           "prLineLimit": 450,
-          "prNumber": 87
+          "prNumber": 87,
+          "mergedAt": "2026-05-29T21:12:00+09:00"
         }
       ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 87,
-        "fixLoopCount": 0,
-        "autoChainArgs": "87",
-        "updatedAt": "2026-05-29T21:12:00+09:00"
-      }
+      "workflowState": null,
+      "completedAt": "2026-05-29T21:13:00+09:00"
     },
     "CANDID-021": {
       "id": "CANDID-021",
