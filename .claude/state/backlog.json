@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 328,
+    "version": 329,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T00:45:24+09:00"
+    "updatedAt": "2026-05-30T00:47:30+09:00"
   },
   "summary": {
     "total": 47,
@@ -2807,23 +2807,67 @@
       "priority": "medium",
       "phase": 1,
       "assignee": "wejsa-u@hoji-20260530-004524",
-      "assignedAt": "2026-05-30T00:45:24+09:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-05-30T00:47:30+09:00",
+      "lockedFiles": [
+        "scripts/meta/check-guard-wiring-consistency.mjs",
+        "scripts/check-guard-wiring-consistency.mjs",
+        "package.json",
+        ".claude/skills/skill-review-pr/SKILL.md",
+        "tests/scripts/check-guard-wiring-consistency.test.ts",
+        "tests/scripts/check-migrations-no-concurrently.test.ts",
+        "tests/scripts/_helpers/spawn-guard.ts",
+        ".claude/domains/_base/checklists/common.md"
+      ],
       "dependencies": [
         "CANDID-043"
       ],
       "createdAt": "2026-05-25T23:34:34+09:00",
       "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)",
-      "lockTTL": 1800,
+      "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-30T00:45:24+09:00"
+        "updatedAt": "2026-05-30T00:47:30+09:00"
       },
-      "updatedAt": "2026-05-30T00:45:24+09:00"
+      "updatedAt": "2026-05-30T00:47:30+09:00",
+      "planPath": ".claude/temp/CANDID-045-plan.md",
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "메타가드 디렉토리 분리(D-5) + 검증 룰 강화(D-1/D-3/D-4/D-6) + lifecycle-hook 보안(M-SEC)",
+          "status": "pending",
+          "files": [
+            "scripts/meta/check-guard-wiring-consistency.mjs",
+            "scripts/check-guard-wiring-consistency.mjs",
+            "package.json",
+            ".claude/skills/skill-review-pr/SKILL.md",
+            "tests/scripts/check-guard-wiring-consistency.test.ts"
+          ],
+          "estimatedLines": 110,
+          "prLineLimit": 250,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "테스트 강화: DRY spawn-guard helper 추출(M-DRY) + fixtures(T-1/T-3/T-4)",
+          "status": "pending",
+          "files": [
+            "tests/scripts/_helpers/spawn-guard.ts",
+            "tests/scripts/check-guard-wiring-consistency.test.ts",
+            "tests/scripts/check-migrations-no-concurrently.test.ts",
+            ".claude/domains/_base/checklists/common.md"
+          ],
+          "estimatedLines": 150,
+          "prLineLimit": 300,
+          "dependsOn": [
+            1
+          ]
+        }
+      ]
     },
     "CANDID-046": {
       "id": "CANDID-046",
