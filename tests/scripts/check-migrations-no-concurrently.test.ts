@@ -1,8 +1,9 @@
-import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+// CANDID-045 Step 2: spawn/cleanup 공통 로직은 _helpers/spawn-guard로 추출(DRY).
+import { createTmpTracker, runGuard as runGuardScript } from './_helpers/spawn-guard';
 
 // CANDID-041: scripts/check-migrations-no-concurrently.mjs (CANDID-038 회귀 가드) 무결성 검증.
 // L-034 (회귀 가드 도입 PR에 가드 자체 단위 테스트 동반) 첫 적용.
@@ -39,36 +40,12 @@ function setupTempProject(opts: Fixtures): string {
   return cwd;
 }
 
-function runGuard(cwd: string): { exitCode: number; stdout: string; stderr: string } {
-  try {
-    const stdout = execFileSync('node', [SCRIPT_PATH], {
-      cwd,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    return { exitCode: 0, stdout, stderr: '' };
-  } catch (e) {
-    const err = e as { status?: number; stdout?: Buffer | string; stderr?: Buffer | string };
-    return {
-      exitCode: err.status ?? -1,
-      stdout: err.stdout?.toString() ?? '',
-      stderr: err.stderr?.toString() ?? '',
-    };
-  }
-}
+// 본 테스트 파일 전용 래퍼 — SCRIPT_PATH를 바인딩 (호출부는 runGuard(cwd) 유지).
+const runGuard = (cwd: string) => runGuardScript(SCRIPT_PATH, cwd);
 
-const tmpDirs: string[] = [];
-function track(cwd: string): string {
-  tmpDirs.push(cwd);
-  return cwd;
-}
-
-afterEach(() => {
-  while (tmpDirs.length > 0) {
-    const dir = tmpDirs.pop()!;
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
+const tmp = createTmpTracker();
+const track = tmp.track;
+afterEach(() => tmp.cleanupAll());
 
 describe('check-migrations-no-concurrently — clean cases', () => {
   it('빈 migrations 디렉토리 → exit 0 + OK 메시지', () => {
