@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 307,
+    "version": 308,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T20:12:13+09:00"
+    "updatedAt": "2026-05-29T20:12:52+09:00"
   },
   "summary": {
     "total": 47,
@@ -2484,9 +2484,8 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260529-192652",
-      "assignedAt": "2026-05-29T20:12:13+09:00",
+      "assignedAt": "2026-05-29T20:12:52+09:00",
       "lockedFiles": [
-        "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
         "tests/lib/drafts/use-auto-save.test.ts"
       ],
       "dependencies": [
@@ -2496,14 +2495,14 @@
       "source": "CANDID-016 retro Action Item HIGH-2",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 82,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "82",
-        "updatedAt": "2026-05-29T20:12:13+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-29T20:12:52+09:00"
       },
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -2522,12 +2521,13 @@
         {
           "step": 2,
           "title": "ResumeUploadStep.test.tsx (10 시나리오)",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 500,
           "files": [
             "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx"
           ],
-          "prNumber": 82
+          "prNumber": 82,
+          "mergedAt": "2026-05-29T11:12:34Z"
         },
         {
           "step": 3,
