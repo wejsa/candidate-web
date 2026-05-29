@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 314,
+    "version": 315,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T20:19:04+09:00"
+    "updatedAt": "2026-05-29T20:32:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -1625,7 +1625,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260529-193508",
-      "assignedAt": "2026-05-29T20:17:09+09:00",
+      "assignedAt": "2026-05-29T20:32:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/auth/password-reset.ts",
@@ -1636,7 +1636,10 @@
         "app/api/v1/auth/password/reset/route.ts",
         "app/password/reset-request/page.tsx",
         "app/password/reset/page.tsx",
-        "tests/lib/auth/password-reset.test.ts"
+        "tests/lib/auth/password-reset.test.ts",
+        "lib/security/rate-limit.ts",
+        "tests/lib/errors/codes.test.ts",
+        "tests/lib/security/rate-limit.test.ts"
       ],
       "dependencies": [
         "CANDID-010"
@@ -1662,7 +1665,7 @@
           "number": 2,
           "title": "reset-request 백엔드 (서비스 + 라우트 + 메일 템플릿)",
           "description": "requestPasswordReset: 이메일 조회 → 존재·ACTIVE·passwordHash 있을 때만 활성 토큰 consume 후 신규 토큰(sha256, 30분) INSERT → 재설정 링크 메일(TX 외부). 계정 열거 방지: 존재/미존재/WITHDRAWN/소셜전용 모두 동일 200, 타이밍·로깅 균일. POST /api/v1/auth/password/reset-request. 단위 테스트 포함.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/auth/password-reset.ts",
             "lib/email/templates/reset-password.ts",
@@ -1672,7 +1675,8 @@
             "tests/lib/auth/password-reset.test.ts"
           ],
           "estimatedLines": 420,
-          "prLineLimit": 500
+          "prLineLimit": 500,
+          "prNumber": 84
         },
         {
           "number": 3,
@@ -1712,12 +1716,12 @@
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 84,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-29T20:17:09+09:00"
+        "autoChainArgs": "84 --auto-fix",
+        "updatedAt": "2026-05-29T20:32:00+09:00"
       }
     },
     "CANDID-021": {
