@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 36,
+    "version": 37,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-30T01:34:12+09:00"
+    "updatedAt": "2026-05-30T01:48:00+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1195,6 +1195,26 @@
         "M002: vi.mock(@/lib/prisma) 22+개 파일 reset 전략(clear/reset) 3종 혼재 — 선택 기준을 tests/setup.ts 또는 테스트 컨벤션 문서로 일원화 (follow-up)",
         "INFO: --no-isolate 성능 전환 시 미수정 파일 동일 클래스 누수 노출 — 단일 공유 prisma mock 재구조화 검토(범위 외)",
         "원본 flaky 미재현 — CI 환경(CPU/pool)에서 재발 시 추가 조사 필요"
+      ]
+    },
+    "CANDID-045": {
+      "id": "CANDID-045",
+      "title": "meta-guard refinement 통합 (carry 10건)",
+      "phase": 1,
+      "priority": "medium",
+      "type": "chore",
+      "completedAt": "2026-05-30T01:48:00+09:00",
+      "assignee": "wejsa-u@hoji-20260530-004524",
+      "prs": [
+        89,
+        91
+      ],
+      "totalMergedLines": 475,
+      "stepCount": 2,
+      "reviewSummary": "Step1 #89: full 3관점 CRITICAL 0, MAJOR 9 in-task 수정(L-019 — tsx self-detection 정합/meta orphan 스캔/alias-chaining/negative 테스트). Step2 #91: CRITICAL 0, domain MAJOR는 stale false-positive(SKILL.md §2.4 #89에서 이미 scripts/meta/ 반영). ⚠️ PR #88이 state-push 실수로 리뷰 우회 자동머지 → revert(bebc101) 후 #89로 정식 재진행.",
+      "carry": [
+        "T-1/T-3 단언을 substring→정확 토큰/경계(\\b)로 강화 (회귀 민감도)",
+        "SKILL.md §2.4 '신규 가드 추가 절차'에 spawn-guard.ts 헬퍼 재사용 1줄 안내 (common.md DRY 규약 대응)"
       ]
     }
   }

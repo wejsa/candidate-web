@@ -2591,5 +2591,22 @@
     "prNumber": 91,
     "decision": "APPROVED (CRITICAL 0; domain MAJOR=stale false-positive; self-PR COMMENT)",
     "at": "2026-05-30T01:46:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-045",
+    "stepNumber": 2,
+    "prNumber": 91,
+    "mergedAt": "2026-05-30T01:46:30+09:00",
+    "at": "2026-05-30T01:48:00+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-045",
+    "prs": [
+      89,
+      91
+    ],
+    "at": "2026-05-30T01:48:00+09:00"
   }
 ]
