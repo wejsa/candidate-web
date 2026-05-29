@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 34,
+    "version": 35,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-29T20:19:04+09:00"
+    "updatedAt": "2026-05-29T21:13:00+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1149,6 +1149,32 @@
         "frontend-testing.md에 RTL 모킹경계/renderHook/fireEvent우회/cleanup 패턴 명문화 — docs MINOR",
         "vitest coverage.include에 app/**/*.tsx 포함 여부 결정 — QA MINOR",
         "reducer 미사용 abort 액션 dead path 정리 — domain MINOR"
+      ]
+    },
+    "CANDID-020": {
+      "id": "CANDID-020",
+      "title": "비밀번호 재설정 (US-AUTH-004)",
+      "phase": 3,
+      "priority": "medium",
+      "type": "feature",
+      "completedAt": "2026-05-29T21:13:00+09:00",
+      "assignee": "wejsa-u@hoji-20260529-193508",
+      "prs": [
+        81,
+        84,
+        85,
+        86,
+        87
+      ],
+      "totalMergedLines": 1390,
+      "stepCount": 5,
+      "reviewSummary": "full 3관점 5 PR(#81/#84/#85/#86/#87) 전부 APPROVED, CRITICAL 0. 각 스텝 리뷰 MAJOR(라우트 통합 테스트·동시성 race 가드·429 처리·a11y·Referer 방어)는 전부 in-PR 해소. 전체 1490 테스트 통과.",
+      "carry": [
+        "마이그 부분 UNIQUE predicate/스키마 회귀 통합 테스트(testcontainers 필요) — 별도 통합 PR (QA/test P2)",
+        "균일 메시지 카피 SSOT 통합(reset-request 서버/클라 fallback/테스트 3곳) — domain MINOR",
+        "revoke 쿼리 tx 헬퍼(revokeAllForUserTx) 추출로 SSOT — arch MINOR",
+        "비밀번호 재설정 발급/완료 감사 로그 — PHASE-4(compliance)",
+        "reset UI 400 불일치/강도 메시지 세분화 + page token 배열/undefined 폴백 테스트 — domain/test MINOR"
       ]
     }
   }
