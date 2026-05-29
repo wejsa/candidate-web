@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 46,
     "projectPrefix": "CANDID",
-    "version": 303,
+    "version": 304,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T19:57:17+09:00"
+    "updatedAt": "2026-05-29T20:05:00+09:00"
   },
   "summary": {
     "total": 46,
@@ -1649,13 +1649,14 @@
           "number": 1,
           "title": "마이그레이션: password_reset_tokens token 해시 격상 + 부분 UNIQUE",
           "description": "token VARCHAR(255) → token_hash CHAR(64) sha256(@unique) + uk_password_reset_active_per_user 부분 UNIQUE(user_id WHERE consumed_at IS NULL) + idx_password_reset_tokens_expires. 0-row guard(L-001). prisma generate 확인.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "prisma/schema.prisma",
-            "prisma/migrations/{ts}_candid_020_password_reset_token_hash/migration.sql"
+            "prisma/migrations/20260529200000_candid_020_password_reset_token_hash/migration.sql"
           ],
           "estimatedLines": 120,
-          "prLineLimit": 150
+          "prLineLimit": 150,
+          "prNumber": 81
         },
         {
           "number": 2,
@@ -1711,12 +1712,12 @@
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 81,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-29T19:57:17+09:00"
+        "autoChainArgs": "81 --auto-fix",
+        "updatedAt": "2026-05-29T20:05:00+09:00"
       }
     },
     "CANDID-021": {
