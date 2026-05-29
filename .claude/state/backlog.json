@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 46,
     "projectPrefix": "CANDID",
-    "version": 302,
+    "version": 303,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T19:54:14+09:00"
+    "updatedAt": "2026-05-29T20:00:11+09:00"
   },
   "summary": {
     "total": 46,
@@ -2484,7 +2484,7 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260529-192652",
-      "assignedAt": "2026-05-29T19:54:14+09:00",
+      "assignedAt": "2026-05-29T20:00:11+09:00",
       "lockedFiles": [
         "package.json",
         "pnpm-lock.yaml",
@@ -2500,12 +2500,12 @@
       "source": "CANDID-016 retro Action Item HIGH-2",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 80,
         "fixLoopCount": 0,
-        "autoChainArgs": "80 --auto-fix",
-        "updatedAt": "2026-05-29T19:54:14+09:00"
+        "autoChainArgs": "80",
+        "updatedAt": "2026-05-29T20:00:11+09:00"
       },
       "currentStep": 1,
       "steps": [
