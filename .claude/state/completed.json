@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 33,
+    "version": 34,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-29T01:11:30+09:00"
+    "updatedAt": "2026-05-29T20:19:04+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1127,6 +1127,29 @@
         }
       ],
       "description": "CANDID-008 Step 2 review MAJOR D10. README + migration.sql이 참조 중인 `docs/security/pii-encryption.md` 파일이 존재하지 않음 → broken reference 해소. 포함 내용: AES-256-GCM 알고리즘 사양, [iv 12B][tag 16B][ciphertext] 포맷, encryptPii/decryptPii API, *_key_version 컬럼 의미, 키 회전 SOP (4단계 무중단 M1~M4), 사고 대응 (키 유출 시 즉시 회전 절차), 컴플라이언스 매핑 (개인정보보호법 / GDPR Art. 32). docs/architecture/pii-data-flow.md (시퀀스 다이어그램)도 함께 검토."
+    },
+    "CANDID-039": {
+      "id": "CANDID-039",
+      "title": "RTL 인프라 도입 + ResumeUploadStep.test.tsx + use-auto-save 마이그",
+      "phase": 4,
+      "priority": "high",
+      "type": "test",
+      "completedAt": "2026-05-29T20:19:04+09:00",
+      "assignee": "wejsa-u@hoji-20260529-192652",
+      "prs": [
+        80,
+        82,
+        83
+      ],
+      "totalMergedLines": 513,
+      "stepCount": 3,
+      "reviewSummary": "full 3관점 전 PR APPROVED, CRITICAL 0. Step1 MINOR 일부 in-review 반영, Step2 403/500 가드 보강. 부수 발견 분리: CANDID-046(auth 테스트 플래키), CANDID-047(422 빈 message 빈 alert 버그).",
+      "carry": [
+        "use-auto-save 테스트 커버리지 보강(inflightRef 동시성, conflict 후 saveNow 차단, 409 dead mock 정리) — QA P2",
+        "frontend-testing.md에 RTL 모킹경계/renderHook/fireEvent우회/cleanup 패턴 명문화 — docs MINOR",
+        "vitest coverage.include에 app/**/*.tsx 포함 여부 결정 — QA MINOR",
+        "reducer 미사용 abort 액션 dead path 정리 — domain MINOR"
+      ]
     }
   }
 }
