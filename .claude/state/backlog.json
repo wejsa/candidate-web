@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 318,
+    "version": 319,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T20:44:00+09:00"
+    "updatedAt": "2026-05-29T20:50:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -1714,12 +1714,12 @@
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 85,
         "fixLoopCount": 0,
-        "autoChainArgs": "85 --auto-fix",
-        "updatedAt": "2026-05-29T20:44:00+09:00"
+        "autoChainArgs": "85",
+        "updatedAt": "2026-05-29T20:50:00+09:00"
       }
     },
     "CANDID-021": {
