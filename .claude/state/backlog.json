@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 309,
+    "version": 311,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-05-29T20:15:20+09:00"
   },
   "summary": {
     "total": 47,
     "done": 33,
-    "inProgress": 1,
+    "inProgress": 2,
     "review": 0,
-    "todo": 13
+    "todo": 12
   },
   "phases": {
     "1": {
@@ -1620,14 +1620,105 @@
       "id": "CANDID-020",
       "title": "비밀번호 재설정 (US-AUTH-004)",
       "description": "이메일 입력 → 재설정 메일 발송(존재 여부 무관 동일 응답, 계정 열거 방지). 토큰 30분 일회용. 완료 시 모든 Refresh Token 무효화.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
+      "assignee": "wejsa-u@hoji-20260529-193508",
+      "assignedAt": "2026-05-29T19:57:17+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "prisma/schema.prisma",
+        "lib/auth/password-reset.ts",
+        "lib/auth/validation.ts",
+        "lib/email/templates/reset-password.ts",
+        "lib/errors/codes.ts",
+        "app/api/v1/auth/password/reset-request/route.ts",
+        "app/api/v1/auth/password/reset/route.ts",
+        "app/password/reset-request/page.tsx",
+        "app/password/reset/page.tsx",
+        "tests/lib/auth/password-reset.test.ts"
+      ],
       "dependencies": [
         "CANDID-010"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "currentStep": 1,
+      "steps": [
+        {
+          "number": 1,
+          "title": "마이그레이션: password_reset_tokens token 해시 격상 + 부분 UNIQUE",
+          "description": "token VARCHAR(255) → token_hash CHAR(64) sha256(@unique) + uk_password_reset_active_per_user 부분 UNIQUE(user_id WHERE consumed_at IS NULL) + idx_password_reset_tokens_expires. 0-row guard(L-001). prisma generate 확인.",
+          "status": "pr_created",
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations/20260529200000_candid_020_password_reset_token_hash/migration.sql"
+          ],
+          "estimatedLines": 120,
+          "prLineLimit": 150,
+          "prNumber": 81
+        },
+        {
+          "number": 2,
+          "title": "reset-request 백엔드 (서비스 + 라우트 + 메일 템플릿)",
+          "description": "requestPasswordReset: 이메일 조회 → 존재·ACTIVE·passwordHash 있을 때만 활성 토큰 consume 후 신규 토큰(sha256, 30분) INSERT → 재설정 링크 메일(TX 외부). 계정 열거 방지: 존재/미존재/WITHDRAWN/소셜전용 모두 동일 200, 타이밍·로깅 균일. POST /api/v1/auth/password/reset-request. 단위 테스트 포함.",
+          "status": "pending",
+          "files": [
+            "lib/auth/password-reset.ts",
+            "lib/email/templates/reset-password.ts",
+            "app/api/v1/auth/password/reset-request/route.ts",
+            "lib/auth/validation.ts",
+            "lib/errors/codes.ts",
+            "tests/lib/auth/password-reset.test.ts"
+          ],
+          "estimatedLines": 420,
+          "prLineLimit": 500
+        },
+        {
+          "number": 3,
+          "title": "reset-request UI (이메일 입력 · 균일 안내 메시지)",
+          "description": "이메일 입력 폼 → reset-request API 호출 → 성공/실패 구분 없는 균일 안내 메시지 표시. 기본 접근성(label/aria). 데모 가능 지점①.",
+          "status": "pending",
+          "files": [
+            "app/password/reset-request/page.tsx"
+          ],
+          "estimatedLines": 300,
+          "prLineLimit": 400
+        },
+        {
+          "number": 4,
+          "title": "reset 백엔드 (consume + 단일 TX + 리프레시 무효화)",
+          "description": "resetPassword: 토큰 race-safe consume(updateMany WHERE consumedAt=null AND expiresAt>now) → 새 비번 bcrypt 해시 → 단일 TX(users.passwordHash 갱신 + 토큰 consume + revokeAllForUser('password_change')). 만료/무효 → AUTH_RESET_TOKEN_*. POST /api/v1/auth/password/reset. 단위 테스트 포함.",
+          "status": "pending",
+          "files": [
+            "lib/auth/password-reset.ts",
+            "app/api/v1/auth/password/reset/route.ts",
+            "lib/auth/validation.ts",
+            "tests/lib/auth/password-reset.test.ts"
+          ],
+          "estimatedLines": 420,
+          "prLineLimit": 500
+        },
+        {
+          "number": 5,
+          "title": "reset UI (토큰 폼 · 전체 흐름 완성)",
+          "description": "쿼리스트링 토큰 수신 → 새 비번/확인 폼(클라 정책 검증) → reset API 호출 → 성공 시 로그인 유도, 실패(만료/무효) 시 재요청 안내. 접근성. 데모 가능 지점②(전체 흐름).",
+          "status": "pending",
+          "files": [
+            "app/password/reset/page.tsx"
+          ],
+          "estimatedLines": 350,
+          "prLineLimit": 450
+        }
+      ],
+      "workflowState": {
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
+        "prNumber": 81,
+        "fixLoopCount": 0,
+        "autoChainArgs": "81",
+        "updatedAt": "2026-05-29T20:10:00+09:00"
+      }
     },
     "CANDID-021": {
       "id": "CANDID-021",
