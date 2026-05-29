@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { Prisma } from '@prisma/client';
 import { AppError } from '@/lib/errors';
@@ -51,11 +51,10 @@ const validInput = {
 };
 
 beforeEach(() => {
+  // clearAllMocks(호출 이력만 초기화)로 factory 기본 impl(jwt/session)을 보존한다.
+  // CANDID-046: 기존 afterEach(vi.restoreAllMocks()) 제거 — 전역 restore가 워커 공유 시
+  //   다음 파일의 vi.mock('@/lib/prisma') 상태를 비워 간헐 실패를 유발했다.
   vi.clearAllMocks();
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
 });
 
 describe('createUserAndIssueTokens', () => {
