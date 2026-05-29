@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 45,
     "projectPrefix": "CANDID",
-    "version": 299,
+    "version": 300,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T19:26:52+09:00"
+    "updatedAt": "2026-05-29T19:29:39+09:00"
   },
   "summary": {
     "total": 45,
@@ -2484,22 +2484,62 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260529-192652",
-      "assignedAt": "2026-05-29T19:26:52+09:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-05-29T19:29:39+09:00",
+      "lockedFiles": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "tests/setup.ts",
+        "vitest.config.ts",
+        "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
+        "tests/lib/drafts/use-auto-save.test.ts"
+      ],
       "dependencies": [
         "CANDID-016"
       ],
       "createdAt": "2026-05-25T11:00:00+09:00",
       "source": "CANDID-016 retro Action Item HIGH-2",
-      "lockTTL": 1800,
+      "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-29T19:26:52+09:00"
-      }
+        "updatedAt": "2026-05-29T19:29:39+09:00"
+      },
+      "currentStep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "title": "RTL 인프라 도입 + jsdom 매핑 + smoke",
+          "status": "pending",
+          "prLineLimit": 200,
+          "files": [
+            "package.json",
+            "pnpm-lock.yaml",
+            "tests/setup.ts",
+            "vitest.config.ts"
+          ]
+        },
+        {
+          "step": 2,
+          "title": "ResumeUploadStep.test.tsx (10 시나리오)",
+          "status": "pending",
+          "prLineLimit": 500,
+          "files": [
+            "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx"
+          ]
+        },
+        {
+          "step": 3,
+          "title": "use-auto-save RTL 마이그 (검토/폴백)",
+          "status": "pending",
+          "prLineLimit": 400,
+          "files": [
+            "tests/lib/drafts/use-auto-save.test.ts"
+          ]
+        }
+      ]
     },
     "CANDID-040": {
       "id": "CANDID-040",
