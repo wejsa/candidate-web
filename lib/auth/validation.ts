@@ -101,6 +101,24 @@ export const PasswordResetRequestInputSchema = z.object({
 
 export type PasswordResetRequestInput = z.infer<typeof PasswordResetRequestInputSchema>;
 
+// CANDID-020 Step 4 — 비밀번호 재설정 확정 입력 (US-AUTH-004).
+// token: 32 bytes hex(64 char). password: 가입과 동일 강도(min 10 + 3-of-4). passwordConfirm 일치.
+export const PasswordResetInputSchema = z
+  .object({
+    token: z
+      .string()
+      .trim()
+      .regex(/^[0-9a-f]{64}$/i, 'token must be 64-char hex'),
+    password: PASSWORD_FIELD,
+    passwordConfirm: z.string(),
+  })
+  .refine((d) => d.password === d.passwordConfirm, {
+    message: '비밀번호와 비밀번호 확인이 일치하지 않습니다',
+    path: ['passwordConfirm'],
+  });
+
+export type PasswordResetInput = z.infer<typeof PasswordResetInputSchema>;
+
 // CANDID-011 — 이메일 로그인 입력 스키마 (US-AUTH-002).
 // 회원가입과 달리 password는 길이/강도 검증을 *생략*한다 — 정책이 시점에 따라 달라질 수 있고
 // (과거 회원이 약한 비밀번호로 가입한 경우 차단되면 안 됨), DB의 bcrypt 해시와 매칭만 수행한다.

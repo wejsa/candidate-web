@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 319,
+    "version": 322,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T20:50:00+09:00"
+    "updatedAt": "2026-05-29T21:03:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -1625,23 +1625,21 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260529-193508",
-      "assignedAt": "2026-05-29T20:44:00+09:00",
+      "assignedAt": "2026-05-29T20:59:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "app/password/reset-request/page.tsx",
-        "app/password/reset/page.tsx",
         "lib/auth/password-reset.ts",
         "app/api/v1/auth/password/reset/route.ts",
         "lib/auth/validation.ts",
         "tests/lib/auth/password-reset.test.ts",
-        "app/password/reset-request/_components/ResetRequestForm.tsx",
-        "tests/app/password/reset-request/ResetRequestForm.test.tsx"
+        "app/password/reset/page.tsx",
+        "tests/app/api/v1/auth/password/reset.test.ts"
       ],
       "dependencies": [
         "CANDID-010"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "currentStep": 3,
+      "currentStep": 4,
       "steps": [
         {
           "number": 1,
@@ -1679,19 +1677,20 @@
           "number": 3,
           "title": "reset-request UI (이메일 입력 · 균일 안내 메시지)",
           "description": "이메일 입력 폼 → reset-request API 호출 → 성공/실패 구분 없는 균일 안내 메시지 표시. 기본 접근성(label/aria). 데모 가능 지점①.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "app/password/reset-request/page.tsx"
           ],
           "estimatedLines": 300,
           "prLineLimit": 400,
-          "prNumber": 85
+          "prNumber": 85,
+          "mergedAt": "2026-05-29T20:50:00+09:00"
         },
         {
           "number": 4,
           "title": "reset 백엔드 (consume + 단일 TX + 리프레시 무효화)",
           "description": "resetPassword: 토큰 race-safe consume(updateMany WHERE consumedAt=null AND expiresAt>now) → 새 비번 bcrypt 해시 → 단일 TX(users.passwordHash 갱신 + 토큰 consume + revokeAllForUser('password_change')). 만료/무효 → AUTH_RESET_TOKEN_*. POST /api/v1/auth/password/reset. 단위 테스트 포함.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/auth/password-reset.ts",
             "app/api/v1/auth/password/reset/route.ts",
@@ -1699,7 +1698,8 @@
             "tests/lib/auth/password-reset.test.ts"
           ],
           "estimatedLines": 420,
-          "prLineLimit": 500
+          "prLineLimit": 500,
+          "prNumber": 86
         },
         {
           "number": 5,
@@ -1716,10 +1716,10 @@
       "workflowState": {
         "currentSkill": "skill-merge-pr",
         "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 85,
+        "prNumber": 86,
         "fixLoopCount": 0,
-        "autoChainArgs": "85",
-        "updatedAt": "2026-05-29T20:50:00+09:00"
+        "autoChainArgs": "86",
+        "updatedAt": "2026-05-29T21:03:00+09:00"
       }
     },
     "CANDID-021": {
