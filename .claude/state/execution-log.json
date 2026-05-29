@@ -2521,5 +2521,13 @@
     "prNumber": 89,
     "branch": "feature/CANDID-045-step1",
     "at": "2026-05-30T01:24:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-046",
+    "stepNumber": 1,
+    "prNumber": 90,
+    "branch": "worktree-purring-sparking-key",
+    "at": "2026-05-30T01:25:48+09:00"
   }
 ]
