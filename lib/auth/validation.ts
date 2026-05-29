@@ -92,6 +92,15 @@ export const VerifyEmailInputSchema = z.object({
 
 export type VerifyEmailInput = z.infer<typeof VerifyEmailInputSchema>;
 
+// CANDID-020 Step 2 — 비밀번호 재설정 요청 입력 (US-AUTH-004).
+// email은 SignupInputSchema와 동일 정규화(trim + 소문자 + IDN homograph 차단).
+// 계정 열거 방지는 서비스/라우터 레이어 책임 — 스키마는 형식 검증만 수행한다.
+export const PasswordResetRequestInputSchema = z.object({
+  email: EMAIL_FIELD,
+});
+
+export type PasswordResetRequestInput = z.infer<typeof PasswordResetRequestInputSchema>;
+
 // CANDID-011 — 이메일 로그인 입력 스키마 (US-AUTH-002).
 // 회원가입과 달리 password는 길이/강도 검증을 *생략*한다 — 정책이 시점에 따라 달라질 수 있고
 // (과거 회원이 약한 비밀번호로 가입한 경우 차단되면 안 됨), DB의 bcrypt 해시와 매칭만 수행한다.

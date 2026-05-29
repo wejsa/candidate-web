@@ -89,6 +89,16 @@ export const POLICIES = Object.freeze({
     maxRequests: 30,
     keyExtractor: rateLimitKeyByIp,
   } satisfies RateLimitPolicy),
+  /**
+   * CANDID-020 (US-AUTH-004) — 비밀번호 재설정 요청. 메일 발송 + 계정 열거 방지 흐름.
+   * SIGNUP과 동일하게 시간당 5회/IP — 토큰 발급/메일 폭주 + 열거 시도(이메일 대량 탐침) 차단.
+   */
+  PASSWORD_RESET: Object.freeze({
+    name: 'password_reset',
+    windowMs: 3_600_000,
+    maxRequests: 5,
+    keyExtractor: rateLimitKeyByIp,
+  } satisfies RateLimitPolicy),
 });
 
 /**

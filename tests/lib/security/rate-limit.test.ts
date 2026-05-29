@@ -120,8 +120,14 @@ describe('POLICIES catalog (BR-SEC-04)', () => {
   it('정책 카탈로그 키 화이트리스트 — 신규 정책 추가는 의도적 변경 강제 (C001 회귀 가드)', () => {
     // FILE_UPLOAD는 (request, AuthContext) 시그니처 확장 후 CANDID-016에서 정의.
     // VERIFY_EMAIL — CANDID-036에서 추가 (PR #33 H005, 무제한 POST DoS 차단).
+    // PASSWORD_RESET — CANDID-020에서 추가 (US-AUTH-004, 토큰/메일 폭주 + 열거 탐침 차단).
     // 본 테스트가 fail하면: 신규 정책 정당하면 화이트리스트 갱신, FILE_UPLOAD라면 시그니처 확장 동반 필수.
-    expect(Object.keys(POLICIES).sort()).toEqual(['LOGIN', 'SIGNUP', 'VERIFY_EMAIL']);
+    expect(Object.keys(POLICIES).sort()).toEqual([
+      'LOGIN',
+      'PASSWORD_RESET',
+      'SIGNUP',
+      'VERIFY_EMAIL',
+    ]);
   });
 
   it('정책 카탈로그는 BR-SEC-04 사양(LOGIN/SIGNUP)과 정합', () => {
