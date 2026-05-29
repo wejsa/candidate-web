@@ -160,7 +160,7 @@ frontmatter 다음에 다음 섹션을 권장합니다(고정 형식 아님):
 3. .claude/rules/{domain}/{language}/*.md 글롭
 4. 매칭 파일 경로를 rules_paths 리스트에 수집
 5. 부재 시 SKIP (기존 동작 유지)
-6. Trivial 경량 리뷰 시 SKIP
+6. T0(Trivial) 분류 시 SKIP. T1a(Test-only) / T1b(Deps-only)는 도메인 에이전트 미호출이므로 `rules_paths` 전달 불필요(자연 SKIP — v2.3+)
 7. _example/_example/는 매핑 표에 없으므로 자연 SKIP
 ```
 

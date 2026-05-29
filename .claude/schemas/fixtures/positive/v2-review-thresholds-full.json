@@ -1,0 +1,12 @@
+{
+  "name": "review-thresholds-full-example",
+  "domain": "fintech",
+  "version": "2.3.0",
+  "review": {
+    "thresholds": {
+      "critical": 85,
+      "major": 65,
+      "minor": 55
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "review-thresholds-partial-example",
+  "domain": "saas",
+  "version": "2.3.0",
+  "review": {
+    "thresholds": {
+      "critical": 90
+    }
+  }
+}

@@ -182,8 +182,9 @@ complexity-hint: heavy
 
 #### SI-03. 잠금 만료 탐지 (MINOR)
 - 사전 조건: .claude/state/backlog.json 존재
-- 검사: lockedBy 필드가 있는 Task 중 lockedAt이 1시간 이상 경과한 것
-- autoFix: 자동 잠금 해제 (confirm: false — TTL 초과는 명백한 비정상)
+- 검사: `lockedBy` 필드가 있는 Task 중 `lockedAt`이 1시간 이상 경과한 것 (둘 다 v2.2.0+ `backlog.schema.json` 정식 필드 — 가변 잠금 의미, `assignee`/`assignedAt`(불변 할당)와 구분)
+- 비교: `stop.sh`의 10분(EXPIRY_SECONDS) TTL은 응답 단위 heartbeat 만료. 본 검사는 보다 보수적인 1시간(헬스체크 단위) — 일과성 만료가 아닌 진짜 좀비 잠금만 탐지
+- autoFix: 자동 잠금 해제 (`lockedBy`/`lockedAt`을 null로 — confirm: false. TTL 초과는 명백한 비정상)
 
 #### SI-04. backlog 내부 논리 검증 (MAJOR)
 - 사전 조건: .claude/state/backlog.json 존재

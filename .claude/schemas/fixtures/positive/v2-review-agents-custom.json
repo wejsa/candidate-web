@@ -1,0 +1,8 @@
+{
+  "name": "review-agents-custom-example",
+  "domain": "healthcare",
+  "version": "2.3.0",
+  "review": {
+    "agents": ["domain", "security"]
+  }
+}

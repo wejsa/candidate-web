@@ -1,0 +1,8 @@
+{
+  "name": "review-mode-full-example",
+  "domain": "general",
+  "version": "2.3.0",
+  "review": {
+    "mode": "full"
+  }
+}

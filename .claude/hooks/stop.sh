@@ -77,14 +77,18 @@ if [ -f "$BACKLOG" ]; then
     ' "$BACKLOG" 2>/dev/null || echo false)"
 
     if [ "$HAS_EXPIRED" = "true" ]; then
+      # schema의 .tasks는 dict — `map`은 array 변환이라 키가 손실됨. dict 의미 유지 위해
+      # `with_entries(.value |= ...)` 사용. backlog.schema.json:73-79 정합 (PR #73).
       atomic_write "$BACKLOG" jq \
         --argjson now "$NOW_EPOCH" \
         --argjson ttl "$EXPIRY_SECONDS" \
-        '.tasks |= map(
-          if (.lockedAt // "") != "" and
-             ((.lockedAt | fromdateiso8601?) // 0) < ($now - $ttl)
-          then . + {lockedAt: null, lockedBy: null}
-          else . end
+        '.tasks |= with_entries(
+          .value |= (
+            if (.lockedAt // "") != "" and
+               ((.lockedAt | fromdateiso8601?) // 0) < ($now - $ttl)
+            then . + {lockedAt: null, lockedBy: null}
+            else . end
+          )
         )' "$BACKLOG"
     fi
   fi

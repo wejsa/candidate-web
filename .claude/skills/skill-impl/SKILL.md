@@ -150,7 +150,7 @@ step status → "pr_created", prNumber 기록. assignedAt 갱신 (lock heartbeat
    - > 300줄: 차단 "Standard 경로 필요. /skill-plan 실행"
 5. **빌드 & 테스트**: 일반과 동일
 6. **커밋 & PR**: `{type}: {taskId} - {설명}` (type은 AI 추론)
-7. **리뷰**: Trivial Fast Path 조건 매칭 시 경량 리뷰, 미매칭 시 일반 리뷰 폴백
+7. **리뷰**: v2.3+ 자동 Tier 분류로 PR 특성 따라 T0(0-agent)~T3(3-agent) 자동 결정. Micro 범위 PR은 대부분 T0/T1a/T1b로 경량 처리.
 
 자연어: "OO 고쳐줘" / "OO 버그 수정해줘" → 규모 추정 → Micro 판단 시 자동 전환. 확신 못 하면 Standard.
 

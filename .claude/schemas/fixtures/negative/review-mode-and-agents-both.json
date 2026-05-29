@@ -1,0 +1,9 @@
+{
+  "name": "review-mode-and-agents-both-violation",
+  "domain": "general",
+  "version": "2.3.0",
+  "review": {
+    "mode": "full",
+    "agents": ["domain"]
+  }
+}

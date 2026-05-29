@@ -29,7 +29,16 @@ agent-qa의 제안 결과가 `.claude/temp/workflow-{id}/qa-suggestions.md`에 �
 
 ## 리뷰 절차
 
-1. `/tmp/pr-{N}-diff.txt`를 Read로 확인하여 변경된 소스 파일 목록 추출 (프롬프트가 아닌 파일 경로로 전달됨)
+**0. 변경 분류**: `/tmp/pr-{N}-diff.txt`에서 변경 파일을 소스 파일과 테스트 파일로 분류.
+
+- **테스트 자체 품질 모드** (소스 변경 0건 + 테스트 100% 변경 — skill-review-pr의 T1a 분류 시): 절차 1·2·3(소스↔테스트 매핑/누락 보고) 건너뛰고 신규/변경 테스트의 자체 품질만 평가:
+  - assert/expect 등 실제 검증문 존재 여부 (빈 테스트 차단)
+  - 경계값/예외 케이스 커버리지 (Happy Path만 있는지)
+  - 테스트 스멜 (sleep, 외부 호출, 비결정성, hardcoded date 등 — 아래 "테스트 스멜 탐지" 섹션 참조)
+  - 도메인 체크리스트 CRITICAL 항목에 대한 신규 테스트 커버 여부 (절차 6 흡수)
+- **일반 모드**: 아래 절차 1~6 수행.
+
+1. 변경된 소스 파일 목록 추출
 2. 각 소스 파일에 대응하는 테스트 파일 Grep으로 탐색
 3. 테스트 파일이 없으면 → 누락으로 기록
 4. 테스트 파일이 있으면 → 품질 평가 수행
@@ -45,7 +54,7 @@ agent-qa의 제안 결과가 `.claude/temp/workflow-{id}/qa-suggestions.md`에 �
 - 동시성 관련 코드에 동시성 테스트 없음 (재고 차감, 락 처리)
 - 테스트에서 실제 외부 서비스 호출 (Mock/Stub 미사용)
 
-### MAJOR (머지 전 수정 권장)
+### MAJOR (개선 권고 — 머지 차단 없음)
 - 에러/예외 케이스 테스트 누락 (Happy Path만 존재)
 - 경계값 테스트 누락 (0, null, empty, max값)
 - 테스트 파일 자체가 누락 (신규 서비스/컨트롤러에 테스트 없음)
@@ -164,6 +173,8 @@ requests\.get\(|requests\.post\(  # 외부 API 직접 호출 (Mock 필요)
 | `time.sleep()` 사용 | MAJOR | `pytest-freezegun` 또는 mock 사용 |
 
 ## 출력 형식 (반드시 준수)
+
+> 본 에이전트는 **markdown 표만 emit**한다(셀의 심각도 텍스트 = `CRITICAL`/`MAJOR`/`MINOR`). PR 인라인 코멘트로 게시될 때의 **최종 라벨 형식(`🔴 **CRITICAL**` 등 + 강등 마커)은 `skill-review-pr` SKILL.md Step 5 "인라인 코멘트 라벨 형식 (SSOT)"가 결정**한다 — 본 에이전트는 confidence 강등/드롭/채번을 수행하지 않는다.
 
 ### 5️⃣ 테스트 품질
 | 심각도 | 체크리스트 | 항목 | 파일:라인 | 설명 |

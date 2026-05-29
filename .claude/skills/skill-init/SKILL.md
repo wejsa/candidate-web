@@ -97,6 +97,17 @@ complexity-hint: light
 
 ## 일반 모드 실행 플로우
 
+### Step 0: 트리거 보호 마커 생성 (v2.2.0+)
+
+본격 진행 전 PostToolUse hook의 자동 비활성화(10초/3회 임계)를 일시 차단합니다. skill-init은 다수 Write를 짧은 시간에 발생시키므로 기본 임계값에서 false-positive 비활성화가 발생하기 쉽습니다.
+
+```bash
+mkdir -p .claude/state 2>/dev/null
+touch .claude/state/init-in-progress.flag 2>/dev/null || true
+```
+
+> `post-tool-use.sh`는 본 마커 존재 시 0-A단계에서 즉시 exit 0(카운터 진입 자체 차단). 마커는 1시간 TTL로 자동 회수되므로 SKILL이 비정상 종료해도 안전. Step 11 종료 시 명시적 제거.
+
 ### Step 1: 환경 검증
 
 #### 평가 순서 (반드시 다음 순서로)
@@ -482,10 +493,11 @@ mkdir -p "$BACKUP_DIR" || {
 ##### 2. 백업 대상 파일 이동 (실재 경로만)
 
 존재하는 경우만 이동:
-- `project.json` → `$BACKUP_DIR/`
-- `backlog.json` → `$BACKUP_DIR/` (프로젝트 루트. `.claude/state/`가 아님 — `.claude/state/`는 v2.0.3에서 cleanup 대상이며 사용자 프로젝트엔 부재)
+- `.claude/state/project.json` → `$BACKUP_DIR/.claude_state/project.json` (v2 SSOT)
+- `.claude/state/backlog.json` → `$BACKUP_DIR/.claude_state/backlog.json` (v2 SSOT)
 - `CLAUDE.md`, `README.md`, `VERSION` → `$BACKUP_DIR/`
-- `.claude/state/` (있는 경우만 — v1 잔재 가능성) → `$BACKUP_DIR/.claude_state/`
+- **루트 폴백 감지** (v1 잔재 또는 잘못된 위치): `./project.json`, `./backlog.json`이 발견되면 `$BACKUP_DIR/`(루트 직하)로 별도 백업하고 v1 데이터 복원 안내 대상으로 표시 (Step 11)
+- `.claude/state/` 디렉토리 전체가 추가로 존재할 경우 (위 두 파일 외 부수 파일 — `hook-errors.log` 등): `$BACKUP_DIR/.claude_state/`로 동봉
 
 각 `mv` 실패 시 STOP (silent 무시 금지). `mv: cannot move 'X' to '$BACKUP_DIR/X'` 발생 → "백업 실패. 원본 보존됨. 다시 시도하세요." 보고 후 종료.
 
@@ -526,7 +538,9 @@ chmod 444 "$BACKUP_DIR/MANIFEST.txt" "$BACKUP_DIR/MANIFEST.sha256" 2>/dev/null |
 
 #### 파일 생성 절차
 
-1. **project.json**:
+> **상태 파일 경로 SSOT (v2.0+)**: `project.json` / `backlog.json`은 **반드시 `.claude/state/` 하위**에 생성합니다. 디렉토리 부재 시 `mkdir -p .claude/state` 선행. 루트(`./project.json`, `./backlog.json`)에 작성하면 `post-tool-use.sh`/`stop.sh` hook과 `CLAUDE.md.tmpl`(line 308/310)의 SSOT 기대와 어긋나 hook이 무동작·진단이 오작동합니다. v1 잔재가 루트에 발견되면 Step 10 `--reset` 백업 경로가 자동 감지합니다.
+
+1. **project.json** (경로: `.claude/state/project.json`):
    - 필드: `version` (schema 버전, semver), `name`, `description`, `domain`, `techStack`, `agents.enabled/disabled`, `conventions`, `createdAt`, `kitVersion`, `kitSource`
      - `version`: `"1.0.0"` (project.schema.json 버전, semver pattern `^\d+\.\d+\.\d+$`)
    - `conventions`: `taskPrefix`, `branchStrategy: "git-flow"`, `commitFormat: "conventional"`, `prLineLimit: 500`, `testCoverage: 80`, `workflowProfile`, `skillProfile`, `overridePriority: "domain-first"`. skillProfile=`custom`이면 `customSkills` 배열 포함.
@@ -539,7 +553,7 @@ chmod 444 "$BACKUP_DIR/MANIFEST.txt" "$BACKUP_DIR/MANIFEST.sha256" 2>/dev/null |
    - **`kitSource` 결정 규칙**:
      - Step 1 ai-crew-kit 자동 정리를 거친 경우: `KIT_SOURCE_URL` 값 사용
      - 자동 정리 미발동(사용자 자기 리포로 시작 또는 git remote 미설정)인 경우: `"https://github.com/wejsa/ai-crew-kit"` 기본값 (kit 시드 출처 문서화 목적)
-2. **backlog.json**:
+2. **backlog.json** (경로: `.claude/state/backlog.json`):
    - **공통**: `metadata`는 `{ "lastTaskNumber": <N>, "version": 1, "projectPrefix": "<PREFIX>", "createdAt": "<ISO8601>", "updatedAt": "<ISO8601>" }`
    - Step 9를 **N/C**로 종료한 경우: `lastTaskNumber: 0`, `summary: { total:0, done:0, inProgress:0, review:0, todo:0 }`, `phases: {}`, `tasks: {}`
    - Step 9를 **Y(A)**로 종료한 경우:
@@ -590,6 +604,16 @@ chmod 444 "$BACKUP_DIR/MANIFEST.txt" "$BACKUP_DIR/MANIFEST.sha256" 2>/dev/null |
 ```
 
 > kit 가이드 문서는 사용자 프로젝트에 포함되지 않습니다. ai-crew-kit GitHub 리포의 `docs/`에서 참조. `kitVersion` 태그가 GitHub에 없을 경우 `blob/main` 안내.
+
+#### 트리거 보호 마커 제거 (v2.2.0+, 필수)
+
+Step 0에서 생성한 마커를 명시적으로 제거하여 다음 일반 Edit/Write에 hook 임계가 다시 정상 동작하도록 합니다. 사용자 보고 출력 *직후* 실행:
+
+```bash
+rm -f .claude/state/init-in-progress.flag 2>/dev/null || true
+```
+
+> 제거 실패해도 1시간 TTL로 hook이 stale 회수하므로 사용자 영향 0. 단 즉시 정상화를 위해 본 단계는 필수. Step 1\~10 도중 abort된 경우(예: 사용자 N 선택, 환경 검증 실패)에도 가능한 한 본 명령을 실행하고 종료(graceful 패턴).
 
 ## Layered Override 적용
 설정 우선순위: 사용자 입력 > domains/{domain}/domain.json > domains/_base/ > 하드코딩 기본값
