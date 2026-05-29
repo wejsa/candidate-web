@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 338,
+    "version": 339,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T01:42:00+09:00"
+    "updatedAt": "2026-05-30T01:46:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -2807,7 +2807,7 @@
       "priority": "medium",
       "phase": 1,
       "assignee": "wejsa-u@hoji-20260530-004524",
-      "assignedAt": "2026-05-30T01:42:00+09:00",
+      "assignedAt": "2026-05-30T01:46:00+09:00",
       "lockedFiles": [
         "tests/scripts/_helpers/spawn-guard.ts",
         "tests/scripts/check-guard-wiring-consistency.test.ts",
@@ -2821,14 +2821,14 @@
       "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 91,
         "fixLoopCount": 0,
-        "autoChainArgs": "91 --auto-fix",
-        "updatedAt": "2026-05-30T01:42:00+09:00"
+        "autoChainArgs": "91",
+        "updatedAt": "2026-05-30T01:46:00+09:00"
       },
-      "updatedAt": "2026-05-30T01:42:00+09:00",
+      "updatedAt": "2026-05-30T01:46:00+09:00",
       "planPath": ".claude/temp/CANDID-045-plan.md",
       "currentStep": 2,
       "steps": [

@@ -2583,5 +2583,13 @@
     "prNumber": 91,
     "branch": "feature/CANDID-045-step2",
     "at": "2026-05-30T01:42:00+09:00"
+  },
+  {
+    "event": "approved",
+    "taskId": "CANDID-045",
+    "stepNumber": 2,
+    "prNumber": 91,
+    "decision": "APPROVED (CRITICAL 0; domain MAJOR=stale false-positive; self-PR COMMENT)",
+    "at": "2026-05-30T01:46:00+09:00"
   }
 ]
