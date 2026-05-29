@@ -7,17 +7,19 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    // CANDID-016 Step 3: .test.tsx 포함 (RTL-less minimal renderer 패턴).
+    // CANDID-016 Step 3 + CANDID-039 Step 1: .test.tsx 포함. RTL 도입 후 컴포넌트 테스트의 표준 경로.
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
     // CANDID-035 Step 1: 통합 테스트는 별도 runner(`vitest.config.integration.ts`)에서 실행.
     exclude: ['tests/integration/**', 'node_modules/**', 'dist/**', '.next/**'],
     setupFiles: ['tests/setup.ts'],
     // CANDID-015 Step 4 + CANDID-016 Step 3: 브라우저 환경(XHR/window/event) 필요 테스트만 jsdom.
     // 다른 테스트는 node 환경 유지.
-    // CANDID-039 Step 1: RTL 도입 — 모든 `.test.tsx`(컴포넌트 테스트)는 jsdom에서 실행.
-    //   (T-CRITICAL-1으로 제거됐던 ResumeUploadStep.test.tsx가 본 Task에서 RTL로 부활).
+    // environmentMatchGlobs는 first-match. 광역 패턴(.tsx)을 선두에, 파일 단위 예외를 그 아래에 둔다.
     environmentMatchGlobs: [
+      // CANDID-039 Step 1: 컴포넌트 테스트(.test.tsx)는 항상 jsdom (RTL render 필요).
+      //   T-CRITICAL-1으로 제거됐던 ResumeUploadStep.test.tsx가 본 Task에서 RTL로 부활.
       ['tests/**/*.test.tsx', 'jsdom'],
+      // 아래는 .test.ts지만 브라우저 API(XHR/window/event) 의존 — 파일 단위 예외.
       ['tests/lib/drafts/use-auto-save.test.ts', 'jsdom'],
       ['tests/lib/files/client.test.ts', 'jsdom'],
     ],

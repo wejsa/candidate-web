@@ -2,6 +2,7 @@
 // 목적: jsdom 환경 매핑(.test.tsx → jsdom) + @testing-library/react render +
 //       @testing-library/jest-dom matcher 확장이 정상 동작함을 증명한다.
 // Step 2에서 ResumeUploadStep.test.tsx가 추가되면 본 smoke 파일은 삭제한다.
+// TODO(CANDID-039-step2): delete this file when ResumeUploadStep.test.tsx lands.
 
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
