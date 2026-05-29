@@ -2306,5 +2306,13 @@
     "stepNumber": 1,
     "prNumber": 80,
     "at": "2026-05-29T19:55:02+09:00"
+  },
+  {
+    "event": "approved",
+    "taskId": "CANDID-039",
+    "stepNumber": 1,
+    "prNumber": 80,
+    "decision": "APPROVED (self-PR COMMENT)",
+    "at": "2026-05-29T20:00:11+09:00"
   }
 ]
