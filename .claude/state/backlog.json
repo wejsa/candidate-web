@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 311,
+    "version": 312,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T20:15:20+09:00"
+    "updatedAt": "2026-05-29T20:17:45+09:00"
   },
   "summary": {
     "total": 47,
@@ -2575,7 +2575,7 @@
       "priority": "high",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260529-192652",
-      "assignedAt": "2026-05-29T20:15:20+09:00",
+      "assignedAt": "2026-05-29T20:17:45+09:00",
       "lockedFiles": [
         "tests/lib/drafts/use-auto-save.test.ts"
       ],
@@ -2586,12 +2586,12 @@
       "source": "CANDID-016 retro Action Item HIGH-2",
       "lockTTL": 7200,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 83,
         "fixLoopCount": 0,
-        "autoChainArgs": "83 --auto-fix",
-        "updatedAt": "2026-05-29T20:15:20+09:00"
+        "autoChainArgs": "83",
+        "updatedAt": "2026-05-29T20:17:45+09:00"
       },
       "currentStep": 3,
       "steps": [
