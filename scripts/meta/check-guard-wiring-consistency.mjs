@@ -82,7 +82,7 @@ function aliasMatches(npmScript, scriptBase) {
 
 function parseSkillTable(content) {
   const headerMatch = content.match(SECTION_HEADER_RX);
-  if (!headerMatch) throw new Error('SKILL.md §"2.4. Pre-Review Guard Execution" 헤더 미발견');
+  if (!headerMatch) throw new Error('SKILL.md §"Pre-Review Guard Execution" 헤더 미발견');
   const startIdx = headerMatch.index + headerMatch[0].length;
   const rest = content.slice(startIdx);
   const nextMatch = rest.match(NEXT_SECTION_RX);
@@ -104,10 +104,16 @@ function parseNpmScriptName(scriptCmd) {
 }
 
 function listScriptFiles() {
-  if (!existsSync(SCRIPTS_DIR)) return [];
-  return readdirSync(SCRIPTS_DIR)
-    .filter((f) => /^check-[a-z0-9-]+\.mjs$/.test(f))
-    .map((f) => `${SCRIPTS_DIR}/${f}`);
+  // CANDID-045 review fix(D-MAJOR): D-5로 META_DIR이 생겼으므로 orphan 스캔도 양쪽 디렉토리를 본다.
+  // (scripts/만 스캔하면 meta/에 미배선 가드를 숨겨 SSOT 우회 가능 — self는 아래 orphan 루프에서 제외.)
+  const out = [];
+  for (const dir of [SCRIPTS_DIR, META_DIR]) {
+    if (!existsSync(dir)) continue;
+    for (const f of readdirSync(dir)) {
+      if (/^check-[a-z0-9-]+\.mjs$/.test(f)) out.push(`${dir}/${f}`);
+    }
+  }
+  return out;
 }
 
 function listTestFiles() {
@@ -133,8 +139,11 @@ try {
   const rows = parseSkillTable(skillContent);
 
   // D-2/T-5 in-PR fix: self npm script entry 동적 탐색.
+  // CANDID-045 review fix(D-MAJOR): D-4 runner 화이트리스트(node|tsx)와 정합 — self도 두 runner 허용.
+  // (node 하드코딩 시 self를 tsx로 등록하면 self 미탐지 → self-DoS 오탐. domain/security 동시 지적.)
+  const SELF_PKG_VALUE_RX = /^(?:node|tsx)\s+(.+)$/;
   const SELF_NPM_SCRIPT = Object.entries(pkg.scripts ?? {}).find(
-    ([, v]) => v === `node ${SELF_SCRIPT_PATH}`,
+    ([, v]) => typeof v === 'string' && SELF_PKG_VALUE_RX.exec(v)?.[1] === SELF_SCRIPT_PATH,
   )?.[0];
 
   const violations = [];
@@ -150,7 +159,7 @@ try {
     }
     if (!SELF_NPM_SCRIPT) {
       violations.push(
-        `meta-guard self npm-script missing: package.json scripts에 value === "node ${SELF_SCRIPT_PATH}"인 entry 부재`,
+        `meta-guard self npm-script missing: package.json scripts에 value === "node|tsx ${SELF_SCRIPT_PATH}"인 entry 부재`,
       );
     }
   }
@@ -199,8 +208,8 @@ try {
     }
   }
 
-  // orphan 검출. CANDID-045 D-5 이후 self는 META_DIR(scripts/meta/)에 있어
-  // listScriptFiles(scripts/ 최상위)에 잡히지 않음 — self-allowlist는 defense-in-depth로 유지.
+  // orphan 검출. listScriptFiles가 scripts/ + scripts/meta/ 양쪽을 스캔하므로 self(META_DIR)도
+  // 목록에 포함된다 — self-allowlist skip으로 제외하고, meta/의 다른 미배선 가드는 orphan으로 잡는다.
   for (const file of listScriptFiles()) {
     if (file === SELF_SCRIPT_PATH) continue;
     if (!activeScriptFiles.has(file)) {
@@ -223,7 +232,10 @@ try {
   }
 
   // CANDID-045 M-SEC: lifecycle hook이 가드 스크립트를 암묵 실행 → §2.4 표 SSOT 우회 차단.
-  const GUARD_REF_RX = /(?:^|[\s/])scripts\/(?:meta\/)?check-[a-z0-9-]+\.mjs\b/;
+  // review fix(S-MAJOR): 직접 경로 참조뿐 아니라 `npm run/pnpm/yarn check:*` alias 경유 호출도 탐지
+  // (간접 체이닝 우회 차단). 단, 별도 wrapper 스크립트 경유는 정적 분석 한계 — 완전 차단 불가.
+  const GUARD_REF_RX =
+    /(?:^|[\s/])scripts\/(?:meta\/)?check-[a-z0-9-]+\.mjs\b|(?:npm run|pnpm(?:\s+run)?|yarn(?:\s+run)?)\s+check:[a-z0-9-]+/;
   for (const [name, value] of Object.entries(pkg.scripts ?? {})) {
     if (!NPM_LIFECYCLE_HOOKS.has(name)) continue;
     if (typeof value === 'string' && GUARD_REF_RX.test(value)) {
