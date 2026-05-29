@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "lastTaskNumber": 46,
+    "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 305,
+    "version": 306,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-29T20:07:41+09:00"
+    "updatedAt": "2026-05-29T20:11:38+09:00"
   },
   "summary": {
-    "total": 46,
+    "total": 47,
     "done": 33,
     "inProgress": 1,
     "review": 0,
-    "todo": 12
+    "todo": 13
   },
   "phases": {
     "1": {
@@ -2752,6 +2752,21 @@
       "dependencies": [],
       "createdAt": "2026-05-29T19:53:15+09:00",
       "source": "CANDID-039 구현 중 발견 (test flakiness)"
+    },
+    "CANDID-047": {
+      "id": "CANDID-047",
+      "title": "이력서 업로드 422 빈 message 시 빈 alert 렌더 버그",
+      "description": "ResumeUploadStep.tsx:101 분기 `kind==='validation' && err instanceof HttpStatusError && err.message!==''`에서, 서버가 422를 빈 message로 응답하면 finalMsg가 classifyUploadError의 빈 문자열로 폴백되어 `<p role=alert>⚠️ </p>` 빈 alert가 렌더됨. classifyUploadError(upload-state.ts:184-186)의 폴백도 빈 문자열은 string이라 발동 안 함. 수정: 422+빈 message 시 클라이언트 폴백 메시지('파일이 허용된 형식·크기가 아닙니다.') 노출. CANDID-039 Step 2 리뷰(QA P1)에서 발견. 수정 시 회귀 테스트 동반(ResumeUploadStep.test.tsx).",
+      "status": "todo",
+      "type": "bug",
+      "priority": "medium",
+      "phase": 3,
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
+      "dependencies": [],
+      "createdAt": "2026-05-29T20:11:38+09:00",
+      "source": "CANDID-039 Step 2 리뷰 (QA P1)"
     }
   }
 }
