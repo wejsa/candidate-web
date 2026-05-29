@@ -13,13 +13,15 @@ import { afterEach, describe, expect, it } from 'vitest';
 //     → package.json scripts[{npm}] = "node scripts/check-{base}.mjs"
 //     → scripts/check-{base}.mjs + tests/scripts/check-{base}.test.ts 존재 필수
 
-const SCRIPT_PATH = resolve(process.cwd(), 'scripts/check-guard-wiring-consistency.mjs');
+// CANDID-045 D-5: meta-guard는 scripts/meta/로 이동.
+const SCRIPT_PATH = resolve(process.cwd(), 'scripts/meta/check-guard-wiring-consistency.mjs');
 
 type Row = { glob: string; scriptCmd: string; id: string };
 type Fixtures = {
   skillTable: Row[];
-  scriptFiles?: string[]; // 가드 스크립트 base 이름 (예: 'migrations-no-concurrently')
-  testFiles?: string[]; // 동일
+  scriptFiles?: string[]; // USER-LEVEL 가드 base 이름 (scripts/check-{base}.mjs)
+  metaScriptFiles?: string[]; // CANDID-045 D-5: META-LEVEL 가드 base (scripts/meta/check-{base}.mjs)
+  testFiles?: string[]; // tests/scripts/check-{base}.test.ts
   pkgScripts?: Record<string, string>; // package.json scripts 사용자 정의 (기본: skillTable의 npmScript → 표준 path)
   skillBodyOverride?: string;
 };
@@ -49,10 +51,16 @@ function setupTempProject(opts: Fixtures): string {
   }
   writeFileSync(join(cwd, '.claude/skills/skill-review-pr/SKILL.md'), skill);
 
-  // scripts/check-*.mjs
+  // scripts/check-*.mjs (USER-LEVEL)
   mkdirSync(join(cwd, 'scripts'), { recursive: true });
   for (const base of opts.scriptFiles ?? []) {
     writeFileSync(join(cwd, `scripts/check-${base}.mjs`), '// dummy\n');
+  }
+
+  // scripts/meta/check-*.mjs (META-LEVEL — CANDID-045 D-5)
+  mkdirSync(join(cwd, 'scripts/meta'), { recursive: true });
+  for (const base of opts.metaScriptFiles ?? []) {
+    writeFileSync(join(cwd, `scripts/meta/check-${base}.mjs`), '// dummy\n');
   }
 
   // tests/scripts/check-*.test.ts
@@ -233,13 +241,13 @@ describe('check-guard-wiring-consistency — orphans (SKILL.md row 없으나 par
     expect(r.stderr).toContain('orphan-test');
   });
 
-  it('meta-guard self-allowlist (check-guard-wiring-consistency + check:guard-wiring) → orphan 분류 안 됨', () => {
+  it('meta-guard self-allowlist (scripts/meta/check-guard-wiring-consistency + check:guard-wiring) → orphan 분류 안 됨', () => {
     const cwd = track(
       setupTempProject({
         skillTable: [],
-        scriptFiles: ['guard-wiring-consistency'],
+        metaScriptFiles: ['guard-wiring-consistency'], // CANDID-045 D-5: META_DIR 배치
         testFiles: ['guard-wiring-consistency'],
-        pkgScripts: { 'check:guard-wiring': 'node scripts/check-guard-wiring-consistency.mjs' },
+        pkgScripts: { 'check:guard-wiring': 'node scripts/meta/check-guard-wiring-consistency.mjs' },
       }),
     );
     const r = runGuard(cwd);
@@ -252,7 +260,7 @@ describe('check-guard-wiring-consistency — orphans (SKILL.md row 없으나 par
     const cwd = track(
       setupTempProject({
         skillTable: [],
-        scriptFiles: ['guard-wiring-consistency'], // self-script만 존재
+        metaScriptFiles: ['guard-wiring-consistency'], // self-script만 존재 (META_DIR)
         testFiles: [], // self-test 부재
         pkgScripts: {}, // self npm-script 부재
       }),
@@ -277,5 +285,191 @@ describe('check-guard-wiring-consistency — environment errors', () => {
     expect(r.exitCode).toBe(2);
     expect(r.stderr).toContain('환경 오류');
     expect(r.stderr).toContain('헤더 미발견');
+    // CANDID-045 D-1: exit 2 시 자체 경로(meta-guard) 보고.
+    expect(r.stderr).toContain('meta-guard:');
+    expect(r.stderr).toContain('scripts/meta/check-guard-wiring-consistency.mjs');
+  });
+});
+
+describe('check-guard-wiring-consistency — CANDID-045 refinements', () => {
+  it('D-6: 섹션 번호가 달라도(### 3.1.) 헤더 텍스트로 파싱 → exit 0', () => {
+    const skill = [
+      '# skill-review-pr',
+      '',
+      '### 3.1. Pre-Review Guard Execution',
+      '',
+      '| 파일 글롭 | npm script | 가드 ID | 도입 | 근거 |',
+      '|-----------|------------|---------|------|------|',
+      '| `prisma/migrations/**/migration.sql` | `pnpm check:migrations` | G-MIG | x | y |',
+      '',
+      '### 3.2. 다음 섹션',
+      '',
+    ].join('\n');
+    const cwd = track(
+      setupTempProject({
+        skillTable: [],
+        skillBodyOverride: skill,
+        pkgScripts: { 'check:migrations': 'node scripts/check-migrations-no-concurrently.mjs' },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('1개 guard entry');
+  });
+
+  it('D-4: runner가 tsx여도 화이트리스트 통과 → exit 0', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [ROW_MIG],
+        pkgScripts: { 'check:migrations': 'tsx scripts/check-migrations-no-concurrently.mjs' },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(0);
+  });
+
+  it('D-3: npm alias와 파일 base 의미 불일치 → exit 1 + alias-mismatch', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [{ glob: 'src/**', scriptCmd: 'pnpm check:foo', id: 'G-FOO' }],
+        pkgScripts: { 'check:foo': 'node scripts/check-bar.mjs' },
+        scriptFiles: ['bar'],
+        testFiles: ['bar'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('alias-mismatch');
+    // 정상 partner는 모두 존재하므로 missing-* 위반은 없어야 함.
+    expect(r.stderr).not.toContain('missing-');
+  });
+
+  it('M-SEC: lifecycle hook(prepublishOnly)이 가드 스크립트 실행 → exit 1 + lifecycle-hook-guard-bypass', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [ROW_MIG],
+        pkgScripts: {
+          'check:migrations': 'node scripts/check-migrations-no-concurrently.mjs',
+          prepublishOnly: 'node scripts/check-migrations-no-concurrently.mjs',
+        },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('lifecycle-hook-guard-bypass');
+    expect(r.stderr).toContain('prepublishOnly');
+  });
+});
+
+describe('check-guard-wiring-consistency — CANDID-045 review fix (negative/boundary)', () => {
+  it('D-4 negative: 화이트리스트 외 runner(bash)는 거부 → exit 1 + invalid-package-script-command', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [ROW_MIG],
+        pkgScripts: { 'check:migrations': 'bash scripts/check-migrations-no-concurrently.mjs' },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('invalid-package-script-command');
+  });
+
+  it('M-SEC negative: 정상 lifecycle hook(postinstall: prisma generate)은 오탐 안 함 → exit 0', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [ROW_MIG],
+        pkgScripts: {
+          'check:migrations': 'node scripts/check-migrations-no-concurrently.mjs',
+          postinstall: 'prisma generate',
+          prepare: 'husky install',
+        },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(0);
+    expect(r.stderr).not.toContain('lifecycle-hook-guard-bypass');
+  });
+
+  it('M-SEC: lifecycle hook이 npm alias(pnpm check:*) 경유로 가드 실행해도 탐지 → exit 1', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [ROW_MIG],
+        pkgScripts: {
+          'check:migrations': 'node scripts/check-migrations-no-concurrently.mjs',
+          postinstall: 'pnpm check:migrations',
+        },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('lifecycle-hook-guard-bypass');
+    expect(r.stderr).toContain('postinstall');
+  });
+
+  it('D-3 boundary: 첫 토큰/prefix 공유 시 느슨 매칭 통과 → exit 0 (의도된 거짓양성 회피 고정)', () => {
+    // npm `check:migrations` ↔ 파일 base `migrations-no-concurrently` (hyphen-prefix 공유) → 통과.
+    const cwd = track(
+      setupTempProject({
+        skillTable: [ROW_MIG],
+        pkgScripts: { 'check:migrations': 'node scripts/check-migrations-no-concurrently.mjs' },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(0);
+    expect(r.stderr).not.toContain('alias-mismatch');
+  });
+
+  it('D-6 boundary: 섹션 번호가 전혀 없는 헤더(### Pre-Review Guard Execution)도 파싱 → exit 0', () => {
+    const skill = [
+      '# skill-review-pr',
+      '',
+      '### Pre-Review Guard Execution',
+      '',
+      '| 파일 글롭 | npm script | 가드 ID | 도입 | 근거 |',
+      '|-----------|------------|---------|------|------|',
+      '| `prisma/migrations/**/migration.sql` | `pnpm check:migrations` | G-MIG | x | y |',
+      '',
+      '### 다음 섹션',
+      '',
+    ].join('\n');
+    const cwd = track(
+      setupTempProject({
+        skillTable: [],
+        skillBodyOverride: skill,
+        pkgScripts: { 'check:migrations': 'node scripts/check-migrations-no-concurrently.mjs' },
+        scriptFiles: ['migrations-no-concurrently'],
+        testFiles: ['migrations-no-concurrently'],
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('1개 guard entry');
+  });
+
+  it('D-5 orphan: scripts/meta/의 비-self 가드는 orphan-script로 검출 → exit 1 (SSOT 우회 차단)', () => {
+    const cwd = track(
+      setupTempProject({
+        skillTable: [],
+        metaScriptFiles: ['rogue-meta-guard'], // self 아님 + §2.4 표에 없음
+      }),
+    );
+    const r = runGuard(cwd);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toContain('orphan-script');
+    expect(r.stderr).toContain('scripts/meta/check-rogue-meta-guard.mjs');
   });
 });

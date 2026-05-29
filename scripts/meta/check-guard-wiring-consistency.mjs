@@ -1,54 +1,88 @@
 #!/usr/bin/env node
 // CANDID-043: 회귀 가드 wiring meta-guard — 3종 세트(L-034 + L-036) 자동 일관성 검증.
+// CANDID-045: META 가드 디렉토리 분리(scripts/meta/, D-5) + 헤더 텍스트 매칭(섹션 재배치 견고성, D-6)
+//   + runner 화이트리스트 node|tsx(D-4) + alias 의미 매칭 룰(D-3) + lifecycle-hook 보안 가드(M-SEC)
+//   + exit 2 self 경로 보고(D-1).
 //
 // 4자 일치 검증 (binding 모델):
-//   SKILL.md §2.4 row "pnpm {npm-script}"
-//     → package.json scripts[{npm-script}] = "node scripts/check-{base}.mjs"
+//   SKILL.md §"Pre-Review Guard Execution" row "pnpm {npm-script}"
+//     → package.json scripts[{npm-script}] = "node|tsx scripts/check-{base}.mjs"
 //     → scripts/check-{base}.mjs 존재 필수
 //     → tests/scripts/check-{base}.test.ts 존재 필수 (L-034)
 //
 // package.json scripts entry가 SKILL.md ↔ 실제 파일 binding의 SSOT.
-// npm script name(예: "check:migrations")과 실제 파일 base name(예:
-// "migrations-no-concurrently")이 다를 수 있다 — npm alias 특성.
+// npm script name(예: "check:migrations")과 파일 base("migrations-no-concurrently")는 다를 수 있으나,
+// 의미적으로(첫 토큰/prefix 공유) 매칭되어야 한다 — alias 무분별 사용 차단(D-3).
+//
+// USER-LEVEL 가드는 `scripts/` 최상위, META-LEVEL 가드(본 파일)는 `scripts/meta/` — 디렉토리로 구분(D-5).
 //
 // 가정 (위반 시 exit 2 — 환경 오류):
-//  - SKILL.md §2.4 헤더 텍스트: `### 2.4. Pre-Review Guard Execution`
+//  - SKILL.md 헤더 텍스트: `### [번호] Pre-Review Guard Execution` (섹션 번호는 매칭에서 제외, D-6)
 //  - 표 컬럼 순서: `| 파일 글롭 | npm script | 가드 ID | ... |`
 //  - 행 패턴: `| {글롭} | {script} | {id} | ... |`
-//  - package.json scripts entry: `"check:{name}": "node scripts/check-{base}.mjs"`
+//  - package.json scripts entry: `"check:{name}": "node|tsx scripts/check-{base}.mjs"`
 //
-// self-allowlist: meta-guard 자체(`scripts/check-guard-wiring-consistency.mjs` +
+// self-allowlist: meta-guard 자체(`scripts/meta/check-guard-wiring-consistency.mjs` +
 // `tests/scripts/check-guard-wiring-consistency.test.ts` + `package.json check:guard-wiring`)
-// 는 §2.4 매핑 표에 등록되지 않음 — META-LEVEL은 preflight 통합 (USER-LEVEL과 구분).
+// 는 §"Pre-Review Guard Execution" 매핑 표에 등록되지 않음 — META-LEVEL은 preflight 통합.
 //
 // Exit: 0 = clean / 1 = 일관성 위반 / 2 = SKILL.md 파싱 실패.
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, relative, basename } from 'node:path';
+import { basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SKILL_PATH = '.claude/skills/skill-review-pr/SKILL.md';
 const SCRIPTS_DIR = 'scripts';
+const META_DIR = 'scripts/meta'; // CANDID-045 D-5: META-LEVEL 가드 격리 디렉토리
 const TESTS_DIR = 'tests/scripts';
 const PKG_PATH = 'package.json';
 
-// D-2/T-5 in-PR fix: 동적 self-detection — `import.meta.url` 기반 SELF_BASE 도출.
+// CANDID-045 M-SEC: npm lifecycle hook(implicit 실행)이 가드 스크립트를 호출하면 §2.4 표 SSOT를
+// 우회한다 — 가드는 명시적 check:* 엔트리로만 호출되어야 한다.
+const NPM_LIFECYCLE_HOOKS = new Set([
+  'preinstall',
+  'install',
+  'postinstall',
+  'prepublish',
+  'prepublishOnly',
+  'prepare',
+  'prepack',
+  'postpack',
+  'preuninstall',
+  'uninstall',
+  'postuninstall',
+]);
+
+// D-2/T-5 in-PR fix: 동적 self-detection — `import.meta.url` 기반 SELF_BASE 도출 (L-042).
 // 파일 rename(상수 stale silent failure) 차단 + self-test 부재(L-034 위반) 명시적 보고.
-// canonical 경로(cwd 상대)를 사용해 fixture(tmpdir) + 실 프로젝트 양쪽에서 일관 동작.
+// CANDID-045 D-5: self는 META_DIR에 위치 — canonical 경로로 fixture + 실 프로젝트 일관 동작.
 const SELF_BASE = basename(fileURLToPath(import.meta.url))
   .replace(/^check-/, '')
   .replace(/\.mjs$/, '');
-const SELF_SCRIPT_PATH = `${SCRIPTS_DIR}/check-${SELF_BASE}.mjs`;
+const SELF_SCRIPT_PATH = `${META_DIR}/check-${SELF_BASE}.mjs`;
 const SELF_TEST_PATH = `${TESTS_DIR}/check-${SELF_BASE}.test.ts`;
 
-const SECTION_HEADER_RX = /^### 2\.4\. Pre-Review Guard Execution\b/m;
+// CANDID-045 D-6: 섹션 번호("2.4.")를 매칭에서 제외 — 헤더 텍스트만 사용해 섹션 재배치에 견고.
+const SECTION_HEADER_RX = /^###\s+(?:[\d.]+\.?\s+)?Pre-Review Guard Execution\b/m;
 const NEXT_SECTION_RX = /^### /m;
 const ROW_RX = /^\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|\s*([A-Z][A-Z0-9-]+)\s*\|/;
-const PKG_VALUE_RX = /^node\s+(scripts\/check-[a-z0-9-]+\.mjs)$/;
+// CANDID-045 D-4: runner 화이트리스트 — node 외 tsx 등 허용. 그 외 임의 명령은 거부(공급망 방어).
+const PKG_VALUE_RX = /^(?:node|tsx)\s+(scripts\/check-[a-z0-9-]+\.mjs)$/;
+
+// CANDID-045 D-3: npm alias({name})와 파일 base가 의미적으로 매칭되는지 검증.
+// 동일하거나, 한쪽이 다른쪽의 hyphen-prefix이거나, 첫 토큰을 공유하면 통과(느슨 매칭 — 거짓양성 회피).
+function aliasMatches(npmScript, scriptBase) {
+  const n = npmScript.replace(/^check:/, '');
+  if (scriptBase === n) return true;
+  if (scriptBase.startsWith(`${n}-`)) return true; // 예: migrations ↔ migrations-no-concurrently
+  if (n.startsWith(`${scriptBase}-`)) return true;
+  return scriptBase.split('-')[0] === n.split('-')[0];
+}
 
 function parseSkillTable(content) {
   const headerMatch = content.match(SECTION_HEADER_RX);
-  if (!headerMatch) throw new Error('SKILL.md §"2.4. Pre-Review Guard Execution" 헤더 미발견');
+  if (!headerMatch) throw new Error('SKILL.md §"Pre-Review Guard Execution" 헤더 미발견');
   const startIdx = headerMatch.index + headerMatch[0].length;
   const rest = content.slice(startIdx);
   const nextMatch = rest.match(NEXT_SECTION_RX);
@@ -70,10 +104,16 @@ function parseNpmScriptName(scriptCmd) {
 }
 
 function listScriptFiles() {
-  if (!existsSync(SCRIPTS_DIR)) return [];
-  return readdirSync(SCRIPTS_DIR)
-    .filter((f) => /^check-[a-z0-9-]+\.mjs$/.test(f))
-    .map((f) => `${SCRIPTS_DIR}/${f}`);
+  // CANDID-045 review fix(D-MAJOR): D-5로 META_DIR이 생겼으므로 orphan 스캔도 양쪽 디렉토리를 본다.
+  // (scripts/만 스캔하면 meta/에 미배선 가드를 숨겨 SSOT 우회 가능 — self는 아래 orphan 루프에서 제외.)
+  const out = [];
+  for (const dir of [SCRIPTS_DIR, META_DIR]) {
+    if (!existsSync(dir)) continue;
+    for (const f of readdirSync(dir)) {
+      if (/^check-[a-z0-9-]+\.mjs$/.test(f)) out.push(`${dir}/${f}`);
+    }
+  }
+  return out;
 }
 
 function listTestFiles() {
@@ -99,8 +139,11 @@ try {
   const rows = parseSkillTable(skillContent);
 
   // D-2/T-5 in-PR fix: self npm script entry 동적 탐색.
+  // CANDID-045 review fix(D-MAJOR): D-4 runner 화이트리스트(node|tsx)와 정합 — self도 두 runner 허용.
+  // (node 하드코딩 시 self를 tsx로 등록하면 self 미탐지 → self-DoS 오탐. domain/security 동시 지적.)
+  const SELF_PKG_VALUE_RX = /^(?:node|tsx)\s+(.+)$/;
   const SELF_NPM_SCRIPT = Object.entries(pkg.scripts ?? {}).find(
-    ([, v]) => v === `node ${SELF_SCRIPT_PATH}`,
+    ([, v]) => typeof v === 'string' && SELF_PKG_VALUE_RX.exec(v)?.[1] === SELF_SCRIPT_PATH,
   )?.[0];
 
   const violations = [];
@@ -116,7 +159,7 @@ try {
     }
     if (!SELF_NPM_SCRIPT) {
       violations.push(
-        `meta-guard self npm-script missing: package.json scripts에 value === "node ${SELF_SCRIPT_PATH}"인 entry 부재`,
+        `meta-guard self npm-script missing: package.json scripts에 value === "node|tsx ${SELF_SCRIPT_PATH}"인 entry 부재`,
       );
     }
   }
@@ -155,9 +198,18 @@ try {
         `missing-test: SKILL.md row "${row.guardId}" → ${testPath} 부재 (L-034 — 가드 자체 단위 테스트 동반 필수)`,
       );
     }
+    // CANDID-045 D-3: npm alias ↔ 파일 base 의미 매칭 (무분별 alias 차단).
+    const scriptBase = scriptPath.replace(/^scripts\/check-/, '').replace(/\.mjs$/, '');
+    if (!aliasMatches(npmScript, scriptBase)) {
+      violations.push(
+        `alias-mismatch: npm script "${npmScript}" ↔ 파일 base "${scriptBase}" 의미 불일치 ` +
+          `(alias는 파일 base와 첫 토큰 또는 hyphen-prefix를 공유해야 함)`,
+      );
+    }
   }
 
-  // orphan 검출 (self-allowlist 적용)
+  // orphan 검출. listScriptFiles가 scripts/ + scripts/meta/ 양쪽을 스캔하므로 self(META_DIR)도
+  // 목록에 포함된다 — self-allowlist skip으로 제외하고, meta/의 다른 미배선 가드는 orphan으로 잡는다.
   for (const file of listScriptFiles()) {
     if (file === SELF_SCRIPT_PATH) continue;
     if (!activeScriptFiles.has(file)) {
@@ -179,6 +231,21 @@ try {
     }
   }
 
+  // CANDID-045 M-SEC: lifecycle hook이 가드 스크립트를 암묵 실행 → §2.4 표 SSOT 우회 차단.
+  // review fix(S-MAJOR): 직접 경로 참조뿐 아니라 `npm run/pnpm/yarn check:*` alias 경유 호출도 탐지
+  // (간접 체이닝 우회 차단). 단, 별도 wrapper 스크립트 경유는 정적 분석 한계 — 완전 차단 불가.
+  const GUARD_REF_RX =
+    /(?:^|[\s/])scripts\/(?:meta\/)?check-[a-z0-9-]+\.mjs\b|(?:npm run|pnpm(?:\s+run)?|yarn(?:\s+run)?)\s+check:[a-z0-9-]+/;
+  for (const [name, value] of Object.entries(pkg.scripts ?? {})) {
+    if (!NPM_LIFECYCLE_HOOKS.has(name)) continue;
+    if (typeof value === 'string' && GUARD_REF_RX.test(value)) {
+      violations.push(
+        `lifecycle-hook-guard-bypass: package.json lifecycle hook "${name}"이 가드 스크립트를 실행 — ` +
+          `가드는 §2.4 표에 등록된 check:* 엔트리로만 호출해야 함 (암묵 실행 우회 차단)`,
+      );
+    }
+  }
+
   if (violations.length > 0) {
     console.error(`[check:guard-wiring] wiring 일관성 위반 ${violations.length}건 감지:`);
     for (const v of violations) console.error(`  - ${v}`);
@@ -191,8 +258,10 @@ try {
   console.log(`[check:guard-wiring] OK — ${rows.length}개 guard entry 4자 일치 확인.`);
 } catch (e) {
   console.error(`[check:guard-wiring] 환경 오류 (파싱 실패): ${e.message}`);
+  // CANDID-045 D-1: 어떤 meta-guard가 보고했는지 자체 경로 명시 (디버깅 단서).
+  console.error(`  meta-guard: ${SELF_SCRIPT_PATH}`);
   console.error(
-    `참조: scripts/check-guard-wiring-consistency.mjs 상단 가정 명시. SKILL.md §2.4 구조 변경 시 meta-guard도 동반 업데이트 필요.`,
+    `참조: ${SELF_SCRIPT_PATH} 상단 가정 명시. SKILL.md §"Pre-Review Guard Execution" 구조 변경 시 meta-guard도 동반 업데이트 필요.`,
   );
   process.exit(2);
 }
