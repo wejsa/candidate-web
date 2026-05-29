@@ -21,6 +21,7 @@ const LABELS = {
   errInvalidLink: '재설정 링크가 유효하지 않거나 만료되었습니다. 재설정을 다시 요청해 주세요.',
   errMismatch: '비밀번호와 비밀번호 확인이 일치하지 않습니다.',
   errWeak: '비밀번호는 10자 이상, 영문 대/소문자·숫자·특수문자 중 3종 이상이어야 합니다.',
+  errRateLimited: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.',
   errGeneric: '잠시 후 다시 시도해 주세요.',
   successTitle: '비밀번호가 변경되었습니다',
   successBody: '보안을 위해 모든 기기에서 로그아웃되었습니다. 새 비밀번호로 다시 로그인해 주세요.',
@@ -78,8 +79,10 @@ export function ResetForm({ token }: Props): React.JSX.Element {
       setState({ status: 'invalid-link', message: LABELS.errInvalidLink });
       return;
     }
-    // 그 외 400(강도/형식)·429·5xx → 인라인 에러.
-    const message = response.status === 400 ? LABELS.errWeak : LABELS.errGeneric;
+    // 그 외 4xx/5xx → 인라인 에러. 429(과도 요청)·400(강도/형식)은 명시 안내.
+    let message: string = LABELS.errGeneric;
+    if (response.status === 429) message = LABELS.errRateLimited;
+    else if (response.status === 400) message = LABELS.errWeak;
     setState({ status: 'error', message });
   }
 

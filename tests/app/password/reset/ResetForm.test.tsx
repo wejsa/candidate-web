@@ -75,6 +75,45 @@ describe('ResetForm', () => {
     });
   });
 
+  it('강도 미달(400, 비토큰 코드) — errWeak 인라인 + 폼 유지', async () => {
+    mockFetch(400, { code: 'SYS_VALIDATION_FAILED' });
+    render(<ResetForm token={'a'.repeat(64)} />);
+    // minLength native 제약 우회 위해 일치하는 값 입력 후 form submit 직접 트리거.
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('새 비밀번호'), STRONG);
+    await user.type(screen.getByLabelText('새 비밀번호 확인'), STRONG);
+    fireEvent.submit(screen.getByLabelText('새 비밀번호').closest('form')!);
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('3종 이상');
+    });
+    // 인라인 에러 — 재요청 안내로 전환되지 않고 폼 유지.
+    expect(screen.getByLabelText('새 비밀번호')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: '재설정 메일 다시 요청하기' })).toBeNull();
+  });
+
+  it('과도 요청(429) — errRateLimited 인라인 + 폼 유지', async () => {
+    mockFetch(429, { code: 'SYS_RATE_LIMITED' });
+    render(<ResetForm token={'a'.repeat(64)} />);
+    await fillAndSubmit();
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('요청이 너무 많습니다');
+    });
+    expect(screen.getByLabelText('새 비밀번호')).toBeInTheDocument();
+  });
+
+  it('서버 오류(500) — errGeneric 인라인 + 폼 유지', async () => {
+    mockFetch(500, { code: 'SYS_INTERNAL_ERROR' });
+    render(<ResetForm token={'a'.repeat(64)} />);
+    await fillAndSubmit();
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('잠시 후 다시 시도해 주세요.');
+    });
+    expect(screen.getByLabelText('새 비밀번호')).toBeInTheDocument();
+  });
+
   it('비밀번호 불일치 — 클라이언트 가드, fetch 미호출', async () => {
     const fetchMock = mockFetch(200, {});
     render(<ResetForm token={'a'.repeat(64)} />);

@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   title: '새 비밀번호 설정 | Candidate Web',
   description: '비밀번호 재설정 링크로 새 비밀번호를 설정하세요.',
   robots: { index: false, follow: false }, // 인증 관련 페이지 — 색인 제외
+  referrer: 'no-referrer', // 쿼리스트링 토큰이 외부 요청 Referer로 누출되지 않도록 차단
 };
 
 export default function ResetPage({ searchParams }: PageProps): React.JSX.Element {
