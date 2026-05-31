@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 359,
+    "version": 360,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:51:36+09:00"
+    "updatedAt": "2026-05-31T21:56:50+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T21:45:53+09:00",
+      "assignedAt": "2026-05-31T21:56:50+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/users/schema.ts",
@@ -1956,18 +1956,18 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 97,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T21:45:53+09:00"
+        "autoChainArgs": "97 --auto-fix",
+        "updatedAt": "2026-05-31T21:56:50+09:00"
       },
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-31T21:45:53+09:00",
+      "updatedAt": "2026-05-31T21:56:50+09:00",
       "planPath": ".claude/temp/CANDID-024-plan.md",
       "currentStep": 3,
       "steps": [
@@ -2025,19 +2025,26 @@
         {
           "step": 3,
           "title": "비밀번호 변경 — POST /api/v1/users/me/password + 폼",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-024-step3",
+          "prNumber": 97,
           "files": [
-            "lib/users/validation.ts",
+            "lib/users/schema.ts",
             "lib/users/password-change.ts",
-            "lib/auth/session.ts",
             "app/api/v1/users/me/password/route.ts",
             "lib/security/rate-limit.ts",
+            "lib/users/profile-form.ts",
             "app/me/profile/_components/PasswordChangeForm.tsx",
+            "app/me/profile/page.tsx",
             "tests/lib/users/password-change.test.ts",
-            "tests/app/api/v1/users/me/password.test.ts"
+            "tests/app/api/v1/users/me/password/route.test.ts",
+            "tests/lib/users/schema.test.ts",
+            "tests/lib/users/profile-form.test.ts"
           ],
           "estimatedLines": 560,
+          "actualLines": 628,
           "prLineLimit": 700,
+          "note": "session.ts 미변경(RevokeReason에 password_change 기존재 → tx 내 인라인 revoke). validation.ts→schema.ts.",
           "dependsOn": [
             1
           ]
