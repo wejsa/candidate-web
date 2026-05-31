@@ -85,4 +85,20 @@ describe('GET /api/v1/users/me', () => {
     expect(res.status).toBe(404);
     expect((await res.json()).code).toBe('USER_NOT_FOUND');
   });
+
+  // QA P3 (IDOR 가드): 쿼리스트링의 임의 userId를 무시하고 토큰 userId로만 조회한다.
+  it('쿼리스트링 userId를 무시하고 requireAuth가 반환한 userId로만 조회', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    getProfile.mockResolvedValueOnce(profile);
+
+    const req = new NextRequest('https://candidate.example.com/api/v1/users/me?userId=1', {
+      method: 'GET',
+      headers: { 'user-agent': 'vitest-ua' },
+    });
+    const res = await GET(req, undefined);
+
+    expect(res.status).toBe(200);
+    expect(getProfile).toHaveBeenCalledWith(42);
+    expect(getProfile).not.toHaveBeenCalledWith(1);
+  });
 });
