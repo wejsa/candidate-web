@@ -8,9 +8,8 @@ import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 // state.ts + provider impl mock — 라우터의 화이트리스트/redirect sanitize/Set-Cookie/302만 검증.
 
 vi.mock('@/lib/auth/oauth/state', async () => {
-  const actual = await vi.importActual<typeof import('@/lib/auth/oauth/state')>(
-    '@/lib/auth/oauth/state',
-  );
+  const actual =
+    await vi.importActual<typeof import('@/lib/auth/oauth/state')>('@/lib/auth/oauth/state');
   return {
     ...actual,
     createOAuthState: vi.fn(() => ({
@@ -30,12 +29,18 @@ vi.mock('@/lib/auth/oauth', async () => {
     getProvider: vi.fn(),
   };
 });
+// CANDID-024 Step 5 — link 모드 인증 분기 검증용.
+vi.mock('@/lib/auth/middleware', () => ({ getOptionalAuth: vi.fn() }));
 
-const { isOAuthProviderEnabled, getProvider } = (await import(
-  '@/lib/auth/oauth'
-)) as unknown as {
+const { isOAuthProviderEnabled, getProvider } = (await import('@/lib/auth/oauth')) as unknown as {
   isOAuthProviderEnabled: ReturnType<typeof vi.fn>;
   getProvider: ReturnType<typeof vi.fn>;
+};
+const { createOAuthState } = (await import('@/lib/auth/oauth/state')) as unknown as {
+  createOAuthState: ReturnType<typeof vi.fn>;
+};
+const { getOptionalAuth } = (await import('@/lib/auth/middleware')) as unknown as {
+  getOptionalAuth: ReturnType<typeof vi.fn>;
 };
 const { GET } = await import('@/app/api/v1/auth/oauth/[provider]/route');
 
@@ -121,5 +126,30 @@ describe('GET /api/v1/auth/oauth/[provider] — start handler', () => {
     const req = makeRequest('/api/v1/auth/oauth/google?redirect=/jobs/1');
     await GET(req, { params: Promise.resolve({ provider: 'google' }) });
     expect(mock).toHaveBeenCalledWith(expect.objectContaining({ redirect: '/jobs/1' }));
+  });
+
+  // CANDID-024 Step 5 — link-add 모드.
+  describe('mode=link', () => {
+    it('인증 사용자 → state에 linkUserId 봉인 + redirect=/me/profile', async () => {
+      getOptionalAuth.mockResolvedValue({ userId: 7 });
+      const req = makeRequest('/api/v1/auth/oauth/google?mode=link');
+      const res = await GET(req, { params: Promise.resolve({ provider: 'google' }) });
+
+      expect(res.status).toBe(302);
+      expect(createOAuthState).toHaveBeenCalledWith(
+        expect.objectContaining({ linkUserId: 7, redirect: '/me/profile' }),
+      );
+    });
+
+    it('미인증 → /login?redirect=/me/profile 302, state 미생성', async () => {
+      getOptionalAuth.mockResolvedValue(null);
+      const req = makeRequest('/api/v1/auth/oauth/google?mode=link');
+      const res = await GET(req, { params: Promise.resolve({ provider: 'google' }) });
+
+      expect(res.status).toBe(302);
+      expect(res.headers.get('location')).toContain('/login');
+      expect(res.headers.get('location')).toContain('redirect=%2Fme%2Fprofile');
+      expect(createOAuthState).not.toHaveBeenCalled();
+    });
   });
 });

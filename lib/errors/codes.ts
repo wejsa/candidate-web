@@ -107,6 +107,12 @@ export const ERROR_CATALOG = {
     status: 404,
     message: '연결되지 않은 소셜 계정입니다.',
   },
+  // CANDID-024 Step 5 — 소셜 계정 연결 추가 (US-MY-004)
+  // 이미 (본인 또는 타 계정에) 연결된 소셜 계정을 다시 연결하려는 시도 차단.
+  USER_PROVIDER_ALREADY_LINKED: {
+    status: 409,
+    message: '이미 연결된 소셜 계정입니다.',
+  },
 
   // 공고 — JOB_
   JOB_NOT_FOUND: { status: 404, message: '채용 공고를 찾을 수 없습니다.' },

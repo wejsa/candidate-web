@@ -10,9 +10,8 @@ import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 // 라우터는 분기 처리(302 success / 302 /login?error= / 404) + state 쿠키 즉시 소멸만 검증.
 
 vi.mock('@/lib/auth/oauth/state', async () => {
-  const actual = await vi.importActual<typeof import('@/lib/auth/oauth/state')>(
-    '@/lib/auth/oauth/state',
-  );
+  const actual =
+    await vi.importActual<typeof import('@/lib/auth/oauth/state')>('@/lib/auth/oauth/state');
   return {
     ...actual,
     verifyOAuthStateCookie: vi.fn(),
@@ -28,20 +27,21 @@ vi.mock('@/lib/auth/oauth', async () => {
 });
 vi.mock('@/lib/auth/oauth/link', () => ({
   linkOrCreateOAuthUser: vi.fn(),
+  linkProviderToCurrentUser: vi.fn(),
 }));
 
 const { verifyOAuthStateCookie } = (await import('@/lib/auth/oauth/state')) as unknown as {
   verifyOAuthStateCookie: ReturnType<typeof vi.fn>;
 };
-const { isOAuthProviderEnabled, getProvider } = (await import(
-  '@/lib/auth/oauth'
-)) as unknown as {
+const { isOAuthProviderEnabled, getProvider } = (await import('@/lib/auth/oauth')) as unknown as {
   isOAuthProviderEnabled: ReturnType<typeof vi.fn>;
   getProvider: ReturnType<typeof vi.fn>;
 };
-const { linkOrCreateOAuthUser } = (await import('@/lib/auth/oauth/link')) as unknown as {
-  linkOrCreateOAuthUser: ReturnType<typeof vi.fn>;
-};
+const { linkOrCreateOAuthUser, linkProviderToCurrentUser } =
+  (await import('@/lib/auth/oauth/link')) as unknown as {
+    linkOrCreateOAuthUser: ReturnType<typeof vi.fn>;
+    linkProviderToCurrentUser: ReturnType<typeof vi.fn>;
+  };
 const { GET } = await import('@/app/api/v1/auth/oauth/[provider]/callback/route');
 
 const happyProfile = {
@@ -192,5 +192,55 @@ describe('callback — 통합 단정', () => {
     expect(linkOrCreateOAuthUser).toHaveBeenCalledWith(
       expect.objectContaining({ provider: 'google', profile: happyProfile }),
     );
+  });
+});
+
+// CANDID-024 Step 5 — link-add 분기 (state.linkUserId 존재).
+describe('callback — link-add 모드', () => {
+  it('linkUserId 존재 → linkProviderToCurrentUser 호출 + /me/profile?linked + 인증쿠키 미발급', async () => {
+    verifyOAuthStateCookie.mockReturnValue({
+      provider: 'google',
+      redirect: '/me/profile',
+      codeVerifier: 'v',
+      linkUserId: 7,
+    });
+    linkProviderToCurrentUser.mockResolvedValue('linked');
+
+    const req = makeRequest('/api/v1/auth/oauth/google/callback?code=ABC&state=XYZ', {
+      oauth_state: 'cookie.signed',
+    });
+    const res = await GET(req, { params: Promise.resolve({ provider: 'google' }) });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toContain('/me/profile');
+    expect(res.headers.get('location')).toContain('linked=google');
+    expect(linkProviderToCurrentUser).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 7, provider: 'google', profile: happyProfile }),
+    );
+    // 일반 로그인이 아니므로 새 access/refresh 미발급.
+    const setCookie = res.headers.get('set-cookie') ?? '';
+    expect(setCookie).not.toContain('access_token=a-jwt');
+    expect(linkOrCreateOAuthUser).not.toHaveBeenCalled();
+    // state cookie는 여전히 소멸.
+    expect(setCookie).toMatch(/oauth_state=;[^,]*Max-Age=0/);
+  });
+
+  it('ALREADY_LINKED → /me/profile?error=provider_already_linked', async () => {
+    verifyOAuthStateCookie.mockReturnValue({
+      provider: 'github',
+      redirect: '/me/profile',
+      codeVerifier: 'v',
+      linkUserId: 7,
+    });
+    const { AppError: AE } = await import('@/lib/errors');
+    linkProviderToCurrentUser.mockRejectedValue(new AE('USER_PROVIDER_ALREADY_LINKED'));
+
+    const req = makeRequest('/api/v1/auth/oauth/github/callback?code=ABC&state=XYZ', {
+      oauth_state: 'cookie.signed',
+    });
+    const res = await GET(req, { params: Promise.resolve({ provider: 'github' }) });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toContain('error=provider_already_linked');
   });
 });
