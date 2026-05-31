@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 344,
+    "version": 345,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T20:53:36+09:00"
+    "updatedAt": "2026-05-31T21:02:01+09:00"
   },
   "summary": {
     "total": 47,
@@ -1725,7 +1725,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-204734",
-      "assignedAt": "2026-05-31T20:53:30+09:00",
+      "assignedAt": "2026-05-31T21:02:01+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "app/api/v1/auth/logout/route.ts",
@@ -1733,7 +1733,7 @@
         "tests/app/api/v1/auth/logout.test.ts",
         "tests/lib/auth/session.test.ts"
       ],
-      "updatedAt": "2026-05-31T20:53:30+09:00",
+      "updatedAt": "2026-05-31T21:02:01+09:00",
       "planPath": ".claude/temp/CANDID-021-plan.md",
       "currentStep": 1,
       "specFile": "docs/sample-requirement.md",
@@ -1741,7 +1741,7 @@
         {
           "step": 1,
           "title": "로그아웃 코어 (엔드포인트 + 단일 세션 revoke)",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/api/v1/auth/logout/route.ts",
             "lib/auth/session.ts",
@@ -1750,7 +1750,9 @@
           ],
           "estimatedLines": 300,
           "prLineLimit": 450,
-          "dependsOn": []
+          "dependsOn": [],
+          "prNumber": 92,
+          "branch": "feature/CANDID-021-step1"
         },
         {
           "step": 2,
@@ -1768,12 +1770,12 @@
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 92,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-31T20:53:30+09:00"
+        "autoChainArgs": "92 --auto-fix",
+        "updatedAt": "2026-05-31T21:02:01+09:00"
       }
     },
     "CANDID-022": {
