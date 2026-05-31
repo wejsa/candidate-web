@@ -101,6 +101,15 @@ describe('unlinkProvider', () => {
     expect(__mocks.providerDelete).not.toHaveBeenCalled();
   });
 
+  // 리뷰 MAJOR(test): 마지막 인증수단 거부 경계 명시 — 무비번 + 대상 provider만(비대상 0) → 거부.
+  it('무비번 + 대상 provider만(비대상 0) → USER_LAST_AUTH_METHOD', async () => {
+    __mocks.findUnique.mockResolvedValue({ passwordHash: null, status: 'ACTIVE' });
+    __mocks.providerFindMany.mockResolvedValue([{ provider: 'GOOGLE' }]); // 대상=google, 비대상 0
+
+    await expect(unlinkProvider(input)).rejects.toMatchObject({ code: 'USER_LAST_AUTH_METHOD' });
+    expect(__mocks.providerDelete).not.toHaveBeenCalled();
+  });
+
   it('연결되지 않은 provider → USER_PROVIDER_NOT_LINKED', async () => {
     __mocks.findUnique.mockResolvedValue({ passwordHash: '$2b$12$X', status: 'ACTIVE' });
     __mocks.providerFindMany.mockResolvedValue([{ provider: 'GITHUB' }]); // google 미연결
