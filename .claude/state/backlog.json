@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 345,
+    "version": 346,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:02:01+09:00"
+    "updatedAt": "2026-05-31T21:06:10+09:00"
   },
   "summary": {
     "total": 47,
@@ -1943,7 +1943,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T20:53:36+09:00",
+      "assignedAt": "2026-05-31T21:06:10+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/users/types.ts",
@@ -1969,12 +1969,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 93,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-31T20:53:36+09:00"
+        "autoChainArgs": "93 --auto-fix",
+        "updatedAt": "2026-05-31T21:06:10+09:00"
       },
       "dependencies": [
         "CANDID-008"
@@ -1987,7 +1987,9 @@
         {
           "step": 1,
           "title": "프로필 조회 — GET /api/v1/users/me + 프로필 페이지(RSC)",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-024-step1",
+          "prNumber": 93,
           "files": [
             "lib/users/types.ts",
             "lib/users/profile-service.ts",
@@ -1998,6 +2000,7 @@
             "tests/app/api/v1/users/me/route.test.ts"
           ],
           "estimatedLines": 480,
+          "actualLines": 413,
           "prLineLimit": 600,
           "dependsOn": []
         },
