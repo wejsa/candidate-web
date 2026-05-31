@@ -111,9 +111,22 @@ class RotationConflictError extends Error {
 }
 
 /**
+ * 이미 'rotated'로 revoke된(=한 번 회전을 마친) 토큰이 다시 제시되면 rotation chain replay 공격으로 간주하고
+ * 해당 family의 모든 활성 세션을 'reuse_detected'로 일괄 무효화한다(CANDID-021 Step 2 — OAuth RT reuse detection).
+ * 정상 revoke 사유('logout'/'password_change'/'user_withdrawn')로 무효화된 토큰의 재제시는 단순 만료된 세션
+ * 재사용이므로 family를 보존한다(공격 신호 아님). revoke된 경로에서만 호출되므로 추가 조회 비용은 예외 경로에 한정.
+ */
+async function detectRefreshReuse(token: string): Promise<void> {
+  const row = await prisma.refreshToken.findUnique({ where: { tokenHash: sha256Hex(token) } });
+  if (row !== null && row.revokedReason === 'rotated') {
+    await revokeAllForFamily(row.familyId, 'reuse_detected');
+  }
+}
+
+/**
  * refresh 토큰 회전 — 구 토큰 검증 후 revoke('rotated') + 신규 토큰 발급을 단일 트랜잭션으로 수행.
- * familyId는 승계되고 rotationCounter는 1 증가한다. 이미 revoke된 토큰은 'revoked'로 거부된다
- * (reuse detection 본격 로직은 CANDID-021 위임 — familyId/rotationCounter가 그 기반).
+ * familyId는 승계되고 rotationCounter는 1 증가한다. 이미 revoke된 토큰은 'revoked'로 거부되며,
+ * 'rotated' 사유의 토큰 재제시는 reuse detection으로 family 전체를 무효화한다(detectRefreshReuse).
  *
  * 동시성(C001): 구 토큰 revoke를 `updateMany(where: revokedAt=null)` 조건부 갱신으로 수행하고
  * affected rows로 경쟁을 감지한다 — verify와 트랜잭션 사이 TOCTOU 윈도우에서 동일 토큰이
@@ -122,6 +135,10 @@ class RotationConflictError extends Error {
 export async function rotateRefreshSession(oldToken: string): Promise<RotateRefreshSessionResult> {
   const verified = await verifyRefreshSession(oldToken);
   if (!verified.ok) {
+    // 이미 'rotated'된 토큰의 재제시 = chain replay → family 전체 무효화 (best-effort, 결정은 'revoked' 유지).
+    if (verified.reason === 'revoked') {
+      await detectRefreshReuse(oldToken);
+    }
     return { ok: false, reason: verified.reason };
   }
   const old = verified.session;
@@ -184,6 +201,40 @@ export async function revokeAllForUser(userId: number, reason: RevokeReason): Pr
   const result = await prisma.refreshToken.updateMany({
     where: { userId, revokedAt: null },
     data: { revokedAt: new Date(), revokedReason: reason },
+  });
+  return result.count;
+}
+
+/**
+ * 한 rotation family(familyId)의 모든 활성 세션을 일괄 revoke — reuse detection(detectRefreshReuse)에서
+ * chain replay 감지 시 호출. 조건부 `updateMany(revokedAt=null)`로 이미 revoke된 row는 건드리지 않는다.
+ */
+export async function revokeAllForFamily(familyId: string, reason: RevokeReason): Promise<number> {
+  const result = await prisma.refreshToken.updateMany({
+    where: { familyId, revokedAt: null },
+    data: { revokedAt: new Date(), revokedReason: reason },
+  });
+  return result.count;
+}
+
+/**
+ * 만료/오래된-revoke refresh 토큰 정리 — 야간 배치(CANDID-029)가 호출할 순수 도메인 함수.
+ * 스케줄러 wiring은 본 함수 범위 밖이다(CANDID-029 위임). 삭제된 row 수를 반환한다.
+ *
+ * 보존 정책:
+ *  - 미revoke 만료 토큰: 즉시 삭제(감사 가치 없음 — 정상 만료).
+ *  - revoke 토큰: `graceDays`(기본 30일) 경과분만 삭제 — 그 전까지는 감사 추적(reuse_detected/logout 사유)을 위해 보존.
+ *  활성(미revoke·미만료) 토큰과 grace 이내 revoke 토큰은 보존된다.
+ */
+export async function deleteExpiredRefreshTokens(
+  now: Date = new Date(),
+  graceDays = 30,
+): Promise<number> {
+  const graceCutoff = new Date(now.getTime() - graceDays * 24 * 3600 * 1000);
+  const result = await prisma.refreshToken.deleteMany({
+    where: {
+      OR: [{ revokedAt: null, expiresAt: { lt: now } }, { revokedAt: { lt: graceCutoff } }],
+    },
   });
   return result.count;
 }
