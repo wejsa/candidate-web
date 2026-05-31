@@ -2622,5 +2622,14 @@
     "stepNumber": 1,
     "prNumber": 93,
     "at": "2026-05-31T21:06:10+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-021",
+    "stepNumber": 1,
+    "prNumber": 92,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "1 MAJOR in-PR fixed (L-019)",
+    "at": "2026-05-31T21:11:51+09:00"
   }
 ]
