@@ -266,3 +266,19 @@ describe('ResumeUploadStep — 서버 메시지 화이트리스트 (S-MAJOR-2 �
     expect(alert).not.toHaveTextContent('file:write');
   });
 });
+
+describe('ResumeUploadStep — 422 빈 message 폴백 (CANDID-047 회귀 가드)', () => {
+  it('422 + 빈 message → 빈 `⚠️ ` alert가 아니라 클라이언트 폴백 메시지 노출', async () => {
+    // 버그 재현: 서버가 422를 빈 message로 응답 → 기존엔 `<p role="alert">⚠️ </p>` 빈 alert.
+    mockUpload.mockRejectedValue(new HttpStatusError(422, '', 'FILE_TYPE_NOT_ALLOWED'));
+    const user = userEvent.setup();
+    renderStep();
+
+    await user.upload(fileInput(), pdf());
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('파일이 허용된 형식·크기가 아닙니다.');
+    // 핵심 단언: alert가 ⚠️ + 공백만으로 비어 있으면 안 된다.
+    expect(alert.textContent ?? '').not.toMatch(/^⚠️\s*$/);
+  });
+});

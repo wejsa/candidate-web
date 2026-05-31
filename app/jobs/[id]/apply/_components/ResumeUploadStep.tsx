@@ -97,10 +97,18 @@ export function ResumeUploadStep({ draftId, onAttached }: Props) {
         // S-MAJOR-2 fix (PR #59 in-PR): 서버 message 화이트리스트 — 422(validation)만 서버 메시지
         // 사용 (사용자에게 유의미한 형식/크기 안내). 그 외 status는 classifyUploadError의 일반화된
         // 메시지만 사용 — 서버 zod 상세/stack 누출 차단.
+        // CANDID-047 fix: finalMsg가 어떤 경로로도 빈 문자열이 되지 않도록 최종 폴백 보강
+        // (서버 422 빈 message → 빈 `⚠️ ` alert 렌더 버그 차단). S-MAJOR-2 불변식 유지:
+        // 서버 raw message는 validation(422)에서만 사용, 그 외 status는 classify 일반화 메시지.
         const { kind, message } = classifyUploadError(err);
-        const finalMsg = kind === 'validation' && err instanceof HttpStatusError && err.message !== ''
-          ? err.message
-          : message;
+        const serverMsg =
+          kind === 'validation' && err instanceof HttpStatusError ? err.message.trim() : '';
+        const finalMsg =
+          serverMsg !== ''
+            ? serverMsg
+            : message.trim() !== ''
+              ? message
+              : '파일을 업로드하지 못했습니다. 다시 시도해 주세요.';
         dispatch({ type: 'fail', kind, message: finalMsg });
       } finally {
         abortRef.current = null;
