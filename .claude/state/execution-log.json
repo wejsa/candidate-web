@@ -2782,5 +2782,12 @@
     "action": "task_completed",
     "taskId": "CANDID-025",
     "at": "2026-05-31T22:19:09+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-024",
+    "stepNumber": 4,
+    "prNumber": 99,
+    "at": "2026-05-31T22:20:11+09:00"
   }
 ]

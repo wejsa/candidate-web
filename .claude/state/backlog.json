@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 367,
+    "version": 368,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T22:19:09+09:00"
+    "updatedAt": "2026-05-31T22:20:11+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,13 +1936,11 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T22:06:01+09:00",
+      "assignedAt": "2026-05-31T22:20:11+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "app/api/v1/users/me/providers/[provider]/route.ts",
         "app/me/profile/page.tsx",
         "app/me/profile/_components/SocialAccountsSection.tsx",
-        "lib/auth/oauth/unlink.ts",
         "lib/auth/oauth/link.ts",
         "lib/auth/oauth/state.ts",
         "lib/errors/codes.ts",
@@ -1950,12 +1948,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 99,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T22:06:01+09:00"
+        "autoChainArgs": "99 --auto-fix",
+        "updatedAt": "2026-05-31T22:20:11+09:00"
       },
       "dependencies": [
         "CANDID-008"
@@ -2047,26 +2045,49 @@
         },
         {
           "step": 4,
-          "title": "소셜 계정 해제/연결 + 관리 UI",
-          "status": "pending",
+          "title": "소셜 계정 해제 + 관리 UI (4a)",
+          "status": "pr_created",
+          "branch": "feature/CANDID-024-step4",
+          "prNumber": 99,
           "files": [
             "lib/errors/codes.ts",
             "lib/auth/oauth/unlink.ts",
-            "lib/auth/oauth/link.ts",
-            "lib/auth/oauth/state.ts",
             "app/api/v1/users/me/providers/[provider]/route.ts",
-            "app/api/v1/auth/oauth/[provider]/route.ts",
-            "app/api/v1/auth/oauth/[provider]/callback/route.ts",
+            "lib/users/profile-form.ts",
             "app/me/profile/_components/SocialAccountsSection.tsx",
+            "app/me/profile/_components/ProfileView.tsx",
+            "app/me/profile/page.tsx",
             "tests/lib/auth/oauth/unlink.test.ts",
-            "tests/app/api/v1/users/me/providers.test.ts"
+            "tests/app/api/v1/users/me/providers/route.test.ts",
+            "tests/lib/errors/codes.test.ts",
+            "tests/lib/users/profile-form.test.ts"
           ],
           "estimatedLines": 780,
+          "actualLines": 435,
           "prLineLimit": 800,
           "dependsOn": [
             1
           ],
-          "note": "800줄 초과 시 impl에서 4a(unlink+UI)/4b(link-add) 분할."
+          "note": "plan §5 contingency로 4a/4b 분할 — 본 스텝은 해제+관리 UI. 연결추가는 Step 5. 감사 이벤트(OAUTH enum+migration)도 Step 5/CANDID-026 위임."
+        },
+        {
+          "step": 5,
+          "title": "소셜 계정 연결 추가 (4b — authenticated link-add)",
+          "status": "pending",
+          "files": [
+            "lib/auth/oauth/state.ts",
+            "lib/auth/oauth/link.ts",
+            "app/api/v1/auth/oauth/[provider]/route.ts",
+            "app/api/v1/auth/oauth/[provider]/callback/route.ts",
+            "app/me/profile/_components/SocialAccountsSection.tsx",
+            "lib/errors/codes.ts"
+          ],
+          "estimatedLines": 450,
+          "prLineLimit": 600,
+          "dependsOn": [
+            4
+          ],
+          "note": "로그인 사용자 OAuth 링크: state-intent(userId) + start 인증 분기 + callback attach(현재 user에 AuthProvider 연결, UNIQUE 위반 → USER_PROVIDER_ALREADY_LINKED). 감사 이벤트 enum+migration 동반."
         }
       ]
     },
