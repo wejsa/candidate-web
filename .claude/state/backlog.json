@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 341,
+    "version": 342,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T20:42:10+09:00"
+    "updatedAt": "2026-05-31T20:47:34+09:00"
   },
   "summary": {
     "total": 47,
     "done": 37,
-    "inProgress": 1,
+    "inProgress": 2,
     "review": 0,
-    "todo": 9
+    "todo": 8
   },
   "phases": {
     "1": {
@@ -1716,14 +1716,19 @@
       "id": "CANDID-021",
       "title": "로그아웃 + Refresh Token DB 블랙리스트",
       "description": "클라이언트 Access 제거 + 서버 Refresh Token DB 블랙리스트 처리(Redis 미사용 → DB 테이블 TTL 컬럼). 만료된 토큰 야간 배치 정리.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
       "dependencies": [
         "CANDID-011"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "wejsa-u@hoji-20260531-204734",
+      "assignedAt": "2026-05-31T20:47:34+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "updatedAt": "2026-05-31T20:47:34+09:00"
     },
     "CANDID-022": {
       "id": "CANDID-022",
