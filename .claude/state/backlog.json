@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 357,
+    "version": 358,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:42:34+09:00"
+    "updatedAt": "2026-05-31T21:45:53+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,18 +1936,14 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T21:42:34+09:00",
+      "assignedAt": "2026-05-31T21:45:53+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/users/profile-service.ts",
-        "lib/users/validation.ts",
-        "lib/users/profile-form.ts",
+        "lib/users/schema.ts",
         "lib/users/password-change.ts",
-        "app/api/v1/users/me/route.ts",
         "app/api/v1/users/me/password/route.ts",
         "app/api/v1/users/me/providers/[provider]/route.ts",
         "app/me/profile/page.tsx",
-        "app/me/profile/_components/ProfileEditForm.tsx",
         "app/me/profile/_components/PasswordChangeForm.tsx",
         "app/me/profile/_components/SocialAccountsSection.tsx",
         "lib/auth/oauth/unlink.ts",
@@ -1960,20 +1956,20 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 95,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "95",
-        "updatedAt": "2026-05-31T21:42:34+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-31T21:45:53+09:00"
       },
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-31T21:36:32+09:00",
+      "updatedAt": "2026-05-31T21:45:53+09:00",
       "planPath": ".claude/temp/CANDID-024-plan.md",
-      "currentStep": 2,
+      "currentStep": 3,
       "steps": [
         {
           "step": 1,
@@ -2000,9 +1996,10 @@
         {
           "step": 2,
           "title": "이름/연락처 수정 — PATCH /api/v1/users/me + 수정 폼",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-024-step2",
           "prNumber": 95,
+          "mergedAt": "2026-05-31T21:45:14+09:00",
           "files": [
             "lib/users/schema.ts",
             "lib/users/profile-service.ts",
