@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 374,
+    "version": 375,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T23:37:05+09:00"
+    "updatedAt": "2026-05-31T23:52:16+09:00"
   },
   "summary": {
     "total": 47,
@@ -3156,19 +3156,40 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "jaese@hoji-20260531-233705",
-      "assignedAt": "2026-05-31T23:37:05+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-05-31T23:52:16+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "lib/files/upload-state.ts",
+        "app/jobs/[id]/apply/_components/ResumeUploadStep.tsx",
+        "tests/lib/files/upload-state.test.ts",
+        "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx"
+      ],
       "dependencies": [],
       "createdAt": "2026-05-29T20:11:38+09:00",
       "source": "CANDID-039 Step 2 리뷰 (QA P1)",
+      "currentStep": 1,
+      "steps": [
+        {
+          "number": 1,
+          "title": "422 빈 message 폴백 처리 + 회귀 테스트",
+          "description": "classifyUploadError(upload-state.ts) 422 분기에서 빈/공백 message를 폴백('파일이 허용된 형식·크기가 아닙니다.')으로 대체(SSOT). ResumeUploadStep.tsx finalMsg 최종 폴백 보강(어떤 경로로도 빈 alert 불가). S-MAJOR-2 누출 불변식은 validation 한정 분기로 보존. 회귀 테스트 4종(단위 2 + 컴포넌트 2).",
+          "status": "pending",
+          "files": [
+            "lib/files/upload-state.ts",
+            "app/jobs/[id]/apply/_components/ResumeUploadStep.tsx",
+            "tests/lib/files/upload-state.test.ts",
+            "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx"
+          ],
+          "prLineLimit": 150
+        }
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-05-31T23:37:05+09:00"
+        "updatedAt": "2026-05-31T23:52:16+09:00"
       }
     }
   }
