@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 355,
+    "version": 356,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:36:32+09:00"
+    "updatedAt": "2026-05-31T21:43:07+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T21:36:32+09:00",
+      "assignedAt": "2026-05-31T21:42:34+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/users/profile-service.ts",
@@ -1960,12 +1960,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 95,
         "fixLoopCount": 0,
-        "autoChainArgs": "95 --auto-fix",
-        "updatedAt": "2026-05-31T21:36:32+09:00"
+        "autoChainArgs": "95",
+        "updatedAt": "2026-05-31T21:42:34+09:00"
       },
       "dependencies": [
         "CANDID-008"
@@ -2082,10 +2082,62 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-213426",
-      "assignedAt": "2026-05-31T21:34:26+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
-      "updatedAt": "2026-05-31T21:34:26+09:00"
+      "assignedAt": "2026-05-31T21:43:07+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "lib/jobs/structured-data.ts",
+        "app/jobs/[id]/page.tsx",
+        "app/layout.tsx",
+        "tests/lib/jobs/structured-data.test.ts",
+        "app/sitemap.ts",
+        "app/robots.ts",
+        "lib/jobs/sitemap-data.ts",
+        "tests/lib/jobs/sitemap-data.test.ts"
+      ],
+      "updatedAt": "2026-05-31T21:43:07+09:00",
+      "planPath": ".claude/temp/CANDID-025-plan.md",
+      "currentStep": 1,
+      "specFile": "docs/sample-requirement.md",
+      "steps": [
+        {
+          "step": 1,
+          "title": "JobPosting JSON-LD structured data + 메타 하드닝(metadataBase/OG)",
+          "status": "pending",
+          "files": [
+            "lib/jobs/structured-data.ts",
+            "app/jobs/[id]/page.tsx",
+            "app/layout.tsx",
+            "tests/lib/jobs/structured-data.test.ts"
+          ],
+          "estimatedLines": 400,
+          "prLineLimit": 500,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "동적 sitemap.xml + robots.txt",
+          "status": "pending",
+          "files": [
+            "lib/jobs/sitemap-data.ts",
+            "app/sitemap.ts",
+            "app/robots.ts",
+            "tests/lib/jobs/sitemap-data.test.ts"
+          ],
+          "estimatedLines": 250,
+          "prLineLimit": 350,
+          "dependsOn": [
+            1
+          ]
+        }
+      ],
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-31T21:43:07+09:00"
+      }
     },
     "CANDID-026": {
       "id": "CANDID-026",
