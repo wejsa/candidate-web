@@ -2622,5 +2622,30 @@
     "stepNumber": 1,
     "prNumber": 93,
     "at": "2026-05-31T21:06:10+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-021",
+    "stepNumber": 1,
+    "prNumber": 92,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "1 MAJOR in-PR fixed (L-019)",
+    "at": "2026-05-31T21:11:51+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-021",
+    "stepNumber": 1,
+    "prNumber": 92,
+    "at": "2026-05-31T21:12:49+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-024",
+    "stepNumber": 1,
+    "prNumber": 93,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "리뷰 full 3-agent. MAJOR 1 + MINOR 2 in-PR fixed (L-019); 나머지 follow-up 이월",
+    "at": "2026-05-31T21:19:28+09:00"
   }
 ]
