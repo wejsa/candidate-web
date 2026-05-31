@@ -91,4 +91,15 @@ describe('DELETE /api/v1/users/me/providers/{provider}', () => {
     expect(res.status).toBe(401);
     expect(unlinkProvider).not.toHaveBeenCalled();
   });
+
+  // QA M3: USER_NOT_FOUND(미존재/탈퇴) → 404 변환 경로.
+  it('USER_NOT_FOUND → 404', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    unlinkProvider.mockRejectedValueOnce(new AppError('USER_NOT_FOUND'));
+
+    const res = await DELETE(delRequest(), ctx('google'));
+
+    expect(res.status).toBe(404);
+    expect((await res.json()).code).toBe('USER_NOT_FOUND');
+  });
 });

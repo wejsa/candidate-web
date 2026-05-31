@@ -54,8 +54,34 @@ describe('unlinkProvider', () => {
     expect(__mocks.providerDelete).toHaveBeenCalledWith({
       where: { userId_provider: { userId: 42, provider: 'GOOGLE' } },
     });
-    // 행 잠금(FOR UPDATE) 선행.
-    expect(__mocks.queryRaw).toHaveBeenCalled();
+    // QA M1: 행 잠금(FOR UPDATE)이 검증(findUnique)·삭제보다 *먼저* 실행됨을 순서로 단언 (TOCTOU 가드).
+    expect(__mocks.queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      __mocks.findUnique.mock.invocationCallOrder[0]!,
+    );
+    expect(__mocks.findUnique.mock.invocationCallOrder[0]).toBeLessThan(
+      __mocks.providerDelete.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  // QA m1: github(GITHUB enum) 매핑 + delete where 계약.
+  it('github 해제 — GITHUB enum으로 delete 호출', async () => {
+    __mocks.findUnique.mockResolvedValue({ passwordHash: '$2b$12$X', status: 'ACTIVE' });
+    __mocks.providerFindMany.mockResolvedValue([{ provider: 'GITHUB' }]);
+
+    await unlinkProvider({ ...input, provider: 'github' });
+
+    expect(__mocks.providerDelete).toHaveBeenCalledWith({
+      where: { userId_provider: { userId: 42, provider: 'GITHUB' } },
+    });
+  });
+
+  // QA M2: delete 실패(동시 해제 race 등) → 트랜잭션 전체 reject 전파 (부분 커밋 방지 의도).
+  it('delete 실패 → 예외 전파', async () => {
+    __mocks.findUnique.mockResolvedValue({ passwordHash: '$2b$12$X', status: 'ACTIVE' });
+    __mocks.providerFindMany.mockResolvedValue([{ provider: 'GOOGLE' }]);
+    __mocks.providerDelete.mockRejectedValue(new Error('P2025 record not found'));
+
+    await expect(unlinkProvider(input)).rejects.toThrow();
   });
 
   it('비밀번호 없음 + provider 2개 → 1개 해제 성공 (잔여 1)', async () => {
