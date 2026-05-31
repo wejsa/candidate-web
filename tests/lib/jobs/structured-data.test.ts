@@ -70,6 +70,31 @@ describe('buildJobPostingJsonLd', () => {
     expect(ld.description).toBe('시니어 백엔드 엔지니어');
   });
 
+  it('does not truncate description at exactly the JSON-LD max (5000 chars)', () => {
+    const exact = 'a'.repeat(5000);
+    const ld = buildJobPostingJsonLd(fakeJob({ contentHtmlSanitized: exact }), BASE);
+    expect(ld.description).toBe(exact);
+    expect(ld.description as string).not.toMatch(/…$/);
+  });
+
+  it('truncates an oversized description to the JSON-LD max with an ellipsis (>160 메타 한도와 구분)', () => {
+    const huge = 'a'.repeat(6000);
+    const ld = buildJobPostingJsonLd(fakeJob({ contentHtmlSanitized: huge }), BASE);
+    const desc = ld.description as string;
+    expect(desc.length).toBe(5001); // 5000자 + '…'
+    expect(desc.endsWith('…')).toBe(true);
+    expect(desc.length).toBeGreaterThan(160); // 메타 description(160) 한도와 다른 상한 확인
+  });
+
+  it('sets identifier.name to the ID scheme (not the organization name)', () => {
+    const ld = buildJobPostingJsonLd(fakeJob(), BASE);
+    expect(ld.identifier).toMatchObject({
+      '@type': 'PropertyValue',
+      'name': 'candidate-web-job-id',
+      'value': 42,
+    });
+  });
+
   it('keeps closed jobs as SEO assets — past validThrough is still emitted (BR-JOB-02)', () => {
     const ld = buildJobPostingJsonLd(
       fakeJob({ isClosed: true, status: 'CLOSED', closesAt: new Date('2020-01-01T00:00:00.000Z') }),

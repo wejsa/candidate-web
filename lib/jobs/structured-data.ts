@@ -15,6 +15,8 @@ const EMPLOYMENT_TYPE_SCHEMA: Record<JobDetail['employmentType'], string> = {
 
 // 채용 주체 — 단일 자사 사이트이므로 상수. (조직명이 환경별로 달라지면 env로 이관)
 const ORG_NAME = '자사 채용';
+// schema.org identifier.name은 조직명이 아닌 "식별자 체계명"이어야 한다(공고 ID 발급 체계).
+const JOB_IDENTIFIER_SCHEME = 'candidate-web-job-id';
 // JSON-LD description은 메타 description(160자)보다 길게 허용 — 검색엔진 본문 설명용.
 const JSONLD_DESCRIPTION_MAX = 5000;
 
@@ -37,7 +39,7 @@ export function buildJobPostingJsonLd(job: JobDetail, baseUrl: string): Record<s
     'hiringOrganization': { '@type': 'Organization', 'name': ORG_NAME, 'sameAs': base },
     'jobLocationType': 'TELECOMMUTE',
     'applicantLocationRequirements': { '@type': 'Country', 'name': 'KR' },
-    'identifier': { '@type': 'PropertyValue', 'name': ORG_NAME, 'value': job.id },
+    'identifier': { '@type': 'PropertyValue', 'name': JOB_IDENTIFIER_SCHEME, 'value': job.id },
     'url': `${base}/jobs/${job.id}`,
     'directApply': true,
   };
