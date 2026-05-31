@@ -1,7 +1,7 @@
 // CANDID-024 Step 2 — lib/users/schema.ProfileUpdateSchema 단위 테스트.
 
 import { describe, expect, it } from 'vitest';
-import { ProfileUpdateSchema } from '@/lib/users/schema';
+import { ProfileUpdateSchema, PasswordChangeSchema } from '@/lib/users/schema';
 
 describe('ProfileUpdateSchema', () => {
   it('이름만 — 통과', () => {
@@ -55,6 +55,44 @@ describe('ProfileUpdateSchema', () => {
 
   it('여분 키 — strict 거부', () => {
     const r = ProfileUpdateSchema.safeParse({ name: '김', role: 'admin' });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe('PasswordChangeSchema', () => {
+  it('현재 + 새(강함) — 통과', () => {
+    const r = PasswordChangeSchema.safeParse({
+      currentPassword: 'OldPass123!',
+      newPassword: 'NewPass456!',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('새 비번만(소셜 최초 설정) — 통과 (current optional)', () => {
+    const r = PasswordChangeSchema.safeParse({ newPassword: 'NewPass456!' });
+    expect(r.success).toBe(true);
+  });
+
+  it('약한 새 비번(10자 미만) — 거부', () => {
+    const r = PasswordChangeSchema.safeParse({ newPassword: 'Ab1!' });
+    expect(r.success).toBe(false);
+  });
+
+  it('강도 미달(3-of-4 미충족, 소문자만) — 거부', () => {
+    const r = PasswordChangeSchema.safeParse({ newPassword: 'abcdefghijkl' });
+    expect(r.success).toBe(false);
+  });
+
+  it('새 비번 = 현재 비번 — 거부 (refine)', () => {
+    const r = PasswordChangeSchema.safeParse({
+      currentPassword: 'SamePass123!',
+      newPassword: 'SamePass123!',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('여분 키 — strict 거부', () => {
+    const r = PasswordChangeSchema.safeParse({ newPassword: 'NewPass456!', admin: true });
     expect(r.success).toBe(false);
   });
 });

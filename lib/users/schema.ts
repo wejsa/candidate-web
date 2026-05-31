@@ -5,6 +5,7 @@
 // password.ts(BR-AUTH-02 BCrypt strength 12) 책임.
 
 import { z } from 'zod';
+import { hasThreeOfFourCharClasses } from '@/lib/auth/validation';
 
 export const WithdrawInputSchema = z
   .object({
@@ -48,3 +49,33 @@ export const ProfileUpdateSchema = z
   });
 
 export type ProfileUpdateBody = z.infer<typeof ProfileUpdateSchema>;
+
+// === CANDID-024 Step 3 — 비밀번호 변경 입력 스키마 (US-MY-004) =======================
+//
+// newPassword는 회원가입과 동일 강도(최소 10자 + UTF-8 72바이트 + 3-of-4). 강도 규칙 SSOT는
+// lib/auth/validation.ts의 hasThreeOfFourCharClasses 재사용. currentPassword는 비번 보유 사용자
+// 재확인용(소셜 전용 최초 설정 시 생략 가능) — 일치 검증은 changePassword(verifyPassword) 책임.
+
+const NEW_PASSWORD_FIELD = z
+  .string()
+  .min(10, '비밀번호는 최소 10자 이상이어야 합니다')
+  .refine((s) => Buffer.byteLength(s, 'utf8') <= 72, {
+    message: '비밀번호가 너무 깁니다 (UTF-8 72바이트 이내, 한글은 24자)',
+  })
+  .refine(hasThreeOfFourCharClasses, {
+    message: '비밀번호는 영문 대/소문자·숫자·특수문자 중 3종 이상을 포함해야 합니다',
+  });
+
+export const PasswordChangeSchema = z
+  .object({
+    /** 현재 비밀번호(보유 사용자 재확인). 소셜 전용 계정 최초 설정 시 생략. */
+    currentPassword: z.string().min(1).max(256).optional(),
+    newPassword: NEW_PASSWORD_FIELD,
+  })
+  .strict()
+  .refine((o) => o.currentPassword !== o.newPassword, {
+    message: '새 비밀번호는 현재 비밀번호와 달라야 합니다.',
+    path: ['newPassword'],
+  });
+
+export type PasswordChangeBody = z.infer<typeof PasswordChangeSchema>;

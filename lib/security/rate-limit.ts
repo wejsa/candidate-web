@@ -146,6 +146,15 @@ export const USER_POLICIES = Object.freeze({
     windowMs: 3_600_000,
     maxRequests: 20,
   } satisfies UserRateLimitPolicy),
+  /**
+   * CANDID-024 Step 3 — 비밀번호 변경 user-bucket. currentPassword 재확인이 brute-force 벡터이므로
+   * 더 엄격하게 시간당 5회 (BCrypt 자체도 느리지만 user 단위 시도 횟수를 추가 제한).
+   */
+  PASSWORD_CHANGE_USER: Object.freeze({
+    name: 'password_change_user',
+    windowMs: 3_600_000,
+    maxRequests: 5,
+  } satisfies UserRateLimitPolicy),
 });
 
 /** Map<`${policy}:${key}`, timestamps[]> — 모듈 lifetime 동안 in-memory 유지. */
