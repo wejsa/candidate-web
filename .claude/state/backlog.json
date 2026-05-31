@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 361,
+    "version": 362,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:59:40+09:00"
+    "updatedAt": "2026-05-31T22:00:17+09:00"
   },
   "summary": {
     "total": 47,
@@ -2087,27 +2087,23 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-213426",
-      "assignedAt": "2026-05-31T21:59:40+09:00",
+      "assignedAt": "2026-05-31T22:00:17+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "lib/jobs/structured-data.ts",
-        "app/jobs/[id]/page.tsx",
-        "app/layout.tsx",
-        "tests/lib/jobs/structured-data.test.ts",
+        "lib/jobs/sitemap-data.ts",
         "app/sitemap.ts",
         "app/robots.ts",
-        "lib/jobs/sitemap-data.ts",
         "tests/lib/jobs/sitemap-data.test.ts"
       ],
-      "updatedAt": "2026-05-31T21:59:40+09:00",
+      "updatedAt": "2026-05-31T22:00:17+09:00",
       "planPath": ".claude/temp/CANDID-025-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
           "step": 1,
           "title": "JobPosting JSON-LD structured data + 메타 하드닝(metadataBase/OG)",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/jobs/structured-data.ts",
             "app/jobs/[id]/page.tsx",
@@ -2118,7 +2114,8 @@
           "prLineLimit": 500,
           "dependsOn": [],
           "prNumber": 96,
-          "branch": "feature/CANDID-025-step1"
+          "branch": "feature/CANDID-025-step1",
+          "mergedAt": "2026-05-31T22:00:17+09:00"
         },
         {
           "step": 2,
@@ -2138,12 +2135,12 @@
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 96,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "96",
-        "updatedAt": "2026-05-31T21:59:40+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-31T22:00:17+09:00"
       }
     },
     "CANDID-026": {
