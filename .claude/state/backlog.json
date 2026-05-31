@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 351,
+    "version": 357,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:22:39+09:00"
+    "updatedAt": "2026-05-31T21:42:34+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 37,
+    "done": 38,
     "inProgress": 2,
     "review": 0,
-    "todo": 8
+    "todo": 7
   },
   "phases": {
     "1": {
@@ -1716,7 +1716,7 @@
       "id": "CANDID-021",
       "title": "로그아웃 + Refresh Token DB 블랙리스트",
       "description": "클라이언트 Access 제거 + 서버 Refresh Token DB 블랙리스트 처리(Redis 미사용 → DB 테이블 TTL 컬럼). 만료된 토큰 야간 배치 정리.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
@@ -1724,14 +1724,11 @@
         "CANDID-011"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "wejsa-u@hoji-20260531-204734",
-      "assignedAt": "2026-05-31T21:21:12+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 7200,
-      "lockedFiles": [
-        "lib/auth/session.ts",
-        "tests/lib/auth/session.test.ts"
-      ],
-      "updatedAt": "2026-05-31T21:21:12+09:00",
+      "lockedFiles": [],
+      "updatedAt": "2026-05-31T21:30:19+09:00",
       "planPath": ".claude/temp/CANDID-021-plan.md",
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
@@ -1756,7 +1753,7 @@
         {
           "step": 2,
           "title": "재사용 탐지(reuse detection) + 만료 토큰 정리 헬퍼",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/auth/session.ts",
             "tests/lib/auth/session.test.ts"
@@ -1767,17 +1764,12 @@
             1
           ],
           "prNumber": 94,
-          "branch": "feature/CANDID-021-step2"
+          "branch": "feature/CANDID-021-step2",
+          "mergedAt": "2026-05-31T21:30:19+09:00"
         }
       ],
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 94,
-        "fixLoopCount": 0,
-        "autoChainArgs": "94 --auto-fix",
-        "updatedAt": "2026-05-31T21:21:12+09:00"
-      }
+      "workflowState": null,
+      "completedAt": "2026-05-31T21:30:19+09:00"
     },
     "CANDID-022": {
       "id": "CANDID-022",
@@ -1944,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T21:22:39+09:00",
+      "assignedAt": "2026-05-31T21:42:34+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/users/profile-service.ts",
@@ -1968,18 +1960,18 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
+        "prNumber": 95,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T21:22:39+09:00"
+        "autoChainArgs": "95",
+        "updatedAt": "2026-05-31T21:42:34+09:00"
       },
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-31T21:22:39+09:00",
+      "updatedAt": "2026-05-31T21:36:32+09:00",
       "planPath": ".claude/temp/CANDID-024-plan.md",
       "currentStep": 2,
       "steps": [
@@ -2008,21 +2000,27 @@
         {
           "step": 2,
           "title": "이름/연락처 수정 — PATCH /api/v1/users/me + 수정 폼",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-024-step2",
+          "prNumber": 95,
           "files": [
-            "lib/users/validation.ts",
+            "lib/users/schema.ts",
             "lib/users/profile-service.ts",
             "lib/users/profile-form.ts",
             "app/api/v1/users/me/route.ts",
             "lib/security/rate-limit.ts",
             "app/me/profile/_components/ProfileEditForm.tsx",
-            "tests/lib/users/validation.test.ts",
+            "app/me/profile/page.tsx",
+            "tests/lib/users/schema.test.ts",
             "tests/lib/users/profile-service.test.ts",
             "tests/lib/users/profile-form.test.ts",
             "tests/app/api/v1/users/me/route.test.ts"
           ],
           "estimatedLines": 560,
+          "actualLines": 546,
           "prLineLimit": 700,
+          "note": "validation.ts→schema.ts (기존 users 스키마 컨벤션). updateProfile updateMany+status가드+encryptUserPiiInput 부분갱신.",
+          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 2 / MINOR 4. QA(M1~M3,m1) 4/4 + 리뷰 MAJOR 2(phone=null route, ratelimit 헤더값) + MINOR 2(401 PATCH, 429 code) in-task fix. carry: phone=null UI 미노출, rate-limit-before-parse(의도), PII 감사로그(PHASE-4), 컴포넌트 테스트. 자기 PR → COMMENT.",
           "dependsOn": [
             1
           ]
@@ -2076,14 +2074,71 @@
       "id": "CANDID-025",
       "title": "SEO 최적화 + JobPosting structured data + OG/메타",
       "description": "공고 페이지 SSR/SSG. JobPosting schema.org structured data. OG 태그(title/description/image). 마감 공고도 SEO 자산으로 유지(흐림 처리).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
       "dependencies": [
         "CANDID-014"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "wejsa-u@hoji-20260531-213426",
+      "assignedAt": "2026-05-31T21:43:07+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "lib/jobs/structured-data.ts",
+        "app/jobs/[id]/page.tsx",
+        "app/layout.tsx",
+        "tests/lib/jobs/structured-data.test.ts",
+        "app/sitemap.ts",
+        "app/robots.ts",
+        "lib/jobs/sitemap-data.ts",
+        "tests/lib/jobs/sitemap-data.test.ts"
+      ],
+      "updatedAt": "2026-05-31T21:43:07+09:00",
+      "planPath": ".claude/temp/CANDID-025-plan.md",
+      "currentStep": 1,
+      "specFile": "docs/sample-requirement.md",
+      "steps": [
+        {
+          "step": 1,
+          "title": "JobPosting JSON-LD structured data + 메타 하드닝(metadataBase/OG)",
+          "status": "pending",
+          "files": [
+            "lib/jobs/structured-data.ts",
+            "app/jobs/[id]/page.tsx",
+            "app/layout.tsx",
+            "tests/lib/jobs/structured-data.test.ts"
+          ],
+          "estimatedLines": 400,
+          "prLineLimit": 500,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "동적 sitemap.xml + robots.txt",
+          "status": "pending",
+          "files": [
+            "lib/jobs/sitemap-data.ts",
+            "app/sitemap.ts",
+            "app/robots.ts",
+            "tests/lib/jobs/sitemap-data.test.ts"
+          ],
+          "estimatedLines": 250,
+          "prLineLimit": 350,
+          "dependsOn": [
+            1
+          ]
+        }
+      ],
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-31T21:43:07+09:00"
+      }
     },
     "CANDID-026": {
       "id": "CANDID-026",

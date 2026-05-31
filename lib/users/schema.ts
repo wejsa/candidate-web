@@ -19,3 +19,32 @@ export const WithdrawInputSchema = z
   .strict();
 
 export type WithdrawInputBody = z.infer<typeof WithdrawInputSchema>;
+
+// === CANDID-024 Step 2 — 프로필 수정 (이름/연락처) 입력 스키마 (US-MY-004) ============
+//
+// 형식 검증만 담당 — phone 정규화/암호화는 lib/prisma/extends.ts encryptUserPiiInput(normalizePhone) 책임.
+// 부분 갱신(PATCH): name/phone 모두 optional, 단 최소 1개는 있어야 한다. phone=null은 "연락처 삭제".
+
+const PROFILE_NAME_FIELD = z.string().trim().min(1, '이름을 입력해 주세요').max(100);
+
+/** 연락처 — 하이픈/공백 허용, 숫자만 추출 시 9~11자리 (normalizePhone과 동일 기준). */
+const PROFILE_PHONE_FIELD = z
+  .string()
+  .trim()
+  .refine((s) => {
+    const digits = s.replace(/[^0-9]/g, '');
+    return digits.length >= 9 && digits.length <= 11;
+  }, '연락처는 9~11자리 숫자여야 합니다.');
+
+export const ProfileUpdateSchema = z
+  .object({
+    name: PROFILE_NAME_FIELD.optional(),
+    /** 신규 연락처 문자열 또는 null(삭제). 미전달 시 연락처 미변경. */
+    phone: z.union([PROFILE_PHONE_FIELD, z.null()]).optional(),
+  })
+  .strict()
+  .refine((o) => o.name !== undefined || 'phone' in o, {
+    message: '수정할 항목이 없습니다.',
+  });
+
+export type ProfileUpdateBody = z.infer<typeof ProfileUpdateSchema>;
