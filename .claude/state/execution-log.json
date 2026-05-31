@@ -2647,5 +2647,12 @@
     "decision": "COMMENT (self-PR, CRITICAL 0)",
     "note": "리뷰 full 3-agent. MAJOR 1 + MINOR 2 in-PR fixed (L-019); 나머지 follow-up 이월",
     "at": "2026-05-31T21:19:28+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-021",
+    "stepNumber": 2,
+    "prNumber": 94,
+    "at": "2026-05-31T21:21:12+09:00"
   }
 ]

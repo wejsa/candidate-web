@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 349,
+    "version": 350,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:19:28+09:00"
+    "updatedAt": "2026-05-31T21:21:12+09:00"
   },
   "summary": {
     "total": 47,
@@ -1725,13 +1725,13 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-204734",
-      "assignedAt": "2026-05-31T21:12:49+09:00",
+      "assignedAt": "2026-05-31T21:21:12+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "lib/auth/session.ts",
         "tests/lib/auth/session.test.ts"
       ],
-      "updatedAt": "2026-05-31T21:12:49+09:00",
+      "updatedAt": "2026-05-31T21:21:12+09:00",
       "planPath": ".claude/temp/CANDID-021-plan.md",
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
@@ -1756,7 +1756,7 @@
         {
           "step": 2,
           "title": "재사용 탐지(reuse detection) + 만료 토큰 정리 헬퍼",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/auth/session.ts",
             "tests/lib/auth/session.test.ts"
@@ -1765,16 +1765,18 @@
           "prLineLimit": 400,
           "dependsOn": [
             1
-          ]
+          ],
+          "prNumber": 94,
+          "branch": "feature/CANDID-021-step2"
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 94,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T21:12:49+09:00"
+        "autoChainArgs": "94 --auto-fix",
+        "updatedAt": "2026-05-31T21:21:12+09:00"
       }
     },
     "CANDID-022": {
