@@ -263,6 +263,49 @@ describe('rotateRefreshSession', () => {
     expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
     expect(db.refreshToken.updateMany).not.toHaveBeenCalled();
   });
+
+  it('reuse detection fires even when the replayed "rotated" token JWT has EXPIRED (gate covers expired)', async () => {
+    // JWT 만료 후 재제시 — verify는 DB 조회 전에 'expired'로 단락되지만,
+    // detectRefreshReuse가 자체 조회로 'rotated'를 확인해 family를 무효화한다(MAJOR 우회 차단).
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-20T00:00:00Z'));
+    const { token } = await issueRefreshToken(USER_ID, { rememberMe: false }); // 1일 TTL
+    vi.setSystemTime(new Date('2026-05-22T00:00:00Z')); // JWT 만료 후
+    db.refreshToken.findUnique.mockResolvedValue(
+      fakeRow({
+        revokedAt: new Date('2026-05-21T00:00:00Z'),
+        revokedReason: 'rotated',
+        familyId: FAMILY,
+      }),
+    );
+    db.refreshToken.updateMany.mockResolvedValue({ count: 1 });
+
+    expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'expired' });
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { familyId: FAMILY, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'reuse_detected' },
+    });
+  });
+
+  it('best-effort — rotation still rejects with "revoked" when reuse detection throws (DB failure)', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    db.refreshToken.findUnique.mockResolvedValue(
+      fakeRow({ revokedAt: new Date(), revokedReason: 'rotated' }),
+    );
+    db.refreshToken.updateMany.mockRejectedValue(new Error('db down')); // family revoke throws
+
+    expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
+  });
+
+  it('does not revoke the family when the revoked row vanished on re-query (race → null)', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    db.refreshToken.findUnique
+      .mockResolvedValueOnce(fakeRow({ revokedAt: new Date(), revokedReason: 'rotated' })) // verify
+      .mockResolvedValueOnce(null); // detectRefreshReuse 재조회 시점엔 삭제됨
+
+    expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
+    expect(db.refreshToken.updateMany).not.toHaveBeenCalled();
+  });
 });
 
 describe('revokeRefreshSession', () => {
@@ -330,6 +373,16 @@ describe('revokeAllForFamily', () => {
       data: { revokedAt: expect.any(Date), revokedReason: 'reuse_detected' },
     });
   });
+
+  it('is idempotent — returns 0 when the family is already fully revoked (preserves prior reasons)', async () => {
+    // 조건부 where(revokedAt=null)로 이미 revoke된 row의 사유를 덮어쓰지 않는다 — 감사 무결성.
+    db.refreshToken.updateMany.mockResolvedValue({ count: 0 });
+    expect(await revokeAllForFamily(FAMILY, 'reuse_detected')).toBe(0);
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { familyId: FAMILY, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'reuse_detected' },
+    });
+  });
 });
 
 describe('deleteExpiredRefreshTokens', () => {
@@ -359,6 +412,33 @@ describe('deleteExpiredRefreshTokens', () => {
     expect(db.refreshToken.deleteMany).toHaveBeenCalledWith({
       where: {
         OR: [{ revokedAt: null, expiresAt: { lt: NOW } }, { revokedAt: { lt: cutoff } }],
+      },
+    });
+  });
+
+  it('uses now()=current time and 30-day grace by default (no-args — the batch call path)', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    db.refreshToken.deleteMany.mockResolvedValue({ count: 0 });
+
+    await deleteExpiredRefreshTokens(); // 무인자 — CANDID-029 배치 실제 호출 경로
+
+    const cutoff = new Date(NOW.getTime() - 30 * 24 * 3600 * 1000);
+    expect(db.refreshToken.deleteMany).toHaveBeenCalledWith({
+      where: {
+        OR: [{ revokedAt: null, expiresAt: { lt: NOW } }, { revokedAt: { lt: cutoff } }],
+      },
+    });
+  });
+
+  it('graceDays=0 — cutoff equals now, so all revoked tokens are eligible for immediate deletion', async () => {
+    db.refreshToken.deleteMany.mockResolvedValue({ count: 3 });
+
+    await deleteExpiredRefreshTokens(NOW, 0);
+
+    expect(db.refreshToken.deleteMany).toHaveBeenCalledWith({
+      where: {
+        OR: [{ revokedAt: null, expiresAt: { lt: NOW } }, { revokedAt: { lt: NOW } }],
       },
     });
   });

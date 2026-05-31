@@ -114,7 +114,8 @@ class RotationConflictError extends Error {
  * 이미 'rotated'로 revoke된(=한 번 회전을 마친) 토큰이 다시 제시되면 rotation chain replay 공격으로 간주하고
  * 해당 family의 모든 활성 세션을 'reuse_detected'로 일괄 무효화한다(CANDID-021 Step 2 — OAuth RT reuse detection).
  * 정상 revoke 사유('logout'/'password_change'/'user_withdrawn')로 무효화된 토큰의 재제시는 단순 만료된 세션
- * 재사용이므로 family를 보존한다(공격 신호 아님). revoke된 경로에서만 호출되므로 추가 조회 비용은 예외 경로에 한정.
+ * 재사용이므로 family를 보존한다(공격 신호 아님). 자체 findUnique를 수행하므로 JWT가 이미 만료돼 verify가
+ * DB를 보기 전에 단락된 경우(reason='expired')에도 DB의 revokedReason로 정확히 판정할 수 있다.
  */
 async function detectRefreshReuse(token: string): Promise<void> {
   const row = await prisma.refreshToken.findUnique({ where: { tokenHash: sha256Hex(token) } });
@@ -125,7 +126,7 @@ async function detectRefreshReuse(token: string): Promise<void> {
 
 /**
  * refresh 토큰 회전 — 구 토큰 검증 후 revoke('rotated') + 신규 토큰 발급을 단일 트랜잭션으로 수행.
- * familyId는 승계되고 rotationCounter는 1 증가한다. 이미 revoke된 토큰은 'revoked'로 거부되며,
+ * familyId는 승계되고 rotationCounter는 1 증가한다. 이미 revoke된/만료된 토큰은 거부되며,
  * 'rotated' 사유의 토큰 재제시는 reuse detection으로 family 전체를 무효화한다(detectRefreshReuse).
  *
  * 동시성(C001): 구 토큰 revoke를 `updateMany(where: revokedAt=null)` 조건부 갱신으로 수행하고
@@ -135,9 +136,15 @@ async function detectRefreshReuse(token: string): Promise<void> {
 export async function rotateRefreshSession(oldToken: string): Promise<RotateRefreshSessionResult> {
   const verified = await verifyRefreshSession(oldToken);
   if (!verified.ok) {
-    // 이미 'rotated'된 토큰의 재제시 = chain replay → family 전체 무효화 (best-effort, 결정은 'revoked' 유지).
-    if (verified.reason === 'revoked') {
-      await detectRefreshReuse(oldToken);
+    // chain replay reuse detection — JWT 만료 여부와 무관하게 DB의 revokedReason='rotated'가 SSOT다.
+    // 'revoked'(미만료 JWT) + 'expired'(JWT TTL 경과)에서 모두 시도해야 지연 replay를 놓치지 않는다.
+    // best-effort: family 무효화 실패(DB 장애)가 회전 거부 결정을 막지 않도록 throw를 삼킨다.
+    if (verified.reason === 'revoked' || verified.reason === 'expired') {
+      try {
+        await detectRefreshReuse(oldToken);
+      } catch (err) {
+        console.error('[rotate] reuse detection failed (rotation still rejected):', err);
+      }
     }
     return { ok: false, reason: verified.reason };
   }
