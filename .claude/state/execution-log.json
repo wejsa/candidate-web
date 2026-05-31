@@ -2707,5 +2707,12 @@
     "prNumber": 95,
     "mergedAt": "2026-05-31T21:45:14+09:00",
     "at": "2026-05-31T21:45:53+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-025",
+    "stepNumber": 1,
+    "prNumber": 96,
+    "at": "2026-05-31T21:51:36+09:00"
   }
 ]
