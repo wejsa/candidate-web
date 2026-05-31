@@ -8,8 +8,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      // 마이페이지(개인 데이터)·API는 색인 대상이 아니다.
-      disallow: ['/me', '/api'],
+      // 마이페이지(개인 데이터)·API·비밀번호 재설정(토큰성 트랜잭션 페이지)은 색인 대상이 아니다.
+      // robots는 접근 제어가 아닌 색인 방지 보조선 — 실제 보호는 서버 인증 가드가 담당.
+      disallow: ['/me', '/api', '/password'],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
     host: baseUrl,
