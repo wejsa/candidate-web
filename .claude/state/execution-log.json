@@ -2761,5 +2761,14 @@
     "stepNumber": 2,
     "prNumber": 98,
     "at": "2026-05-31T22:10:08+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-025",
+    "stepNumber": 2,
+    "prNumber": 98,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "test MAJOR(라우트 0% 커버) + MINOR in-PR fix (L-019)",
+    "at": "2026-05-31T22:18:22+09:00"
   }
 ]
