@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 358,
+    "version": 363,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:45:53+09:00"
+    "updatedAt": "2026-05-31T22:03:47+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T21:45:53+09:00",
+      "assignedAt": "2026-05-31T22:03:47+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/users/schema.ts",
@@ -1956,18 +1956,18 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
+        "prNumber": 97,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T21:45:53+09:00"
+        "autoChainArgs": "97",
+        "updatedAt": "2026-05-31T22:03:47+09:00"
       },
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-31T21:45:53+09:00",
+      "updatedAt": "2026-05-31T21:56:50+09:00",
       "planPath": ".claude/temp/CANDID-024-plan.md",
       "currentStep": 3,
       "steps": [
@@ -2025,19 +2025,27 @@
         {
           "step": 3,
           "title": "비밀번호 변경 — POST /api/v1/users/me/password + 폼",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-024-step3",
+          "prNumber": 97,
           "files": [
-            "lib/users/validation.ts",
+            "lib/users/schema.ts",
             "lib/users/password-change.ts",
-            "lib/auth/session.ts",
             "app/api/v1/users/me/password/route.ts",
             "lib/security/rate-limit.ts",
+            "lib/users/profile-form.ts",
             "app/me/profile/_components/PasswordChangeForm.tsx",
+            "app/me/profile/page.tsx",
             "tests/lib/users/password-change.test.ts",
-            "tests/app/api/v1/users/me/password.test.ts"
+            "tests/app/api/v1/users/me/password/route.test.ts",
+            "tests/lib/users/schema.test.ts",
+            "tests/lib/users/profile-form.test.ts"
           ],
           "estimatedLines": 560,
+          "actualLines": 698,
           "prLineLimit": 700,
+          "note": "session.ts 미변경(RevokeReason에 password_change 기존재 → tx 내 인라인 revoke). validation.ts→schema.ts.",
+          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 4 / MINOR 4. QA(M1~M3,m2,m3) + 리뷰 test MAJOR 2(audit실패 reject, 에러응답 평문가드) + domain MAJOR(revoke SSOT 주석) in-task. carry: 감사 IP(CANDID-026 통일), 소셜 set 재인증, tx 진짜 원자성(통합), revokeAllForUser tx-injectable 리팩터, 컴포넌트 테스트. 자기 PR → COMMENT.",
           "dependsOn": [
             1
           ]
@@ -2080,27 +2088,23 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-213426",
-      "assignedAt": "2026-05-31T21:43:07+09:00",
+      "assignedAt": "2026-05-31T22:00:17+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "lib/jobs/structured-data.ts",
-        "app/jobs/[id]/page.tsx",
-        "app/layout.tsx",
-        "tests/lib/jobs/structured-data.test.ts",
+        "lib/jobs/sitemap-data.ts",
         "app/sitemap.ts",
         "app/robots.ts",
-        "lib/jobs/sitemap-data.ts",
         "tests/lib/jobs/sitemap-data.test.ts"
       ],
-      "updatedAt": "2026-05-31T21:43:07+09:00",
+      "updatedAt": "2026-05-31T22:00:17+09:00",
       "planPath": ".claude/temp/CANDID-025-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
           "step": 1,
           "title": "JobPosting JSON-LD structured data + 메타 하드닝(metadataBase/OG)",
-          "status": "pending",
+          "status": "merged",
           "files": [
             "lib/jobs/structured-data.ts",
             "app/jobs/[id]/page.tsx",
@@ -2109,7 +2113,10 @@
           ],
           "estimatedLines": 400,
           "prLineLimit": 500,
-          "dependsOn": []
+          "dependsOn": [],
+          "prNumber": 96,
+          "branch": "feature/CANDID-025-step1",
+          "mergedAt": "2026-05-31T22:00:17+09:00"
         },
         {
           "step": 2,
@@ -2130,11 +2137,11 @@
       ],
       "workflowState": {
         "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
+        "lastCompletedSkill": "skill-merge-pr",
         "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-31T21:43:07+09:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-05-31T22:00:17+09:00"
       }
     },
     "CANDID-026": {

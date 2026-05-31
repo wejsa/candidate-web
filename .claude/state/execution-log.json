@@ -2707,5 +2707,44 @@
     "prNumber": 95,
     "mergedAt": "2026-05-31T21:45:14+09:00",
     "at": "2026-05-31T21:45:53+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-025",
+    "stepNumber": 1,
+    "prNumber": 96,
+    "at": "2026-05-31T21:51:36+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-024",
+    "stepNumber": 3,
+    "prNumber": 97,
+    "at": "2026-05-31T21:56:50+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-025",
+    "stepNumber": 1,
+    "prNumber": 96,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "MINOR in-PR fix (identifier.name + truncation tests); 1 MAJOR(TELECOMMUTE) 수용",
+    "at": "2026-05-31T21:59:40+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-025",
+    "stepNumber": 1,
+    "prNumber": 96,
+    "at": "2026-05-31T22:00:17+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-024",
+    "stepNumber": 3,
+    "prNumber": 97,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "리뷰 full 3-agent. QA + test MAJOR 2 + domain MAJOR(주석) in-PR; 감사 IP는 CANDID-026 deferral",
+    "at": "2026-05-31T22:03:47+09:00"
   }
 ]

@@ -3,9 +3,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   PROFILE_EDIT_LABELS as L,
+  PASSWORD_CHANGE_LABELS as PL,
   buildProfileUpdatePayload,
   isEmptyPayload,
   classifyProfileUpdateError,
+  classifyPasswordChangeError,
 } from '@/lib/users/profile-form';
 
 describe('buildProfileUpdatePayload', () => {
@@ -54,5 +56,18 @@ describe('classifyProfileUpdateError', () => {
     [500, L.errorGeneric],
   ])('status %i → 메시지', (status, expected) => {
     expect(classifyProfileUpdateError(status)).toBe(expected);
+  });
+});
+
+describe('classifyPasswordChangeError', () => {
+  it.each([
+    [401, PL.errorCurrentInvalid],
+    [400, PL.errorWeak],
+    [422, PL.errorCurrentInvalid],
+    [429, PL.errorRateLimited],
+    [404, PL.errorSession],
+    [500, PL.errorGeneric],
+  ])('status %i → 메시지', (status, expected) => {
+    expect(classifyPasswordChangeError(status)).toBe(expected);
   });
 });

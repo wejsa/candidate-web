@@ -7,8 +7,10 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { getJobDetail } from '@/lib/jobs/detail';
 import { buildJobDetailMetadata } from '@/lib/jobs/detail-metadata';
+import { buildJobPostingJsonLd, jsonLdScriptContent } from '@/lib/jobs/structured-data';
 import { resolveApplyCta } from '@/lib/jobs/apply-cta';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
+import { getEnv } from '@/lib/env';
 import { AppError } from '@/lib/errors';
 import { JobDetailHeader } from '@/app/jobs/[id]/_components/JobDetailHeader';
 import { JobDetailBody } from '@/app/jobs/[id]/_components/JobDetailBody';
@@ -69,8 +71,12 @@ export default async function JobDetailPage({ params }: PageProps) {
     job: { id: job.id, isClosed: job.isClosed },
   });
 
+  // schema.org JobPosting JSON-LD — 검색엔진 리치 결과. 마감 공고도 SEO 자산으로 유지(BR-JOB-02).
+  const jsonLd = jsonLdScriptContent(buildJobPostingJsonLd(job, getEnv().NEXT_PUBLIC_APP_URL));
+
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <JobDetailHeader job={job} />
       <JobDetailBody job={job} />
       <section aria-label="지원하기">
