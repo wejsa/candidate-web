@@ -7,6 +7,7 @@ import { issueAccessToken, issueRefreshToken } from '@/lib/auth/jwt';
 import {
   issueRefreshSession,
   revokeAllForUser,
+  revokeRefreshSession,
   rotateRefreshSession,
   verifyRefreshSession,
 } from '@/lib/auth/session';
@@ -158,7 +159,9 @@ describe('verifyRefreshSession', () => {
 
   it('reports expired when the DB row expiry has passed (defense-in-depth)', async () => {
     const { token } = await issueRefreshToken(USER_ID);
-    db.refreshToken.findUnique.mockResolvedValue(fakeRow({ expiresAt: new Date(Date.now() - 1000) }));
+    db.refreshToken.findUnique.mockResolvedValue(
+      fakeRow({ expiresAt: new Date(Date.now() - 1000) }),
+    );
     expect(await verifyRefreshSession(token)).toEqual({ ok: false, reason: 'expired' });
   });
 
@@ -227,6 +230,34 @@ describe('rotateRefreshSession', () => {
     db.refreshToken.findUnique.mockResolvedValue(fakeRow({ revokedAt: new Date() }));
     expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
     expect(db.$transaction).not.toHaveBeenCalled();
+  });
+});
+
+describe('revokeRefreshSession', () => {
+  it('revokes the single session matching the token hash with reason "logout" and returns true', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    db.refreshToken.updateMany.mockResolvedValue({ count: 1 });
+
+    const revoked = await revokeRefreshSession(token);
+
+    expect(revoked).toBe(true);
+    // 조건부 갱신 — revokedAt=null인 row만, sha256 해시로 직접 조회 (서명 재검증 없음).
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { tokenHash: sha256(token), revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'logout' },
+    });
+  });
+
+  it('is idempotent — returns false when no active row matches (not found or already revoked)', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    db.refreshToken.updateMany.mockResolvedValue({ count: 0 });
+    expect(await revokeRefreshSession(token)).toBe(false);
+  });
+
+  it('does not throw on a malformed token — hashes it and reports false (no match)', async () => {
+    db.refreshToken.updateMany.mockResolvedValue({ count: 0 });
+    expect(await revokeRefreshSession('not-a-jwt')).toBe(false);
+    expect(db.refreshToken.updateMany).toHaveBeenCalledTimes(1);
   });
 });
 
