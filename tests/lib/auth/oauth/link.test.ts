@@ -261,22 +261,25 @@ describe('linkProviderToCurrentUser', () => {
     expect(tx.authProvider.create).not.toHaveBeenCalled();
   });
 
-  it('create P2002(user_provider UNIQUE) → USER_PROVIDER_ALREADY_LINKED', async () => {
-    const { Prisma } = await import('@prisma/client');
-    tx.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
-    tx.authProvider.findUnique.mockResolvedValue(null);
-    tx.authProvider.create.mockRejectedValue(
-      new Prisma.PrismaClientKnownRequestError('P2002', {
-        code: 'P2002',
-        clientVersion: 'test',
-        meta: { target: ['uk_auth_providers_user_provider'] },
-      }),
-    );
+  it.each(['uk_auth_providers_user_provider', 'uk_auth_providers_provider_pid'])(
+    'create P2002(%s) → USER_PROVIDER_ALREADY_LINKED',
+    async (indexName) => {
+      const { Prisma } = await import('@prisma/client');
+      tx.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+      tx.authProvider.findUnique.mockResolvedValue(null);
+      tx.authProvider.create.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('P2002', {
+          code: 'P2002',
+          clientVersion: 'test',
+          meta: { target: [indexName] },
+        }),
+      );
 
-    await expect(
-      linkProviderToCurrentUser({ userId: 42, provider: 'github', profile: PROFILE }),
-    ).rejects.toMatchObject({ code: 'USER_PROVIDER_ALREADY_LINKED' });
-  });
+      await expect(
+        linkProviderToCurrentUser({ userId: 42, provider: 'github', profile: PROFILE }),
+      ).rejects.toMatchObject({ code: 'USER_PROVIDER_ALREADY_LINKED' });
+    },
+  );
 
   it('사용자 미존재/비활성 → USER_NOT_FOUND', async () => {
     tx.user.findUnique.mockResolvedValue(null);

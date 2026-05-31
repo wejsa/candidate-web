@@ -29,6 +29,8 @@ vi.mock('@/lib/auth/oauth/link', () => ({
   linkOrCreateOAuthUser: vi.fn(),
   linkProviderToCurrentUser: vi.fn(),
 }));
+// CANDID-024 Step 5 — link 분기 세션 바인딩 재확인용.
+vi.mock('@/lib/auth/middleware', () => ({ getOptionalAuth: vi.fn() }));
 
 const { verifyOAuthStateCookie } = (await import('@/lib/auth/oauth/state')) as unknown as {
   verifyOAuthStateCookie: ReturnType<typeof vi.fn>;
@@ -42,6 +44,9 @@ const { linkOrCreateOAuthUser, linkProviderToCurrentUser } =
     linkOrCreateOAuthUser: ReturnType<typeof vi.fn>;
     linkProviderToCurrentUser: ReturnType<typeof vi.fn>;
   };
+const { getOptionalAuth } = (await import('@/lib/auth/middleware')) as unknown as {
+  getOptionalAuth: ReturnType<typeof vi.fn>;
+};
 const { GET } = await import('@/app/api/v1/auth/oauth/[provider]/callback/route');
 
 const happyProfile = {
@@ -204,6 +209,7 @@ describe('callback — link-add 모드', () => {
       codeVerifier: 'v',
       linkUserId: 7,
     });
+    getOptionalAuth.mockResolvedValue({ userId: 7 }); // 세션 == linkUserId
     linkProviderToCurrentUser.mockResolvedValue('linked');
 
     const req = makeRequest('/api/v1/auth/oauth/google/callback?code=ABC&state=XYZ', {
@@ -234,6 +240,7 @@ describe('callback — link-add 모드', () => {
       codeVerifier: 'v',
       linkUserId: 7,
     });
+    getOptionalAuth.mockResolvedValue({ userId: 7 });
     const { AppError: AE } = await import('@/lib/errors');
     linkProviderToCurrentUser.mockRejectedValue(new AE('USER_PROVIDER_ALREADY_LINKED'));
 
@@ -244,5 +251,64 @@ describe('callback — link-add 모드', () => {
 
     expect(res.status).toBe(302);
     expect(res.headers.get('location')).toContain('error=provider_already_linked');
+  });
+
+  // 리뷰 보안 MAJOR — 세션 바인딩: 현재 세션 ≠ state.linkUserId → 거부 (공유 단말 stale-state 방어).
+  it('세션 사용자 ≠ linkUserId → /login?error=oauth_state_invalid, link 미수행', async () => {
+    verifyOAuthStateCookie.mockReturnValue({
+      provider: 'google',
+      redirect: '/me/profile',
+      codeVerifier: 'v',
+      linkUserId: 7,
+    });
+    getOptionalAuth.mockResolvedValue({ userId: 999 }); // 다른 사용자로 전환됨
+
+    const req = makeRequest('/api/v1/auth/oauth/google/callback?code=ABC&state=XYZ', {
+      oauth_state: 'cookie.signed',
+    });
+    const res = await GET(req, { params: Promise.resolve({ provider: 'google' }) });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toContain('/login');
+    expect(res.headers.get('location')).toContain('oauth_state_invalid');
+    expect(linkProviderToCurrentUser).not.toHaveBeenCalled();
+  });
+
+  it('미인증(세션 없음) link callback → /login?error=oauth_state_invalid', async () => {
+    verifyOAuthStateCookie.mockReturnValue({
+      provider: 'google',
+      redirect: '/me/profile',
+      codeVerifier: 'v',
+      linkUserId: 7,
+    });
+    getOptionalAuth.mockResolvedValue(null);
+
+    const req = makeRequest('/api/v1/auth/oauth/google/callback?code=ABC&state=XYZ', {
+      oauth_state: 'cookie.signed',
+    });
+    const res = await GET(req, { params: Promise.resolve({ provider: 'google' }) });
+
+    expect(res.headers.get('location')).toContain('oauth_state_invalid');
+    expect(linkProviderToCurrentUser).not.toHaveBeenCalled();
+  });
+
+  // 리뷰 test MAJOR — USER_NOT_FOUND(탈퇴/비활성) → /login?error=oauth_account_inactive 분기.
+  it('linkProviderToCurrentUser USER_NOT_FOUND → /login?error=oauth_account_inactive', async () => {
+    verifyOAuthStateCookie.mockReturnValue({
+      provider: 'google',
+      redirect: '/me/profile',
+      codeVerifier: 'v',
+      linkUserId: 7,
+    });
+    getOptionalAuth.mockResolvedValue({ userId: 7 });
+    const { AppError: AE } = await import('@/lib/errors');
+    linkProviderToCurrentUser.mockRejectedValue(new AE('USER_NOT_FOUND'));
+
+    const req = makeRequest('/api/v1/auth/oauth/google/callback?code=ABC&state=XYZ', {
+      oauth_state: 'cookie.signed',
+    });
+    const res = await GET(req, { params: Promise.resolve({ provider: 'google' }) });
+
+    expect(res.headers.get('location')).toContain('oauth_account_inactive');
   });
 });
