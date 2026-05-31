@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 370,
+    "version": 371,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T22:29:51+09:00"
+    "updatedAt": "2026-05-31T22:43:57+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T22:29:51+09:00",
+      "assignedAt": "2026-05-31T22:43:57+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/me/profile/_components/SocialAccountsSection.tsx",
@@ -1947,12 +1947,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 100,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T22:29:51+09:00"
+        "autoChainArgs": "100 --auto-fix",
+        "updatedAt": "2026-05-31T22:43:57+09:00"
       },
       "dependencies": [
         "CANDID-008"
@@ -2074,16 +2074,24 @@
         {
           "step": 5,
           "title": "소셜 계정 연결 추가 (4b — authenticated link-add)",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-024-step5",
+          "prNumber": 100,
           "files": [
             "lib/auth/oauth/state.ts",
             "lib/auth/oauth/link.ts",
             "app/api/v1/auth/oauth/[provider]/route.ts",
             "app/api/v1/auth/oauth/[provider]/callback/route.ts",
             "app/me/profile/_components/SocialAccountsSection.tsx",
-            "lib/errors/codes.ts"
+            "lib/errors/codes.ts",
+            "tests/lib/auth/oauth/state.test.ts",
+            "tests/lib/auth/oauth/link.test.ts",
+            "tests/app/api/v1/auth/oauth/start.test.ts",
+            "tests/app/api/v1/auth/oauth/callback.test.ts",
+            "tests/lib/errors/codes.test.ts"
           ],
           "estimatedLines": 450,
+          "actualLines": 344,
           "prLineLimit": 600,
           "dependsOn": [
             4
