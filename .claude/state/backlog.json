@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 372,
+    "version": 373,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T22:54:48+09:00"
+    "updatedAt": "2026-05-31T22:56:50+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 39,
-    "inProgress": 1,
+    "done": 40,
+    "inProgress": 0,
     "review": 0,
     "todo": 7
   },
@@ -1931,34 +1931,21 @@
       "id": "CANDID-024",
       "title": "프로필 수정 (US-MY-004)",
       "description": "수정 가능: 이름/연락처/비밀번호. 소셜 계정 연결 추가/해제. 이메일 변경은 P2(별도 인증).",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
-      "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T22:54:48+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "app/me/profile/_components/SocialAccountsSection.tsx",
-        "lib/auth/oauth/link.ts",
-        "lib/auth/oauth/state.ts",
-        "lib/errors/codes.ts",
-        "app/api/v1/auth/oauth/[provider]/route.ts",
-        "app/api/v1/auth/oauth/[provider]/callback/route.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 100,
-        "fixLoopCount": 0,
-        "autoChainArgs": "100",
-        "updatedAt": "2026-05-31T22:54:48+09:00"
-      },
+      "lockedFiles": [],
+      "workflowState": null,
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-31T22:29:51+09:00",
+      "updatedAt": "2026-05-31T22:56:50+09:00",
+      "completedAt": "2026-05-31T22:56:50+09:00",
       "planPath": ".claude/temp/CANDID-024-plan.md",
       "currentStep": 5,
       "steps": [
@@ -2074,9 +2061,10 @@
         {
           "step": 5,
           "title": "소셜 계정 연결 추가 (4b — authenticated link-add)",
-          "status": "pr_created",
+          "status": "merged",
           "branch": "feature/CANDID-024-step5",
           "prNumber": 100,
+          "mergedAt": "2026-05-31T22:56:18+09:00",
           "files": [
             "lib/auth/oauth/state.ts",
             "lib/auth/oauth/link.ts",

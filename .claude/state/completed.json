@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 39,
+    "version": 40,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-31T22:19:09+09:00"
+    "updatedAt": "2026-05-31T22:56:50+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1262,6 +1262,26 @@
         "docs/security/security-controls.md에 JSON-LD XSS 방어 + 색인 노출 통제 소절 추가(docs-impact 권장)",
         "title 길이 cap(JSON-LD), opengraph-image 동적 생성, 근무지/급여 schema 확장 — follow-up"
       ]
+    },
+    "CANDID-024": {
+      "id": "CANDID-024",
+      "title": "프로필 수정 (US-MY-004)",
+      "phase": 3,
+      "priority": "medium",
+      "type": "feature",
+      "completedAt": "2026-05-31T22:56:50+09:00",
+      "assignee": "wejsa-u@hoji-20260531-204210",
+      "prs": [
+        93,
+        95,
+        97,
+        99,
+        100
+      ],
+      "totalMergedLines": 2702,
+      "stepCount": 5,
+      "reviewSummary": "5 스텝(조회/수정/비번/소셜해제/소셜연결) 전부 CRITICAL 0. 매 스텝 QA+리뷰 MAJOR in-PR 보강(L-019). DB 스키마 변경 없음(순수 앱 레이어). PII 마스킹·BCrypt12·전체 revoke·마지막 인증수단 가드·OAuth state-intent 봉인+세션 바인딩. carry: 감사 이벤트(OAUTH/PASSWORD) CANDID-026, IP 추출 통일 CANDID-026.",
+      "note": "plan Step4를 4a(해제)/4b(연결)로 분할 → 총 5 스텝."
     }
   }
 }
