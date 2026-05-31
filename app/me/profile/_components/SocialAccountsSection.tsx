@@ -66,7 +66,11 @@ export function SocialAccountsSection({ providers }: SocialAccountsSectionProps)
                   {pending === provider ? L.unlinking : L.unlink}
                 </button>
               ) : (
-                <span> · {L.notLinked}</span>
+                <>
+                  <span> · {L.notLinked} · </span>
+                  {/* link-add는 OAuth 전체 페이지 리다이렉트 흐름 → 일반 anchor 네비게이션 */}
+                  <a href={`/api/v1/auth/oauth/${provider}?mode=link`}>{L.connect}</a>
+                </>
               )}
             </li>
           );

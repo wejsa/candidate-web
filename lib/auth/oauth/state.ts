@@ -45,6 +45,11 @@ export const OAUTH_STATE_COOKIE_PATH = '/api/v1/auth/oauth';
 export interface CreateOAuthStateInput {
   provider: OAuthProviderName;
   redirect: string;
+  /**
+   * CANDID-024 Step 5 — link-add 의도. 설정 시 callback이 새 로그인이 아니라
+   * 이 userId에 provider를 *연결*한다. 서명 페이로드에 포함되어 위조 불가.
+   */
+  linkUserId?: number;
 }
 
 export interface CreateOAuthStateResult {
@@ -64,6 +69,8 @@ export interface VerifyOAuthStateResult {
   provider: OAuthProviderName;
   redirect: string;
   codeVerifier: string;
+  /** CANDID-024 Step 5 — link-add 대상 userId (서명 검증된 값). 일반 로그인 흐름이면 undefined. */
+  linkUserId?: number;
 }
 
 interface StatePayload {
@@ -79,6 +86,8 @@ interface StatePayload {
   n: string;
   /** 만료 epoch ms. */
   e: number;
+  /** CANDID-024 Step 5 — link-add 대상 userId (선택). 부재 시 일반 로그인. */
+  u?: number;
 }
 
 function base64urlEncode(buf: Buffer): string {
@@ -120,6 +129,9 @@ export function createOAuthState(input: CreateOAuthStateInput): CreateOAuthState
     n: nonce,
     e: expiresAtMs,
   };
+  if (input.linkUserId !== undefined) {
+    payload.u = input.linkUserId;
+  }
 
   const payloadB64 = base64urlEncode(Buffer.from(JSON.stringify(payload), 'utf8'));
   const signature = sign(payloadB64);
@@ -174,12 +186,7 @@ export function verifyOAuthStateCookie(
   if (expectedSig.length !== signatureB64.length) {
     throw new AppError('AUTH_OAUTH_STATE_INVALID');
   }
-  if (
-    !timingSafeEqual(
-      Buffer.from(expectedSig, 'utf8'),
-      Buffer.from(signatureB64, 'utf8'),
-    )
-  ) {
+  if (!timingSafeEqual(Buffer.from(expectedSig, 'utf8'), Buffer.from(signatureB64, 'utf8'))) {
     throw new AppError('AUTH_OAUTH_STATE_INVALID');
   }
 
@@ -200,7 +207,8 @@ export function verifyOAuthStateCookie(
     typeof payload.v !== 'string' ||
     typeof payload.s !== 'string' ||
     typeof payload.n !== 'string' ||
-    typeof payload.e !== 'number'
+    typeof payload.e !== 'number' ||
+    (payload.u !== undefined && (typeof payload.u !== 'number' || !Number.isInteger(payload.u)))
   ) {
     throw new AppError('AUTH_OAUTH_STATE_INVALID');
   }
@@ -220,5 +228,10 @@ export function verifyOAuthStateCookie(
     throw new AppError('AUTH_OAUTH_STATE_INVALID');
   }
 
-  return { provider: payload.p, redirect: payload.r, codeVerifier: payload.v };
+  return {
+    provider: payload.p,
+    redirect: payload.r,
+    codeVerifier: payload.v,
+    linkUserId: payload.u,
+  };
 }

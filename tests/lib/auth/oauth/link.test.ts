@@ -6,7 +6,7 @@ import type { Mock } from 'vitest';
 
 vi.mock('@/lib/prisma', () => {
   const tx = {
-    authProvider: { findUnique: vi.fn() },
+    authProvider: { findUnique: vi.fn(), create: vi.fn() },
     user: { findUnique: vi.fn(), create: vi.fn() },
   };
   return {
@@ -36,13 +36,13 @@ const { prisma } = (await import('@/lib/prisma')) as unknown as {
   prisma: {
     $transaction: Mock;
     __tx: {
-      authProvider: { findUnique: Mock };
+      authProvider: { findUnique: Mock; create: Mock };
       user: { findUnique: Mock; create: Mock };
     };
   };
 };
 const tx = prisma.__tx;
-const { linkOrCreateOAuthUser } = await import('@/lib/auth/oauth/link');
+const { linkOrCreateOAuthUser, linkProviderToCurrentUser } = await import('@/lib/auth/oauth/link');
 
 const PROFILE = {
   providerUserId: 'g-12345',
@@ -210,5 +210,100 @@ describe('linkOrCreateOAuthUser — case C (신규 가입)', () => {
     await expect(
       linkOrCreateOAuthUser({ provider: 'google', profile: PROFILE }),
     ).rejects.toMatchObject({ code: 'P2002' });
+  });
+});
+
+// CANDID-024 Step 5 — linkProviderToCurrentUser (authenticated link-add).
+describe('linkProviderToCurrentUser', () => {
+  it('신규 연결 → authProvider 생성 + linked', async () => {
+    tx.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+    tx.authProvider.findUnique.mockResolvedValue(null);
+    tx.authProvider.create.mockResolvedValue({});
+
+    const result = await linkProviderToCurrentUser({
+      userId: 42,
+      provider: 'google',
+      profile: PROFILE,
+    });
+
+    expect(result).toBe('linked');
+    expect(tx.authProvider.create).toHaveBeenCalledWith({
+      data: {
+        userId: 42,
+        provider: 'GOOGLE',
+        providerUserId: PROFILE.providerUserId,
+        profileImageUrl: PROFILE.profileImageUrl,
+      },
+    });
+  });
+
+  it('본인에게 이미 연결됨 → already (멱등, create 미호출)', async () => {
+    tx.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+    tx.authProvider.findUnique.mockResolvedValue({ userId: 42 });
+
+    const result = await linkProviderToCurrentUser({
+      userId: 42,
+      provider: 'google',
+      profile: PROFILE,
+    });
+
+    expect(result).toBe('already');
+    expect(tx.authProvider.create).not.toHaveBeenCalled();
+  });
+
+  it('타 계정에 이미 연결됨 → USER_PROVIDER_ALREADY_LINKED (선점 차단)', async () => {
+    tx.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+    tx.authProvider.findUnique.mockResolvedValue({ userId: 999 }); // 다른 사용자
+
+    await expect(
+      linkProviderToCurrentUser({ userId: 42, provider: 'google', profile: PROFILE }),
+    ).rejects.toMatchObject({ code: 'USER_PROVIDER_ALREADY_LINKED' });
+    expect(tx.authProvider.create).not.toHaveBeenCalled();
+  });
+
+  it.each(['uk_auth_providers_user_provider', 'uk_auth_providers_provider_pid'])(
+    'create P2002(%s) → USER_PROVIDER_ALREADY_LINKED',
+    async (indexName) => {
+      const { Prisma } = await import('@prisma/client');
+      tx.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+      tx.authProvider.findUnique.mockResolvedValue(null);
+      tx.authProvider.create.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('P2002', {
+          code: 'P2002',
+          clientVersion: 'test',
+          meta: { target: [indexName] },
+        }),
+      );
+
+      await expect(
+        linkProviderToCurrentUser({ userId: 42, provider: 'github', profile: PROFILE }),
+      ).rejects.toMatchObject({ code: 'USER_PROVIDER_ALREADY_LINKED' });
+    },
+  );
+
+  it('사용자 미존재/비활성 → USER_NOT_FOUND', async () => {
+    tx.user.findUnique.mockResolvedValue(null);
+
+    await expect(
+      linkProviderToCurrentUser({ userId: 42, provider: 'google', profile: PROFILE }),
+    ).rejects.toMatchObject({ code: 'USER_NOT_FOUND' });
+  });
+
+  // QA m3: github → GITHUB enum 매핑 happy-path.
+  it('github 신규 연결 → GITHUB enum으로 생성', async () => {
+    tx.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+    tx.authProvider.findUnique.mockResolvedValue(null);
+    tx.authProvider.create.mockResolvedValue({});
+
+    const result = await linkProviderToCurrentUser({
+      userId: 42,
+      provider: 'github',
+      profile: PROFILE,
+    });
+
+    expect(result).toBe('linked');
+    expect(tx.authProvider.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ userId: 42, provider: 'GITHUB' }),
+    });
   });
 });

@@ -109,9 +109,7 @@ export async function linkOrCreateOAuthUser(args: {
     // profile.email이 null이면 임시 placeholder 이메일 (provider:providerUserId@oauth.local) 사용.
     // 클라이언트가 마이페이지에서 실 이메일 입력 + 인증 진행 예정 (follow-up).
     const emailValue =
-      profile.email !== null
-        ? profile.email
-        : `${provider}-${profile.providerUserId}@oauth.local`;
+      profile.email !== null ? profile.email : `${provider}-${profile.providerUserId}@oauth.local`;
 
     try {
       const created = await tx.user.create({
@@ -178,4 +176,66 @@ export async function linkOrCreateOAuthUser(args: {
     },
     linkAction: linkResult.action,
   };
+}
+
+// CANDID-024 Step 5 — 로그인 사용자에 소셜 계정 연결 추가 (authenticated link-add, US-MY-004).
+//
+// linkOrCreateOAuthUser(로그인/가입)와 달리, *이미 인증된 사용자*에게 provider를 부착한다.
+// 호출 전제: callback이 서명 검증된 state.linkUserId로 본 userId를 전달 (위조 불가).
+// 차단 규칙:
+//   - (provider, providerUserId)가 *타 계정*에 이미 연결됨 → USER_PROVIDER_ALREADY_LINKED (계정 탈취/선점 방지).
+//   - 본인에게 이미 연결됨 → 멱등 'already' (no-op).
+//   - 사용자가 같은 provider 종류를 이미 보유(uk_auth_providers_user_provider) → ALREADY_LINKED.
+// 새 토큰은 발급하지 않는다 (사용자는 이미 로그인 상태).
+export type LinkAddAction = 'linked' | 'already';
+
+export async function linkProviderToCurrentUser(args: {
+  userId: number;
+  provider: OAuthProviderName;
+  profile: OAuthProfile;
+}): Promise<LinkAddAction> {
+  const { userId, provider, profile } = args;
+  const providerEnum = provider === 'google' ? 'GOOGLE' : 'GITHUB';
+
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({ where: { id: userId }, select: { status: true } });
+    if (user === null || user.status !== 'ACTIVE') {
+      throw new AppError('USER_NOT_FOUND');
+    }
+
+    const existing = await tx.authProvider.findUnique({
+      where: {
+        provider_providerUserId: { provider: providerEnum, providerUserId: profile.providerUserId },
+      },
+      select: { userId: true },
+    });
+    if (existing !== null) {
+      // 본인에게 이미 연결 → 멱등 성공. 타 계정 선점 → 차단.
+      if (existing.userId === userId) return 'already';
+      throw new AppError('USER_PROVIDER_ALREADY_LINKED');
+    }
+
+    try {
+      await tx.authProvider.create({
+        data: {
+          userId,
+          provider: providerEnum,
+          providerUserId: profile.providerUserId,
+          profileImageUrl: profile.profileImageUrl,
+        },
+      });
+    } catch (err) {
+      // 동시 연결 race / 사용자가 같은 provider 종류 이미 보유 → 일관되게 ALREADY_LINKED.
+      if (
+        isUniqueViolationOn(err, [
+          'uk_auth_providers_user_provider',
+          'uk_auth_providers_provider_pid',
+        ])
+      ) {
+        throw new AppError('USER_PROVIDER_ALREADY_LINKED');
+      }
+      throw err;
+    }
+    return 'linked';
+  });
 }

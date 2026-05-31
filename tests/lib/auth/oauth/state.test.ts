@@ -82,6 +82,17 @@ describe('verifyOAuthStateCookie — happy path', () => {
     const r = createOAuthState({ provider: 'github', redirect: '/' });
     expect(verifyOAuthStateCookie(r.cookieValue, r.state, 'github').provider).toBe('github');
   });
+
+  // CANDID-024 Step 5 — linkUserId 봉인/복원 (서명 페이로드, 위조 불가).
+  it('linkUserId 설정 시 round-trip 복원', () => {
+    const r = createOAuthState({ provider: 'google', redirect: '/me/profile', linkUserId: 42 });
+    expect(verifyOAuthStateCookie(r.cookieValue, r.state, 'google').linkUserId).toBe(42);
+  });
+
+  it('linkUserId 미설정 시 undefined', () => {
+    const r = createOAuthState({ provider: 'google', redirect: '/' });
+    expect(verifyOAuthStateCookie(r.cookieValue, r.state, 'google').linkUserId).toBeUndefined();
+  });
 });
 
 describe('verifyOAuthStateCookie — 실패 경로 (모두 AUTH_OAUTH_STATE_INVALID)', () => {
@@ -125,7 +136,14 @@ describe('verifyOAuthStateCookie — 실패 경로 (모두 AUTH_OAUTH_STATE_INVA
     const [, sig] = r.cookieValue.split('.');
     // payload를 새로 만들어 signature와 mismatch
     const fakePayload = Buffer.from(
-      JSON.stringify({ p: 'google', r: '/evil', v: 'x', s: r.state, n: 'n', e: Date.now() + 60000 }),
+      JSON.stringify({
+        p: 'google',
+        r: '/evil',
+        v: 'x',
+        s: r.state,
+        n: 'n',
+        e: Date.now() + 60000,
+      }),
       'utf8',
     )
       .toString('base64')
@@ -133,6 +151,30 @@ describe('verifyOAuthStateCookie — 실패 경로 (모두 AUTH_OAUTH_STATE_INVA
       .replace(/\+/g, '-')
       .replace(/\//g, '_');
     expectStateInvalid(() => verifyOAuthStateCookie(`${fakePayload}.${sig}`, r.state, 'google'));
+  });
+
+  // CANDID-024 Step 5 (QA M1) — 공격자가 linkUserId(u)를 피해자 ID로 주입한 위조 state는
+  // 서명 불일치로 거부되어야 한다 (타 계정 provider 선점 차단의 핵심 방어선).
+  it('linkUserId(u) 주입 위조 → AUTH_OAUTH_STATE_INVALID (서명 불일치)', () => {
+    const r = createOAuthState({ provider: 'google', redirect: '/me/profile' });
+    const [, sig] = r.cookieValue.split('.');
+    const forged = Buffer.from(
+      JSON.stringify({
+        p: 'google',
+        r: '/me/profile',
+        v: 'x',
+        s: r.state,
+        n: 'n',
+        e: Date.now() + 60000,
+        u: 9999, // 피해자 userId 주입 시도
+      }),
+      'utf8',
+    )
+      .toString('base64')
+      .replace(/=+$/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+    expectStateInvalid(() => verifyOAuthStateCookie(`${forged}.${sig}`, r.state, 'google'));
   });
 
   it('만료 (TTL 초과)', () => {
