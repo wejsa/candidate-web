@@ -10,6 +10,7 @@ import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
 import { getProfile } from '@/lib/users/profile-service';
 import { ProfileView } from '@/app/me/profile/_components/ProfileView';
 import { ProfileEditForm } from '@/app/me/profile/_components/ProfileEditForm';
+import { PasswordChangeForm } from '@/app/me/profile/_components/PasswordChangeForm';
 import { AppError } from '@/lib/errors';
 import type { ProfileDto } from '@/lib/users/types';
 
@@ -44,6 +45,7 @@ export default async function ProfilePage() {
       <h1>프로필</h1>
       <ProfileView profile={profile} />
       <ProfileEditForm initialName={profile.name} phoneMasked={profile.phoneMasked} />
+      <PasswordChangeForm hasPassword={profile.hasPassword} />
     </main>
   );
 }

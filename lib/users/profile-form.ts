@@ -55,3 +55,31 @@ export function classifyProfileUpdateError(status: number): string {
   if (status === 401 || status === 404) return PROFILE_EDIT_LABELS.errorSession;
   return PROFILE_EDIT_LABELS.errorGeneric;
 }
+
+// === CANDID-024 Step 3 — 비밀번호 변경 폼 헬퍼 ====================================
+
+export const PASSWORD_CHANGE_LABELS = {
+  heading: '비밀번호 변경',
+  currentLabel: '현재 비밀번호',
+  newLabel: '새 비밀번호',
+  confirmLabel: '새 비밀번호 확인',
+  submit: '비밀번호 변경',
+  submitting: '변경 중…',
+  done: '비밀번호가 변경되었습니다. 보안을 위해 다시 로그인해 주세요.',
+  errorMismatch: '새 비밀번호 확인이 일치하지 않습니다.',
+  errorWeak: '비밀번호는 10자 이상, 영문 대/소·숫자·특수문자 중 3종 이상이어야 합니다.',
+  errorCurrentInvalid: '현재 비밀번호가 올바르지 않습니다.',
+  errorRateLimited: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+  errorSession: '세션이 만료되었습니다. 다시 로그인해 주세요.',
+  errorGeneric: '잠시 후 다시 시도해 주세요.',
+} as const;
+
+/** 비밀번호 변경 응답 status → 사용자 안내 메시지. */
+export function classifyPasswordChangeError(status: number): string {
+  if (status === 401) return PASSWORD_CHANGE_LABELS.errorCurrentInvalid; // AUTH_INVALID_CREDENTIALS
+  if (status === 400) return PASSWORD_CHANGE_LABELS.errorWeak; // zod 강도/형식
+  if (status === 422) return PASSWORD_CHANGE_LABELS.errorCurrentInvalid; // RECONFIRM_REQUIRED
+  if (status === 429) return PASSWORD_CHANGE_LABELS.errorRateLimited;
+  if (status === 404) return PASSWORD_CHANGE_LABELS.errorSession;
+  return PASSWORD_CHANGE_LABELS.errorGeneric;
+}

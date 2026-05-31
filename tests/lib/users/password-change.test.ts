@@ -1,0 +1,169 @@
+// CANDID-024 Step 3 — lib/users/password-change.changePassword 단위 테스트.
+// prisma($transaction 포함) + password 헬퍼 mock. 트랜잭션 콜백은 tx 더블로 즉시 실행.
+
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('@/lib/prisma', () => {
+  const findUnique = vi.fn();
+  const userUpdateMany = vi.fn();
+  const refreshUpdateMany = vi.fn();
+  const auditCreate = vi.fn();
+  const $transaction = vi.fn();
+  return {
+    prisma: { user: { findUnique }, $transaction },
+    basePrisma: {},
+    __mocks: { findUnique, userUpdateMany, refreshUpdateMany, auditCreate, $transaction },
+  };
+});
+vi.mock('@/lib/auth/password', () => ({ hashPassword: vi.fn(), verifyPassword: vi.fn() }));
+
+const { __mocks } = (await import('@/lib/prisma')) as unknown as {
+  __mocks: {
+    findUnique: Mock;
+    userUpdateMany: Mock;
+    refreshUpdateMany: Mock;
+    auditCreate: Mock;
+    $transaction: Mock;
+  };
+};
+const { hashPassword, verifyPassword } = (await import('@/lib/auth/password')) as unknown as {
+  hashPassword: Mock;
+  verifyPassword: Mock;
+};
+const { changePassword } = await import('@/lib/users/password-change');
+const { AppError } = await import('@/lib/errors');
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  __mocks.userUpdateMany.mockResolvedValue({ count: 1 });
+  __mocks.refreshUpdateMany.mockResolvedValue({ count: 2 });
+  __mocks.auditCreate.mockResolvedValue({});
+  hashPassword.mockResolvedValue('$2b$12$NEWHASH');
+  // resetAllMocks가 구현을 지우므로 tx 콜백 실행 구현을 매 테스트 재설정 (tx 더블은 inner mock 참조).
+  __mocks.$transaction.mockImplementation(async (cb: (tx: unknown) => unknown) =>
+    cb({
+      user: { updateMany: __mocks.userUpdateMany },
+      refreshToken: { updateMany: __mocks.refreshUpdateMany },
+      auditLog: { create: __mocks.auditCreate },
+    }),
+  );
+});
+
+const input = {
+  userId: 42,
+  currentPassword: 'OldPass123!',
+  newPassword: 'NewPass456!',
+  userAgent: 'vitest-ua',
+  ipAddress: null,
+};
+
+describe('changePassword — 비번 보유 사용자(changed)', () => {
+  beforeEach(() => {
+    __mocks.findUnique.mockResolvedValue({ id: 42, passwordHash: '$2b$12$OLD', status: 'ACTIVE' });
+    verifyPassword.mockResolvedValue(true);
+  });
+
+  it('현재 비번 일치 → 해싱·갱신·전체 revoke·감사 로그(PASSWORD_CHANGE)', async () => {
+    const result = await changePassword(input);
+
+    expect(result).toEqual({ mode: 'changed', revokedSessionCount: 2 });
+    expect(hashPassword).toHaveBeenCalledWith('NewPass456!');
+    // 비번 갱신 (status≠WITHDRAWN 가드).
+    expect(__mocks.userUpdateMany).toHaveBeenCalledWith({
+      where: { id: 42, NOT: { status: 'WITHDRAWN' } },
+      data: { passwordHash: '$2b$12$NEWHASH' },
+    });
+    // 전체 refresh 토큰 revoke (BR-AUTH-05).
+    expect(__mocks.refreshUpdateMany).toHaveBeenCalledWith({
+      where: { userId: 42, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'password_change' },
+    });
+    // 감사 로그 — eventType + metadata.mode + 평문 비밀번호 비포함 (QA M1).
+    const audit = __mocks.auditCreate.mock.calls[0]![0].data;
+    expect(audit.eventType).toBe('PASSWORD_CHANGE');
+    expect(audit.actorUserId).toBe(42);
+    expect(audit.metadataJson).toEqual({ mode: 'changed' });
+    expect(JSON.stringify(audit)).not.toContain('NewPass456!');
+    expect(JSON.stringify(audit)).not.toContain('OldPass123!');
+  });
+
+  it('활성 세션 없음(revoke count 0) → revokedSessionCount 0 (QA M2)', async () => {
+    __mocks.refreshUpdateMany.mockResolvedValue({ count: 0 });
+
+    const result = await changePassword(input);
+
+    expect(result.revokedSessionCount).toBe(0);
+  });
+
+  it('현재 비번 불일치 → AUTH_INVALID_CREDENTIALS, 갱신 미수행 + 평문 비노출(QA m2)', async () => {
+    verifyPassword.mockResolvedValue(false);
+
+    const err = await changePassword(input).catch((e: unknown) => e);
+    expect(err).toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
+    // BR-PII-02: 예외 직렬화에 평문 비밀번호 미포함.
+    expect(JSON.stringify({ message: (err as Error).message })).not.toContain('OldPass123!');
+    expect(hashPassword).not.toHaveBeenCalled();
+    expect(__mocks.userUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it('현재 비번 누락 → USER_PASSWORD_RECONFIRM_REQUIRED', async () => {
+    await expect(changePassword({ ...input, currentPassword: undefined })).rejects.toMatchObject({
+      code: 'USER_PASSWORD_RECONFIRM_REQUIRED',
+    });
+    expect(verifyPassword).not.toHaveBeenCalled();
+  });
+});
+
+describe('changePassword — 소셜 전용(set)', () => {
+  it('passwordHash=null → 현재 비번 없이 최초 설정', async () => {
+    __mocks.findUnique.mockResolvedValue({ id: 42, passwordHash: null, status: 'ACTIVE' });
+
+    const result = await changePassword({ ...input, currentPassword: undefined });
+
+    expect(result.mode).toBe('set');
+    expect(verifyPassword).not.toHaveBeenCalled();
+    expect(hashPassword).toHaveBeenCalledWith('NewPass456!');
+    expect(__mocks.userUpdateMany).toHaveBeenCalled();
+    // QA M1/M2: set 모드도 audit metadata.mode='set' + 전체 revoke 호출.
+    expect(__mocks.auditCreate.mock.calls[0]![0].data.metadataJson).toEqual({ mode: 'set' });
+    expect(__mocks.refreshUpdateMany).toHaveBeenCalledWith({
+      where: { userId: 42, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'password_change' },
+    });
+  });
+});
+
+describe('changePassword — 계정 상태', () => {
+  it('미존재 → USER_NOT_FOUND', async () => {
+    __mocks.findUnique.mockResolvedValue(null);
+    await expect(changePassword(input)).rejects.toMatchObject({ code: 'USER_NOT_FOUND' });
+  });
+
+  it('탈퇴(WITHDRAWN) → USER_NOT_FOUND', async () => {
+    __mocks.findUnique.mockResolvedValue({
+      id: 42,
+      passwordHash: '$2b$12$OLD',
+      status: 'WITHDRAWN',
+    });
+    await expect(changePassword(input)).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('tx 중 동시 탈퇴(updateMany count 0) → USER_NOT_FOUND', async () => {
+    __mocks.findUnique.mockResolvedValue({ id: 42, passwordHash: '$2b$12$OLD', status: 'ACTIVE' });
+    verifyPassword.mockResolvedValue(true);
+    __mocks.userUpdateMany.mockResolvedValue({ count: 0 });
+
+    await expect(changePassword(input)).rejects.toMatchObject({ code: 'USER_NOT_FOUND' });
+  });
+
+  // 리뷰 MAJOR(test): 감사 로그 삽입 실패 시 tx 전체 reject (부분 커밋 방지 의도).
+  // 주: $transaction mock은 실제 rollback을 흉내내지 못함 — 진짜 원자성 검증은 통합 테스트(실 DB) 백로그.
+  it('감사 로그 create 실패 → changePassword 전체 reject (부분 성공 반환 안 함)', async () => {
+    __mocks.findUnique.mockResolvedValue({ id: 42, passwordHash: '$2b$12$OLD', status: 'ACTIVE' });
+    verifyPassword.mockResolvedValue(true);
+    __mocks.auditCreate.mockRejectedValueOnce(new Error('db down'));
+
+    await expect(changePassword(input)).rejects.toThrow();
+  });
+});
