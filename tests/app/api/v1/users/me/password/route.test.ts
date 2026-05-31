@@ -68,6 +68,21 @@ describe('POST /api/v1/users/me/password', () => {
     expect(changePassword).not.toHaveBeenCalled();
   });
 
+  // 리뷰 MAJOR(test): 검증 실패 에러 응답 body에 평문 비밀번호가 새지 않아야 한다 (BR-PII-02 경계 가드).
+  it('400 에러 응답 body에 평문 비밀번호 미포함', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+
+    const res = await POST(
+      postRequest({ currentPassword: 'OldPass123!', newPassword: 'weak' }),
+      undefined,
+    );
+    const text = await res.text();
+
+    expect(res.status).toBe(400);
+    expect(text).not.toContain('OldPass123!');
+    expect(text).not.toContain('weak');
+  });
+
   it('새 비번 = 현재 비번 → 400 (refine)', async () => {
     requireAuth.mockResolvedValueOnce({ userId: 42 });
 

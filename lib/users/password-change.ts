@@ -71,6 +71,9 @@ export async function changePassword(input: ChangePasswordInput): Promise<Change
     }
 
     // 2) 전체 refresh 토큰 revoke (BR-AUTH-05) — 동일 tx로 유효 윈도우 제거.
+    // SSOT 주의: lib/auth/session.ts revokeAllForUser(userId, 'password_change')와 동일 시맨틱이나,
+    // 그 헬퍼는 글로벌 prisma를 사용해 본 트랜잭션 컨텍스트를 공유할 수 없어 인라인 재현한다.
+    // revoke 조건(revokedAt=null 필터 / reason)을 바꿀 때는 두 곳을 함께 갱신해야 BR-AUTH-05 일관성 유지.
     const revoked = await tx.refreshToken.updateMany({
       where: { userId: input.userId, revokedAt: null },
       data: { revokedAt: now, revokedReason: 'password_change' },

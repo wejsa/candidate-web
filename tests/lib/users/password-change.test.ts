@@ -156,4 +156,14 @@ describe('changePassword — 계정 상태', () => {
 
     await expect(changePassword(input)).rejects.toMatchObject({ code: 'USER_NOT_FOUND' });
   });
+
+  // 리뷰 MAJOR(test): 감사 로그 삽입 실패 시 tx 전체 reject (부분 커밋 방지 의도).
+  // 주: $transaction mock은 실제 rollback을 흉내내지 못함 — 진짜 원자성 검증은 통합 테스트(실 DB) 백로그.
+  it('감사 로그 create 실패 → changePassword 전체 reject (부분 성공 반환 안 함)', async () => {
+    __mocks.findUnique.mockResolvedValue({ id: 42, passwordHash: '$2b$12$OLD', status: 'ACTIVE' });
+    verifyPassword.mockResolvedValue(true);
+    __mocks.auditCreate.mockRejectedValueOnce(new Error('db down'));
+
+    await expect(changePassword(input)).rejects.toThrow();
+  });
 });
