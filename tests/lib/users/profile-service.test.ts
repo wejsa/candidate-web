@@ -8,16 +8,17 @@ import type { Mock } from 'vitest';
 
 vi.mock('@/lib/prisma', () => {
   const findUnique = vi.fn();
+  const updateMany = vi.fn();
   return {
-    prisma: { user: { findUnique } },
-    basePrisma: { user: { findUnique } },
+    prisma: { user: { findUnique, updateMany } },
+    basePrisma: { user: { findUnique, updateMany } },
   };
 });
 
 const { prisma } = (await import('@/lib/prisma')) as unknown as {
-  prisma: { user: { findUnique: Mock } };
+  prisma: { user: { findUnique: Mock; updateMany: Mock } };
 };
-const { getProfile } = await import('@/lib/users/profile-service');
+const { getProfile, updateProfile } = await import('@/lib/users/profile-service');
 const { AppError } = await import('@/lib/errors');
 
 function userRow(overrides: Record<string, unknown> = {}) {
@@ -131,5 +132,54 @@ describe('getProfile', () => {
     prisma.user.findUnique.mockRejectedValueOnce(dbError);
 
     await expect(getProfile(42)).rejects.toBe(dbError);
+  });
+});
+
+describe('updateProfile', () => {
+  it('이름만 갱신 — data.name만, phone 컬럼 미포함 (부분 갱신)', async () => {
+    prisma.user.updateMany.mockResolvedValueOnce({ count: 1 });
+    prisma.user.findUnique.mockResolvedValueOnce(userRow({ name: '새이름' }));
+
+    const dto = await updateProfile(42, { name: '새이름' });
+
+    expect(dto.name).toBe('새이름');
+    const callArg = prisma.user.updateMany.mock.calls[0]![0];
+    expect(callArg.where).toEqual({ id: 42, NOT: { status: 'WITHDRAWN' } });
+    expect(callArg.data.name).toBe('새이름');
+    // phone 미입력 → 암호화 컬럼 미포함 (재암호화 churn 방지).
+    expect('phone' in callArg.data).toBe(false);
+    expect('phoneKeyVersion' in callArg.data).toBe(false);
+  });
+
+  it('연락처 갱신 — encryptUserPiiInput 경유로 phone(Buffer) + phoneKeyVersion 원자적 set', async () => {
+    prisma.user.updateMany.mockResolvedValueOnce({ count: 1 });
+    prisma.user.findUnique.mockResolvedValueOnce(userRow());
+
+    await updateProfile(42, { phone: '010-1234-5678' });
+
+    const data = prisma.user.updateMany.mock.calls[0]![0].data;
+    expect(Buffer.isBuffer(data.phone)).toBe(true); // 암호문 (평문 아님)
+    expect(data.phoneKeyVersion).toBe(1);
+    // 평문이 그대로 들어가지 않았는지 확인 (PII 컬럼 암호화 강제).
+    expect(data.phone.toString('utf8')).not.toContain('01012345678');
+  });
+
+  it('phone=null(삭제) — phone 컬럼 null로 set', async () => {
+    prisma.user.updateMany.mockResolvedValueOnce({ count: 1 });
+    prisma.user.findUnique.mockResolvedValueOnce(userRow({ phone: null }));
+
+    await updateProfile(42, { phone: null });
+
+    const data = prisma.user.updateMany.mock.calls[0]![0].data;
+    expect(data.phone).toBeNull();
+  });
+
+  it('탈퇴/미존재(count 0) → USER_NOT_FOUND, getProfile 미호출', async () => {
+    prisma.user.updateMany.mockResolvedValueOnce({ count: 0 });
+
+    await expect(updateProfile(42, { name: '새' })).rejects.toMatchObject({
+      code: 'USER_NOT_FOUND',
+    });
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
   });
 });

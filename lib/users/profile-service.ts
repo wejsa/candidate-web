@@ -1,8 +1,11 @@
 import 'server-only';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { encryptUserPiiInput } from '@/lib/prisma/extends';
 import { AppError } from '@/lib/errors';
 import { maskPhone } from '@/lib/pii/mask';
 import type { ProfileDto, ProfileProviderName } from '@/lib/users/types';
+import type { ProfileUpdateBody } from '@/lib/users/schema';
 
 // CANDID-024 Step 1 — 프로필 조회 서비스 (US-MY-004, GET /api/v1/users/me).
 //
@@ -43,4 +46,31 @@ export async function getProfile(userId: number): Promise<ProfileDto> {
       linkedAt: p.linkedAt.toISOString(),
     })),
   };
+}
+
+// CANDID-024 Step 2 — 프로필 수정 (이름/연락처) 서비스 (PATCH /api/v1/users/me).
+//
+// 부분 갱신: 전달된 필드만 UPDATE. phone은 'phone' 키가 있을 때만 encryptUserPiiInput를 경유해
+// phone + phone_key_version을 원자적으로 set(L-007 top-level write, 미수정 시 재암호화 churn 회피).
+// updateMany + status≠WITHDRAWN 가드로 탈퇴/미존재 계정 수정을 차단(count 0 → USER_NOT_FOUND).
+export async function updateProfile(userId: number, input: ProfileUpdateBody): Promise<ProfileDto> {
+  const data: Prisma.UserUpdateManyMutationInput = {};
+  if (input.name !== undefined) {
+    data.name = input.name;
+  }
+  if ('phone' in input) {
+    // phone 입력 시에만 암호화 컬럼 동시 갱신. encryptUserPiiInput가 normalizePhone로 형식 재검증.
+    Object.assign(data, encryptUserPiiInput({ phone: input.phone ?? null }));
+  }
+
+  const result = await prisma.user.updateMany({
+    where: { id: userId, NOT: { status: 'WITHDRAWN' } },
+    data,
+  });
+  if (result.count === 0) {
+    throw new AppError('USER_NOT_FOUND');
+  }
+
+  // 갱신 후 마스킹 DTO로 환원하여 반환 (클라이언트 즉시 반영).
+  return getProfile(userId);
 }
