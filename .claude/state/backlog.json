@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 344,
+    "version": 350,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T20:53:36+09:00"
+    "updatedAt": "2026-05-31T21:21:12+09:00"
   },
   "summary": {
     "total": 47,
@@ -1725,23 +1725,21 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-204734",
-      "assignedAt": "2026-05-31T20:53:30+09:00",
+      "assignedAt": "2026-05-31T21:21:12+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
-        "app/api/v1/auth/logout/route.ts",
         "lib/auth/session.ts",
-        "tests/app/api/v1/auth/logout.test.ts",
         "tests/lib/auth/session.test.ts"
       ],
-      "updatedAt": "2026-05-31T20:53:30+09:00",
+      "updatedAt": "2026-05-31T21:21:12+09:00",
       "planPath": ".claude/temp/CANDID-021-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
           "step": 1,
           "title": "로그아웃 코어 (엔드포인트 + 단일 세션 revoke)",
-          "status": "pending",
+          "status": "merged",
           "files": [
             "app/api/v1/auth/logout/route.ts",
             "lib/auth/session.ts",
@@ -1750,12 +1748,15 @@
           ],
           "estimatedLines": 300,
           "prLineLimit": 450,
-          "dependsOn": []
+          "dependsOn": [],
+          "prNumber": 92,
+          "branch": "feature/CANDID-021-step1",
+          "mergedAt": "2026-05-31T21:12:49+09:00"
         },
         {
           "step": 2,
           "title": "재사용 탐지(reuse detection) + 만료 토큰 정리 헬퍼",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/auth/session.ts",
             "tests/lib/auth/session.test.ts"
@@ -1764,16 +1765,18 @@
           "prLineLimit": 400,
           "dependsOn": [
             1
-          ]
+          ],
+          "prNumber": 94,
+          "branch": "feature/CANDID-021-step2"
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 94,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-31T20:53:30+09:00"
+        "autoChainArgs": "94 --auto-fix",
+        "updatedAt": "2026-05-31T21:21:12+09:00"
       }
     },
     "CANDID-022": {
@@ -1941,7 +1944,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T20:53:36+09:00",
+      "assignedAt": "2026-05-31T21:19:28+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/users/types.ts",
@@ -1967,12 +1970,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
+        "prNumber": 93,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-31T20:53:36+09:00"
+        "autoChainArgs": "93",
+        "updatedAt": "2026-05-31T21:19:28+09:00"
       },
       "dependencies": [
         "CANDID-008"
@@ -1985,7 +1988,9 @@
         {
           "step": 1,
           "title": "프로필 조회 — GET /api/v1/users/me + 프로필 페이지(RSC)",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-024-step1",
+          "prNumber": 93,
           "files": [
             "lib/users/types.ts",
             "lib/users/profile-service.ts",
@@ -1996,7 +2001,9 @@
             "tests/app/api/v1/users/me/route.test.ts"
           ],
           "estimatedLines": 480,
+          "actualLines": 450,
           "prLineLimit": 600,
+          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 1 / MINOR 6. in-task fix: AUTH_TOKEN_EXPIRED 테스트(H/test) + RSC USER_NOT_FOUND redirect(M/domain) + null 직렬화 가드(M/test). carry: provider fall-through 가드, PII 조회 감사로그(PHASE-4/CANDID-026), 컴포넌트 테스트. 자기 PR → COMMENT 승인 갈음.",
           "dependsOn": []
         },
         {

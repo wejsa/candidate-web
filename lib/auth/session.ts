@@ -163,6 +163,20 @@ export async function rotateRefreshSession(oldToken: string): Promise<RotateRefr
 }
 
 /**
+ * 단일 refresh 세션 revoke — 로그아웃(CANDID-021)에서 제시된 refresh 토큰 1건만 무효화한다.
+ * 토큰 원문을 아는 주체(쿠키 보유자)만 호출 가능하므로 JWT 서명 재검증 없이 sha256 해시로 직접 조회한다.
+ * 조건부 `updateMany(revokedAt=null)`로 **멱등** — 이미 revoke됐거나 존재하지 않으면 count 0 → false 반환(에러 아님).
+ * (전체 디바이스 로그아웃이 필요하면 revokeAllForUser를 사용한다.)
+ */
+export async function revokeRefreshSession(token: string): Promise<boolean> {
+  const result = await prisma.refreshToken.updateMany({
+    where: { tokenHash: sha256Hex(token), revokedAt: null },
+    data: { revokedAt: new Date(), revokedReason: 'logout' },
+  });
+  return result.count > 0;
+}
+
+/**
  * 사용자의 모든 활성 refresh 세션을 일괄 revoke — BR-AUTH-05(비밀번호 변경 시 전체 무효화),
  * 로그아웃, 회원 탈퇴 등에서 호출. revoke된 세션 수를 반환한다.
  */
