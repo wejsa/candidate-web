@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 38,
+    "version": 39,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-31T21:30:19+09:00"
+    "updatedAt": "2026-05-31T22:19:09+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1238,6 +1238,29 @@
         "detectRefreshReuse 2차 findUnique — verifyRefreshSession 반환 확장 시 통합",
         "docs/security/security-controls.md에 refresh reuse detection 섹션 추가 (docs-impact 권장)",
         "CANDID-029 description에 deleteExpiredRefreshTokens 배치 wiring 항목 동기화"
+      ]
+    },
+    "CANDID-025": {
+      "id": "CANDID-025",
+      "title": "SEO 최적화 + JobPosting structured data + OG/메타",
+      "phase": 3,
+      "priority": "medium",
+      "type": "feature",
+      "completedAt": "2026-05-31T22:19:09+09:00",
+      "assignee": "wejsa-u@hoji-20260531-213426",
+      "prs": [
+        96,
+        98
+      ],
+      "totalMergedLines": 451,
+      "stepCount": 2,
+      "reviewSummary": "full(3 agent) 양 스텝 CRITICAL 0. Step1(JSON-LD structured data + metadataBase): identifier.name 시맨틱 + truncation 테스트 in-PR fix(L-019); jobLocationType:TELECOMMUTE 수용(근무지 컬럼 부재). Step2(sitemap+robots): 라우트 0% 커버 MAJOR(test) + /password disallow in-PR fix(L-019). 자기 PR COMMENT. 테스트 1546→1592(+46).",
+      "carry": [
+        "jobLocationType:TELECOMMUTE — 근무지 컬럼 도입 시 jobLocation 물리주소로 보정",
+        "sitemap unstable_cache TTL/tag 옵션 spy 회귀 가드(detail.test.ts unstableCacheSpy 패턴)",
+        "어드민 발행/마감 mutation 도입 시 jobs-sitemap revalidateTag 연결(list/detail 태그와 함께)",
+        "docs/security/security-controls.md에 JSON-LD XSS 방어 + 색인 노출 통제 소절 추가(docs-impact 권장)",
+        "title 길이 cap(JSON-LD), opengraph-image 동적 생성, 근무지/급여 schema 확장 — follow-up"
       ]
     }
   }

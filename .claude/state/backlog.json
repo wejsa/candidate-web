@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 364,
+    "version": 367,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T22:06:01+09:00"
+    "updatedAt": "2026-05-31T22:19:09+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 38,
-    "inProgress": 2,
+    "done": 39,
+    "inProgress": 1,
     "review": 0,
     "todo": 7
   },
@@ -2074,7 +2074,7 @@
       "id": "CANDID-025",
       "title": "SEO 최적화 + JobPosting structured data + OG/메타",
       "description": "공고 페이지 SSR/SSG. JobPosting schema.org structured data. OG 태그(title/description/image). 마감 공고도 SEO 자산으로 유지(흐림 처리).",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
@@ -2082,16 +2082,11 @@
         "CANDID-014"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "wejsa-u@hoji-20260531-213426",
-      "assignedAt": "2026-05-31T22:00:17+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 7200,
-      "lockedFiles": [
-        "lib/jobs/sitemap-data.ts",
-        "app/sitemap.ts",
-        "app/robots.ts",
-        "tests/lib/jobs/sitemap-data.test.ts"
-      ],
-      "updatedAt": "2026-05-31T22:00:17+09:00",
+      "lockedFiles": [],
+      "updatedAt": "2026-05-31T22:19:09+09:00",
       "planPath": ".claude/temp/CANDID-025-plan.md",
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
@@ -2116,7 +2111,7 @@
         {
           "step": 2,
           "title": "동적 sitemap.xml + robots.txt",
-          "status": "pending",
+          "status": "merged",
           "files": [
             "lib/jobs/sitemap-data.ts",
             "app/sitemap.ts",
@@ -2127,17 +2122,14 @@
           "prLineLimit": 350,
           "dependsOn": [
             1
-          ]
+          ],
+          "prNumber": 98,
+          "branch": "feature/CANDID-025-step2",
+          "mergedAt": "2026-05-31T22:19:09+09:00"
         }
       ],
-      "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
-        "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T22:00:17+09:00"
-      }
+      "workflowState": null,
+      "completedAt": "2026-05-31T22:19:09+09:00"
     },
     "CANDID-026": {
       "id": "CANDID-026",
