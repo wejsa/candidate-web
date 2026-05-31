@@ -259,6 +259,12 @@ describe('revokeRefreshSession', () => {
     expect(await revokeRefreshSession('not-a-jwt')).toBe(false);
     expect(db.refreshToken.updateMany).toHaveBeenCalledTimes(1);
   });
+
+  it('propagates DB errors (does not swallow) — the caller decides logout best-effort policy', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    db.refreshToken.updateMany.mockRejectedValue(new Error('connection reset'));
+    await expect(revokeRefreshSession(token)).rejects.toThrow('connection reset');
+  });
 });
 
 describe('revokeAllForUser', () => {

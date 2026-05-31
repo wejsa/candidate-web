@@ -41,8 +41,27 @@ describe('POST /api/v1/auth/logout', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true });
     expect(revoke).toHaveBeenCalledWith('current-refresh-token');
+    // 로그아웃 응답은 캐시 금지 (토큰 클리어 Set-Cookie 재사용 방지).
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
     expectCleared(response, ACCESS_COOKIE);
     expectCleared(response, REFRESH_COOKIE);
+  });
+
+  it('still clears cookies and returns 200 when revoke throws — best-effort contract holds on DB failure', async () => {
+    revoke.mockRejectedValue(new Error('db unavailable'));
+
+    const response = await POST(logoutRequest('current-refresh-token'), undefined);
+
+    // 멱등 계약: 서버 revoke 실패(throw)에도 클라이언트 쿠키는 항상 클리어 + 200.
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ ok: true });
+    expectCleared(response, ACCESS_COOKIE);
+    expectCleared(response, REFRESH_COOKIE);
+  });
+
+  it('does not expose a GET handler (CSRF/prefetch safety — logout must be POST-only)', async () => {
+    const route = await import('@/app/api/v1/auth/logout/route');
+    expect((route as Record<string, unknown>).GET).toBeUndefined();
   });
 
   it('is idempotent — clears cookies and returns 200 even with no refresh cookie (no revoke call)', async () => {
