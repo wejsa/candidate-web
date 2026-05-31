@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 362,
+    "version": 363,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T22:00:17+09:00"
+    "updatedAt": "2026-05-31T22:03:47+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T21:56:50+09:00",
+      "assignedAt": "2026-05-31T22:03:47+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/users/schema.ts",
@@ -1956,12 +1956,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 97,
         "fixLoopCount": 0,
-        "autoChainArgs": "97 --auto-fix",
-        "updatedAt": "2026-05-31T21:56:50+09:00"
+        "autoChainArgs": "97",
+        "updatedAt": "2026-05-31T22:03:47+09:00"
       },
       "dependencies": [
         "CANDID-008"
@@ -2042,9 +2042,10 @@
             "tests/lib/users/profile-form.test.ts"
           ],
           "estimatedLines": 560,
-          "actualLines": 628,
+          "actualLines": 698,
           "prLineLimit": 700,
           "note": "session.ts 미변경(RevokeReason에 password_change 기존재 → tx 내 인라인 revoke). validation.ts→schema.ts.",
+          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 4 / MINOR 4. QA(M1~M3,m2,m3) + 리뷰 test MAJOR 2(audit실패 reject, 에러응답 평문가드) + domain MAJOR(revoke SSOT 주석) in-task. carry: 감사 IP(CANDID-026 통일), 소셜 set 재인증, tx 진짜 원자성(통합), revokeAllForUser tx-injectable 리팩터, 컴포넌트 테스트. 자기 PR → COMMENT.",
           "dependsOn": [
             1
           ]
