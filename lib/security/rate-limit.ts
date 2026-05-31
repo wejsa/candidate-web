@@ -137,6 +137,15 @@ export const USER_POLICIES = Object.freeze({
     windowMs: 3_600_000,
     maxRequests: 3,
   } satisfies UserRateLimitPolicy),
+  /**
+   * CANDID-024 Step 2 — 프로필 수정(이름/연락처) user-bucket. 저빈도 작업이나 PII 재암호화
+   * 폭주 + 스크립트 오류 다중 호출 차단. 시간당 20회: 정상 편집/재시도 흡수, 남용은 차단.
+   */
+  PROFILE_UPDATE_USER: Object.freeze({
+    name: 'profile_update_user',
+    windowMs: 3_600_000,
+    maxRequests: 20,
+  } satisfies UserRateLimitPolicy),
 });
 
 /** Map<`${policy}:${key}`, timestamps[]> — 모듈 lifetime 동안 in-memory 유지. */
