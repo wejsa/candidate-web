@@ -285,4 +285,22 @@ describe('linkProviderToCurrentUser', () => {
       linkProviderToCurrentUser({ userId: 42, provider: 'google', profile: PROFILE }),
     ).rejects.toMatchObject({ code: 'USER_NOT_FOUND' });
   });
+
+  // QA m3: github → GITHUB enum 매핑 happy-path.
+  it('github 신규 연결 → GITHUB enum으로 생성', async () => {
+    tx.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+    tx.authProvider.findUnique.mockResolvedValue(null);
+    tx.authProvider.create.mockResolvedValue({});
+
+    const result = await linkProviderToCurrentUser({
+      userId: 42,
+      provider: 'github',
+      profile: PROFILE,
+    });
+
+    expect(result).toBe('linked');
+    expect(tx.authProvider.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ userId: 42, provider: 'GITHUB' }),
+    });
+  });
 });

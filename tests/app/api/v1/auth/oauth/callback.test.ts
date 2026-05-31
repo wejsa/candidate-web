@@ -217,9 +217,11 @@ describe('callback — link-add 모드', () => {
     expect(linkProviderToCurrentUser).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 7, provider: 'google', profile: happyProfile }),
     );
-    // 일반 로그인이 아니므로 새 access/refresh 미발급.
+    // QA M3: 일반 로그인이 아니므로 setAuthCookies 미호출 — access/refresh 쿠키 *키 자체*가 없어야 함
+    // (토큰 값이 아니라 키 부재를 단정 — 세션 발급 불변식).
     const setCookie = res.headers.get('set-cookie') ?? '';
-    expect(setCookie).not.toContain('access_token=a-jwt');
+    expect(setCookie).not.toMatch(/access_token=/);
+    expect(setCookie).not.toMatch(/refresh_token=/);
     expect(linkOrCreateOAuthUser).not.toHaveBeenCalled();
     // state cookie는 여전히 소멸.
     expect(setCookie).toMatch(/oauth_state=;[^,]*Max-Age=0/);

@@ -153,6 +153,30 @@ describe('verifyOAuthStateCookie — 실패 경로 (모두 AUTH_OAUTH_STATE_INVA
     expectStateInvalid(() => verifyOAuthStateCookie(`${fakePayload}.${sig}`, r.state, 'google'));
   });
 
+  // CANDID-024 Step 5 (QA M1) — 공격자가 linkUserId(u)를 피해자 ID로 주입한 위조 state는
+  // 서명 불일치로 거부되어야 한다 (타 계정 provider 선점 차단의 핵심 방어선).
+  it('linkUserId(u) 주입 위조 → AUTH_OAUTH_STATE_INVALID (서명 불일치)', () => {
+    const r = createOAuthState({ provider: 'google', redirect: '/me/profile' });
+    const [, sig] = r.cookieValue.split('.');
+    const forged = Buffer.from(
+      JSON.stringify({
+        p: 'google',
+        r: '/me/profile',
+        v: 'x',
+        s: r.state,
+        n: 'n',
+        e: Date.now() + 60000,
+        u: 9999, // 피해자 userId 주입 시도
+      }),
+      'utf8',
+    )
+      .toString('base64')
+      .replace(/=+$/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+    expectStateInvalid(() => verifyOAuthStateCookie(`${forged}.${sig}`, r.state, 'google'));
+  });
+
   it('만료 (TTL 초과)', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-05-24T12:00:00Z'));
