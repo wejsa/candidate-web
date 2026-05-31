@@ -2746,5 +2746,13 @@
     "decision": "COMMENT (self-PR, CRITICAL 0)",
     "note": "리뷰 full 3-agent. QA + test MAJOR 2 + domain MAJOR(주석) in-PR; 감사 IP는 CANDID-026 deferral",
     "at": "2026-05-31T22:03:47+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-024",
+    "stepNumber": 3,
+    "prNumber": 97,
+    "mergedAt": "2026-05-31T22:05:34+09:00",
+    "at": "2026-05-31T22:06:01+09:00"
   }
 ]
