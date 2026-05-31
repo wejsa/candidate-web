@@ -2798,5 +2798,13 @@
     "decision": "COMMENT (self-PR, CRITICAL 0)",
     "note": "리뷰 full 3-agent. test MAJOR 2 in-PR; unlink 감사로그는 CANDID-026+Step5 위임",
     "at": "2026-05-31T22:27:54+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-024",
+    "stepNumber": 4,
+    "prNumber": 99,
+    "mergedAt": "2026-05-31T22:29:18+09:00",
+    "at": "2026-05-31T22:29:51+09:00"
   }
 ]
