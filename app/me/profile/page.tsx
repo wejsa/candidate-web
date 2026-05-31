@@ -9,6 +9,8 @@ import { redirect } from 'next/navigation';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
 import { getProfile } from '@/lib/users/profile-service';
 import { ProfileView } from '@/app/me/profile/_components/ProfileView';
+import { AppError } from '@/lib/errors';
+import type { ProfileDto } from '@/lib/users/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -25,7 +27,16 @@ export default async function ProfilePage() {
     redirect(`/login?redirect=${encodeURIComponent('/me/profile')}`);
   }
 
-  const profile = await getProfile(auth.userId);
+  // 토큰은 유효하지만 계정이 탈퇴/삭제된 엣지(토큰 만료 전 탈퇴) → 모호한 에러 화면 대신 로그인 유도.
+  let profile: ProfileDto;
+  try {
+    profile = await getProfile(auth.userId);
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'USER_NOT_FOUND') {
+      redirect(`/login?redirect=${encodeURIComponent('/me/profile')}`);
+    }
+    throw e;
+  }
 
   return (
     <main>

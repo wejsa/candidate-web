@@ -64,6 +64,18 @@ describe('GET /api/v1/users/me', () => {
     expect(getProfile).not.toHaveBeenCalled();
   });
 
+  // 리뷰 MAJOR(test): requireAuth는 만료 시 AUTH_TOKEN_EXPIRED를 throw(middleware.ts) —
+  // 클라이언트가 이 코드로 /auth/refresh를 분기하므로 401 매핑 회귀를 별도 가드한다.
+  it('만료 토큰 → AUTH_TOKEN_EXPIRED가 표준 401로 변환 (refresh 트리거)', async () => {
+    requireAuth.mockRejectedValueOnce(new AppError('AUTH_TOKEN_EXPIRED'));
+
+    const res = await GET(getRequest(), undefined);
+
+    expect(res.status).toBe(401);
+    expect((await res.json()).code).toBe('AUTH_TOKEN_EXPIRED');
+    expect(getProfile).not.toHaveBeenCalled();
+  });
+
   it('응답 body에 평문 phone 키/passwordHash가 없다 (회귀 가드)', async () => {
     requireAuth.mockResolvedValueOnce({ userId: 42 });
     getProfile.mockResolvedValueOnce(profile);
@@ -74,6 +86,20 @@ describe('GET /api/v1/users/me', () => {
     expect(text).not.toContain('passwordHash');
     // phoneMasked만 존재해야 하며 평문 "phone" 키는 없어야 한다.
     expect(text).not.toMatch(/"phone"\s*:/);
+  });
+
+  // 리뷰 MINOR(test): phoneMasked=null/providers=[] 변형 — null 필드가 키째 누락되지 않고
+  // 직렬화에 보존되는지 가드 (UI의 `phoneMasked ?? '미등록'` 분기 회귀 방지).
+  it('phoneMasked=null이어도 키가 보존되어 직렬화된다', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    getProfile.mockResolvedValueOnce({ ...profile, phoneMasked: null, providers: [] });
+
+    const res = await GET(getRequest(), undefined);
+    const body = (await res.json()) as { phoneMasked: unknown; providers: unknown[] };
+
+    expect(body.phoneMasked).toBeNull();
+    expect('phoneMasked' in body).toBe(true);
+    expect(body.providers).toEqual([]);
   });
 
   it('USER_NOT_FOUND(탈퇴/삭제) → 404', async () => {
