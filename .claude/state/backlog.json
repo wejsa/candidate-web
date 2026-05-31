@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 368,
+    "version": 369,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T22:20:11+09:00"
+    "updatedAt": "2026-05-31T22:27:54+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T22:20:11+09:00",
+      "assignedAt": "2026-05-31T22:27:54+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/me/profile/page.tsx",
@@ -1948,12 +1948,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 99,
         "fixLoopCount": 0,
-        "autoChainArgs": "99 --auto-fix",
-        "updatedAt": "2026-05-31T22:20:11+09:00"
+        "autoChainArgs": "99",
+        "updatedAt": "2026-05-31T22:27:54+09:00"
       },
       "dependencies": [
         "CANDID-008"
@@ -2063,8 +2063,9 @@
             "tests/lib/users/profile-form.test.ts"
           ],
           "estimatedLines": 780,
-          "actualLines": 435,
+          "actualLines": 542,
           "prLineLimit": 800,
+          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 3 / MINOR 3. QA(M1~M3,m1) + 리뷰 test MAJOR 2(SocialAccountsSection 컴포넌트 테스트, last-auth 경계) in-task. carry: unlink 감사로그(CANDID-026+Step5 enum), ipAddress(CANDID-026), tx 진짜 원자성(통합). 자기 PR → COMMENT.",
           "dependsOn": [
             1
           ],
