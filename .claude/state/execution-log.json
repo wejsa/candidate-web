@@ -2690,5 +2690,14 @@
     "stepNumber": 2,
     "prNumber": 95,
     "at": "2026-05-31T21:36:32+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-024",
+    "stepNumber": 2,
+    "prNumber": 95,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "리뷰 full 3-agent. QA 4/4 + MAJOR 2 + MINOR 2 in-PR fixed (L-019); 나머지 follow-up 이월",
+    "at": "2026-05-31T21:42:34+09:00"
   }
 ]

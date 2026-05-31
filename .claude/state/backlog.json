@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 356,
+    "version": 357,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:43:07+09:00"
+    "updatedAt": "2026-05-31T21:42:34+09:00"
   },
   "summary": {
     "total": 47,
@@ -2017,9 +2017,10 @@
             "tests/app/api/v1/users/me/route.test.ts"
           ],
           "estimatedLines": 560,
-          "actualLines": 487,
+          "actualLines": 546,
           "prLineLimit": 700,
           "note": "validation.ts→schema.ts (기존 users 스키마 컨벤션). updateProfile updateMany+status가드+encryptUserPiiInput 부분갱신.",
+          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 2 / MINOR 4. QA(M1~M3,m1) 4/4 + 리뷰 MAJOR 2(phone=null route, ratelimit 헤더값) + MINOR 2(401 PATCH, 429 code) in-task fix. carry: phone=null UI 미노출, rate-limit-before-parse(의도), PII 감사로그(PHASE-4), 컴포넌트 테스트. 자기 PR → COMMENT.",
           "dependsOn": [
             1
           ]
