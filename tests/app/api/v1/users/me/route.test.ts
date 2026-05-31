@@ -151,7 +151,29 @@ describe('PATCH /api/v1/users/me', () => {
     expect(res.status).toBe(200);
     expect((await res.json()).name).toBe('새이름');
     expect(updateProfile).toHaveBeenCalledWith(42, { name: '새이름' });
-    expect(res.headers.get('x-ratelimit-remaining')).not.toBeNull();
+    // 리뷰 MAJOR(test): 헤더 존재만이 아니라 첫 호출 remaining 값(20-1=19)까지 단언.
+    expect(res.headers.get('x-ratelimit-remaining')).toBe('19');
+  });
+
+  // 리뷰 MAJOR(test): phone=null(연락처 삭제)이 zod strict+refine을 통과해 그대로 updateProfile에 전달.
+  it('phone=null(삭제) → 200 + updateProfile에 {phone:null} 전달', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    updateProfile.mockResolvedValueOnce({ ...profile, phoneMasked: null });
+
+    const res = await PATCH(patchRequest({ phone: null }), undefined);
+
+    expect(res.status).toBe(200);
+    expect(updateProfile).toHaveBeenCalledWith(42, { phone: null });
+  });
+
+  // 리뷰 MINOR(test): 미인증 PATCH 경로 — requireAuth throw → 401, updateProfile 미호출.
+  it('미인증 → 401, updateProfile 미호출', async () => {
+    requireAuth.mockRejectedValueOnce(new AppError('AUTH_TOKEN_INVALID'));
+
+    const res = await PATCH(patchRequest({ name: '새' }), undefined);
+
+    expect(res.status).toBe(401);
+    expect(updateProfile).not.toHaveBeenCalled();
   });
 
   it('빈 객체(변경 없음) → 400 SYS_VALIDATION_FAILED (zod refine)', async () => {
@@ -194,5 +216,8 @@ describe('PATCH /api/v1/users/me', () => {
     }
     const limited = await PATCH(patchRequest({ name: 'over' }), undefined);
     expect(limited.status).toBe(429);
+    // 리뷰 MINOR(test): 429 code + Retry-After 헤더까지 단언 (다른 에러 케이스와 일관).
+    expect((await limited.json()).code).toBe('SYS_RATE_LIMITED');
+    expect(limited.headers.get('retry-after')).not.toBeNull();
   });
 });
