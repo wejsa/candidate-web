@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 364,
+    "version": 365,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T22:06:01+09:00"
+    "updatedAt": "2026-05-31T22:10:08+09:00"
   },
   "summary": {
     "total": 47,
@@ -2083,7 +2083,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-213426",
-      "assignedAt": "2026-05-31T22:00:17+09:00",
+      "assignedAt": "2026-05-31T22:10:08+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "lib/jobs/sitemap-data.ts",
@@ -2091,7 +2091,7 @@
         "app/robots.ts",
         "tests/lib/jobs/sitemap-data.test.ts"
       ],
-      "updatedAt": "2026-05-31T22:00:17+09:00",
+      "updatedAt": "2026-05-31T22:10:08+09:00",
       "planPath": ".claude/temp/CANDID-025-plan.md",
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
@@ -2116,7 +2116,7 @@
         {
           "step": 2,
           "title": "동적 sitemap.xml + robots.txt",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/jobs/sitemap-data.ts",
             "app/sitemap.ts",
@@ -2127,16 +2127,18 @@
           "prLineLimit": 350,
           "dependsOn": [
             1
-          ]
+          ],
+          "prNumber": 98,
+          "branch": "feature/CANDID-025-step2"
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 98,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T22:00:17+09:00"
+        "autoChainArgs": "98 --auto-fix",
+        "updatedAt": "2026-05-31T22:10:08+09:00"
       }
     },
     "CANDID-026": {
