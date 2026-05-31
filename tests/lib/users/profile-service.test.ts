@@ -5,6 +5,9 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
+// QA M1: prisma mock이 query 후크(assertUserPiiInputShape)를 건너뛰므로, updateProfile이 조립한
+// data가 실제 PII 런타임 가드를 통과하는지 직접 단언해 false-confidence 갭을 메운다.
+import { assertUserPiiInputShape } from '@/lib/prisma/extends';
 
 vi.mock('@/lib/prisma', () => {
   const findUnique = vi.fn();
@@ -162,9 +165,25 @@ describe('updateProfile', () => {
     expect(data.phoneKeyVersion).toBe(1);
     // 평문이 그대로 들어가지 않았는지 확인 (PII 컬럼 암호화 강제).
     expect(data.phone.toString('utf8')).not.toContain('01012345678');
+    // QA M1: 조립된 data가 실제 prisma query 후크의 PII 가드를 통과함을 단언 (mock이 우회하는 부분).
+    expect(() => assertUserPiiInputShape(data)).not.toThrow();
   });
 
-  it('phone=null(삭제) — phone 컬럼 null로 set', async () => {
+  // QA M2: name + phone 동시 갱신 — Object.assign이 name을 덮어쓰지 않고 두 분기 누적.
+  it('이름 + 연락처 동시 갱신 — name 보존 + phone 암호화 동시 set', async () => {
+    prisma.user.updateMany.mockResolvedValueOnce({ count: 1 });
+    prisma.user.findUnique.mockResolvedValueOnce(userRow({ name: '새이름' }));
+
+    await updateProfile(42, { name: '새이름', phone: '010-1234-5678' });
+
+    const data = prisma.user.updateMany.mock.calls[0]![0].data;
+    expect(data.name).toBe('새이름');
+    expect(Buffer.isBuffer(data.phone)).toBe(true);
+    expect(data.phoneKeyVersion).toBe(1);
+    expect(() => assertUserPiiInputShape(data)).not.toThrow();
+  });
+
+  it('phone=null(삭제) — phone null + phoneKeyVersion 미포함 (stale key 방지)', async () => {
     prisma.user.updateMany.mockResolvedValueOnce({ count: 1 });
     prisma.user.findUnique.mockResolvedValueOnce(userRow({ phone: null }));
 
@@ -172,6 +191,8 @@ describe('updateProfile', () => {
 
     const data = prisma.user.updateMany.mock.calls[0]![0].data;
     expect(data.phone).toBeNull();
+    // QA M3: 삭제 경로는 phoneKeyVersion을 포함하지 않아야 한다 (NULL phone에 stale 버전 잔존 방지).
+    expect('phoneKeyVersion' in data).toBe(false);
   });
 
   it('탈퇴/미존재(count 0) → USER_NOT_FOUND, getProfile 미호출', async () => {

@@ -34,6 +34,15 @@ describe('ProfileUpdateSchema', () => {
     expect(r.success).toBe(false);
   });
 
+  // QA m1: 연락처 자리수 경계값 분석 (9 하한 / 11 상한 통과, 12 초과 거부).
+  it.each([
+    ['012345678', true], // 9자리 하한
+    ['01234567890', true], // 11자리 상한
+    ['012345678901', false], // 12자리 초과
+  ])('연락처 %s → success=%s (경계)', (phone, ok) => {
+    expect(ProfileUpdateSchema.safeParse({ phone }).success).toBe(ok);
+  });
+
   it('이름 공백만 — 거부 (trim 후 min 1)', () => {
     const r = ProfileUpdateSchema.safeParse({ name: '   ' });
     expect(r.success).toBe(false);
