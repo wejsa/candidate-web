@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 340,
+    "version": 341,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T01:48:00+09:00"
+    "updatedAt": "2026-05-31T20:42:10+09:00"
   },
   "summary": {
     "total": 47,
     "done": 37,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 10
+    "todo": 9
   },
   "phases": {
     "1": {
@@ -1885,10 +1885,22 @@
       "id": "CANDID-024",
       "title": "프로필 수정 (US-MY-004)",
       "description": "수정 가능: 이름/연락처/비밀번호. 소셜 계정 연결 추가/해제. 이메일 변경은 P2(별도 인증).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
+      "assignee": "wejsa-u@hoji-20260531-204210",
+      "assignedAt": "2026-05-31T20:42:10+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-31T20:42:10+09:00"
+      },
       "dependencies": [
         "CANDID-008"
       ],
