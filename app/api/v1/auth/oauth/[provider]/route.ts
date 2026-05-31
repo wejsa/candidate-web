@@ -11,6 +11,7 @@ import {
 } from '@/lib/auth/oauth/state';
 import { getProvider, isOAuthProviderEnabled } from '@/lib/auth/oauth';
 import { sanitizeOAuthRedirect } from '@/lib/auth/oauth/redirect';
+import { getOptionalAuth } from '@/lib/auth/middleware';
 
 // CANDID-012 Step 3 — GET /api/v1/auth/oauth/{provider} (start handler).
 //
@@ -50,10 +51,28 @@ export const GET = withErrorHandler(
       return new NextResponse(null, { status: 404 });
     }
 
-    const redirect = sanitizeOAuthRedirect(request.nextUrl.searchParams.get('redirect'));
+    // CANDID-024 Step 5 — link-add 모드: 로그인 사용자가 본 provider를 자기 계정에 연결.
+    // mode=link면 인증 필수(미인증 → /login 복귀), state에 서명된 linkUserId를 봉인해 callback이 연결로 분기.
+    const isLinkMode = request.nextUrl.searchParams.get('mode') === 'link';
+    let linkUserId: number | undefined;
+    if (isLinkMode) {
+      const auth = await getOptionalAuth(request);
+      if (auth === null) {
+        const loginUrl = new URL('/login', getEnv().NEXT_PUBLIC_APP_URL);
+        loginUrl.searchParams.set('redirect', '/me/profile');
+        return NextResponse.redirect(loginUrl, { status: 302 });
+      }
+      linkUserId = auth.userId;
+    }
+
+    // link 모드는 항상 마이페이지로 복귀. 일반 로그인은 호출자 redirect(sanitized).
+    const redirect = isLinkMode
+      ? '/me/profile'
+      : sanitizeOAuthRedirect(request.nextUrl.searchParams.get('redirect'));
     const { state, codeChallenge, cookieValue, cookieExpires } = createOAuthState({
       provider,
       redirect,
+      linkUserId,
     });
 
     const authorizeUrl = getProvider(provider).authorizeUrl({

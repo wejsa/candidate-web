@@ -91,8 +91,8 @@ export const SOCIAL_ACCOUNTS_LABELS = {
   unlink: '연결 해제',
   unlinking: '해제 중…',
   notLinked: '미연결',
-  // 연결 추가(link-add)는 Step 5에서 OAuth 링크 플로우와 함께 제공.
-  connectComingSoon: '연결 추가는 준비 중입니다.',
+  // CANDID-024 Step 5 — link-add OAuth 플로우로 이동하는 연결 버튼.
+  connect: '연결 추가',
   unlinked: '연결이 해제되었습니다.',
   errorLastAuth: '마지막 로그인 수단은 해제할 수 없습니다. 비밀번호를 먼저 설정해 주세요.',
   errorNotLinked: '연결되지 않은 소셜 계정입니다.',

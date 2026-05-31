@@ -9,8 +9,9 @@ import {
   type OAuthProviderName,
 } from '@/lib/auth/oauth/state';
 import { getProvider, isOAuthProviderEnabled } from '@/lib/auth/oauth';
-import { linkOrCreateOAuthUser } from '@/lib/auth/oauth/link';
+import { linkOrCreateOAuthUser, linkProviderToCurrentUser } from '@/lib/auth/oauth/link';
 import { resolveCallbackRedirect } from '@/lib/auth/oauth/redirect';
+import { getOptionalAuth } from '@/lib/auth/middleware';
 
 // CANDID-012 Step 3 — GET /api/v1/auth/oauth/{provider}/callback.
 //
@@ -105,7 +106,43 @@ export const GET = withErrorHandler(async (request: NextRequest, context: unknow
     return r;
   }
 
-  // (6) link 트랜잭션
+  // (6-link) CANDID-024 Step 5 — link-add 분기.
+  // state.linkUserId(서명 검증됨)가 있으면 로그인/가입이 아니라 해당 사용자에 provider를 연결하고
+  // /me/profile로 복귀한다 (새 인증 쿠키 미발급 — 사용자는 이미 로그인 상태).
+  if (stateResult.linkUserId !== undefined) {
+    // 리뷰 보안 MAJOR — 세션 바인딩: start 시점에 봉인한 linkUserId와 callback 시점의 현재 세션이
+    // 동일해야 한다. 공유 단말에서 5분 TTL 내 계정 전환 시 stale state로 타 계정에 연결되는 것을 차단.
+    const auth = await getOptionalAuth(request);
+    if (auth === null || auth.userId !== stateResult.linkUserId) {
+      const r = loginRedirect('oauth_state_invalid');
+      clearStateCookie(r);
+      return r;
+    }
+
+    const profileUrl = new URL('/me/profile', getEnv().NEXT_PUBLIC_APP_URL);
+    try {
+      await linkProviderToCurrentUser({ userId: stateResult.linkUserId, provider, profile });
+    } catch (err) {
+      if (err instanceof AppError && err.code === 'USER_PROVIDER_ALREADY_LINKED') {
+        profileUrl.searchParams.set('error', 'provider_already_linked');
+        const r = NextResponse.redirect(profileUrl, { status: 302 });
+        clearStateCookie(r);
+        return r;
+      }
+      if (err instanceof AppError && err.code === 'USER_NOT_FOUND') {
+        const r = loginRedirect('oauth_account_inactive');
+        clearStateCookie(r);
+        return r;
+      }
+      throw err;
+    }
+    profileUrl.searchParams.set('linked', provider);
+    const r = NextResponse.redirect(profileUrl, { status: 302 });
+    clearStateCookie(r);
+    return r;
+  }
+
+  // (6) link 트랜잭션 (일반 로그인/가입)
   let linkResult: Awaited<ReturnType<typeof linkOrCreateOAuthUser>>;
   try {
     linkResult = await linkOrCreateOAuthUser({
@@ -137,7 +174,10 @@ export const GET = withErrorHandler(async (request: NextRequest, context: unknow
   const response = NextResponse.redirect(target, { status: 302 });
   setAuthCookies(response, {
     access: { token: linkResult.tokens.accessToken, expiresAt: linkResult.tokens.accessExpiresAt },
-    refresh: { token: linkResult.tokens.refreshToken, expiresAt: linkResult.tokens.refreshExpiresAt },
+    refresh: {
+      token: linkResult.tokens.refreshToken,
+      expiresAt: linkResult.tokens.refreshExpiresAt,
+    },
   });
   clearStateCookie(response);
   return response;
