@@ -2662,5 +2662,14 @@
     "prNumber": 93,
     "mergedAt": "2026-05-31T21:22:39+09:00",
     "at": "2026-05-31T21:22:39+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-021",
+    "stepNumber": 2,
+    "prNumber": 94,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "1 MAJOR (reuse detection 만료-우회) in-PR fixed (L-019)",
+    "at": "2026-05-31T21:29:16+09:00"
   }
 ]
