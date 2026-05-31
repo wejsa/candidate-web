@@ -83,3 +83,27 @@ export function classifyPasswordChangeError(status: number): string {
   if (status === 404) return PASSWORD_CHANGE_LABELS.errorSession;
   return PASSWORD_CHANGE_LABELS.errorGeneric;
 }
+
+// === CANDID-024 Step 4 — 소셜 계정 관리(해제) 헬퍼 ================================
+
+export const SOCIAL_ACCOUNTS_LABELS = {
+  heading: '연결된 소셜 계정',
+  unlink: '연결 해제',
+  unlinking: '해제 중…',
+  notLinked: '미연결',
+  // 연결 추가(link-add)는 Step 5에서 OAuth 링크 플로우와 함께 제공.
+  connectComingSoon: '연결 추가는 준비 중입니다.',
+  unlinked: '연결이 해제되었습니다.',
+  errorLastAuth: '마지막 로그인 수단은 해제할 수 없습니다. 비밀번호를 먼저 설정해 주세요.',
+  errorNotLinked: '연결되지 않은 소셜 계정입니다.',
+  errorSession: '세션이 만료되었습니다. 다시 로그인해 주세요.',
+  errorGeneric: '잠시 후 다시 시도해 주세요.',
+} as const;
+
+/** 소셜 연결 해제(DELETE) 응답 status → 사용자 안내 메시지. */
+export function classifyUnlinkError(status: number): string {
+  if (status === 409) return SOCIAL_ACCOUNTS_LABELS.errorLastAuth; // USER_LAST_AUTH_METHOD
+  if (status === 404) return SOCIAL_ACCOUNTS_LABELS.errorNotLinked; // USER_PROVIDER_NOT_LINKED
+  if (status === 401) return SOCIAL_ACCOUNTS_LABELS.errorSession;
+  return SOCIAL_ACCOUNTS_LABELS.errorGeneric;
+}

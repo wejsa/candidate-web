@@ -96,6 +96,17 @@ export const ERROR_CATALOG = {
     status: 422,
     message: '소셜 계정 재인증 후 탈퇴를 진행해 주세요.',
   },
+  // CANDID-024 Step 4 — 소셜 계정 해제 (US-MY-004)
+  // 마지막 인증수단(비밀번호 없음 + 소셜 1개) 해제 차단 — orphan(로그인 불가) 계정 방지.
+  USER_LAST_AUTH_METHOD: {
+    status: 409,
+    message: '마지막 로그인 수단은 해제할 수 없습니다. 비밀번호를 먼저 설정해 주세요.',
+  },
+  // 연결되지 않은 소셜 계정 해제 시도.
+  USER_PROVIDER_NOT_LINKED: {
+    status: 404,
+    message: '연결되지 않은 소셜 계정입니다.',
+  },
 
   // 공고 — JOB_
   JOB_NOT_FOUND: { status: 404, message: '채용 공고를 찾을 수 없습니다.' },

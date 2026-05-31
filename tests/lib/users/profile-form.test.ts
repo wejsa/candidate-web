@@ -4,10 +4,12 @@ import { describe, expect, it } from 'vitest';
 import {
   PROFILE_EDIT_LABELS as L,
   PASSWORD_CHANGE_LABELS as PL,
+  SOCIAL_ACCOUNTS_LABELS as SL,
   buildProfileUpdatePayload,
   isEmptyPayload,
   classifyProfileUpdateError,
   classifyPasswordChangeError,
+  classifyUnlinkError,
 } from '@/lib/users/profile-form';
 
 describe('buildProfileUpdatePayload', () => {
@@ -69,5 +71,16 @@ describe('classifyPasswordChangeError', () => {
     [500, PL.errorGeneric],
   ])('status %i → 메시지', (status, expected) => {
     expect(classifyPasswordChangeError(status)).toBe(expected);
+  });
+});
+
+describe('classifyUnlinkError', () => {
+  it.each([
+    [409, SL.errorLastAuth],
+    [404, SL.errorNotLinked],
+    [401, SL.errorSession],
+    [500, SL.errorGeneric],
+  ])('status %i → 메시지', (status, expected) => {
+    expect(classifyUnlinkError(status)).toBe(expected);
   });
 });
