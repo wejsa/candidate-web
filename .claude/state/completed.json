@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 37,
+    "version": 38,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-30T01:48:00+09:00"
+    "updatedAt": "2026-05-31T21:30:19+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1215,6 +1215,29 @@
       "carry": [
         "T-1/T-3 단언을 substring→정확 토큰/경계(\\b)로 강화 (회귀 민감도)",
         "SKILL.md §2.4 '신규 가드 추가 절차'에 spawn-guard.ts 헬퍼 재사용 1줄 안내 (common.md DRY 규약 대응)"
+      ]
+    },
+    "CANDID-021": {
+      "id": "CANDID-021",
+      "title": "로그아웃 + Refresh Token DB 블랙리스트",
+      "phase": 3,
+      "priority": "medium",
+      "type": "feature",
+      "completedAt": "2026-05-31T21:30:19+09:00",
+      "assignee": "wejsa-u@hoji-20260531-204734",
+      "prs": [
+        92,
+        94
+      ],
+      "totalMergedLines": 397,
+      "stepCount": 2,
+      "reviewSummary": "full(3 agent) 양 스텝 모두 CRITICAL 0. Step1: best-effort revoke try/catch MAJOR in-PR fix(L-019). Step2: reuse detection 만료-우회 MAJOR(domain+security 수렴) in-PR fix(L-019). 자기 PR COMMENT. 테스트 1503→1523(+20).",
+      "carry": [
+        "reuse_detected 발동 시 audit_logs 기록 (AuditEventType enum 필요) — CANDID-026 영역",
+        "grace 정책에서 reuse_detected를 일반 사유보다 장기 보존 검토",
+        "detectRefreshReuse 2차 findUnique — verifyRefreshSession 반환 확장 시 통합",
+        "docs/security/security-controls.md에 refresh reuse detection 섹션 추가 (docs-impact 권장)",
+        "CANDID-029 description에 deleteExpiredRefreshTokens 배치 wiring 항목 동기화"
       ]
     }
   }
