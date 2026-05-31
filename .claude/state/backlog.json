@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 336,
+    "version": 340,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-30T01:34:12+09:00"
+    "updatedAt": "2026-05-30T01:48:00+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 36,
-    "inProgress": 1,
+    "done": 37,
+    "inProgress": 0,
     "review": 0,
     "todo": 10
   },
@@ -17,7 +17,7 @@
     "1": {
       "name": "기반/인프라",
       "description": "Next.js + PostgreSQL/Prisma 셋업, DB 스키마, 인증 미들웨어, PII 암호화, 보안 가드(Rate Limit/CSRF/CORS/XSS)",
-      "status": "in_progress"
+      "status": "done"
     },
     "2": {
       "name": "핵심 도메인",
@@ -2802,44 +2802,28 @@
       "id": "CANDID-045",
       "title": "meta-guard refinement 통합 (carry 10건)",
       "description": "CANDID-043 회고 Action Item A1. CANDID-043에서 carry된 10건 통합 처리: (D-1) exit 2 시 스크립트 자체 보고 메시지 추가 + (D-3) binding alias 일관성 검증 룰 (npm name ↔ file base 의미 매칭) + (D-4) PKG_VALUE_RX runner 화이트리스트 (node + tsx 등 확장) + (D-5) META 가드 디렉토리 분리 (scripts/meta/check-*.mjs) + (D-6) SKILL.md 섹션 번호 결합 → 헤더 텍스트만 사용 (재배치 견고성) + (T-1) 다중 row 동시 위반 fixture + (T-3) ROW_RX 헤더/구분선 회귀 가드 fixture + (T-4) parseNpmScriptName 실패 경로 (exit 2) fixture + (MINOR) `tests/scripts/_helpers/spawn-guard.ts` DRY 추출 (CANDID-041 + 043 패턴) + (MINOR Security) npm script lifecycle hook(prepublish 등) 화이트리스트 가드. 추정 ~200줄 (script ~50 + tests ~80 + DRY helper ~40 + 컨벤션 ~30).",
-      "status": "in_progress",
+      "status": "done",
       "type": "chore",
       "priority": "medium",
       "phase": 1,
-      "assignee": "wejsa-u@hoji-20260530-004524",
-      "assignedAt": "2026-05-30T01:33:00+09:00",
-      "lockedFiles": [
-        "scripts/meta/check-guard-wiring-consistency.mjs",
-        "scripts/check-guard-wiring-consistency.mjs",
-        "package.json",
-        ".claude/skills/skill-review-pr/SKILL.md",
-        "tests/scripts/check-guard-wiring-consistency.test.ts",
-        "tests/scripts/check-migrations-no-concurrently.test.ts",
-        "tests/scripts/_helpers/spawn-guard.ts",
-        ".claude/domains/_base/checklists/common.md"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-043"
       ],
       "createdAt": "2026-05-25T23:34:34+09:00",
       "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)",
       "lockTTL": 7200,
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 89,
-        "fixLoopCount": 0,
-        "autoChainArgs": "89",
-        "updatedAt": "2026-05-30T01:33:00+09:00"
-      },
-      "updatedAt": "2026-05-30T01:33:00+09:00",
+      "workflowState": null,
+      "updatedAt": "2026-05-30T01:48:00+09:00",
       "planPath": ".claude/temp/CANDID-045-plan.md",
-      "currentStep": 1,
+      "currentStep": 2,
       "steps": [
         {
           "step": 1,
           "title": "메타가드 디렉토리 분리(D-5) + 검증 룰 강화(D-1/D-3/D-4/D-6) + lifecycle-hook 보안(M-SEC)",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "scripts/meta/check-guard-wiring-consistency.mjs",
             "scripts/check-guard-wiring-consistency.mjs",
@@ -2852,12 +2836,14 @@
           "dependsOn": [],
           "prNumber": 89,
           "branch": "feature/CANDID-045-step1",
-          "note": "PR #88 상태-푸시 실수로 리뷰 없이 자동 머지 → revert(bebc101) 후 #89로 정식 재진행. 변경 동일."
+          "note": "PR #88 상태-푸시 실수로 리뷰 없이 자동 머지 → revert(bebc101) 후 #89로 정식 재진행. 변경 동일.",
+          "mergedAt": "2026-05-30T01:34:39+09:00",
+          "mergedLines": 333
         },
         {
           "step": 2,
           "title": "테스트 강화: DRY spawn-guard helper 추출(M-DRY) + fixtures(T-1/T-3/T-4)",
-          "status": "pending",
+          "status": "merged",
           "files": [
             "tests/scripts/_helpers/spawn-guard.ts",
             "tests/scripts/check-guard-wiring-consistency.test.ts",
@@ -2868,9 +2854,14 @@
           "prLineLimit": 300,
           "dependsOn": [
             1
-          ]
+          ],
+          "prNumber": 91,
+          "branch": "feature/CANDID-045-step2",
+          "mergedAt": "2026-05-30T01:46:30+09:00",
+          "mergedLines": 142
         }
-      ]
+      ],
+      "completedAt": "2026-05-30T01:48:00+09:00"
     },
     "CANDID-046": {
       "id": "CANDID-046",

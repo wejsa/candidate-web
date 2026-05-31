@@ -2567,5 +2567,46 @@
     ],
     "stepCount": 1,
     "at": "2026-05-30T01:34:12+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-045",
+    "stepNumber": 1,
+    "prNumber": 89,
+    "mergedAt": "2026-05-30T01:34:39+09:00",
+    "at": "2026-05-30T01:35:00+09:00"
+  },
+  {
+    "event": "pr_created",
+    "taskId": "CANDID-045",
+    "stepNumber": 2,
+    "prNumber": 91,
+    "branch": "feature/CANDID-045-step2",
+    "at": "2026-05-30T01:42:00+09:00"
+  },
+  {
+    "event": "approved",
+    "taskId": "CANDID-045",
+    "stepNumber": 2,
+    "prNumber": 91,
+    "decision": "APPROVED (CRITICAL 0; domain MAJOR=stale false-positive; self-PR COMMENT)",
+    "at": "2026-05-30T01:46:00+09:00"
+  },
+  {
+    "event": "merged",
+    "taskId": "CANDID-045",
+    "stepNumber": 2,
+    "prNumber": 91,
+    "mergedAt": "2026-05-30T01:46:30+09:00",
+    "at": "2026-05-30T01:48:00+09:00"
+  },
+  {
+    "event": "task_completed",
+    "taskId": "CANDID-045",
+    "prs": [
+      89,
+      91
+    ],
+    "at": "2026-05-30T01:48:00+09:00"
   }
 ]
