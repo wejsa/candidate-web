@@ -90,6 +90,17 @@ describe('POST /api/v1/users/me/password', () => {
     expect((await res.json()).code).toBe('AUTH_INVALID_CREDENTIALS');
   });
 
+  // QA M3: 비번 보유자가 currentPassword 누락 → changePassword가 RECONFIRM(422) throw → 422 변환.
+  it('현재 비번 재확인 필요 → 422 USER_PASSWORD_RECONFIRM_REQUIRED', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    changePassword.mockRejectedValueOnce(new AppError('USER_PASSWORD_RECONFIRM_REQUIRED'));
+
+    const res = await POST(postRequest({ newPassword: 'NewPass456!' }), undefined);
+
+    expect(res.status).toBe(422);
+    expect((await res.json()).code).toBe('USER_PASSWORD_RECONFIRM_REQUIRED');
+  });
+
   it('미인증 → 401, changePassword 미호출', async () => {
     requireAuth.mockRejectedValueOnce(new AppError('AUTH_TOKEN_INVALID'));
 

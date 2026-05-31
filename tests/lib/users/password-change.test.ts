@@ -79,18 +79,30 @@ describe('changePassword — 비번 보유 사용자(changed)', () => {
       where: { userId: 42, revokedAt: null },
       data: { revokedAt: expect.any(Date), revokedReason: 'password_change' },
     });
-    // 감사 로그 — 평문 비밀번호 비포함.
+    // 감사 로그 — eventType + metadata.mode + 평문 비밀번호 비포함 (QA M1).
     const audit = __mocks.auditCreate.mock.calls[0]![0].data;
     expect(audit.eventType).toBe('PASSWORD_CHANGE');
     expect(audit.actorUserId).toBe(42);
+    expect(audit.metadataJson).toEqual({ mode: 'changed' });
     expect(JSON.stringify(audit)).not.toContain('NewPass456!');
     expect(JSON.stringify(audit)).not.toContain('OldPass123!');
   });
 
-  it('현재 비번 불일치 → AUTH_INVALID_CREDENTIALS, 갱신 미수행', async () => {
+  it('활성 세션 없음(revoke count 0) → revokedSessionCount 0 (QA M2)', async () => {
+    __mocks.refreshUpdateMany.mockResolvedValue({ count: 0 });
+
+    const result = await changePassword(input);
+
+    expect(result.revokedSessionCount).toBe(0);
+  });
+
+  it('현재 비번 불일치 → AUTH_INVALID_CREDENTIALS, 갱신 미수행 + 평문 비노출(QA m2)', async () => {
     verifyPassword.mockResolvedValue(false);
 
-    await expect(changePassword(input)).rejects.toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
+    const err = await changePassword(input).catch((e: unknown) => e);
+    expect(err).toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
+    // BR-PII-02: 예외 직렬화에 평문 비밀번호 미포함.
+    expect(JSON.stringify({ message: (err as Error).message })).not.toContain('OldPass123!');
     expect(hashPassword).not.toHaveBeenCalled();
     expect(__mocks.userUpdateMany).not.toHaveBeenCalled();
   });
@@ -113,6 +125,12 @@ describe('changePassword — 소셜 전용(set)', () => {
     expect(verifyPassword).not.toHaveBeenCalled();
     expect(hashPassword).toHaveBeenCalledWith('NewPass456!');
     expect(__mocks.userUpdateMany).toHaveBeenCalled();
+    // QA M1/M2: set 모드도 audit metadata.mode='set' + 전체 revoke 호출.
+    expect(__mocks.auditCreate.mock.calls[0]![0].data.metadataJson).toEqual({ mode: 'set' });
+    expect(__mocks.refreshUpdateMany).toHaveBeenCalledWith({
+      where: { userId: 42, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'password_change' },
+    });
   });
 });
 

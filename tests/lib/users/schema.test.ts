@@ -95,4 +95,17 @@ describe('PasswordChangeSchema', () => {
     const r = PasswordChangeSchema.safeParse({ newPassword: 'NewPass456!', admin: true });
     expect(r.success).toBe(false);
   });
+
+  // QA m3: UTF-8 72바이트 경계 — 한글 24자(72byte)+영숫자특수로 3-of-4 충족은 통과, 초과는 거부.
+  it('72바이트 경계 — 한글 23자+"a1!"(72byte) 통과', () => {
+    const pw = '가'.repeat(23) + 'a1!'; // 23*3 + 3 = 72 bytes, 3-of-4(한글=특수외 아님→ 소문자 a/숫자 1/특수 !)
+    const r = PasswordChangeSchema.safeParse({ newPassword: pw });
+    expect(r.success).toBe(true);
+  });
+
+  it('72바이트 초과 — 한글 24자+"a1!"(75byte) 거부', () => {
+    const pw = '가'.repeat(24) + 'a1!'; // 75 bytes
+    const r = PasswordChangeSchema.safeParse({ newPassword: pw });
+    expect(r.success).toBe(false);
+  });
 });
