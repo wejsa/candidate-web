@@ -2721,5 +2721,14 @@
     "stepNumber": 3,
     "prNumber": 97,
     "at": "2026-05-31T21:56:50+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-025",
+    "stepNumber": 1,
+    "prNumber": 96,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "MINOR in-PR fix (identifier.name + truncation tests); 1 MAJOR(TELECOMMUTE) 수용",
+    "at": "2026-05-31T21:59:40+09:00"
   }
 ]
