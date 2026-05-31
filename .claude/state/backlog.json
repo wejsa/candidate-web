@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 342,
+    "version": 343,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T20:47:34+09:00"
+    "updatedAt": "2026-05-31T20:53:30+09:00"
   },
   "summary": {
     "total": 47,
@@ -1725,10 +1725,56 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-204734",
-      "assignedAt": "2026-05-31T20:47:34+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
-      "updatedAt": "2026-05-31T20:47:34+09:00"
+      "assignedAt": "2026-05-31T20:53:30+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "app/api/v1/auth/logout/route.ts",
+        "lib/auth/session.ts",
+        "tests/app/api/v1/auth/logout.test.ts",
+        "tests/lib/auth/session.test.ts"
+      ],
+      "updatedAt": "2026-05-31T20:53:30+09:00",
+      "planPath": ".claude/temp/CANDID-021-plan.md",
+      "currentStep": 1,
+      "specFile": "docs/sample-requirement.md",
+      "steps": [
+        {
+          "step": 1,
+          "title": "로그아웃 코어 (엔드포인트 + 단일 세션 revoke)",
+          "status": "pending",
+          "files": [
+            "app/api/v1/auth/logout/route.ts",
+            "lib/auth/session.ts",
+            "tests/lib/auth/session.test.ts",
+            "tests/app/api/v1/auth/logout.test.ts"
+          ],
+          "estimatedLines": 300,
+          "prLineLimit": 450,
+          "dependsOn": []
+        },
+        {
+          "step": 2,
+          "title": "재사용 탐지(reuse detection) + 만료 토큰 정리 헬퍼",
+          "status": "pending",
+          "files": [
+            "lib/auth/session.ts",
+            "tests/lib/auth/session.test.ts"
+          ],
+          "estimatedLines": 280,
+          "prLineLimit": 400,
+          "dependsOn": [
+            1
+          ]
+        }
+      ],
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-05-31T20:53:30+09:00"
+      }
     },
     "CANDID-022": {
       "id": "CANDID-022",
