@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 358,
+    "version": 359,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:45:53+09:00"
+    "updatedAt": "2026-05-31T21:51:36+09:00"
   },
   "summary": {
     "total": 47,
@@ -2080,7 +2080,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260531-213426",
-      "assignedAt": "2026-05-31T21:43:07+09:00",
+      "assignedAt": "2026-05-31T21:51:36+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "lib/jobs/structured-data.ts",
@@ -2092,7 +2092,7 @@
         "lib/jobs/sitemap-data.ts",
         "tests/lib/jobs/sitemap-data.test.ts"
       ],
-      "updatedAt": "2026-05-31T21:43:07+09:00",
+      "updatedAt": "2026-05-31T21:51:36+09:00",
       "planPath": ".claude/temp/CANDID-025-plan.md",
       "currentStep": 1,
       "specFile": "docs/sample-requirement.md",
@@ -2100,7 +2100,7 @@
         {
           "step": 1,
           "title": "JobPosting JSON-LD structured data + 메타 하드닝(metadataBase/OG)",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/jobs/structured-data.ts",
             "app/jobs/[id]/page.tsx",
@@ -2109,7 +2109,9 @@
           ],
           "estimatedLines": 400,
           "prLineLimit": 500,
-          "dependsOn": []
+          "dependsOn": [],
+          "prNumber": 96,
+          "branch": "feature/CANDID-025-step1"
         },
         {
           "step": 2,
@@ -2129,12 +2131,12 @@
         }
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 96,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-05-31T21:43:07+09:00"
+        "autoChainArgs": "96 --auto-fix",
+        "updatedAt": "2026-05-31T21:51:36+09:00"
       }
     },
     "CANDID-026": {
