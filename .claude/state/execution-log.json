@@ -2834,8 +2834,22 @@
   {
     "action": "task_completed",
     "taskId": "CANDID-024",
-    "prs": [93, 95, 97, 99, 100],
+    "prs": [
+      93,
+      95,
+      97,
+      99,
+      100
+    ],
     "stepCount": 5,
     "at": "2026-05-31T22:56:50+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-047",
+    "stepNumber": 1,
+    "prNumber": 101,
+    "branch": "feature/CANDID-047-step1",
+    "at": "2026-06-01T00:00:59+09:00"
   }
 ]
