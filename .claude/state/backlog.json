@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 354,
+    "version": 355,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:34:26+09:00"
+    "updatedAt": "2026-05-31T21:36:32+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T21:22:39+09:00",
+      "assignedAt": "2026-05-31T21:36:32+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/users/profile-service.ts",
@@ -1960,18 +1960,18 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 95,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-05-31T21:22:39+09:00"
+        "autoChainArgs": "95 --auto-fix",
+        "updatedAt": "2026-05-31T21:36:32+09:00"
       },
       "dependencies": [
         "CANDID-008"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "updatedAt": "2026-05-31T21:22:39+09:00",
+      "updatedAt": "2026-05-31T21:36:32+09:00",
       "planPath": ".claude/temp/CANDID-024-plan.md",
       "currentStep": 2,
       "steps": [
@@ -2000,21 +2000,26 @@
         {
           "step": 2,
           "title": "이름/연락처 수정 — PATCH /api/v1/users/me + 수정 폼",
-          "status": "pending",
+          "status": "pr_created",
+          "branch": "feature/CANDID-024-step2",
+          "prNumber": 95,
           "files": [
-            "lib/users/validation.ts",
+            "lib/users/schema.ts",
             "lib/users/profile-service.ts",
             "lib/users/profile-form.ts",
             "app/api/v1/users/me/route.ts",
             "lib/security/rate-limit.ts",
             "app/me/profile/_components/ProfileEditForm.tsx",
-            "tests/lib/users/validation.test.ts",
+            "app/me/profile/page.tsx",
+            "tests/lib/users/schema.test.ts",
             "tests/lib/users/profile-service.test.ts",
             "tests/lib/users/profile-form.test.ts",
             "tests/app/api/v1/users/me/route.test.ts"
           ],
           "estimatedLines": 560,
+          "actualLines": 487,
           "prLineLimit": 700,
+          "note": "validation.ts→schema.ts (기존 users 스키마 컨벤션). updateProfile updateMany+status가드+encryptUserPiiInput 부분갱신.",
           "dependsOn": [
             1
           ]
