@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 352,
+    "version": 353,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T21:29:16+09:00"
+    "updatedAt": "2026-05-31T21:30:19+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 37,
-    "inProgress": 2,
+    "done": 38,
+    "inProgress": 1,
     "review": 0,
     "todo": 8
   },
@@ -1716,7 +1716,7 @@
       "id": "CANDID-021",
       "title": "로그아웃 + Refresh Token DB 블랙리스트",
       "description": "클라이언트 Access 제거 + 서버 Refresh Token DB 블랙리스트 처리(Redis 미사용 → DB 테이블 TTL 컬럼). 만료된 토큰 야간 배치 정리.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
@@ -1724,14 +1724,11 @@
         "CANDID-011"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "wejsa-u@hoji-20260531-204734",
-      "assignedAt": "2026-05-31T21:29:16+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 7200,
-      "lockedFiles": [
-        "lib/auth/session.ts",
-        "tests/lib/auth/session.test.ts"
-      ],
-      "updatedAt": "2026-05-31T21:29:16+09:00",
+      "lockedFiles": [],
+      "updatedAt": "2026-05-31T21:30:19+09:00",
       "planPath": ".claude/temp/CANDID-021-plan.md",
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
@@ -1756,7 +1753,7 @@
         {
           "step": 2,
           "title": "재사용 탐지(reuse detection) + 만료 토큰 정리 헬퍼",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/auth/session.ts",
             "tests/lib/auth/session.test.ts"
@@ -1767,17 +1764,12 @@
             1
           ],
           "prNumber": 94,
-          "branch": "feature/CANDID-021-step2"
+          "branch": "feature/CANDID-021-step2",
+          "mergedAt": "2026-05-31T21:30:19+09:00"
         }
       ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 94,
-        "fixLoopCount": 0,
-        "autoChainArgs": "94",
-        "updatedAt": "2026-05-31T21:29:16+09:00"
-      }
+      "workflowState": null,
+      "completedAt": "2026-05-31T21:30:19+09:00"
     },
     "CANDID-022": {
       "id": "CANDID-022",

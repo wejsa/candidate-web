@@ -2671,5 +2671,17 @@
     "decision": "COMMENT (self-PR, CRITICAL 0)",
     "note": "1 MAJOR (reuse detection 만료-우회) in-PR fixed (L-019)",
     "at": "2026-05-31T21:29:16+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-021",
+    "stepNumber": 2,
+    "prNumber": 94,
+    "at": "2026-05-31T21:30:19+09:00"
+  },
+  {
+    "action": "task_completed",
+    "taskId": "CANDID-021",
+    "at": "2026-05-31T21:30:19+09:00"
   }
 ]
