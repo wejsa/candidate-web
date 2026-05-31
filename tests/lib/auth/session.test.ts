@@ -5,7 +5,9 @@ import type { RefreshToken } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { issueAccessToken, issueRefreshToken } from '@/lib/auth/jwt';
 import {
+  deleteExpiredRefreshTokens,
   issueRefreshSession,
+  revokeAllForFamily,
   revokeAllForUser,
   revokeRefreshSession,
   rotateRefreshSession,
@@ -19,6 +21,7 @@ vi.mock('@/lib/prisma', () => {
     create: vi.fn(),
     findUnique: vi.fn(),
     updateMany: vi.fn(),
+    deleteMany: vi.fn(),
   };
   return {
     prisma: {
@@ -30,7 +33,7 @@ vi.mock('@/lib/prisma', () => {
 });
 
 const db = prisma as unknown as {
-  refreshToken: { create: Mock; findUnique: Mock; updateMany: Mock };
+  refreshToken: { create: Mock; findUnique: Mock; updateMany: Mock; deleteMany: Mock };
   $transaction: Mock;
 };
 
@@ -231,6 +234,78 @@ describe('rotateRefreshSession', () => {
     expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
     expect(db.$transaction).not.toHaveBeenCalled();
   });
+
+  it('reuse detection — replaying an already-"rotated" token revokes the whole family (reuse_detected)', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    // 이미 'rotated'로 revoke된 토큰의 재제시 = chain replay 공격.
+    db.refreshToken.findUnique.mockResolvedValue(
+      fakeRow({ revokedAt: new Date(), revokedReason: 'rotated', familyId: FAMILY }),
+    );
+    db.refreshToken.updateMany.mockResolvedValue({ count: 2 });
+
+    expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
+
+    // family 전체 무효화 — 활성 row만(revokedAt=null) 'reuse_detected'로 갱신.
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { familyId: FAMILY, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'reuse_detected' },
+    });
+    expect(db.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('does NOT revoke the family when the token was revoked for a non-rotated reason (logout)', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    // 정상 로그아웃으로 revoke된 토큰의 재제시 — 공격 신호 아님, family 보존.
+    db.refreshToken.findUnique.mockResolvedValue(
+      fakeRow({ revokedAt: new Date(), revokedReason: 'logout' }),
+    );
+
+    expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
+    expect(db.refreshToken.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('reuse detection fires even when the replayed "rotated" token JWT has EXPIRED (gate covers expired)', async () => {
+    // JWT 만료 후 재제시 — verify는 DB 조회 전에 'expired'로 단락되지만,
+    // detectRefreshReuse가 자체 조회로 'rotated'를 확인해 family를 무효화한다(MAJOR 우회 차단).
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-20T00:00:00Z'));
+    const { token } = await issueRefreshToken(USER_ID, { rememberMe: false }); // 1일 TTL
+    vi.setSystemTime(new Date('2026-05-22T00:00:00Z')); // JWT 만료 후
+    db.refreshToken.findUnique.mockResolvedValue(
+      fakeRow({
+        revokedAt: new Date('2026-05-21T00:00:00Z'),
+        revokedReason: 'rotated',
+        familyId: FAMILY,
+      }),
+    );
+    db.refreshToken.updateMany.mockResolvedValue({ count: 1 });
+
+    expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'expired' });
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { familyId: FAMILY, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'reuse_detected' },
+    });
+  });
+
+  it('best-effort — rotation still rejects with "revoked" when reuse detection throws (DB failure)', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    db.refreshToken.findUnique.mockResolvedValue(
+      fakeRow({ revokedAt: new Date(), revokedReason: 'rotated' }),
+    );
+    db.refreshToken.updateMany.mockRejectedValue(new Error('db down')); // family revoke throws
+
+    expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
+  });
+
+  it('does not revoke the family when the revoked row vanished on re-query (race → null)', async () => {
+    const { token } = await issueRefreshToken(USER_ID);
+    db.refreshToken.findUnique
+      .mockResolvedValueOnce(fakeRow({ revokedAt: new Date(), revokedReason: 'rotated' })) // verify
+      .mockResolvedValueOnce(null); // detectRefreshReuse 재조회 시점엔 삭제됨
+
+    expect(await rotateRefreshSession(token)).toEqual({ ok: false, reason: 'revoked' });
+    expect(db.refreshToken.updateMany).not.toHaveBeenCalled();
+  });
 });
 
 describe('revokeRefreshSession', () => {
@@ -283,5 +358,88 @@ describe('revokeAllForUser', () => {
   it('returns 0 when the user has no active sessions', async () => {
     db.refreshToken.updateMany.mockResolvedValue({ count: 0 });
     expect(await revokeAllForUser(USER_ID, 'logout')).toBe(0);
+  });
+});
+
+describe('revokeAllForFamily', () => {
+  it('revokes all active sessions in a family with reason "reuse_detected" and returns the count', async () => {
+    db.refreshToken.updateMany.mockResolvedValue({ count: 2 });
+
+    const count = await revokeAllForFamily(FAMILY, 'reuse_detected');
+
+    expect(count).toBe(2);
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { familyId: FAMILY, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'reuse_detected' },
+    });
+  });
+
+  it('is idempotent — returns 0 when the family is already fully revoked (preserves prior reasons)', async () => {
+    // 조건부 where(revokedAt=null)로 이미 revoke된 row의 사유를 덮어쓰지 않는다 — 감사 무결성.
+    db.refreshToken.updateMany.mockResolvedValue({ count: 0 });
+    expect(await revokeAllForFamily(FAMILY, 'reuse_detected')).toBe(0);
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { familyId: FAMILY, revokedAt: null },
+      data: { revokedAt: expect.any(Date), revokedReason: 'reuse_detected' },
+    });
+  });
+});
+
+describe('deleteExpiredRefreshTokens', () => {
+  const NOW = new Date('2026-06-01T00:00:00Z');
+
+  it('deletes unrevoked-expired and grace-elapsed-revoked tokens, returning the count', async () => {
+    db.refreshToken.deleteMany.mockResolvedValue({ count: 5 });
+
+    const deleted = await deleteExpiredRefreshTokens(NOW, 30);
+
+    expect(deleted).toBe(5);
+    const graceCutoff = new Date(NOW.getTime() - 30 * 24 * 3600 * 1000);
+    expect(db.refreshToken.deleteMany).toHaveBeenCalledWith({
+      where: {
+        OR: [{ revokedAt: null, expiresAt: { lt: NOW } }, { revokedAt: { lt: graceCutoff } }],
+      },
+    });
+  });
+
+  it('honors a custom grace window when computing the revoked-token cutoff', async () => {
+    db.refreshToken.deleteMany.mockResolvedValue({ count: 1 });
+
+    await deleteExpiredRefreshTokens(NOW, 7);
+
+    // grace=7일이면 7일 이내 revoke 토큰은 cutoff에 걸리지 않아 보존된다(감사 윈도우).
+    const cutoff = new Date(NOW.getTime() - 7 * 24 * 3600 * 1000);
+    expect(db.refreshToken.deleteMany).toHaveBeenCalledWith({
+      where: {
+        OR: [{ revokedAt: null, expiresAt: { lt: NOW } }, { revokedAt: { lt: cutoff } }],
+      },
+    });
+  });
+
+  it('uses now()=current time and 30-day grace by default (no-args — the batch call path)', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    db.refreshToken.deleteMany.mockResolvedValue({ count: 0 });
+
+    await deleteExpiredRefreshTokens(); // 무인자 — CANDID-029 배치 실제 호출 경로
+
+    const cutoff = new Date(NOW.getTime() - 30 * 24 * 3600 * 1000);
+    expect(db.refreshToken.deleteMany).toHaveBeenCalledWith({
+      where: {
+        OR: [{ revokedAt: null, expiresAt: { lt: NOW } }, { revokedAt: { lt: cutoff } }],
+      },
+    });
+  });
+
+  it('graceDays=0 — cutoff equals now, so all revoked tokens are eligible for immediate deletion', async () => {
+    db.refreshToken.deleteMany.mockResolvedValue({ count: 3 });
+
+    await deleteExpiredRefreshTokens(NOW, 0);
+
+    expect(db.refreshToken.deleteMany).toHaveBeenCalledWith({
+      where: {
+        OR: [{ revokedAt: null, expiresAt: { lt: NOW } }, { revokedAt: { lt: NOW } }],
+      },
+    });
   });
 });
