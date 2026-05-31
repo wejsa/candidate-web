@@ -2813,5 +2813,14 @@
     "stepNumber": 5,
     "prNumber": 100,
     "at": "2026-05-31T22:43:57+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-024",
+    "stepNumber": 5,
+    "prNumber": 100,
+    "decision": "COMMENT (self-PR, CRITICAL 0)",
+    "note": "리뷰 full 3-agent. 보안 MAJOR(세션 바인딩) in-PR 수정 + test MAJOR 3; 감사로그 CANDID-026 위임",
+    "at": "2026-05-31T22:54:48+09:00"
   }
 ]

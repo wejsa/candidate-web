@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 371,
+    "version": 372,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-05-31T22:43:57+09:00"
+    "updatedAt": "2026-05-31T22:54:48+09:00"
   },
   "summary": {
     "total": 47,
@@ -1936,7 +1936,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260531-204210",
-      "assignedAt": "2026-05-31T22:43:57+09:00",
+      "assignedAt": "2026-05-31T22:54:48+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/me/profile/_components/SocialAccountsSection.tsx",
@@ -1947,12 +1947,12 @@
         "app/api/v1/auth/oauth/[provider]/callback/route.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 100,
         "fixLoopCount": 0,
-        "autoChainArgs": "100 --auto-fix",
-        "updatedAt": "2026-05-31T22:43:57+09:00"
+        "autoChainArgs": "100",
+        "updatedAt": "2026-05-31T22:54:48+09:00"
       },
       "dependencies": [
         "CANDID-008"
@@ -2091,8 +2091,9 @@
             "tests/lib/errors/codes.test.ts"
           ],
           "estimatedLines": 450,
-          "actualLines": 344,
+          "actualLines": 466,
           "prLineLimit": 600,
+          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 6 / MINOR 3. QA(M1/M3/m3) + 리뷰 보안 MAJOR(callback 세션 바인딩 재확인) in-PR 코드+테스트 + test MAJOR(USER_NOT_FOUND 분기, P2002 provider_pid). carry: link-add 감사로그(CANDID-026 enum), start→callback 실서명 통합테스트, redirect 쿼리 노출(경미). 자기 PR → COMMENT.",
           "dependsOn": [
             4
           ],
