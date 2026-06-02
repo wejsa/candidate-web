@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 383,
+    "version": 384,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T22:27:53+09:00"
+    "updatedAt": "2026-06-02T22:35:01+09:00"
   },
   "summary": {
     "total": 47,
@@ -2905,13 +2905,13 @@
       "source": "CANDID-016 retro Action Item HIGH-3",
       "lockTTL": 10800,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 104,
         "fixLoopCount": 0,
-        "lastReviewDecision": null,
+        "lastReviewDecision": "COMMENT",
         "autoChainArgs": "104 --auto-fix",
-        "updatedAt": "2026-06-02T22:27:53+09:00"
+        "updatedAt": "2026-06-02T22:35:01+09:00"
       },
       "steps": [
         {
