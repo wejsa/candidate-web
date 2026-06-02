@@ -120,6 +120,10 @@ const envSchema = z
     SMTP_USER: z.string().default(''),
     SMTP_PASS: z.string().default(''),
     SMTP_FROM: z.string().email(),
+
+    // CANDID-023 Step 4 (US-MY-003) — 지원 철회 어드민 Slack 알림 webhook (선택).
+    // 미설정 시 알림 no-op (BR-TX-02 트랜잭션 외 fire-and-forget). 관리자 설정값이라 SSRF 사용자입력 아님.
+    SLACK_WEBHOOK_URL: z.string().url().optional(),
   })
   .refine((e) => e.JWT_ACCESS_SECRET !== e.JWT_REFRESH_SECRET, {
     // CANDID-006: Access/Refresh secret 분리 강제 — 동일 값이면 누수 영향 격리 무력화.
