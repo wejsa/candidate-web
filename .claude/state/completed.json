@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 41,
+    "version": 42,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-02T21:51:07+09:00"
+    "updatedAt": "2026-06-02T23:30:09+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1298,6 +1298,29 @@
       "stepCount": 1,
       "reviewSummary": "T2 자동분류(domain+security): CRITICAL 0, MAJOR 0, MINOR 1 게시(드롭 1, 강등 0). S-MAJOR-2 서버메시지 화이트리스트 불변식 유지 검증. 자기 PR → COMMENT 후 머지.",
       "note": "CANDID-039 Step 2 리뷰(QA P1)에서 발견. 서버 422 빈/공백 message → 빈 ⚠️ alert 렌더 버그. lib classifyUploadError + 컴포넌트 레이어드 폴백 + 회귀 테스트 4종(단위2+컴포넌트2)."
+    },
+    "CANDID-023": {
+      "id": "CANDID-023",
+      "title": "지원 철회 (US-MY-003)",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 3,
+      "assignee": "jaese@hoji-20260602-215900",
+      "stepCount": 4,
+      "totalMergedLines": 821,
+      "prs": [
+        103,
+        105,
+        106,
+        108
+      ],
+      "reviewSummary": "4스텝(마이그레이션/서비스/API/UI+Slack) 전부 CRITICAL 0. 리뷰 MAJOR(rate limiting·테스트 4종) 머지 전 반영.",
+      "completedAt": "2026-06-02T23:30:09+09:00",
+      "carry": [
+        "hasReason 단일출처화",
+        "구조화 로깅",
+        "클라 401/429 분기"
+      ]
     }
   }
 }
