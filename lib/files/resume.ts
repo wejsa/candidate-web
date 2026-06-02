@@ -83,6 +83,15 @@ export async function issueResumePresign(
 
   // 5. fire-and-forget S3 객체 삭제. 실패는 무시 — CANDID-029가 orphan 청소.
   //    동기 await하면 presign 응답 지연 + 사용자 경험 저하.
+  //
+  // ── S-MAJOR-3 orphan S3 객체 정리 design note (CANDID-040 carry / CANDID-029 위임) ──
+  // orphan(참조 없는 S3 객체) 발생 경로 2가지:
+  //   (1) 교체(replace): 본 루프의 fire-and-forget delete 실패 시 — 기존 storedPath가 S3에 잔존.
+  //   (2) presign 발급 후 confirm 미도달: 사용자가 PUT 후 confirm 전에 이탈/네트워크 단절/abort →
+  //       S3 객체는 생성됐으나 resume_files row 없음 (DB 미참조 orphan).
+  // 본 task(CANDID-040)는 *탐지·정리 로직을 구현하지 않는다* — 즉시 정리는 비용/복잡도 대비 효과 낮고,
+  // (2)는 presign 시점에 DB row가 없어 동기 추적 불가. **정리 책임은 CANDID-029 야간 배치**(S3 객체와
+  // resume_files.stored_path 차집합 스캔 → TTL 경과분 삭제)에 위임한다. 본 주석이 그 의존성의 SSOT 추적점.
   for (const storedPath of replacedPaths) {
     void deleteResumeObject(storedPath).catch(() => {
       // silent — orphan 정리는 CANDID-029 위임.

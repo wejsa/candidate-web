@@ -28,3 +28,9 @@ process.env.JWT_ACCESS_SECRET =
   'test-access-secret-candid006-hs512-min-64-chars-XXXXXXXXXXXXXXXX-only';
 process.env.JWT_REFRESH_SECRET =
   'test-refresh-secret-candid006-hs512-min-64-chars-YYYYYYYYYYYYYY-only';
+
+// CANDID-040 Step 3: SMTP env 동기화. SMTP_* 가 env 필수로 격상된 뒤 본 통합 setup이 미반영되어
+// getEnv() 검증이 모든 통합 테스트에서 throw하던 선재 결함 해소(tests/setup.ts와 동일 값 미러).
+process.env.SMTP_HOST = 'sandbox.smtp.test.local';
+process.env.SMTP_PORT = '2525';
+process.env.SMTP_FROM = 'noreply@candidate.test';
