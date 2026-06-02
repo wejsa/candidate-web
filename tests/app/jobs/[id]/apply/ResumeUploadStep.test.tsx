@@ -282,3 +282,28 @@ describe('ResumeUploadStep — 422 빈 message 폴백 (CANDID-047 회귀 가드)
     expect(alert.textContent ?? '').not.toMatch(/^⚠️\s*$/);
   });
 });
+
+describe('ResumeUploadStep — 동시 업로드 race 가드 (D-MAJOR-3 / CANDID-040)', () => {
+  it('새 업로드 시작 시 진행 중이던 이전 업로드를 abort', async () => {
+    // mockUpload을 영원히 pending으로 두어 in-flight 상태 유지 + signal 캡처.
+    const signals: AbortSignal[] = [];
+    mockUpload.mockImplementation((args: { signal?: AbortSignal }) => {
+      if (args.signal !== undefined) signals.push(args.signal);
+      return new Promise<never>(() => {}); // never settles
+    });
+    renderStep();
+    const input = fileInput();
+
+    // 1차: validating 윈도우의 빠른 재선택을 fireEvent로 시뮬레이션(disable 우회).
+    fireEvent.change(input, { target: { files: [pdf()] } });
+    await waitFor(() => expect(mockUpload).toHaveBeenCalledTimes(1));
+
+    // 2차: fix가 이전 AbortController를 먼저 abort해야 함.
+    fireEvent.change(input, { target: { files: [pdf()] } });
+    await waitFor(() => expect(mockUpload).toHaveBeenCalledTimes(2));
+
+    expect(signals).toHaveLength(2);
+    expect(signals[0]!.aborted).toBe(true); // 이전 요청 중단 (race 차단)
+    expect(signals[1]!.aborted).toBe(false); // 현재 요청 진행 중
+  });
+});
