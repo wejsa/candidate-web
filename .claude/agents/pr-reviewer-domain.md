@@ -1,6 +1,7 @@
 ---
 name: pr-reviewer-domain
 description: PR 리뷰 시 도메인 로직 및 아키텍처 관점 전문 검토. skill-review-pr에서 자동 호출됨.
+model: opus
 tools: Read, Glob, Grep
 color: 🟣
 ---

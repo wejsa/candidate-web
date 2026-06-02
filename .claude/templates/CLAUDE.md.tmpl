@@ -247,15 +247,23 @@ fi
 ```json
 "workflowState": {
   "currentSkill": "{현재 스킬명}",
-  "lastCompletedSkill": "{이전 스킬명}",
-  "prNumber": "{PR 번호 또는 null}",
-  "fixLoopCount": "{N, skill-fix 전용, 루프 가드용}",
+  "lastCompletedSkill": "{이전 스킬명 또는 null}",
+  "prNumber": null,
+  "fixLoopCount": null,
+  "lastReviewDecision": null,
   "autoChainArgs": "{체이닝 인자}",
   "updatedAt": "{현재 ISO 8601}"
 }
 ```
 
+**필드 타입·소유권 (PreToolUse 머지 게이트 전제조건 — 위반 시 게이트가 silent no-op):**
+> 타입·enum의 SSOT는 `.claude/schemas/backlog.schema.json`(`definitions.workflowState`). 아래는 그 요약이며, 충돌 시 schema가 우선한다.
+- `prNumber` / `fixLoopCount`: **정수 또는 `null`** — 따옴표 금지. 문자열 `"42"`는 ① schema 거부(`integer|null`), ② `pre-tool-use.sh`의 숫자 join(`--argjson`) 미스로 머지 게이트가 PR을 못 찾음. PR 생성 시 `prNumber`에 **정수** PR 번호 기록.
+- `lastReviewDecision`: `APPROVED` / `COMMENT` / `REQUEST_CHANGES` / `null`. **skill-review-pr Step 6.5가 매 리뷰마다 소유·갱신.** PreToolUse 머지 게이트(`pre-tool-use.sh`)의 결정적 차단 신호 — `REQUEST_CHANGES`면 미해결 CRITICAL로 간주해 `gh pr merge`를 차단한다.
+
 **완료 시:** `currentSkill`을 다음 스킬로, `lastCompletedSkill`을 현재 스킬로 갱신.
+> ⚠️ **부분 갱신 시 기존 필드를 드롭하지 말 것.** 특히 `lastReviewDecision`/`prNumber`는 게이트가 읽으므로, currentSkill만 바꾸려다 두 필드를 누락하면 미해결 CRITICAL PR이 머지될 수 있다. workflowState는 항상 전체 객체로 다시 쓴다.
+
 **Task 완료 시:** `workflowState: null`로 초기화.
 
 ---

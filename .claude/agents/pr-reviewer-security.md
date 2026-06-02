@@ -1,6 +1,7 @@
 ---
 name: pr-reviewer-security
 description: PR 리뷰 시 보안 및 컴플라이언스 관점 전문 검토. skill-review-pr에서 자동 호출됨.
+model: opus
 tools: Read, Glob, Grep
 color: 🔴
 ---

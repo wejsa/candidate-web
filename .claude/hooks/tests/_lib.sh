@@ -13,6 +13,7 @@ mk_sandbox() {
   # 훅 스크립트 심볼릭 링크로 재사용 (실제 대상 검증)
   ln -s "$HOOK_DIR/session-start.sh" "$dir/.claude/hooks/session-start.sh"
   ln -s "$HOOK_DIR/stop.sh" "$dir/.claude/hooks/stop.sh"
+  ln -s "$HOOK_DIR/pre-tool-use.sh" "$dir/.claude/hooks/pre-tool-use.sh"
   ln -s "$HOOK_DIR/lib/atomic-write.sh" "$dir/.claude/hooks/lib/atomic-write.sh"
   printf '%s\n' "$dir"
 }

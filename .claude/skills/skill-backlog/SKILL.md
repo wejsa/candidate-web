@@ -89,6 +89,8 @@ complexity-hint: light
         "currentSkill": "skill-impl",
         "lastCompletedSkill": "skill-plan",
         "prNumber": null,
+        "fixLoopCount": null,
+        "lastReviewDecision": null,
         "autoChainArgs": "",
         "updatedAt": "2026-02-03T14:30:52Z"
       },

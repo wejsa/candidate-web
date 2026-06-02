@@ -18,16 +18,30 @@ Claude Code 네이티브 훅으로 ai-crew-kit 워크플로우 자동화를 구�
 ├── lib/
 │   └── atomic-write.sh           flock/mkdir 기반 원자적 쓰기 helper (R5)
 ├── diagnose.sh                   v2.1.3: read-only hook 진단 도구
-├── session-start.sh              SessionStart: git sync + 상태 로드
-├── stop.sh                       Stop: 만료 잠금 해제 + continuation-plan 갱신
-└── post-tool-use.sh              PostToolUse: lockedAt heartbeat + 3단계 무한 루프 방어
+├── session-start.sh              SessionStart: git sync + 상태 로드          [bookkeeping]
+├── stop.sh                       Stop: 만료 잠금 해제 + continuation-plan     [bookkeeping]
+├── post-tool-use.sh              PostToolUse: lockedAt heartbeat + 루프 방어   [bookkeeping]
+└── pre-tool-use.sh               PreToolUse: 머지 품질 게이트 (v2.4.0)         [gate]
 ```
 
 ---
 
-## 비블로킹 작성 규칙 (중요)
+## 훅의 두 카테고리: Bookkeeping vs Gate (중요)
 
-훅 스크립트는 **Claude 세션을 절대 차단하지 않아야** 합니다. 다음 규칙을 지키세요.
+훅은 목적에 따라 두 부류로 나뉘며, 차단 정책이 **정반대**다. 이 구분이 SSOT다.
+
+| 카테고리 | 훅 | 차단 정책 | 근거 |
+|---------|-----|----------|------|
+| **Bookkeeping** | session-start, post-tool-use, stop | **절대 비블로킹** (R4 — 모든 경로 `exit 0`) | 상태 기록/동기화가 일이다. 실패해도 세션을 막아선 안 된다. |
+| **Gate** | pre-tool-use | **설계상 블로킹** (`exit 2`로 거부) | 품질 게이트 강제가 일이다. "CRITICAL 머지 차단"을 prose 지시가 아니라 결정적으로 강제한다. |
+
+**핵심 원칙**: Gate 훅도 **인프라 실패(도구 부재·파싱 불가·상태 부재·네트워크)에는 fail-open(`exit 0`)** 한다 — 게이트 *자체의 장애*가 정상 작업을 막아선 안 되기 때문이다. Gate 훅이 `exit 2`를 내는 건 오직 **신호가 명확히 차단을 가리킬 때**뿐이다. 그리고 항상 **명시 우회 경로**(env)를 제공한다.
+
+> Gate 훅은 파일 상단에 `# hi04-exempt: gate-hook` 마커를 선언해야 HI-04 정적 검사의 exit-2 금지에서 면제된다(opt-in). 마커 없는 훅의 `exit 2`는 여전히 위반으로 잡힌다.
+
+### Bookkeeping 훅 작성 규칙
+
+Bookkeeping 훅은 **Claude 세션을 절대 차단하지 않아야** 합니다. 다음 규칙을 지키세요.
 
 | 금지 | 이유 | 대안 |
 |------|------|------|
@@ -36,7 +50,7 @@ Claude Code 네이티브 훅으로 ai-crew-kit 워크플로우 자동화를 구�
 | `set -u` / `set -o pipefail` | 미정의 변수/파이프 실패가 비의도적 차단 유발 | 명시적 조건 체크 |
 | 대화형 프롬프트 유발 명령 | `git pull`(HTTPS credential), `ssh`, `sudo` 등이 터미널에서 입력을 대기 → 사용자 터미널이 hang | 훅 초반에 `GIT_TERMINAL_PROMPT=0`, `GIT_ASKPASS=/bin/true`, `GCM_INTERACTIVE=never` export + 필요 시 `exec 0</dev/null` |
 
-**HI-04** (Phase 1 Step 5) 정적 검사로 위 규칙 위반을 자동 탐지합니다.
+**HI-04** (`scripts/check-hook-blocking.sh`) 정적 검사로 위 규칙 위반(단독 `exit 2` 포함)을 자동 탐지합니다. `# hi04-exempt: gate-hook` 마커를 선언한 Gate 훅만 exit-2 검사에서 면제됩니다(`set -e` 검사는 Gate 훅에도 적용 — fail-open 보장).
 
 ### 대화형 프롬프트 차단 레시피 (필수)
 
@@ -54,6 +68,34 @@ exec 0</dev/null                  # stdin을 /dev/null로 — 자식 프로세�
 ---
 
 ## 현재 등록된 훅
+
+### PreToolUse (`pre-tool-use.sh`) — Gate (v2.4.0)
+
+**발동 시점**: 모든 `Bash` 도구 호출 직전
+**timeout**: 10초
+**매처**: `Bash`
+**목적**: `gh pr merge` 직전, 미해결 CRITICAL이 있는 PR의 머지를 **결정적으로 차단**한다. 기존엔 "CRITICAL은 머지 차단"이 prose 지시(skill-merge-pr/CLAUDE.md)였으나, LLM이 review 분기를 한 번만 잘못 따라도 나쁜 PR이 auto-merge되는 구멍이 있었다. 이 게이트가 그 구멍을 닫는다.
+
+**동작**:
+1. `gh pr merge`가 아닌 모든 Bash 명령 → 즉시 `exit 0` (의견 없음, 오버헤드 최소).
+2. PR 번호 추출 후 **차단 신호** 검사 (둘 중 하나라도 차단이면 deny):
+   - **신호 A (state, 오프라인 결정적)**: PR N을 소유한 Task(`step.prNumber == N` **또는** `workflowState.prNumber == N`)의 `workflowState.lastReviewDecision == "REQUEST_CHANGES"` → 미해결 CRITICAL 게시됨. PR 번호의 결정적 SSOT는 `step.prNumber`(skill-impl Step 8)이므로 거기서도 join한다 — `workflowState.prNumber`만 보면 실제 backlog에서 발동하지 못한다.
+   - **신호 B (GitHub, best-effort)**: `gh pr view N --json reviewDecision == CHANGES_REQUESTED` (타인 PR에서 GitHub가 기록한 request-changes). 네트워크/인증/`gh` 부재 시 fail-open.
+3. 차단 시 `exit 2` + stderr에 사유·복구 안내(재리뷰 / 우회) 출력.
+
+**제어 환경변수**:
+
+| 변수 | 효과 |
+|------|------|
+| `CCK_MERGE_GATE=off` | 게이트 전면 비활성 (allow always) |
+| `CCK_GATE_BYPASS=1` | 이번 1회 의도적 우회 — 로그 + allow (사용자 책임) |
+| `CCK_GATE_NO_GH=1` | 신호 B(GitHub 네트워크 호출) 전면 스킵 — 오프라인/에어갭 환경 |
+
+**fail-open 시나리오** (게이트 장애가 정상 머지를 막지 않도록 → `exit 0`): `jq` 부재, stdin 부재, backlog 부재, PR 번호 추출 불가, 매칭 `workflowState` 없음, GitHub 조회 실패.
+
+> 신호 A는 `backlog.schema.json`의 `workflowState.lastReviewDecision`(v2.4.0 정식 등록)에 의존한다. 이 필드는 skill-review-pr Step 6.5가 매 리뷰마다 갱신한다. 이전에는 스킬이 참조했으나 schema 미등록(`additionalProperties:false`)으로 거부되던 sleeper였다 — 본 게이트와 함께 정식화되어 skill-fix 모드 판정도 같이 복구됨.
+>
+> **한계**: kit 개발 리포 자체는 backlog state가 없어 신호 A가 no-op(claim 감지와 동일) — 실효는 사용자 프로젝트에서 발현. 기존 사용자가 업그레이드 시 PreToolUse 등록을 받으려면 `settings.json` 병합이 필요(skill-upgrade 후속 과제).
 
 ### SessionStart (`session-start.sh`)
 
@@ -250,7 +292,7 @@ bash .claude/hooks/tests/run-all.sh           # 전체
 bash .claude/hooks/tests/test-stop-recursion.sh  # 개별
 ```
 
-커버: 재귀 방지, jq/git 미설치, 워크트리 동시 write(flock), 만료 lock 해제, continuation-plan 디바운스/idle 스킵, develop 미반영 워크트리 claim 감지(이중 claim/자기 제외/stale 무시), HI-04 체커 자체.
+커버: 재귀 방지, jq/git 미설치, 워크트리 동시 write(flock), 만료 lock 해제, continuation-plan 디바운스/idle 스킵, develop 미반영 워크트리 claim 감지(이중 claim/자기 제외/stale 무시), HI-04 체커 자체, **머지 게이트(실제 backlog shape의 step.prNumber join 차단/통과·우회·비활성·fail-open·PR번호 추출 견고성 — `test-pre-tool-use-merge-gate.sh` 19 assertion)**.
 
 ---
 

@@ -2,6 +2,7 @@
 name: skill-impl
 description: 구현 - 스텝별 개발 + PR 생성. 사용자가 "개발 진행해줘", "구현해줘" 또는 /skill-impl을 요청할 때 사용합니다.
 disable-model-invocation: false
+model: sonnet
 allowed-tools: Bash(git:*), Bash(./gradlew:*), Bash(mvn:*), Bash(./mvnw:*), Bash(npm:*), Bash(yarn:*), Bash(pnpm:*), Bash(bun:*), Bash(python:*), Bash(pytest:*), Bash(ruff:*), Bash(poetry:*), Bash(pip:*), Bash(npx:*), Bash(go:*), Bash(golangci-lint:*), Read, Write, Edit, Glob, Grep, Task
 argument-hint: "[--next|--all|--retry|--skip|--micro \"설명\"|--dry-run]"
 complexity-hint: medium
