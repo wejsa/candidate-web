@@ -128,12 +128,27 @@ describe('withdrawApplication', () => {
     expect(auditCreate).not.toHaveBeenCalled();
   });
 
-  it('이미 철회된 지원 재철회(멱등) → 두 번째는 APP_NOT_WITHDRAWABLE', async () => {
+  it('이미 철회된 지원 재철회(멱등) → 두 번째는 APP_NOT_WITHDRAWABLE, audit 미기록', async () => {
     updateMany.mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 0 });
 
     await withdrawApplication({ userId: 7, applicationId: 42, now: NOW });
+    expect(auditCreate).toHaveBeenCalledTimes(1); // 1차만 기록
     await expect(
       withdrawApplication({ userId: 7, applicationId: 42, now: NOW }),
     ).rejects.toMatchObject({ code: 'APP_NOT_WITHDRAWABLE' });
+    expect(auditCreate).toHaveBeenCalledTimes(1); // 2차(count=0)는 추가 기록 없음
+  });
+
+  it('AuditLog 생성 실패 시 에러 전파 — 트랜잭션 롤백 위임(BR-TX-01)', async () => {
+    // UPDATE는 성공(count=1)했으나 같은 트랜잭션의 AuditLog가 실패하면 에러가 전파되어
+    // Prisma가 UPDATE까지 롤백한다(감사 누락 없는 원자성). passthrough mock 한계상 전파만 박제.
+    updateMany.mockResolvedValue({ count: 1 });
+    auditCreate.mockRejectedValueOnce(new Error('audit insert failed'));
+
+    await expect(
+      withdrawApplication({ userId: 7, applicationId: 42, reason: '사유', now: NOW }),
+    ).rejects.toThrow('audit insert failed');
+
+    expect(updateMany).toHaveBeenCalledTimes(1);
   });
 });

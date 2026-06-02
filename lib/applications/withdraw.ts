@@ -9,6 +9,12 @@
 //   2) AuditLog(APPLICATION_WITHDRAW) — actor=본인, resource=application.
 //      metadataJson은 PII-free (사유 평문 미포함 — BR-PII-02). 사유 본문은 withdraw_reason 컬럼에만 저장.
 //
+// ApplicationStatusHistory 미기록 (의도된 설계 — db-designer CANDID-023 분석):
+//   철회는 `result`(ApplicationResult) 축 전이이고, ApplicationStatusHistory는 `currentStage`
+//   (StageType) 전이 전용 트랙이다. StageType에는 WITHDRAWN 값이 없으므로(REJECTED만 존재)
+//   철회를 history에 매핑할 수 없다. 철회 사실은 result=WITHDRAWN 컬럼 + AuditLog로 표현한다.
+//   (submit이 history를 남기는 것과의 비대칭은 두 축의 모델 차이에서 기인 — 회귀 가드용 박제)
+//
 // 트랜잭션 외 (BR-TX-02): 어드민 Slack 알림은 Step 4에서 호출자(API)가 트랜잭션 커밋 후
 //   fire-and-forget으로 발행한다. 본 서비스는 DB 상태 전이만 담당(롤백 위험 분리).
 //
