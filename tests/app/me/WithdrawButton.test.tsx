@@ -124,4 +124,13 @@ describe('WithdrawButton', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it('취소 후 재오픈 시 사유 입력 초기화 (잠재 PII 잔존 방지)', async () => {
+    render(<WithdrawButton applicationId={100} />);
+    const user = await openModal();
+    await user.type(screen.getByLabelText('철회 사유 (선택)'), '민감 사유');
+    await user.click(screen.getByRole('button', { name: '취소' }));
+    await user.click(screen.getByRole('button', { name: '지원 철회' }));
+    expect(screen.getByLabelText('철회 사유 (선택)')).toHaveValue('');
+  });
 });

@@ -73,6 +73,20 @@ describe('POST /api/v1/applications/me/[id]/withdraw', () => {
     expect(withdrawApplication).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 42, applicationId: 100, reason: null }),
     );
+    // 사유 미입력 → Slack hasReason:false (route 레벨 분기 박제)
+    expect(notifyApplicationWithdrawn).toHaveBeenCalledWith({
+      applicationId: 100,
+      hasReason: false,
+    });
+  });
+
+  it('Slack 알림 실패해도 철회 응답 200 유지 (BR-TX-02 fire-and-forget 비차단)', async () => {
+    notifyApplicationWithdrawn.mockRejectedValue(new Error('slack down'));
+
+    const response = await POST(postRequest({ reason: 'x' }), ctx('100'));
+
+    expect(response.status).toBe(200);
+    expect(withdrawApplication).toHaveBeenCalledTimes(1);
   });
 
   it('서비스가 APP_NOT_WITHDRAWABLE → 409 표준 에러 응답', async () => {

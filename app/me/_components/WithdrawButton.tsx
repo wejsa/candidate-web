@@ -25,6 +25,13 @@ export function WithdrawButton({ applicationId }: Props): React.JSX.Element {
   const [reason, setReason] = useState('');
   const [state, setState] = useState<SubmitState>({ status: 'idle', error: null });
 
+  // 모달 종료 시 입력 사유·에러를 리셋 — 재오픈 시 이전 사유(잠재 PII) 잔존 방지.
+  function closeModal(): void {
+    setOpen(false);
+    setReason('');
+    setState({ status: 'idle', error: null });
+  }
+
   async function handleConfirm(): Promise<void> {
     setState({ status: 'pending', error: null });
 
@@ -44,8 +51,7 @@ export function WithdrawButton({ applicationId }: Props): React.JSX.Element {
 
     // 성공(200) 또는 이미 철회/대상 아님(409) → 최신 상태로 새로고침.
     if (response.ok || response.status === 409) {
-      setOpen(false);
-      setState({ status: 'idle', error: null });
+      closeModal();
       router.refresh();
       return;
     }
@@ -77,11 +83,7 @@ export function WithdrawButton({ applicationId }: Props): React.JSX.Element {
           <button type="button" onClick={handleConfirm} disabled={state.status === 'pending'}>
             {state.status === 'pending' ? '처리 중…' : '철회 확인'}
           </button>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            disabled={state.status === 'pending'}
-          >
+          <button type="button" onClick={closeModal} disabled={state.status === 'pending'}>
             취소
           </button>
         </div>

@@ -29,7 +29,7 @@ export async function notifyApplicationWithdrawn({
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    await fetch(webhookUrl, {
+    const res = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -37,6 +37,10 @@ export async function notifyApplicationWithdrawn({
       }),
       signal: controller.signal,
     });
+    // 4xx/5xx(만료/오설정 webhook)는 fetch가 reject하지 않으므로 명시 검사 — 호출자(.catch)가 경고 로깅.
+    if (!res.ok) {
+      throw new Error(`slack webhook responded ${res.status}`);
+    }
   } finally {
     clearTimeout(timer);
   }
