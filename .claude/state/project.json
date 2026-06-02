@@ -40,10 +40,10 @@
   "hooks": {},
   "tokenHints": {},
   "metadata": {
-    "version": 1,
+    "version": 2,
     "updatedAt": "2026-05-12T18:22:05+09:00"
   },
   "createdAt": "2026-05-12T18:22:05+09:00",
-  "kitVersion": "2.3.3",
+  "kitVersion": "2.5.1",
   "kitSource": "https://github.com/wejsa/ai-crew-kit.git"
 }

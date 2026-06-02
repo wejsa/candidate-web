@@ -2,6 +2,7 @@
 name: skill-merge-pr
 description: PR 머지 - 승인된 PR을 Squash 머지하고 상태 업데이트. 사용자가 "PR 머지해줘" 또는 /skill-merge-pr을 요청할 때 사용합니다.
 disable-model-invocation: false
+model: sonnet
 allowed-tools: Bash(git:*), Bash(gh:*), Read, Write, Glob, Skill
 argument-hint: "{PR번호}"
 complexity-hint: light
@@ -128,3 +129,5 @@ CLAUDE.md "에러 복구 프로토콜" 참조. 미존재 시 3회 재시도 후 
 - 자기 PR은 승인 조건 스킵 후 머지 허용
 - Squash 머지만 사용
 - Task 완료 시 상태 파일 커밋 필수
+
+> **결정적 머지 게이트 (v2.4.0)**: 본 스킬의 prose 사전 조건과 별개로, `gh pr merge` 실행은 PreToolUse hook(`.claude/hooks/pre-tool-use.sh`)이 결정적으로 게이트한다 — `workflowState.lastReviewDecision=="REQUEST_CHANGES"`(미해결 CRITICAL)인 PR은 hook이 `exit 2`로 차단한다. 따라서 Step 6.5의 `lastReviewDecision` 갱신은 **이 게이트의 신호원**이기도 하다. 의도적 강행은 `CCK_GATE_BYPASS=1`, 전면 비활성은 `CCK_MERGE_GATE=off`(hooks/README 참조).

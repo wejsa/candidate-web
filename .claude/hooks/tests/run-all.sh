@@ -20,6 +20,7 @@ tests=(
   "test-diagnose.sh"
   "test-tasks-dict-shape.sh"
   "test-init-flag-bypass.sh"
+  "test-pre-tool-use-merge-gate.sh"
 )
 
 passed=0

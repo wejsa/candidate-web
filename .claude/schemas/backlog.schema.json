@@ -286,6 +286,11 @@
           "maximum": 2,
           "description": "같은 PR에 대한 skill-fix 호출 횟수 (루프 가드: 최대 2회)"
         },
+        "lastReviewDecision": {
+          "type": ["string", "null"],
+          "enum": ["APPROVED", "COMMENT", "REQUEST_CHANGES", null],
+          "description": "직전 skill-review-pr 회차의 결정값. skill-review-pr Step 6.5가 매 리뷰마다 갱신. skill-fix 모드 판정 SSOT(auto-fix vs 수동) 및 PreToolUse 머지 게이트(pre-tool-use.sh)의 결정적 신호. REQUEST_CHANGES = 미해결 CRITICAL 게시됨 → 머지 차단 대상. v2.4.0 도입(이전엔 스킬이 참조했으나 schema 미등록으로 additionalProperties:false에 거부되던 sleeper)."
+        },
         "updatedAt": {
           "type": "string",
           "format": "date-time",

@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "lastTaskNumber": 1,
+    "version": 1,
+    "projectPrefix": "TASK",
+    "createdAt": "2026-05-29T00:00:00+00:00",
+    "updatedAt": "2026-05-29T00:00:00+00:00"
+  },
+  "summary": {
+    "total": 1,
+    "done": 0,
+    "inProgress": 1,
+    "review": 0,
+    "todo": 0
+  },
+  "phases": {
+    "1": { "name": "기반/인프라", "description": "인증/스키마", "status": "in_progress" }
+  },
+  "tasks": {
+    "TASK-001": {
+      "id": "TASK-001",
+      "title": "JWT 인증 미들웨어",
+      "description": "JWT 발급/검증 + 토큰 회전",
+      "status": "in_progress",
+      "type": "feature",
+      "priority": "high",
+      "phase": 1,
+      "dependencies": [],
+      "createdAt": "2026-05-29T00:00:00+00:00",
+      "assignee": "alice@host-20260529-100000",
+      "assignedAt": "2026-05-29T10:00:00+00:00",
+      "lockedBy": "alice@host-20260529-100000",
+      "lockedAt": "2026-05-29T10:30:00+00:00",
+      "lockTTL": 3600,
+      "lockedFiles": ["src/auth/jwt.py"],
+      "currentStep": 1,
+      "steps": [
+        {
+          "number": 1,
+          "title": "JWT 발급/검증",
+          "status": "pr_created",
+          "files": ["src/auth/jwt.py"],
+          "prNumber": 42
+        }
+      ],
+      "workflowState": {
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 42,
+        "fixLoopCount": 1,
+        "lastReviewDecision": "REQUEST_CHANGES",
+        "autoChainArgs": "42 --auto-fix",
+        "updatedAt": "2026-05-29T10:30:00+00:00"
+      }
+    }
+  }
+}
