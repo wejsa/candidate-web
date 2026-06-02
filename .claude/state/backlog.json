@@ -2,13 +2,13 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 391,
+    "version": 392,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T23:30:09+09:00"
+    "updatedAt": "2026-06-02T23:34:12+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 42,
+    "done": 43,
     "inProgress": 1,
     "review": 0,
     "todo": 4
@@ -2936,34 +2936,18 @@
       "id": "CANDID-040",
       "title": "CANDID-016 Step 3 carry MAJOR/MINOR 보강",
       "description": "CANDID-016 Step 1~3 review carry 9건 일괄 처리: (a) D-MAJOR-1 ApplicationFormShell의 draftId={jobId} 명명/의미 정합 — 서버 라우트가 application_drafts.id를 받도록 변경 또는 명명 통일 (b) D-MAJOR-3 ResumeUploadStep 동시 업로드 race — 이전 abortRef cleanup 추가 (c) A-MAJOR-2 upload-state.ts invalid 전이 dev warn 추가 (d) A-MAJOR-3 storage.ts HMR-safe globalThis 싱글톤 (e) S-MAJOR-1 client.ts presign uploadUrl HTTPS 강제 가드 (NODE_ENV=production) (f) S-MAJOR-3 orphan S3 객체 정리 — CANDID-029 야간 배치 의존 명시 + design note (g) T-MAJOR-2~4 lengthComputable=false, sha256 reject 경로, confirm 422/409 명시 케이스, partial UNIQUE 통합 테스트 (h) D-MINOR-1 STORED_PATH_RE 확장자 화이트리스트 SSOT (i) MINOR/INFO 다수.",
-      "status": "in_progress",
+      "status": "done",
       "type": "refactor",
       "priority": "medium",
       "phase": 4,
-      "assignee": "jaese@hoji-20260602-220417",
-      "assignedAt": "2026-06-02T23:24:25+09:00",
-      "lockedFiles": [
-        "tests/lib/files/client.test.ts",
-        "tests/lib/files/confirm.test.ts",
-        "tests/app/api/v1/files/resume/presign.test.ts",
-        "tests/app/api/v1/files/resume/confirm.test.ts",
-        "lib/files/resume.ts"
-      ],
+      "lockedFiles": [],
       "dependencies": [
         "CANDID-016"
       ],
       "createdAt": "2026-05-25T11:00:00+09:00",
       "source": "CANDID-016 retro Action Item HIGH-3",
       "lockTTL": 10800,
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 109,
-        "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "109 --auto-fix",
-        "updatedAt": "2026-06-02T23:24:25+09:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
@@ -3014,12 +2998,14 @@
             "lib/files/resume.ts"
           ],
           "prLineLimit": 800,
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 109,
-          "branch": "feature/CANDID-040-step3"
+          "branch": "feature/CANDID-040-step3",
+          "mergedAt": "2026-06-02T23:34:12+09:00"
         }
       ],
-      "currentStep": 3
+      "currentStep": 3,
+      "completedAt": "2026-06-02T23:34:12+09:00"
     },
     "CANDID-041": {
       "id": "CANDID-041",
