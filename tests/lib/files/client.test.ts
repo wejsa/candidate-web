@@ -47,6 +47,12 @@ class FakeXHR {
       cb({ lengthComputable: true, loaded, total }),
     );
   }
+  // T-MAJOR-2 (CANDID-040): lengthComputable=false 진행 이벤트 — 총 크기 미상 시 onProgress 미호출 검증용.
+  emitProgressNonComputable() {
+    (this.upload._listeners.get('progress') ?? []).forEach((cb) =>
+      cb({ lengthComputable: false, loaded: 0, total: 0 }),
+    );
+  }
   loadSuccess(status: number) {
     this.status = status;
     this.emit('load');
@@ -207,6 +213,53 @@ describe('uploadResumeFile 실패 처리', () => {
     await new Promise((r) => setTimeout(r, 0));
     FakeXHR.instances[0]!.loadError();
     await expect(promise).rejects.toMatchObject({ status: 0 });
+  });
+});
+
+// T-MAJOR-2 / T-MAJOR-3 (CANDID-040): 업로드 진행률 경계 + checksum 실패 경로.
+describe('uploadResumeFile — 진행률/체크섬 경계 (T-MAJOR-2/3)', () => {
+  it('lengthComputable=false 진행 이벤트는 onProgress를 호출하지 않음 (T-MAJOR-2)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.endsWith('/presign'))
+          return { ok: true, json: async () => presignResponse } as Response;
+        return { ok: true, json: async () => confirmResponse } as Response;
+      }),
+    );
+    const progresses: number[] = [];
+    const promise = uploadResumeFile({
+      draftId: 7,
+      file: makeFile(),
+      onProgress: (p) => progresses.push(p),
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    // 총 크기 미상(lengthComputable=false) → 콜백 미발화. 그 후 정상 진행은 발화.
+    FakeXHR.instances[0]!.emitProgressNonComputable();
+    FakeXHR.instances[0]!.emitProgress(60, 100);
+    FakeXHR.instances[0]!.loadSuccess(200);
+    await promise;
+    expect(progresses).toEqual([60]); // non-computable 이벤트는 제외됨
+  });
+
+  it('checksum(sha256) 계산 실패 → 업로드 reject (T-MAJOR-3)', async () => {
+    // presign + S3 PUT 성공 후 sha256Hex(crypto.subtle.digest)가 reject되는 경로.
+    vi.spyOn(globalThis.crypto.subtle, 'digest').mockRejectedValue(
+      new DOMException('digest failed', 'OperationError'),
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.endsWith('/presign'))
+          return { ok: true, json: async () => presignResponse } as Response;
+        // confirm까지 도달하면 안 됨 (checksum 단계에서 실패).
+        throw new Error('confirm must not be reached');
+      }),
+    );
+    const promise = uploadResumeFile({ draftId: 7, file: makeFile() });
+    await new Promise((r) => setTimeout(r, 0));
+    FakeXHR.instances[0]!.loadSuccess(200); // S3 PUT 성공 → 이후 checksum 단계 진입
+    await expect(promise).rejects.toBeInstanceOf(DOMException);
   });
 });
 
