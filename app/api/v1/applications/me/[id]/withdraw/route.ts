@@ -15,6 +15,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/auth/middleware';
 import { withdrawApplication } from '@/lib/applications/withdraw';
+import { notifyApplicationWithdrawn } from '@/lib/notifications/slack';
 import { WithdrawRequestSchema } from '@/lib/applications/schema';
 import {
   POLICIES,
@@ -92,6 +93,19 @@ export const POST = withErrorHandler(
       userAgent: request.headers.get('user-agent')?.slice(0, 512) ?? null,
       // X-Forwarded-For 미신뢰 — CANDID-026 감사 IP 통일 전까지 null (account-withdraw 일관).
       ipAddress: null,
+    });
+
+    // BR-TX-02: 트랜잭션 커밋 후 어드민 Slack 알림 fire-and-forget. 실패해도 철회 응답 정상.
+    // 사유 평문은 외부로 보내지 않음(BR-PII-02) — 존재 여부만 전달.
+    void notifyApplicationWithdrawn({
+      applicationId,
+      hasReason: reason !== undefined && reason.trim() !== '',
+    }).catch((err) => {
+      console.warn(
+        `[application-withdraw-slack-failed] applicationId=${applicationId} err=${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
     });
 
     const response = NextResponse.json(result, { status: 200 });

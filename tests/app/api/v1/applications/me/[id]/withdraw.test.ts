@@ -12,12 +12,18 @@ vi.mock('@/lib/auth/middleware', () => ({
 vi.mock('@/lib/applications/withdraw', () => ({
   withdrawApplication: vi.fn(),
 }));
+vi.mock('@/lib/notifications/slack', () => ({
+  notifyApplicationWithdrawn: vi.fn().mockResolvedValue(undefined),
+}));
 
 const { requireAuth } = (await import('@/lib/auth/middleware')) as unknown as {
   requireAuth: Mock;
 };
 const { withdrawApplication } = (await import('@/lib/applications/withdraw')) as unknown as {
   withdrawApplication: Mock;
+};
+const { notifyApplicationWithdrawn } = (await import('@/lib/notifications/slack')) as unknown as {
+  notifyApplicationWithdrawn: Mock;
 };
 const { POST } = await import('@/app/api/v1/applications/me/[id]/withdraw/route');
 
@@ -52,6 +58,11 @@ describe('POST /api/v1/applications/me/[id]/withdraw', () => {
       reason: '개인 사정',
       userAgent: 'Mozilla/5.0',
       ipAddress: null,
+    });
+    // BR-TX-02: Slack 알림 fire-and-forget (사유 평문 미전달 — hasReason만)
+    expect(notifyApplicationWithdrawn).toHaveBeenCalledWith({
+      applicationId: 100,
+      hasReason: true,
     });
   });
 
