@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 40,
+    "version": 41,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-05-31T22:56:50+09:00"
+    "updatedAt": "2026-06-02T21:51:07+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1282,6 +1282,22 @@
       "stepCount": 5,
       "reviewSummary": "5 스텝(조회/수정/비번/소셜해제/소셜연결) 전부 CRITICAL 0. 매 스텝 QA+리뷰 MAJOR in-PR 보강(L-019). DB 스키마 변경 없음(순수 앱 레이어). PII 마스킹·BCrypt12·전체 revoke·마지막 인증수단 가드·OAuth state-intent 봉인+세션 바인딩. carry: 감사 이벤트(OAUTH/PASSWORD) CANDID-026, IP 추출 통일 CANDID-026.",
       "note": "plan Step4를 4a(해제)/4b(연결)로 분할 → 총 5 스텝."
+    },
+    "CANDID-047": {
+      "id": "CANDID-047",
+      "title": "이력서 업로드 422 빈 message 시 빈 alert 렌더 버그",
+      "phase": 3,
+      "priority": "medium",
+      "type": "bug",
+      "completedAt": "2026-06-02T21:51:07+09:00",
+      "assignee": "jaese@hoji-20260531-233705",
+      "prs": [
+        101
+      ],
+      "totalMergedLines": 47,
+      "stepCount": 1,
+      "reviewSummary": "T2 자동분류(domain+security): CRITICAL 0, MAJOR 0, MINOR 1 게시(드롭 1, 강등 0). S-MAJOR-2 서버메시지 화이트리스트 불변식 유지 검증. 자기 PR → COMMENT 후 머지.",
+      "note": "CANDID-039 Step 2 리뷰(QA P1)에서 발견. 서버 422 빈/공백 message → 빈 ⚠️ alert 렌더 버그. lib classifyUploadError + 컴포넌트 레이어드 폴백 + 회귀 테스트 4종(단위2+컴포넌트2)."
     }
   }
 }
