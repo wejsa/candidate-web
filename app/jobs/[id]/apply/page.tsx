@@ -58,6 +58,7 @@ export default async function ApplyPage({ params }: PageProps) {
     <main>
       <ApplicationFormShell
         jobId={jobId}
+        draftDbId={draft.id}
         initialPayload={draft.payloadJson as unknown as DraftPayloadV1}
         initialVersion={draft.version}
         initialLastSavedAt={draft.lastSavedAt.toISOString()}
