@@ -331,6 +331,8 @@ model Application {
   result                           ApplicationResult @default(IN_PROGRESS)
   submittedAt                      DateTime          @map("submitted_at")
   withdrawnAt                      DateTime?         @map("withdrawn_at")
+  // CANDID-023 (US-MY-003): 지원 철회 사유 — 선택 입력. 자유 텍스트(앱 레이어 sanitize, L-006). PII 아님.
+  withdrawReason                   String?           @map("withdraw_reason") @db.VarChar(500)
   // PII snapshot (BR-PII-03 익명화 보존). CANDID-008 패턴 미러 — AES-256-GCM ciphertext.
   // 본 Step은 NULLABLE 컬럼만 정의. extension wiring/암복호화는 CANDID-005-FU1.
   applicantNameSnapshot            Bytes?            @map("applicant_name_snapshot")
