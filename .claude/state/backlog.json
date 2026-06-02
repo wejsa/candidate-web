@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 379,
+    "version": 380,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T21:51:07+09:00"
+    "updatedAt": "2026-06-02T21:59:00+09:00"
   },
   "summary": {
     "total": 47,
     "done": 41,
     "inProgress": 1,
     "review": 0,
-    "todo": 6
+    "todo": 5
   },
   "phases": {
     "1": {
@@ -1918,14 +1918,25 @@
       "id": "CANDID-023",
       "title": "지원 철회 (US-MY-003)",
       "description": "철회 사유(선택) 수집. result=WITHDRAWN 갱신, withdrawn_at 기록. 동일 공고 재지원 정책(모집 기간 내 1회 허용 또는 불가).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
       "dependencies": [
         "CANDID-019"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "jaese@hoji-20260602-215900",
+      "assignedAt": "2026-06-02T21:59:00+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": null,
+        "updatedAt": "2026-06-02T21:59:00+09:00"
+      }
     },
     "CANDID-024": {
       "id": "CANDID-024",
