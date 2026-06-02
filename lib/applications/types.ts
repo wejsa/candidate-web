@@ -16,3 +16,9 @@ export interface SubmittedApplicationSummary {
   submittedAt: string; // ISO 8601
   currentStage: 'SUBMITTED';
 }
+
+// CANDID-023 Step 2 — 지원 철회 응답 (PII-free).
+export interface WithdrawnApplicationSummary {
+  result: 'WITHDRAWN';
+  withdrawnAt: string; // ISO 8601
+}
