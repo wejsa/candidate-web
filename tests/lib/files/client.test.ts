@@ -4,7 +4,7 @@
 // XMLHttpRequest는 jsdom 기본 제공 — globalThis.XMLHttpRequest를 직접 stub.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { HttpStatusError, uploadResumeFile } from '@/lib/files/client';
+import { assertSecureUploadUrl, HttpStatusError, uploadResumeFile } from '@/lib/files/client';
 
 // XHR stub — open/setRequestHeader/send/abort + event listeners + upload.progress emit.
 class FakeXHR {
@@ -207,5 +207,32 @@ describe('uploadResumeFile 실패 처리', () => {
     await new Promise((r) => setTimeout(r, 0));
     FakeXHR.instances[0]!.loadError();
     await expect(promise).rejects.toMatchObject({ status: 0 });
+  });
+});
+
+// S-MAJOR-1 (CANDID-040): 운영 환경 HTTPS presign URL 강제.
+describe('assertSecureUploadUrl (S-MAJOR-1)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('production + http URL → 차단(HttpStatusError)', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(() => assertSecureUploadUrl('http://minio.local/upload?sig=abc')).toThrow(HttpStatusError);
+  });
+
+  it('production + https URL → 통과', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(() => assertSecureUploadUrl('https://s3.amazonaws.com/bucket/key?sig=abc')).not.toThrow();
+  });
+
+  it('production + 잘못된 URL → 차단', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(() => assertSecureUploadUrl('not-a-url')).toThrow(HttpStatusError);
+  });
+
+  it('development + http URL → 통과 (MinIO 로컬 허용)', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(() => assertSecureUploadUrl('http://localhost:9000/upload')).not.toThrow();
   });
 });

@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // vi.mock factory는 hoisting되므로 외부 변수 참조 불가 — vi.hoisted로 모킹용 fn 사전 끌어올림.
-const { getSignedUrlMock, s3SendMock } = vi.hoisted(() => ({
+const { getSignedUrlMock, s3SendMock, s3ConstructMock } = vi.hoisted(() => ({
   getSignedUrlMock: vi.fn(),
   s3SendMock: vi.fn(),
+  s3ConstructMock: vi.fn(), // A-MAJOR-3: S3Client 생성 횟수 추적 (HMR 싱글톤 회귀 가드)
 }));
 
 vi.mock('@aws-sdk/s3-request-presigner', () => ({
@@ -29,7 +30,9 @@ vi.mock('@aws-sdk/client-s3', async () => {
     constructor(public input: Record<string, unknown>) {}
   }
   class S3Client {
-    constructor(public config: Record<string, unknown>) {}
+    constructor(public config: Record<string, unknown>) {
+      s3ConstructMock();
+    }
     send = s3SendMock;
   }
   return { S3Client, PutObjectCommand, DeleteObjectCommand, S3ServiceException };
@@ -57,6 +60,7 @@ function stubS3Env(): void {
 beforeEach(() => {
   getSignedUrlMock.mockReset();
   s3SendMock.mockReset();
+  s3ConstructMock.mockReset();
   __resetCachedEnvForTesting();
   __resetStorageClientForTesting();
 });
@@ -105,6 +109,13 @@ describe('isValidResumeStoredPath', () => {
     ).toBe(true);
   });
 
+  // D-MINOR-1 (CANDID-040): 확장자 화이트리스트 SSOT — RESUME_ALLOWED_EXTS만 통과.
+  it.each(['pdf', 'docx', 'doc', 'hwp', 'hwpx'])('화이트리스트 확장자 .%s 통과', (ext) => {
+    expect(
+      isValidResumeStoredPath(`resumes/2026/05/01234567-89ab-cdef-0123-456789abcdef.${ext}`),
+    ).toBe(true);
+  });
+
   it.each([
     ['외부 prefix', '../etc/passwd'],
     ['잘못된 prefix', 'avatars/2026/05/01234567-89ab-cdef-0123-456789abcdef.pdf'],
@@ -112,8 +123,39 @@ describe('isValidResumeStoredPath', () => {
     ['UUID 형식 위반', 'resumes/2026/05/not-a-uuid.pdf'],
     ['확장자 누락', 'resumes/2026/05/01234567-89ab-cdef-0123-456789abcdef'],
     ['빈 문자열', ''],
+    // D-MINOR-1: 위조 storedPath의 비화이트리스트 확장자 차단 (기존 [a-z0-9]{1,5}는 통과시켰음).
+    ['실행 파일 위장 .exe', 'resumes/2026/05/01234567-89ab-cdef-0123-456789abcdef.exe'],
+    ['압축 .zip', 'resumes/2026/05/01234567-89ab-cdef-0123-456789abcdef.zip'],
+    ['임의 5자 확장자 .abcde', 'resumes/2026/05/01234567-89ab-cdef-0123-456789abcdef.abcde'],
   ])('%s 거부: %s', (_label, input) => {
     expect(isValidResumeStoredPath(input)).toBe(false);
+  });
+
+  // D-MINOR-1: 'bin'은 buildResumeKey 폴백 확장자 — round-trip 불변식 유지 위해 인정.
+  it("'.bin' 폴백 키는 통과 (buildResumeKey round-trip 불변식)", () => {
+    expect(
+      isValidResumeStoredPath('resumes/2026/05/01234567-89ab-cdef-0123-456789abcdef.bin'),
+    ).toBe(true);
+  });
+});
+
+// A-MAJOR-3 (CANDID-040): HMR-safe globalThis 싱글톤 회귀 가드.
+describe('S3Client 싱글톤 (A-MAJOR-3)', () => {
+  it('여러 presign 호출이 S3Client를 1회만 생성 (globalThis 캐시 재사용)', async () => {
+    stubS3Env();
+    getSignedUrlMock.mockResolvedValue('https://minio.local/upload?sig=abc');
+    await presignResumeUpload('a.pdf', 'application/pdf');
+    await presignResumeUpload('b.pdf', 'application/pdf');
+    expect(s3ConstructMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('__resetStorageClientForTesting 후에는 재생성 (캐시 초기화 검증)', async () => {
+    stubS3Env();
+    getSignedUrlMock.mockResolvedValue('https://minio.local/upload?sig=abc');
+    await presignResumeUpload('a.pdf', 'application/pdf');
+    __resetStorageClientForTesting();
+    await presignResumeUpload('b.pdf', 'application/pdf');
+    expect(s3ConstructMock).toHaveBeenCalledTimes(2);
   });
 });
 

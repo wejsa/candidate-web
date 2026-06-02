@@ -10,6 +10,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { getEnv } from '@/lib/env';
 import { AppError } from '@/lib/errors';
+import { RESUME_ALLOWED_EXTS } from '@/lib/files/validation';
 
 // CANDID-016 Step 1 — S3/MinIO presigned PUT URL 발급 + 객체 삭제 헬퍼.
 // **호출 위치**: Route Handler / Server Action (Node runtime). middleware/Edge 금지.
@@ -17,7 +18,10 @@ import { AppError } from '@/lib/errors';
 // "모두 set" 또는 "모두 unset" 두 상태만 가정. 후자에서는 SYS_DEPENDENCY_UNAVAILABLE throw
 // (A-MAJOR-2 fix: 구성 미흡과 호출 실패 코드 분리 — 운영 알람 분기 가능).
 
-let cachedClient: S3Client | null = null;
+// A-MAJOR-3 fix (CANDID-040): HMR-safe 싱글톤. 모듈 스코프 `let`은 Next.js dev의 모듈 hot-reload마다
+// 새 S3Client를 만들어 소켓/핸들러를 누수시킨다. globalThis 캐시로 reload 간 단일 인스턴스를 보장
+// (Prisma 클라이언트 권장 패턴과 동일). production에서도 동작 동일(모듈 1회 평가라 사실상 모듈 싱글톤).
+const globalForS3 = globalThis as unknown as { __resumeS3Client?: S3Client | null };
 
 function isStorageConfigured(): boolean {
   const env = getEnv();
@@ -56,7 +60,7 @@ function getClient(): { client: S3Client; bucket: string; ttlSec: number } {
     });
   }
   const env = getEnv();
-  if (cachedClient === null) {
+  if (!globalForS3.__resumeS3Client) {
     // A-MAJOR-1 fix (PR #57 carry): connection/socket timeout + maxAttempts 명시.
     // 외부 S3/MinIO 장애 시 Next.js Route Handler가 무한 대기 → worker hang 차단.
     // presign은 네트워크 호출 없으나 deleteObject는 실제 PUT/DELETE → 본 핸들러 영향.
@@ -64,7 +68,7 @@ function getClient(): { client: S3Client; bucket: string; ttlSec: number } {
       connectionTimeout: 2_000, // TCP 연결 2초
       socketTimeout: 10_000, // 응답 10초 (delete가 주 IO)
     });
-    cachedClient = new S3Client({
+    globalForS3.__resumeS3Client = new S3Client({
       endpoint: env.S3_ENDPOINT,
       region: 'auto',
       // MinIO 호환 — 일부 호환 스토리지는 path-style만 지원.
@@ -78,7 +82,7 @@ function getClient(): { client: S3Client; bucket: string; ttlSec: number } {
     });
   }
   return {
-    client: cachedClient,
+    client: globalForS3.__resumeS3Client,
     bucket: env.S3_BUCKET as string,
     ttlSec: env.S3_PRESIGN_TTL_SEC,
   };
@@ -102,8 +106,14 @@ export function buildResumeKey(originalFilename: string, now: Date = new Date())
 
 // confirm 단계에서 storedPath가 본 함수가 만든 형식과 일치하는지 검증.
 // 외부 prefix 주입 (예: "../etc/passwd") 차단.
+// D-MINOR-1 fix (CANDID-040): 확장자 그룹을 RESUME_ALLOWED_EXTS SSOT에서 도출. 기존 `[a-z0-9]{1,5}`는
+// 위조 storedPath의 임의 확장자(.exe/.zip 등)를 통과시켜 화이트리스트와 단절돼 있었다.
+// 'bin'은 buildResumeKey가 비정상 입력(확장자 누락/traversal 등)에 부여하는 폴백 키 확장자이므로
+// round-trip 불변식 유지를 위해 함께 인정한다(검증은 validation.ts가 presign 전에 이미 수행 —
+// 정상 플로우에서 'bin' 키는 생성되지 않으며, 임의 확장자 차단이라는 보안 목표는 그대로 달성).
+const STORED_PATH_EXT_GROUP = [...RESUME_ALLOWED_EXTS, 'bin'].join('|');
 const STORED_PATH_RE = new RegExp(
-  `^${KEY_PREFIX}/\\d{4}/\\d{2}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.[a-z0-9]{1,5}$`,
+  `^${KEY_PREFIX}/\\d{4}/\\d{2}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(?:${STORED_PATH_EXT_GROUP})$`,
 );
 
 export function isValidResumeStoredPath(storedPath: string): boolean {
@@ -182,5 +192,5 @@ export function __resetStorageClientForTesting(): void {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('__resetStorageClientForTesting must not be called in production');
   }
-  cachedClient = null;
+  globalForS3.__resumeS3Client = null;
 }

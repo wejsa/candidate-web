@@ -79,12 +79,41 @@ export type UploadAction =
   | { type: 'abort' }
   | { type: 'reset' };
 
+// A-MAJOR-2 fix (CANDID-040): dev-only 비정상 전이 경고.
+// reducer는 의도적으로 모든 전이를 허용하지만(UI 호출자가 일관성 책임), 개발 중 예기치 않은
+// (status, action) 조합을 조기에 드러내 호출 순서 버그를 잡기 위한 가드. 순수성 유지 — 상태는
+// 바꾸지 않고 console.warn만 출력하며, production에서는 no-op(번들·런타임 비용 0 지향).
+const ALWAYS_ALLOWED: ReadonlySet<UploadAction['type']> = new Set(['reset', 'select', 'abort']);
+const VALID_TRANSITIONS: Record<UploadStatus, ReadonlySet<UploadAction['type']>> = {
+  idle: new Set(),
+  validating: new Set(['validate-fail', 'upload-start']),
+  uploading: new Set(['upload-progress', 'upload-complete', 'fail']),
+  confirming: new Set(['confirm-start', 'confirm-success', 'fail']),
+  scanning: new Set(),
+  clean: new Set(),
+  infected: new Set(),
+  failed: new Set(['upload-start']), // 재시도 경로(performUpload 재호출)
+  aborted: new Set(['upload-start']), // 재시도 경로
+};
+
+export function warnIfInvalidTransition(state: UploadState, action: UploadAction): void {
+  if (process.env.NODE_ENV === 'production') return;
+  if (ALWAYS_ALLOWED.has(action.type)) return;
+  if (VALID_TRANSITIONS[state.status].has(action.type)) return;
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[upload-state] 예기치 않은 전이: status="${state.status}" + action="${action.type}". ` +
+      'UI 호출 순서를 확인하세요 (dev 전용 경고 · 상태는 정상 처리됨).',
+  );
+}
+
 /**
  * pure transition — 입력 상태 + 액션 → 새 상태.
  * 의도적으로 모든 상태에서 모든 액션 허용 (UI 호출자가 일관성 책임). 단,
- * progress는 0..100 clamp.
+ * progress는 0..100 clamp. dev에서는 비정상 전이를 warnIfInvalidTransition으로 경고.
  */
 export function uploadReducer(state: UploadState, action: UploadAction): UploadState {
+  warnIfInvalidTransition(state, action);
   switch (action.type) {
     case 'select':
       return {
