@@ -146,6 +146,11 @@ export const ERROR_CATALOG = {
     status: 404,
     message: '면접 일정을 찾을 수 없습니다.',
   },
+  // CANDID-023 Step 2 — 지원 철회 불가 (미존재 / 비소유 / 이미 종결: WITHDRAWN·PASSED·FAILED) 단일 코드, 정보 누출 회피
+  APP_NOT_WITHDRAWABLE: {
+    status: 409,
+    message: '철회할 수 없는 지원입니다. 이미 처리되었거나 대상이 아닙니다.',
+  },
 
   // 파일 — FILE_
   FILE_SIZE_EXCEEDED: { status: 422, message: '허용된 파일 크기를 초과했습니다.' },
