@@ -64,10 +64,39 @@ describe('integration: resume_files partial UNIQUE (uk_resume_files_one_per_draf
     await prisma.resumeFile.create({
       data: buildResumeData(draft.id, user.id, { virusScanStatus: 'INFECTED' }),
     });
+    // 인과 고정(MINOR): INFECTED row가 동일 draft에 실제 잔존함을 사전 단언 — 성공이 "제외 조건" 덕분임을 명확히.
+    expect(
+      await prisma.resumeFile.count({
+        where: { draftId: draft.id, virusScanStatus: 'INFECTED' },
+      }),
+    ).toBe(1);
     const second = await prisma.resumeFile.create({
       data: buildResumeData(draft.id, user.id), // 기본 PENDING
     });
     expect(second.id).toBeGreaterThan(0);
     expect(second.virusScanStatus).toBe('PENDING');
+  });
+
+  it('FAILED 잔존 + 새 PENDING 첨부 → 허용 (FAILED도 partial UNIQUE 평가 제외)', async () => {
+    // v2 인덱스 WHERE는 IN ('PENDING','CLEAN') — INFECTED/FAILED 둘 다 제외. FAILED 분기 회귀 가드.
+    const { prisma, user, draft } = await seedDraft();
+    await prisma.resumeFile.create({
+      data: buildResumeData(draft.id, user.id, { virusScanStatus: 'FAILED' }),
+    });
+    const second = await prisma.resumeFile.create({
+      data: buildResumeData(draft.id, user.id), // 기본 PENDING
+    });
+    expect(second.id).toBeGreaterThan(0);
+  });
+
+  it('CLEAN 활성 + 새 PENDING 첨부 → P2002 (CLEAN도 활성 평가 대상)', async () => {
+    // UNIQUE 평가 대상은 PENDING+CLEAN 둘 다. 스캔 완료(CLEAN) 첨부가 활성으로 남은 흔한 충돌 경로.
+    const { prisma, user, draft } = await seedDraft();
+    await prisma.resumeFile.create({
+      data: buildResumeData(draft.id, user.id, { virusScanStatus: 'CLEAN' }),
+    });
+    await expect(
+      prisma.resumeFile.create({ data: buildResumeData(draft.id, user.id) }), // PENDING
+    ).rejects.toMatchObject({ code: 'P2002' });
   });
 });
