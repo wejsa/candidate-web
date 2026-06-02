@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 388,
+    "version": 389,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T23:14:50+09:00"
+    "updatedAt": "2026-06-02T23:24:25+09:00"
   },
   "summary": {
     "total": 47,
@@ -2880,7 +2880,7 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "jaese@hoji-20260602-220417",
-      "assignedAt": "2026-06-02T23:14:50+09:00",
+      "assignedAt": "2026-06-02T23:24:25+09:00",
       "lockedFiles": [
         "tests/lib/files/client.test.ts",
         "tests/lib/files/confirm.test.ts",
@@ -2895,13 +2895,13 @@
       "source": "CANDID-016 retro Action Item HIGH-3",
       "lockTTL": 10800,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 109,
         "fixLoopCount": 0,
         "lastReviewDecision": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-02T23:14:50+09:00"
+        "autoChainArgs": "109 --auto-fix",
+        "updatedAt": "2026-06-02T23:24:25+09:00"
       },
       "steps": [
         {
@@ -2953,7 +2953,9 @@
             "lib/files/resume.ts"
           ],
           "prLineLimit": 800,
-          "status": "pending"
+          "status": "pr_created",
+          "prNumber": 109,
+          "branch": "feature/CANDID-040-step3"
         }
       ],
       "currentStep": 3
