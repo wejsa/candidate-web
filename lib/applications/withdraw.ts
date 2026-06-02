@@ -30,8 +30,11 @@ import type { WithdrawnApplicationSummary } from '@/lib/applications/types';
 interface WithdrawInput {
   userId: number;
   applicationId: number;
-  /** 철회 사유 — 선택 입력. 호출자(API)에서 sanitize + 길이 검증 후 전달. */
+  /** 철회 사유 — 선택 입력. 호출자(API)에서 trim + 길이 검증(≤500) 후 전달. */
   reason?: string | null;
+  /** 감사 포렌식 — 호출자(API)가 헤더에서 주입. ipAddress는 CANDID-026 통일 전까지 null 관례. */
+  userAgent?: string | null;
+  ipAddress?: string | null;
   now?: Date;
 }
 
@@ -48,6 +51,8 @@ export async function withdrawApplication({
   userId,
   applicationId,
   reason = null,
+  userAgent = null,
+  ipAddress = null,
   now = new Date(),
 }: WithdrawInput): Promise<WithdrawnApplicationSummary> {
   await prisma.$transaction(async (tx) => {
@@ -76,6 +81,8 @@ export async function withdrawApplication({
         eventType: AuditEventType.APPLICATION_WITHDRAW,
         resourceType: 'application',
         resourceId: String(applicationId),
+        ipAddress,
+        userAgent,
         metadataJson: { hasReason: reason !== null && reason !== '' } as Prisma.InputJsonValue,
       },
     });

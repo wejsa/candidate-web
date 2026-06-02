@@ -138,6 +138,17 @@ export const USER_POLICIES = Object.freeze({
     maxRequests: 3,
   } satisfies UserRateLimitPolicy),
   /**
+   * CANDID-023 Step 3 — 지원 철회 user-bucket (US-MY-003). 인증된 self-withdraw의 자원 소모형
+   * abuse(임의 applicationId 대량 POST → tx + audit insert) 차단. 멱등 가드가 상태 오염은 막으나
+   * 호출 비용은 발생하므로 user 단위 제한. 시간당 10회: 정상 사용자(활성 지원 소수 + 재시도) 흡수,
+   * 남용 차단. account-withdraw(WITHDRAW_USER) 보안 컨트롤과 정합.
+   */
+  WITHDRAW_APPLICATION_USER: Object.freeze({
+    name: 'withdraw_application_user',
+    windowMs: 3_600_000,
+    maxRequests: 10,
+  } satisfies UserRateLimitPolicy),
+  /**
    * CANDID-024 Step 2 — 프로필 수정(이름/연락처) user-bucket. 저빈도 작업이나 PII 재암호화
    * 폭주 + 스크립트 오류 다중 호출 차단. 시간당 20회: 정상 편집/재시도 흡수, 남용은 차단.
    */
