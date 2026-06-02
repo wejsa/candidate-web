@@ -14,6 +14,12 @@ import { ResumeUploadStep } from './ResumeUploadStep';
 
 interface Props {
   jobId: number;
+  /**
+   * application_drafts.id (DB PK). D-MAJOR-1 fix (CANDID-040): ResumeUploadStep이 presign/confirm에
+   * 전달하는 draftId는 jobPostingId가 아니라 **draft DB id**여야 한다(서버 issueResumePresign이
+   * applicationDraft.findUnique({where:{id}})로 조회). jobId(공고 id)는 autoSave의 jobPostingId 용도로만 사용.
+   */
+  draftDbId: number;
   initialPayload: DraftPayloadV1;
   initialVersion: number;
   initialLastSavedAt: string;
@@ -28,6 +34,7 @@ const STEPS: { step: ApplicationStep; label: string }[] = [
 
 export function ApplicationFormShell({
   jobId,
+  draftDbId,
   initialPayload,
   initialVersion,
   initialLastSavedAt,
@@ -103,7 +110,7 @@ export function ApplicationFormShell({
         )}
         {currentStep === 2 && (
           <ResumeUploadStep
-            draftId={jobId}
+            draftId={draftDbId}
             onAttached={() => {
               // ResumeFile 메타는 서버 DB(resume_files.draft_id)로 직접 연결되므로 payload 갱신 불요.
               // CANDID-018 최종 제출 시 BR-TX-01 단일 트랜잭션으로 draft → application 이관.
