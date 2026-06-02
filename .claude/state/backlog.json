@@ -4,7 +4,7 @@
     "projectPrefix": "CANDID",
     "version": 382,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T22:08:16+09:00"
+    "updatedAt": "2026-06-02T22:14:51+09:00"
   },
   "summary": {
     "total": 47,
@@ -1927,79 +1927,16 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260602-215900",
-      "assignedAt": "2026-06-02T22:08:16+09:00",
-      "lockTTL": 7200,
-      "lockedFiles": [
-        "prisma/schema.prisma",
-        "lib/applications/withdraw.ts",
-        "lib/errors/codes.ts",
-        "app/api/v1/applications/me/[id]/withdraw/route.ts",
-        "app/me/[applicationId]/page.tsx",
-        "app/me/_components/WithdrawButton.tsx",
-        "lib/notifications/slack.ts",
-        "lib/my-page/detail-service.ts"
-      ],
+      "assignedAt": "2026-06-02T21:59:00+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
         "prNumber": null,
         "fixLoopCount": null,
-        "updatedAt": "2026-06-02T22:08:16+09:00"
-      },
-      "steps": [
-        {
-          "number": 1,
-          "title": "마이그레이션 — withdraw_reason 컬럼",
-          "description": "applications.withdraw_reason VARCHAR(500) NULL 추가 (Prisma schema + migration.sql). CONCURRENTLY 미사용(L-029), 비-destructive ADD, 롤백 DROP COLUMN.",
-          "status": "pending",
-          "files": [
-            "prisma/schema.prisma"
-          ],
-          "prLineLimit": 150,
-          "estimatedLines": 80
-        },
-        {
-          "number": 2,
-          "title": "도메인 서비스 + 단위 테스트",
-          "description": "lib/applications/withdraw.ts — 소유권+상태 검증, 조건부 UPDATE WHERE result='IN_PROGRESS'(멱등성/경합 가드), AuditLog(APPLICATION_WITHDRAW) in-tx. APP_NOT_WITHDRAWABLE 에러코드 신설. 단위 테스트.",
-          "status": "pending",
-          "files": [
-            "lib/applications/withdraw.ts",
-            "lib/errors/codes.ts",
-            "tests/lib/applications/withdraw.test.ts"
-          ],
-          "prLineLimit": 600,
-          "estimatedLines": 450
-        },
-        {
-          "number": 3,
-          "title": "API route + 통합 테스트",
-          "description": "POST /api/v1/applications/me/[id]/withdraw — withErrorHandler→requireAuth→withdrawApplication. zod reason optional+sanitize. 통합 테스트(route export 직접 import).",
-          "status": "pending",
-          "files": [
-            "app/api/v1/applications/me/[id]/withdraw/route.ts",
-            "tests/app/api/v1/applications/me/[id]/withdraw.test.ts"
-          ],
-          "prLineLimit": 400,
-          "estimatedLines": 300
-        },
-        {
-          "number": 4,
-          "title": "UI + Slack 알림",
-          "description": "마이페이지 상세 철회 버튼+확인 모달+사유 입력+성공 후 갱신. detail-service canWithdraw 플래그. Slack fire-and-forget(트랜잭션 외, 최소 webhook, env 미설정 시 no-op).",
-          "status": "pending",
-          "files": [
-            "app/me/[applicationId]/page.tsx",
-            "app/me/_components/WithdrawButton.tsx",
-            "lib/notifications/slack.ts",
-            "lib/my-page/detail-service.ts",
-            "tests/app/me/WithdrawButton.test.tsx"
-          ],
-          "prLineLimit": 600,
-          "estimatedLines": 500
-        }
-      ],
-      "currentStep": 1
+        "updatedAt": "2026-06-02T21:59:00+09:00"
+      }
     },
     "CANDID-024": {
       "id": "CANDID-024",
@@ -2943,22 +2880,87 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "jaese@hoji-20260602-220417",
-      "assignedAt": "2026-06-02T22:04:17+09:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-06-02T22:14:51+09:00",
+      "lockedFiles": [
+        "lib/files/upload-state.ts",
+        "lib/files/storage.ts",
+        "lib/files/client.ts",
+        "lib/files/validation.ts",
+        "tests/lib/files/upload-state.test.ts",
+        "tests/lib/files/storage.test.ts",
+        "tests/lib/files/client.test.ts",
+        "app/jobs/[id]/apply/page.tsx",
+        "app/jobs/[id]/apply/_components/ApplicationFormShell.tsx",
+        "app/jobs/[id]/apply/_components/ResumeUploadStep.tsx",
+        "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
+        "tests/app/api/v1/files/resume/presign.test.ts",
+        "tests/app/api/v1/files/resume/confirm.test.ts",
+        "tests/lib/files/confirm.test.ts",
+        "lib/files/resume.ts"
+      ],
       "dependencies": [
         "CANDID-016"
       ],
       "createdAt": "2026-05-25T11:00:00+09:00",
       "source": "CANDID-016 retro Action Item HIGH-3",
-      "lockTTL": 1800,
+      "lockTTL": 10800,
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": null,
         "lastReviewDecision": null,
-        "updatedAt": "2026-06-02T22:04:17+09:00"
-      }
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-02T22:14:51+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "lib 보안·아키텍처 보강 (c,d,e,h)",
+          "description": "upload-state.ts dev-only 전이 warn(c) · storage.ts HMR globalThis 싱글톤(d) + STORED_PATH_RE 확장자 SSOT(h) · client.ts prod HTTPS presign 가드(e). 단위테스트 동반.",
+          "files": [
+            "lib/files/upload-state.ts",
+            "lib/files/storage.ts",
+            "lib/files/client.ts",
+            "lib/files/validation.ts",
+            "tests/lib/files/upload-state.test.ts",
+            "tests/lib/files/storage.test.ts",
+            "tests/lib/files/client.test.ts"
+          ],
+          "prLineLimit": 500,
+          "status": "pending"
+        },
+        {
+          "number": 2,
+          "title": "draftId 의미 정합(a) + 동시 race(b)",
+          "description": "option A: page가 실제 draft.id를 ApplicationFormShell→ResumeUploadStep에 전달(서버 계약 유지). ResumeUploadStep performUpload 진입 시 이전 abortRef cleanup(b). 컴포넌트/라우트 회귀 테스트.",
+          "files": [
+            "app/jobs/[id]/apply/page.tsx",
+            "app/jobs/[id]/apply/_components/ApplicationFormShell.tsx",
+            "app/jobs/[id]/apply/_components/ResumeUploadStep.tsx",
+            "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
+            "tests/app/api/v1/files/resume/presign.test.ts",
+            "tests/app/api/v1/files/resume/confirm.test.ts"
+          ],
+          "prLineLimit": 500,
+          "status": "pending"
+        },
+        {
+          "number": 3,
+          "title": "테스트 갭 보강(g) + orphan 설계노트(f,i)",
+          "description": "T-MAJOR-2~4: client lengthComputable=false/sha256 reject, confirm 422·409, partial UNIQUE 통합테스트. orphan S3 정리는 CANDID-029 위임 design note(주석)만.",
+          "files": [
+            "tests/lib/files/client.test.ts",
+            "tests/lib/files/confirm.test.ts",
+            "tests/app/api/v1/files/resume/presign.test.ts",
+            "tests/app/api/v1/files/resume/confirm.test.ts",
+            "lib/files/resume.ts"
+          ],
+          "prLineLimit": 800,
+          "status": "pending"
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-041": {
       "id": "CANDID-041",
