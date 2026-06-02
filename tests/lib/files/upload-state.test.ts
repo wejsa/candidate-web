@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   canAbort,
   canRetry,
   classifyUploadError,
   INITIAL_UPLOAD_STATE,
   uploadReducer,
+  warnIfInvalidTransition,
   type UploadState,
 } from '@/lib/files/upload-state';
 import { HttpStatusError } from '@/lib/files/client';
@@ -155,5 +156,65 @@ describe('classifyUploadError', () => {
   it('알 수 없는 에러 → network 기본', () => {
     expect(classifyUploadError(new Error('???')).kind).toBe('network');
     expect(classifyUploadError(null).kind).toBe('network');
+  });
+});
+
+// A-MAJOR-2 (CANDID-040): dev-only 비정상 전이 경고.
+describe('warnIfInvalidTransition (A-MAJOR-2)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  function spyWarn() {
+    return vi.spyOn(console, 'warn').mockImplementation(() => {});
+  }
+
+  it('비정상 전이는 dev에서 console.warn (예: idle + upload-progress)', () => {
+    const warn = spyWarn();
+    warnIfInvalidTransition(INITIAL_UPLOAD_STATE, { type: 'upload-progress', progress: 50 });
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0]![0]).toContain('예기치 않은 전이');
+  });
+
+  it('정상 전이는 경고 없음 (uploading + upload-progress)', () => {
+    const warn = spyWarn();
+    warnIfInvalidTransition({ ...INITIAL_UPLOAD_STATE, status: 'uploading' }, {
+      type: 'upload-progress',
+      progress: 10,
+    });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('reset/select/abort는 모든 상태에서 허용 — 경고 없음', () => {
+    const warn = spyWarn();
+    warnIfInvalidTransition({ ...INITIAL_UPLOAD_STATE, status: 'clean' }, { type: 'reset' });
+    warnIfInvalidTransition({ ...INITIAL_UPLOAD_STATE, status: 'infected' }, {
+      type: 'select',
+      file: sampleFile,
+    });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('failed/aborted + upload-start(재시도)는 허용 — 경고 없음', () => {
+    const warn = spyWarn();
+    warnIfInvalidTransition({ ...INITIAL_UPLOAD_STATE, status: 'failed' }, { type: 'upload-start' });
+    warnIfInvalidTransition({ ...INITIAL_UPLOAD_STATE, status: 'aborted' }, { type: 'upload-start' });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('production에서는 no-op (비정상 전이도 경고 안 함)', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const warn = spyWarn();
+    warnIfInvalidTransition(INITIAL_UPLOAD_STATE, { type: 'upload-progress', progress: 50 });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('순수성 유지 — reducer는 비정상 전이도 상태를 정상 처리(경고만)', () => {
+    spyWarn();
+    // idle에서 upload-progress: 경고하되 상태는 reducer 규칙대로 uploading+progress 처리.
+    const next = uploadReducer(INITIAL_UPLOAD_STATE, { type: 'upload-progress', progress: 42 });
+    expect(next.status).toBe('uploading');
+    expect(next.progress).toBe(42);
   });
 });
