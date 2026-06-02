@@ -87,9 +87,29 @@ describe('withdrawApplication', () => {
         eventType: AuditEventType.APPLICATION_WITHDRAW,
         resourceType: 'application',
         resourceId: '9',
+        ipAddress: null,
+        userAgent: null,
         metadataJson: { hasReason: false },
       },
     });
+  });
+
+  it('userAgent/ipAddress를 AuditLog에 기록한다 (포렌식)', async () => {
+    updateMany.mockResolvedValue({ count: 1 });
+
+    await withdrawApplication({
+      userId: 1,
+      applicationId: 9,
+      userAgent: 'Mozilla/5.0',
+      ipAddress: null,
+      now: NOW,
+    });
+
+    expect(auditCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ userAgent: 'Mozilla/5.0', ipAddress: null }),
+      }),
+    );
   });
 
   it('빈 문자열 사유는 hasReason=false로 간주한다', async () => {
