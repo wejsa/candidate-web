@@ -2929,5 +2929,18 @@
     "decision": "COMMENT",
     "note": "MAJOR2+MINOR1 addressed pre-merge",
     "at": "2026-06-02T23:30:22+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-040",
+    "stepNumber": 3,
+    "prNumber": 109,
+    "at": "2026-06-02T23:34:12+09:00"
+  },
+  {
+    "action": "task_completed",
+    "taskId": "CANDID-040",
+    "prNumber": 109,
+    "at": "2026-06-02T23:34:12+09:00"
   }
 ]

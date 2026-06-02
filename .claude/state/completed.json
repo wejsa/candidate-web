@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 42,
+    "version": 43,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-02T23:30:09+09:00"
+    "updatedAt": "2026-06-02T23:34:12+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1321,6 +1321,24 @@
         "구조화 로깅",
         "클라 401/429 분기"
       ]
+    },
+    "CANDID-040": {
+      "id": "CANDID-040",
+      "title": "CANDID-016 Step 3 carry MAJOR/MINOR 보강",
+      "phase": 4,
+      "priority": "medium",
+      "type": "refactor",
+      "completedAt": "2026-06-02T23:34:12+09:00",
+      "assignee": "jaese@hoji-20260602-220417",
+      "prs": [
+        104,
+        107,
+        109
+      ],
+      "totalMergedLines": 482,
+      "stepCount": 3,
+      "reviewSummary": "Step1 T2(domain+sec) C0/M0/MINOR1 → COMMENT. Step2 T2 C0/M0/M0 IDOR 검증 → COMMENT. Step3 full 3관점 C0/MAJOR2→반영/MINOR1→반영 → COMMENT. (Step1 리뷰는 1M 크레딧 소진으로 메인 폴백 직접 리뷰)",
+      "note": "CANDID-016 carry 9건: (a)draftId 의미 정합 latent 버그 해소 (b)동시 업로드 race 가드 (c)dev 전이 warn (d)HMR S3 싱글톤 (e)prod HTTPS presign 가드 (f)orphan 설계노트(CANDID-029 위임) (g)T-MAJOR 테스트+partial UNIQUE 통합테스트 (h)STORED_PATH_RE 확장자 SSOT. 부수: 통합 harness SMTP env 복구."
     }
   }
 }
