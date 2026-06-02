@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { AppError } from '@/lib/errors';
+import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 
 vi.mock('@/lib/auth/middleware', () => ({
   requireAuth: vi.fn(),
@@ -34,6 +35,7 @@ const ctx = (id: string) => ({ params: { id } });
 
 beforeEach(() => {
   vi.clearAllMocks();
+  __resetRateLimitStateForTesting();
   requireAuth.mockResolvedValue({ userId: 42 });
   withdrawApplication.mockResolvedValue(RESULT);
 });
@@ -92,6 +94,18 @@ describe('POST /api/v1/applications/me/[id]/withdraw', () => {
     const response = await POST(postRequest({ reason: 'x', evil: 1 }), ctx('100'));
 
     expect(response.status).toBe(400);
+    expect(withdrawApplication).not.toHaveBeenCalled();
+  });
+
+  it('비어있지 않은 malformed JSON → 400 (무사유 철회로 흡수하지 않음)', async () => {
+    const req = new NextRequest(
+      'https://candidate.example.com/api/v1/applications/me/100/withdraw',
+      { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"reason": ' },
+    );
+    const response = await POST(req, ctx('100'));
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).code).toBe('SYS_VALIDATION_FAILED');
     expect(withdrawApplication).not.toHaveBeenCalled();
   });
 });
