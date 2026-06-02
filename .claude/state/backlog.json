@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 387,
+    "version": 388,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T23:13:58+09:00"
+    "updatedAt": "2026-06-02T23:14:50+09:00"
   },
   "summary": {
     "total": 47,
@@ -2880,16 +2880,12 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "jaese@hoji-20260602-220417",
-      "assignedAt": "2026-06-02T23:11:08+09:00",
+      "assignedAt": "2026-06-02T23:14:50+09:00",
       "lockedFiles": [
-        "app/jobs/[id]/apply/page.tsx",
-        "app/jobs/[id]/apply/_components/ApplicationFormShell.tsx",
-        "app/jobs/[id]/apply/_components/ResumeUploadStep.tsx",
-        "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
-        "tests/app/api/v1/files/resume/presign.test.ts",
-        "tests/app/api/v1/files/resume/confirm.test.ts",
         "tests/lib/files/client.test.ts",
         "tests/lib/files/confirm.test.ts",
+        "tests/app/api/v1/files/resume/presign.test.ts",
+        "tests/app/api/v1/files/resume/confirm.test.ts",
         "lib/files/resume.ts"
       ],
       "dependencies": [
@@ -2899,13 +2895,13 @@
       "source": "CANDID-016 retro Action Item HIGH-3",
       "lockTTL": 10800,
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 107,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "107 --auto-fix",
-        "updatedAt": "2026-06-02T23:13:58+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-02T23:14:50+09:00"
       },
       "steps": [
         {
@@ -2940,9 +2936,10 @@
             "tests/app/api/v1/files/resume/confirm.test.ts"
           ],
           "prLineLimit": 500,
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 107,
-          "branch": "feature/CANDID-040-step2"
+          "branch": "feature/CANDID-040-step2",
+          "mergedAt": "2026-06-02T23:14:50+09:00"
         },
         {
           "number": 3,
@@ -2959,7 +2956,7 @@
           "status": "pending"
         }
       ],
-      "currentStep": 2
+      "currentStep": 3
     },
     "CANDID-041": {
       "id": "CANDID-041",
