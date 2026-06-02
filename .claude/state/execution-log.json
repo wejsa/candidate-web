@@ -2905,5 +2905,12 @@
     "prNumber": 107,
     "decision": "COMMENT",
     "at": "2026-06-02T23:13:58+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-040",
+    "stepNumber": 2,
+    "prNumber": 107,
+    "at": "2026-06-02T23:14:50+09:00"
   }
 ]
