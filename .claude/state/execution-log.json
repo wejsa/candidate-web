@@ -2865,5 +2865,13 @@
     "taskId": "CANDID-047",
     "prNumber": 101,
     "at": "2026-06-02T21:51:45+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-040",
+    "stepNumber": 1,
+    "prNumber": 104,
+    "branch": "feature/CANDID-040-step1",
+    "at": "2026-06-02T22:27:53+09:00"
   }
 ]
