@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 385,
+    "version": 386,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T22:36:24+09:00"
+    "updatedAt": "2026-06-02T22:55:28+09:00"
   },
   "summary": {
     "total": 47,
@@ -1927,16 +1927,82 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260602-215900",
-      "assignedAt": "2026-06-02T21:59:00+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-06-02T22:55:28+09:00",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "app/api/v1/applications/me/[id]/withdraw/route.ts",
+        "app/me/[applicationId]/page.tsx",
+        "app/me/_components/WithdrawButton.tsx",
+        "lib/notifications/slack.ts",
+        "lib/my-page/detail-service.ts"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
         "prNumber": null,
-        "fixLoopCount": null,
-        "updatedAt": "2026-06-02T21:59:00+09:00"
-      }
+        "fixLoopCount": 0,
+        "updatedAt": "2026-06-02T22:55:28+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "마이그레이션 — withdraw_reason 컬럼",
+          "description": "applications.withdraw_reason VARCHAR(500) NULL 추가 (Prisma schema + migration.sql). CONCURRENTLY 미사용(L-029), 비-destructive ADD, 롤백 DROP COLUMN.",
+          "status": "merged",
+          "files": [
+            "prisma/schema.prisma"
+          ],
+          "prLineLimit": 150,
+          "estimatedLines": 80,
+          "prNumber": 103,
+          "branch": "feature/CANDID-023-step1",
+          "mergedAt": "2026-06-02T22:25:08+09:00"
+        },
+        {
+          "number": 2,
+          "title": "도메인 서비스 + 단위 테스트",
+          "description": "lib/applications/withdraw.ts — 소유권+상태 검증, 조건부 UPDATE WHERE result='IN_PROGRESS'(멱등성/경합 가드), AuditLog(APPLICATION_WITHDRAW) in-tx. APP_NOT_WITHDRAWABLE 에러코드 신설. 단위 테스트.",
+          "status": "merged",
+          "files": [
+            "lib/applications/withdraw.ts",
+            "lib/errors/codes.ts",
+            "tests/lib/applications/withdraw.test.ts"
+          ],
+          "prLineLimit": 600,
+          "estimatedLines": 450,
+          "prNumber": 105,
+          "branch": "feature/CANDID-023-step2",
+          "mergedAt": "2026-06-02T22:55:28+09:00"
+        },
+        {
+          "number": 3,
+          "title": "API route + 통합 테스트",
+          "description": "POST /api/v1/applications/me/[id]/withdraw — withErrorHandler→requireAuth→withdrawApplication. zod reason optional+sanitize. 통합 테스트(route export 직접 import).",
+          "status": "pending",
+          "files": [
+            "app/api/v1/applications/me/[id]/withdraw/route.ts",
+            "tests/app/api/v1/applications/me/[id]/withdraw.test.ts"
+          ],
+          "prLineLimit": 400,
+          "estimatedLines": 300
+        },
+        {
+          "number": 4,
+          "title": "UI + Slack 알림",
+          "description": "마이페이지 상세 철회 버튼+확인 모달+사유 입력+성공 후 갱신. detail-service canWithdraw 플래그. Slack fire-and-forget(트랜잭션 외, 최소 webhook, env 미설정 시 no-op).",
+          "status": "pending",
+          "files": [
+            "app/me/[applicationId]/page.tsx",
+            "app/me/_components/WithdrawButton.tsx",
+            "lib/notifications/slack.ts",
+            "lib/my-page/detail-service.ts",
+            "tests/app/me/WithdrawButton.test.tsx"
+          ],
+          "prLineLimit": 600,
+          "estimatedLines": 500
+        }
+      ],
+      "currentStep": 3
     },
     "CANDID-024": {
       "id": "CANDID-024",
