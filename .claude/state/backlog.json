@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 386,
+    "version": 387,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T22:55:28+09:00"
+    "updatedAt": "2026-06-02T23:02:15+09:00"
   },
   "summary": {
     "total": 47,
@@ -1927,7 +1927,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260602-215900",
-      "assignedAt": "2026-06-02T22:55:28+09:00",
+      "assignedAt": "2026-06-02T23:02:15+09:00",
       "lockTTL": 7200,
       "lockedFiles": [
         "app/api/v1/applications/me/[id]/withdraw/route.ts",
@@ -1937,11 +1937,11 @@
         "lib/my-page/detail-service.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 106,
         "fixLoopCount": 0,
-        "updatedAt": "2026-06-02T22:55:28+09:00"
+        "updatedAt": "2026-06-02T23:02:15+09:00"
       },
       "steps": [
         {
@@ -1978,13 +1978,15 @@
           "number": 3,
           "title": "API route + 통합 테스트",
           "description": "POST /api/v1/applications/me/[id]/withdraw — withErrorHandler→requireAuth→withdrawApplication. zod reason optional+sanitize. 통합 테스트(route export 직접 import).",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/api/v1/applications/me/[id]/withdraw/route.ts",
             "tests/app/api/v1/applications/me/[id]/withdraw.test.ts"
           ],
           "prLineLimit": 400,
-          "estimatedLines": 300
+          "estimatedLines": 300,
+          "prNumber": 106,
+          "branch": "feature/CANDID-023-step3"
         },
         {
           "number": 4,
