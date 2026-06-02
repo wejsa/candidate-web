@@ -2882,5 +2882,12 @@
     "decision": "COMMENT",
     "note": "fallback direct review (subagent credit fail)",
     "at": "2026-06-02T22:35:01+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-040",
+    "stepNumber": 1,
+    "prNumber": 104,
+    "at": "2026-06-02T22:36:24+09:00"
   }
 ]
