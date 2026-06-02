@@ -72,6 +72,12 @@ export function ResumeUploadStep({ draftId, onAttached }: Props) {
         return;
       }
 
+      // D-MAJOR-3 fix (CANDID-040): 진행 중인 이전 업로드가 있으면 먼저 중단(동시 업로드 race 차단).
+      // 입력 disable이 uploading/confirming만 막아 validating 윈도우의 빠른 재선택은 통과 가능 →
+      // 이전 AbortController를 abort하지 않고 덮어쓰면 고아 요청이 백그라운드에서 완료돼 stale 결과/순서
+      // 역전이 발생할 수 있다. 새 컨트롤러 설정 전에 명시적으로 이전 요청을 취소한다.
+      abortRef.current?.abort();
+
       // AbortController + upload 실행.
       const ctrl = new AbortController();
       abortRef.current = ctrl;
