@@ -2920,5 +2920,14 @@
     "prNumber": 109,
     "branch": "feature/CANDID-040-step3",
     "at": "2026-06-02T23:24:25+09:00"
+  },
+  {
+    "action": "reviewed",
+    "taskId": "CANDID-040",
+    "stepNumber": 3,
+    "prNumber": 109,
+    "decision": "COMMENT",
+    "note": "MAJOR2+MINOR1 addressed pre-merge",
+    "at": "2026-06-02T23:30:22+09:00"
   }
 ]
