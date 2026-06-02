@@ -2,13 +2,13 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 389,
+    "version": 390,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T23:24:25+09:00"
+    "updatedAt": "2026-06-02T23:30:09+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 41,
+    "done": 42,
     "inProgress": 1,
     "review": 0,
     "todo": 4
@@ -27,7 +27,7 @@
     "3": {
       "name": "부가 기능",
       "description": "비밀번호 재설정, 로그아웃, 회원 탈퇴/익명화(GDPR), 지원 철회, 프로필 수정, SEO/structured data",
-      "status": "todo"
+      "status": "done"
     },
     "4": {
       "name": "운영/품질",
@@ -1918,7 +1918,7 @@
       "id": "CANDID-023",
       "title": "지원 철회 (US-MY-003)",
       "description": "철회 사유(선택) 수집. result=WITHDRAWN 갱신, withdrawn_at 기록. 동일 공고 재지원 정책(모집 기간 내 1회 허용 또는 불가).",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "medium",
       "phase": 3,
@@ -1926,17 +1926,78 @@
         "CANDID-019"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260602-215900",
-      "assignedAt": "2026-06-02T21:59:00+09:00",
-      "lockTTL": 1800,
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": 7200,
       "lockedFiles": [],
-      "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
-        "prNumber": null,
-        "fixLoopCount": null,
-        "updatedAt": "2026-06-02T21:59:00+09:00"
-      }
+      "workflowState": null,
+      "steps": [
+        {
+          "number": 1,
+          "title": "마이그레이션 — withdraw_reason 컬럼",
+          "description": "applications.withdraw_reason VARCHAR(500) NULL 추가 (Prisma schema + migration.sql). CONCURRENTLY 미사용(L-029), 비-destructive ADD, 롤백 DROP COLUMN.",
+          "status": "merged",
+          "files": [
+            "prisma/schema.prisma"
+          ],
+          "prLineLimit": 150,
+          "estimatedLines": 80,
+          "prNumber": 103,
+          "branch": "feature/CANDID-023-step1",
+          "mergedAt": "2026-06-02T22:25:08+09:00"
+        },
+        {
+          "number": 2,
+          "title": "도메인 서비스 + 단위 테스트",
+          "description": "lib/applications/withdraw.ts — 소유권+상태 검증, 조건부 UPDATE WHERE result='IN_PROGRESS'(멱등성/경합 가드), AuditLog(APPLICATION_WITHDRAW) in-tx. APP_NOT_WITHDRAWABLE 에러코드 신설. 단위 테스트.",
+          "status": "merged",
+          "files": [
+            "lib/applications/withdraw.ts",
+            "lib/errors/codes.ts",
+            "tests/lib/applications/withdraw.test.ts"
+          ],
+          "prLineLimit": 600,
+          "estimatedLines": 450,
+          "prNumber": 105,
+          "branch": "feature/CANDID-023-step2",
+          "mergedAt": "2026-06-02T22:55:28+09:00"
+        },
+        {
+          "number": 3,
+          "title": "API route + 통합 테스트",
+          "description": "POST /api/v1/applications/me/[id]/withdraw — withErrorHandler→requireAuth→withdrawApplication. zod reason optional+sanitize. 통합 테스트(route export 직접 import).",
+          "status": "merged",
+          "files": [
+            "app/api/v1/applications/me/[id]/withdraw/route.ts",
+            "tests/app/api/v1/applications/me/[id]/withdraw.test.ts"
+          ],
+          "prLineLimit": 400,
+          "estimatedLines": 300,
+          "prNumber": 106,
+          "branch": "feature/CANDID-023-step3",
+          "mergedAt": "2026-06-02T23:12:01+09:00"
+        },
+        {
+          "number": 4,
+          "title": "UI + Slack 알림",
+          "description": "마이페이지 상세 철회 버튼+확인 모달+사유 입력+성공 후 갱신. detail-service canWithdraw 플래그. Slack fire-and-forget(트랜잭션 외, 최소 webhook, env 미설정 시 no-op).",
+          "status": "merged",
+          "files": [
+            "app/me/[applicationId]/page.tsx",
+            "app/me/_components/WithdrawButton.tsx",
+            "lib/notifications/slack.ts",
+            "lib/my-page/detail-service.ts",
+            "tests/app/me/WithdrawButton.test.tsx"
+          ],
+          "prLineLimit": 600,
+          "estimatedLines": 500,
+          "prNumber": 108,
+          "branch": "feature/CANDID-023-step4",
+          "mergedAt": "2026-06-02T23:30:09+09:00"
+        }
+      ],
+      "currentStep": 4,
+      "completedAt": "2026-06-02T23:30:09+09:00"
     },
     "CANDID-024": {
       "id": "CANDID-024",
