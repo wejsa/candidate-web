@@ -121,6 +121,22 @@ function xhrPut(args: {
   });
 }
 
+// S-MAJOR-1 fix (CANDID-040): 운영 환경에서 presign uploadUrl이 HTTPS인지 강제. 평문(http) 업로드는
+// 파일 본문 + 서명 헤더가 네트워크에 노출되므로 차단한다. dev/local(MinIO http)은 허용 —
+// process.env.NODE_ENV는 Next.js 클라이언트 번들에 빌드 시 인라인되어 브라우저에서도 안전하게 분기.
+export function assertSecureUploadUrl(uploadUrl: string): void {
+  if (process.env.NODE_ENV !== 'production') return;
+  let parsed: URL;
+  try {
+    parsed = new URL(uploadUrl);
+  } catch {
+    throw new HttpStatusError(0, '업로드 URL이 올바르지 않습니다. 다시 시도해 주세요.');
+  }
+  if (parsed.protocol !== 'https:') {
+    throw new HttpStatusError(0, '안전하지 않은(HTTPS가 아닌) 업로드 URL이 차단되었습니다.');
+  }
+}
+
 async function sha256Hex(file: File): Promise<string> {
   const buf = await file.arrayBuffer();
   const digest = await crypto.subtle.digest('SHA-256', buf);
@@ -147,6 +163,9 @@ export async function uploadResumeFile(params: UploadParams): Promise<UploadResu
     },
     signal,
   );
+
+  // S-MAJOR-1 fix (CANDID-040): 운영에서 평문 업로드 URL 차단 (S3 PUT 직전).
+  assertSecureUploadUrl(presign.uploadUrl);
 
   // 2. S3 PUT — 진행률 + abort. presigned URL은 외부 origin이라 CORS preflight 발생 가능.
   await xhrPut({
