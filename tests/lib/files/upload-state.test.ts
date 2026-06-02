@@ -130,6 +130,19 @@ describe('classifyUploadError', () => {
     expect(c.message).toBe('허용되지 않은 형식');
   });
 
+  // CANDID-047 회귀 가드: 서버가 422를 빈/공백 message로 응답해도 빈 message를 반환하지 않는다.
+  it('HttpStatusError 422 + 빈 message → validation + 폴백 메시지 (빈 문자열 금지)', () => {
+    const c = classifyUploadError(new HttpStatusError(422, ''));
+    expect(c.kind).toBe('validation');
+    expect(c.message).toBe('파일이 허용된 형식·크기가 아닙니다.');
+  });
+
+  it('HttpStatusError 422 + 공백만 message → validation + 폴백 메시지', () => {
+    const c = classifyUploadError(new HttpStatusError(422, '   '));
+    expect(c.kind).toBe('validation');
+    expect(c.message).toBe('파일이 허용된 형식·크기가 아닙니다.');
+  });
+
   it('HttpStatusError 500 → server', () => {
     expect(classifyUploadError(new HttpStatusError(500, 'oops')).kind).toBe('server');
   });

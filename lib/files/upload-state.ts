@@ -181,9 +181,13 @@ export function classifyUploadError(err: unknown): { kind: UploadFailureKind; me
       return { kind: 'conflict', message: '이미 첨부된 파일이 있습니다. 새로고침 후 다시 시도해 주세요.' };
     }
     if (status === 422) {
-      const msg = 'message' in err && typeof (err as { message?: unknown }).message === 'string'
-        ? (err as { message: string }).message
-        : '파일이 허용된 형식·크기가 아닙니다.';
+      // CANDID-047 fix: 서버가 422를 빈/공백 message로 응답하면 빈 alert가 렌더되므로
+      // (빈 문자열도 string이라 기존 폴백이 발동하지 않음) trim 후 비어 있으면 폴백 사용.
+      const raw =
+        'message' in err && typeof (err as { message?: unknown }).message === 'string'
+          ? (err as { message: string }).message
+          : '';
+      const msg = raw.trim() !== '' ? raw : '파일이 허용된 형식·크기가 아닙니다.';
       return { kind: 'validation', message: msg };
     }
     if (status >= 500) {
