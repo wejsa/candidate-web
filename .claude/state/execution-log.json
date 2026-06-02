@@ -2873,5 +2873,14 @@
     "prNumber": 104,
     "branch": "feature/CANDID-040-step1",
     "at": "2026-06-02T22:27:53+09:00"
+  },
+  {
+    "action": "reviewed",
+    "taskId": "CANDID-040",
+    "stepNumber": 1,
+    "prNumber": 104,
+    "decision": "COMMENT",
+    "note": "fallback direct review (subagent credit fail)",
+    "at": "2026-06-02T22:35:01+09:00"
   }
 ]
