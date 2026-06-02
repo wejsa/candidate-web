@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 381,
+    "version": 382,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T22:04:17+09:00"
+    "updatedAt": "2026-06-02T22:14:51+09:00"
   },
   "summary": {
     "total": 47,
@@ -2880,22 +2880,87 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "jaese@hoji-20260602-220417",
-      "assignedAt": "2026-06-02T22:04:17+09:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-06-02T22:14:51+09:00",
+      "lockedFiles": [
+        "lib/files/upload-state.ts",
+        "lib/files/storage.ts",
+        "lib/files/client.ts",
+        "lib/files/validation.ts",
+        "tests/lib/files/upload-state.test.ts",
+        "tests/lib/files/storage.test.ts",
+        "tests/lib/files/client.test.ts",
+        "app/jobs/[id]/apply/page.tsx",
+        "app/jobs/[id]/apply/_components/ApplicationFormShell.tsx",
+        "app/jobs/[id]/apply/_components/ResumeUploadStep.tsx",
+        "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
+        "tests/app/api/v1/files/resume/presign.test.ts",
+        "tests/app/api/v1/files/resume/confirm.test.ts",
+        "tests/lib/files/confirm.test.ts",
+        "lib/files/resume.ts"
+      ],
       "dependencies": [
         "CANDID-016"
       ],
       "createdAt": "2026-05-25T11:00:00+09:00",
       "source": "CANDID-016 retro Action Item HIGH-3",
-      "lockTTL": 1800,
+      "lockTTL": 10800,
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": null,
         "lastReviewDecision": null,
-        "updatedAt": "2026-06-02T22:04:17+09:00"
-      }
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-02T22:14:51+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "lib 보안·아키텍처 보강 (c,d,e,h)",
+          "description": "upload-state.ts dev-only 전이 warn(c) · storage.ts HMR globalThis 싱글톤(d) + STORED_PATH_RE 확장자 SSOT(h) · client.ts prod HTTPS presign 가드(e). 단위테스트 동반.",
+          "files": [
+            "lib/files/upload-state.ts",
+            "lib/files/storage.ts",
+            "lib/files/client.ts",
+            "lib/files/validation.ts",
+            "tests/lib/files/upload-state.test.ts",
+            "tests/lib/files/storage.test.ts",
+            "tests/lib/files/client.test.ts"
+          ],
+          "prLineLimit": 500,
+          "status": "pending"
+        },
+        {
+          "number": 2,
+          "title": "draftId 의미 정합(a) + 동시 race(b)",
+          "description": "option A: page가 실제 draft.id를 ApplicationFormShell→ResumeUploadStep에 전달(서버 계약 유지). ResumeUploadStep performUpload 진입 시 이전 abortRef cleanup(b). 컴포넌트/라우트 회귀 테스트.",
+          "files": [
+            "app/jobs/[id]/apply/page.tsx",
+            "app/jobs/[id]/apply/_components/ApplicationFormShell.tsx",
+            "app/jobs/[id]/apply/_components/ResumeUploadStep.tsx",
+            "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx",
+            "tests/app/api/v1/files/resume/presign.test.ts",
+            "tests/app/api/v1/files/resume/confirm.test.ts"
+          ],
+          "prLineLimit": 500,
+          "status": "pending"
+        },
+        {
+          "number": 3,
+          "title": "테스트 갭 보강(g) + orphan 설계노트(f,i)",
+          "description": "T-MAJOR-2~4: client lengthComputable=false/sha256 reject, confirm 422·409, partial UNIQUE 통합테스트. orphan S3 정리는 CANDID-029 위임 design note(주석)만.",
+          "files": [
+            "tests/lib/files/client.test.ts",
+            "tests/lib/files/confirm.test.ts",
+            "tests/app/api/v1/files/resume/presign.test.ts",
+            "tests/app/api/v1/files/resume/confirm.test.ts",
+            "lib/files/resume.ts"
+          ],
+          "prLineLimit": 800,
+          "status": "pending"
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-041": {
       "id": "CANDID-041",
