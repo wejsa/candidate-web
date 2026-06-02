@@ -7,11 +7,13 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
+import { ApplicationResult } from '@prisma/client';
 import { getMyApplicationDetail } from '@/lib/my-page/detail-service';
 import { AppError } from '@/lib/errors';
 import { ApplicationCard } from '@/app/me/_components/SectionCard';
 import { Timeline } from '@/app/me/_components/Timeline';
 import { InterviewBlock } from '@/app/me/_components/InterviewBlock';
+import { WithdrawButton } from '@/app/me/_components/WithdrawButton';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -76,6 +78,14 @@ export default async function MyApplicationDetailPage({ params }: PageProps) {
         <h2 id="interviews-title">면접 일정</h2>
         <InterviewBlock interviews={detail.interviews} />
       </section>
+
+      {/* US-MY-003: 진행 중(IN_PROGRESS)인 지원만 본인이 철회 가능. */}
+      {detail.summary.result === ApplicationResult.IN_PROGRESS && (
+        <section aria-labelledby="withdraw-title">
+          <h2 id="withdraw-title">지원 철회</h2>
+          <WithdrawButton applicationId={applicationId} />
+        </section>
+      )}
     </main>
   );
 }
