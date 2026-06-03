@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 393,
+    "version": 396,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T09:40:36+09:00"
+    "updatedAt": "2026-06-03T10:07:51+09:00"
   },
   "summary": {
     "total": 47,
     "done": 43,
-    "inProgress": 1,
+    "inProgress": 2,
     "review": 0,
-    "todo": 4
+    "todo": 2
   },
   "phases": {
     "1": {
@@ -2236,10 +2236,86 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T09:40:36+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
-      "workflowState": null
+      "assignedAt": "2026-06-03T10:07:51+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "app/api/v1/auth/oauth/[provider]/callback/route.ts",
+        "app/api/v1/users/me/route.ts",
+        "lib/applications/submit.ts",
+        "lib/applications/withdraw.ts",
+        "lib/audit/record.ts",
+        "lib/auth/email-verification.ts",
+        "lib/auth/login.ts",
+        "lib/auth/oauth/unlink.ts",
+        "lib/errors/response.ts",
+        "lib/observability/trace-context.ts",
+        "lib/users/password-change.ts",
+        "lib/users/withdraw.ts",
+        "middleware.ts",
+        "prisma/schema.prisma"
+      ],
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": null,
+        "lastReviewDecision": null,
+        "updatedAt": "2026-06-03T10:07:51+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "traceId 전파 인프라 + trace_id 마이그레이션",
+          "description": "middleware(Edge) traceId 주입 → withErrorHandler에서 AsyncLocalStorage 컨텍스트 seed → 에러응답 traceId 통일. trace_id VARCHAR(36) NULL 컬럼 + partial 인덱스(WHERE trace_id IS NOT NULL). 경량 ALS만(전체 OTel 보류).",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "lib/observability/trace-context.ts",
+            "middleware.ts",
+            "lib/errors/response.ts"
+          ],
+          "estimatedLines": 380
+        },
+        {
+          "number": 2,
+          "title": "감사 emit SSOT 헬퍼 + 기존 3 호출부 통일",
+          "description": "lib/audit/record.ts recordAuditEvent(tx 지원, traceId 자동주입, metadata PII-free allowlist 가드). withdraw×2/password-change 인라인 create를 헬퍼로 통일(trace_id 채움). PII-free 회귀 가드 테스트 동반.",
+          "status": "pending",
+          "files": [
+            "lib/audit/record.ts",
+            "lib/users/withdraw.ts",
+            "lib/applications/withdraw.ts",
+            "lib/users/password-change.ts"
+          ],
+          "estimatedLines": 450
+        },
+        {
+          "number": 3,
+          "title": "신규 이벤트 A: LOGIN_*/APPLICATION_SUBMIT/PII_VIEW",
+          "description": "login.ts signin()에 LOGIN_SUCCESS/FAILURE, submit.ts 트랜잭션 내부 APPLICATION_SUBMIT, GET /users/me에 PII_VIEW(resourceId만, 값 금지) emit.",
+          "status": "pending",
+          "files": [
+            "lib/auth/login.ts",
+            "lib/applications/submit.ts",
+            "app/api/v1/users/me/route.ts"
+          ],
+          "estimatedLines": 450
+        },
+        {
+          "number": 4,
+          "title": "신규 이벤트 B: enum 마이그 + EMAIL_*/OAUTH_*",
+          "description": "별도 마이그(ALTER TYPE ADD VALUE x4: EMAIL_VERIFIED/EMAIL_VERIFICATION_RESENT/OAUTH_LINKED/OAUTH_UNLINKED). email-verification.ts 2지점 + oauth unlink/callback emit. 토큰·이메일 평문 metadata 제외(PR#33 H007).",
+          "status": "pending",
+          "files": [
+            "prisma/schema.prisma",
+            "lib/auth/email-verification.ts",
+            "lib/auth/oauth/unlink.ts",
+            "app/api/v1/auth/oauth/[provider]/callback/route.ts"
+          ],
+          "estimatedLines": 360
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-027": {
       "id": "CANDID-027",
@@ -2258,14 +2334,134 @@
       "id": "CANDID-028",
       "title": "접근성 WCAG 2.1 AA + 320~1920px 반응형",
       "description": "폼 라벨, 키보드 네비게이션, 대비비. iOS Safari 15+/Chrome 90+ 검증. 키보드만으로 가입~제출 완주 가능.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "low",
       "phase": 4,
       "dependencies": [
         "CANDID-019"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "jaese@hoji-20260603-094035",
+      "assignedAt": "2026-06-03T09:55:42+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "app/globals.css",
+        "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
+        "app/jobs/_components/JobCard.tsx",
+        "app/jobs/_components/Pagination.tsx",
+        "app/layout.tsx",
+        "app/me/_components/Timeline.tsx",
+        "app/me/_components/WithdrawButton.tsx",
+        "app/me/profile/_components/PasswordChangeForm.tsx",
+        "app/me/profile/_components/ProfileEditForm.tsx",
+        "app/me/withdraw/_components/ConfirmModal.tsx",
+        "app/me/withdraw/_components/WithdrawForm.tsx",
+        "lib/ui/use-focus-trap.ts",
+        "package.json",
+        "tests/a11y/axe-pages.test.tsx",
+        "tests/a11y/foundation.test.tsx",
+        "tests/a11y/keyboard-journey.test.tsx",
+        "tests/app/jobs/[id]/apply/PersonalInfoStep.test.tsx",
+        "tests/app/me/WithdrawButton.test.tsx",
+        "tests/app/me/profile/PasswordChangeForm.test.tsx",
+        "tests/app/me/profile/ProfileEditForm.test.tsx",
+        "tests/app/me/withdraw/ConfirmModal.test.tsx",
+        "tests/app/me/withdraw/WithdrawForm.test.tsx",
+        "tests/lib/ui/use-focus-trap.test.tsx",
+        "tests/setup.ts"
+      ],
+      "updatedAt": "2026-06-03T09:55:42+09:00",
+      "metadata": {
+        "version": 2
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "파운데이션: viewport + 디자인 토큰 + 전역 a11y/반응형 CSS (+vitest-axe)",
+          "description": "globals.css 색토큰(AA 대비)+element 전역 스타일+:focus-visible+반응형 breakpoint(320/768/1024/1920)+min44px 터치타깃+reduced-motion+.visually-hidden/.skip-link. layout.tsx viewport export+skip-link. vitest-axe 도입+파운데이션 axe 스모크(L-034 가드 테스트 동반).",
+          "files": [
+            "app/globals.css",
+            "app/layout.tsx",
+            "package.json",
+            "tests/setup.ts",
+            "tests/a11y/foundation.test.tsx"
+          ],
+          "estimatedLines": 420,
+          "prLineLimit": 500,
+          "status": "pending"
+        },
+        {
+          "number": 2,
+          "title": "모달 focus 관리 (trap+복원+배경 inert)",
+          "description": "lib/ui/use-focus-trap.ts 재사용 훅(focus trap+복원+배경 inert/aria-hidden). ConfirmModal(ESC만 있음)+WithdrawButton inline modal(trap·ESC 없음) 보강. user-event Tab 순환·복원·ESC 단정. L-002 reset helper.",
+          "files": [
+            "lib/ui/use-focus-trap.ts",
+            "app/me/withdraw/_components/ConfirmModal.tsx",
+            "app/me/_components/WithdrawButton.tsx",
+            "tests/lib/ui/use-focus-trap.test.tsx",
+            "tests/app/me/withdraw/ConfirmModal.test.tsx",
+            "tests/app/me/WithdrawButton.test.tsx"
+          ],
+          "estimatedLines": 380,
+          "prLineLimit": 500,
+          "status": "pending",
+          "dependsOn": [
+            1
+          ]
+        },
+        {
+          "number": 3,
+          "title": "폼 에러 연관 일관성 + 동적 라이브 영역 마감",
+          "description": "모든 input↔error를 id+aria-describedby 일관 연결+aria-invalid 보강. PersonalInfoStep(phone/birthDate)·ProfileEditForm·PasswordChangeForm·WithdrawForm. axe+testing-library 단정.",
+          "files": [
+            "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
+            "app/me/profile/_components/ProfileEditForm.tsx",
+            "app/me/profile/_components/PasswordChangeForm.tsx",
+            "app/me/withdraw/_components/WithdrawForm.tsx",
+            "tests/app/jobs/[id]/apply/PersonalInfoStep.test.tsx",
+            "tests/app/me/profile/ProfileEditForm.test.tsx",
+            "tests/app/me/profile/PasswordChangeForm.test.tsx",
+            "tests/app/me/withdraw/WithdrawForm.test.tsx"
+          ],
+          "estimatedLines": 460,
+          "prLineLimit": 600,
+          "status": "pending",
+          "dependsOn": [
+            1
+          ]
+        },
+        {
+          "number": 4,
+          "title": "반응형/landmark/heading 마감 + 키보드 여정 + 최종 axe sweep",
+          "description": "320/768/1920 reflow 코드 검증, heading 계층·landmark 점검, 공고탐색→상세→지원4스텝→제출 키보드 도달 테스트, 대표 페이지 axe sweep. Step1 커버리지 따라 축소·Step3 병합 가능.",
+          "files": [
+            "app/jobs/_components/JobCard.tsx",
+            "app/jobs/_components/Pagination.tsx",
+            "app/me/_components/Timeline.tsx",
+            "tests/a11y/keyboard-journey.test.tsx",
+            "tests/a11y/axe-pages.test.tsx"
+          ],
+          "estimatedLines": 420,
+          "prLineLimit": 600,
+          "status": "pending",
+          "dependsOn": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "currentStep": 1,
+      "planPath": ".claude/temp/CANDID-028-plan.md",
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-03T09:55:42+09:00"
+      }
     },
     "CANDID-029": {
       "id": "CANDID-029",
