@@ -99,4 +99,32 @@ describe('withTraceContext (route wrapper)', () => {
     await handler(req({ [TRACE_HEADER]: 'scoped' }), undefined);
     expect(getTraceId()).toBeUndefined();
   });
+
+  it('does not leak the context when the handler throws', async () => {
+    const handler = withTraceContext(async () => {
+      throw new Error('handler boom');
+    });
+    await expect(handler(req({ [TRACE_HEADER]: 'throw-trace' }), undefined)).rejects.toThrow(
+      'handler boom',
+    );
+    expect(getTraceId()).toBeUndefined();
+  });
+});
+
+// 리뷰 보강(PR #111) — ALS의 핵심 목적인 동시 요청 격리를 명시 검증.
+describe('동시 요청 ALS 격리', () => {
+  it('병렬 runWithTrace 컨텍스트는 await 타이밍이 달라도 교차 오염되지 않는다', async () => {
+    const [a, b] = await Promise.all([
+      runWithTrace('concurrent-A', async () => {
+        await new Promise((r) => setTimeout(r, 10));
+        return getTraceId();
+      }),
+      runWithTrace('concurrent-B', async () => {
+        await new Promise((r) => setTimeout(r, 1));
+        return getTraceId();
+      }),
+    ]);
+    expect(a).toBe('concurrent-A');
+    expect(b).toBe('concurrent-B');
+  });
 });

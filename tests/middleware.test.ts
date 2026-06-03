@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { __resetCachedEnvForTesting } from '@/lib/env';
 import { __resetCorsCacheForTesting } from '@/lib/security/cors';
@@ -270,5 +270,48 @@ describe('traceId 전파 (CANDID-026)', () => {
     expect(response.headers.get('x-trace-id')).toBe('csrf-trace');
     const body = (await response.json()) as { traceId: string };
     expect(body.traceId).toBe('csrf-trace');
+  });
+
+  // 리뷰 보강(PR #111) — 일반 경로의 핵심 계약: 다운스트림 요청 헤더 주입(echo와 별개 경로).
+  it('일반 경로: 다운스트림 요청 헤더에 x-trace-id를 주입한다', () => {
+    const spy = vi.spyOn(NextResponse, 'next');
+    try {
+      middleware(
+        makeRequest('https://candidate.example.com/api/v1/jobs', {
+          headers: { 'x-trace-id': 'inject-trace' },
+        }),
+      );
+      const passed = spy.mock.calls[0]?.[0]?.request?.headers as Headers | undefined;
+      expect(passed?.get('x-trace-id')).toBe('inject-trace');
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('CORS preflight(OPTIONS) 응답에도 x-trace-id가 부착된다', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/api/v1/auth/login', {
+        method: 'OPTIONS',
+        headers: {
+          origin: 'https://candidate.example.com',
+          'access-control-request-method': 'POST',
+          'x-trace-id': 'preflight-trace',
+        },
+      }),
+    );
+    expect(response.status).toBe(204);
+    expect(response.headers.get('x-trace-id')).toBe('preflight-trace');
+  });
+
+  it('H003 421(호스트 위조) 응답에도 x-trace-id가 부착된다', () => {
+    vi.stubEnv('FORCE_HTTPS_REDIRECT', 'true');
+    __resetCachedEnvForTesting();
+    const response = middleware(
+      makeRequest('http://evil.example.com/jobs', {
+        headers: { 'x-trace-id': 'evil-trace' },
+      }),
+    );
+    expect(response.status).toBe(421);
+    expect(response.headers.get('x-trace-id')).toBe('evil-trace');
   });
 });
