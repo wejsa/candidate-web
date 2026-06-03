@@ -6,6 +6,7 @@ import { buildVerifyEmailMessage } from '@/lib/email/templates/verify-email';
 import { sendMail } from '@/lib/email/transport';
 import { withErrorHandler } from '@/lib/errors';
 import { emailDomainOf, summarizeError } from '@/lib/logging/pii-safe';
+import { withBusinessMetric } from '@/lib/observability/metrics';
 import { POLICIES, withRateLimit } from '@/lib/security/rate-limit';
 
 // CANDID-010 Step 2 — POST /api/v1/auth/signup (US-AUTH-001).
@@ -18,44 +19,47 @@ import { POLICIES, withRateLimit } from '@/lib/security/rate-limit';
 // 메일 발송은 트랜잭션 외부 fire-and-forget (BR-TX-02) — 발송 실패가 가입을 막지 않음.
 
 export const POST = withErrorHandler(
-  withRateLimit(POLICIES.SIGNUP, async (request: NextRequest) => {
-    const body = SignupInputSchema.parse(await request.json());
-    const result = await createUserAndIssueTokens(body, {
-      userAgent: request.headers.get('user-agent'),
-      // X-Forwarded-For 신뢰는 lib/security/rate-limit.ts와 동일 TRUST_PROXY 게이트로 별도 헬퍼화 가능 —
-      // 현재는 단순화하여 null. CANDID-026 감사 로그에서 IP 추출 통일 예정.
-      ipAddress: null,
-    });
-
-    // 메일 발송은 fire-and-forget (BR-TX-02) — 트랜잭션 밖, 가입 응답을 막지 않는다.
-    const mailMsg = buildVerifyEmailMessage({
-      to: result.user.email,
-      name: result.user.name,
-      token: result.verificationToken,
-    });
-    void sendMail(mailMsg).catch((err) => {
-      // CANDID-036: 인라인 redact를 lib/logging/pii-safe로 추출 — 횡단 관심사.
-      // nodemailer SMTP 응답 본문이 err.message에 합성되어 평문 이메일 우회 노출 가능 (PR #34 H001).
-      console.error('[signup] verification email send failed', {
-        userId: result.user.id,
-        emailDomain: emailDomainOf(result.user.email),
-        ...summarizeError(err),
+  withRateLimit(
+    POLICIES.SIGNUP,
+    withBusinessMetric('signup', async (request: NextRequest) => {
+      const body = SignupInputSchema.parse(await request.json());
+      const result = await createUserAndIssueTokens(body, {
+        userAgent: request.headers.get('user-agent'),
+        // X-Forwarded-For 신뢰는 lib/security/rate-limit.ts와 동일 TRUST_PROXY 게이트로 별도 헬퍼화 가능 —
+        // 현재는 단순화하여 null. CANDID-026 감사 로그에서 IP 추출 통일 예정.
+        ipAddress: null,
       });
-    });
 
-    const response = NextResponse.json(
-      {
-        user: result.user,
-        // Step 3 fix(Step 2 review D2): 응답 시점에는 메일 발송 *시도*만 완료(fire-and-forget).
-        // 발송 결과(성공/실패)는 응답에 포함되지 않음. 미수신 시 재발송 API(/resend-verification).
-        verificationEmailQueued: true,
-      },
-      { status: 201 },
-    );
-    setAuthCookies(response, {
-      access: { token: result.tokens.accessToken, expiresAt: result.tokens.accessExpiresAt },
-      refresh: { token: result.tokens.refreshToken, expiresAt: result.tokens.refreshExpiresAt },
-    });
-    return response;
-  }),
+      // 메일 발송은 fire-and-forget (BR-TX-02) — 트랜잭션 밖, 가입 응답을 막지 않는다.
+      const mailMsg = buildVerifyEmailMessage({
+        to: result.user.email,
+        name: result.user.name,
+        token: result.verificationToken,
+      });
+      void sendMail(mailMsg).catch((err) => {
+        // CANDID-036: 인라인 redact를 lib/logging/pii-safe로 추출 — 횡단 관심사.
+        // nodemailer SMTP 응답 본문이 err.message에 합성되어 평문 이메일 우회 노출 가능 (PR #34 H001).
+        console.error('[signup] verification email send failed', {
+          userId: result.user.id,
+          emailDomain: emailDomainOf(result.user.email),
+          ...summarizeError(err),
+        });
+      });
+
+      const response = NextResponse.json(
+        {
+          user: result.user,
+          // Step 3 fix(Step 2 review D2): 응답 시점에는 메일 발송 *시도*만 완료(fire-and-forget).
+          // 발송 결과(성공/실패)는 응답에 포함되지 않음. 미수신 시 재발송 API(/resend-verification).
+          verificationEmailQueued: true,
+        },
+        { status: 201 },
+      );
+      setAuthCookies(response, {
+        access: { token: result.tokens.accessToken, expiresAt: result.tokens.accessExpiresAt },
+        refresh: { token: result.tokens.refreshToken, expiresAt: result.tokens.refreshExpiresAt },
+      });
+      return response;
+    }),
+  ),
 );

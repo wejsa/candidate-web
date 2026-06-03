@@ -13,6 +13,7 @@ import {
   recordHttpRequest,
   renderMetrics,
   wireHttpMetrics,
+  withBusinessMetric,
 } from '@/lib/observability/metrics';
 
 beforeEach(() => {
@@ -174,5 +175,71 @@ describe('wireHttpMetrics', () => {
     expect(text).toContain('route="/api/v1/jobs/:id"');
     expect(text).toContain('method="GET"');
     expect(text).toContain('status_class="2xx"');
+  });
+});
+
+describe('withBusinessMetric', () => {
+  it('2xx 응답 시 success 카운터를 증가시킨다', async () => {
+    const wrapped = withBusinessMetric('signup', async (_req: NextRequest) =>
+      NextResponse.json({ ok: true }, { status: 201 }),
+    );
+    const res = await wrapped(new NextRequest('http://localhost/api/v1/auth/signup'));
+    expect(res.status).toBe(201);
+    const text = await renderMetrics();
+    expect(text).toContain('candidate_business_event_total{event="signup",result="success"} 1');
+  });
+
+  it('비-2xx 응답 시 failure 카운터를 증가시킨다', async () => {
+    const wrapped = withBusinessMetric('file_upload', async (_req: NextRequest) =>
+      NextResponse.json({ error: true }, { status: 409 }),
+    );
+    const res = await wrapped(new NextRequest('http://localhost/api/v1/files/resume/confirm'));
+    expect(res.status).toBe(409);
+    const text = await renderMetrics();
+    expect(text).toContain(
+      'candidate_business_event_total{event="file_upload",result="failure"} 1',
+    );
+  });
+
+  it('429(rate-limit) 응답은 success/failure 어느 쪽으로도 집계하지 않는다', async () => {
+    const wrapped = withBusinessMetric('application_withdraw', async (_req: NextRequest) =>
+      NextResponse.json({ error: 'rate limited' }, { status: 429 }),
+    );
+    const res = await wrapped(new NextRequest('http://localhost/api/v1/applications/me/1/withdraw'));
+    expect(res.status).toBe(429);
+    const text = await renderMetrics();
+    expect(text).not.toContain('event="application_withdraw"');
+  });
+
+  it('handler가 throw하면 failure 기록 후 에러를 그대로 재던진다', async () => {
+    const boom = new Error('submit failed');
+    const wrapped = withBusinessMetric('application_submit', async (_req: NextRequest) => {
+      throw boom;
+    });
+    await expect(
+      wrapped(new NextRequest('http://localhost/api/v1/applications')),
+    ).rejects.toBe(boom);
+    const text = await renderMetrics();
+    expect(text).toContain(
+      'candidate_business_event_total{event="application_submit",result="failure"} 1',
+    );
+  });
+
+  it('(request, context) 시그니처 핸들러의 context를 그대로 전달한다', async () => {
+    let received: unknown;
+    const wrapped = withBusinessMetric(
+      'application_withdraw',
+      async (_req: NextRequest, context: { params: { id: string } }) => {
+        received = context;
+        return NextResponse.json({ ok: true }, { status: 200 });
+      },
+    );
+    const ctx = { params: { id: '42' } };
+    await wrapped(new NextRequest('http://localhost/api/v1/applications/me/42/withdraw'), ctx);
+    expect(received).toBe(ctx);
+    const text = await renderMetrics();
+    expect(text).toContain(
+      'candidate_business_event_total{event="application_withdraw",result="success"} 1',
+    );
   });
 });
