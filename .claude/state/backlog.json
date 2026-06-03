@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 49,
     "projectPrefix": "CANDID",
-    "version": 444,
+    "version": 445,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T15:30:33+09:00"
+    "updatedAt": "2026-06-03T06:34:07Z"
   },
   "summary": {
     "total": 49,
@@ -3627,15 +3627,11 @@
       "phase": 4,
       "type": "test",
       "assignee": "wejsa-u@hoji-20260603-143929",
-      "assignedAt": "2026-06-03T06:02:05Z",
+      "assignedAt": "2026-06-03T06:34:07Z",
       "lockedFiles": [
-        "playwright.config.ts",
-        "package.json",
-        ".gitignore",
-        "e2e/smoke.spec.ts",
-        "e2e/fixtures/seed.ts",
         "e2e/fixtures/auth.ts",
-        "e2e/journeys.spec.ts"
+        "e2e/journeys.spec.ts",
+        "playwright.config.ts"
       ],
       "dependencies": [],
       "steps": [
@@ -3643,7 +3639,7 @@
           "number": 1,
           "title": "Playwright 스캐폴딩 + 인프라/페이지 스모크",
           "description": "@playwright/test 도입(playwright.config webServer=pnpm dev + /api/health 헬스체크). e2e/smoke.spec.ts: /api/health·/api/ready·/api/metrics + / · /jobs 렌더. package.json devDep/scripts, .gitignore.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "playwright.config.ts",
             "package.json",
@@ -3652,7 +3648,8 @@
           ],
           "estimatedLines": 450,
           "prLineLimit": 600,
-          "prNumber": 123
+          "prNumber": 123,
+          "mergedAt": "2026-06-03T06:34:07Z"
         },
         {
           "number": 2,
@@ -3668,14 +3665,14 @@
           "prLineLimit": 800
         }
       ],
-      "currentStep": 1,
+      "currentStep": 2,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 123,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": null,
-        "autoChainArgs": "123 --auto-fix",
-        "updatedAt": "2026-06-03T06:02:05Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T06:34:07Z"
       },
       "createdAt": "2026-06-03T05:38:55Z",
       "updatedAt": "2026-06-03T05:38:55Z",
