@@ -40,7 +40,7 @@ export function ApplyCta({ jobId, state, applicationNumber }: Props) {
           {LABEL.ALREADY_APPLIED}
         </button>
         <Link
-          href="/mypage"
+          href="/me"
           aria-label={
             applicationNumber !== undefined
               ? `마이페이지에서 ${applicationNumber} 확인`
