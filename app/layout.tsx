@@ -1,8 +1,16 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
 
 const SITE_NAME = 'candidate-web';
+
+// CANDID-028 — 모바일 반응형(320~1920px) 전제. viewport meta가 없으면 모바일 브라우저가
+// 데스크톱 폭으로 렌더해 reflow(WCAG 1.4.10)가 동작하지 않는다. 사용자 확대(접근성)를
+// 막지 않도록 maximumScale·userScalable은 제한하지 않는다.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 // CANDID-025 — metadataBase로 하위 페이지의 상대 canonical/OG URL을 절대 URL로 승격(SEO).
 // 루트 layout metadata는 `next build`의 정적 페이지 데이터 수집 단계에서 평가되므로 getEnv()
