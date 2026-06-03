@@ -181,15 +181,62 @@ button[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
+/*
+ * 버튼 위계 (CANDID-028 Step 2). 전역 button 기본 = primary.
+ * 비가역/파괴적 액션(철회·탈퇴)은 .btn-danger로 일반 액션과 시각 구분(오클릭 방지).
+ */
+.btn-danger {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: #ffffff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #8c1d17;
+  border-color: #8c1d17;
+}
+
+.btn-secondary {
+  color: var(--color-link);
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface);
+}
+
 [role='alert'] {
   color: var(--color-error);
 }
 
 /*
- * 모달 시각 스타일(position:fixed + 백드롭)은 배경 inert·focus-trap·body 스크롤락과
- * 원자적으로 도입해야 한다(시각만 모달이고 배경이 인터랙티브한 중간 상태 방지). 따라서
- * 본 스텝에서는 도입하지 않고 CANDID-028 Step 2(모달 focus 관리)에서 일괄 추가한다.
+ * 모달 (CANDID-028 Step 2). useFocusTrap(Tab 격리·ESC·포커스 복원·body 스크롤락)과 함께 도입.
+ * 백드롭은 ::before로 그려 별도 DOM 없이 배경을 시각적으로 가린다(z-index:-1 → 다이얼로그
+ * 스택 컨텍스트 내부에서 본문 뒤, 페이지 위). 완전한 background inert는 portal 도입 시 후속.
  */
+[role='dialog'][aria-modal='true'] {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: calc(100% - 2rem);
+  max-width: 480px;
+  max-height: 90vh;
+  margin: auto;
+  overflow: auto;
+  padding: 1.5rem;
+  background: var(--color-bg);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+[role='dialog'][aria-modal='true']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.5);
+}
 
 /* 모션 민감 사용자 배려 (WCAG 2.3.3) */
 @media (prefers-reduced-motion: reduce) {
