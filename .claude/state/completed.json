@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 47,
+    "version": 49,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-03T06:28:26Z"
+    "updatedAt": "2026-06-03T15:30:33+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1440,6 +1440,24 @@
         }
       ],
       "note": "unstable_cache JSON 직렬화로 Date→string 환원 → computeDDay/.getTime() 크래시. list.ts toCard + sitemap-data.ts ISO DTO 패턴 통일. 회귀: JSON 라운드트립 직접 재현 + 통합 경로."
+    },
+    "CANDID-029": {
+      "id": "CANDID-029",
+      "title": "야간 배치: 30일 미제출 Draft 파일 정리 + ClamAV 스캔 골격",
+      "phase": 4,
+      "priority": "low",
+      "type": "feature",
+      "completedAt": "2026-06-03T15:30:33+09:00",
+      "assignee": "wejsa-u@hoji-20260603-141749",
+      "prs": [
+        122,
+        124,
+        126
+      ],
+      "totalMergedLines": 1748,
+      "stepCount": 3,
+      "reviewSummary": "3 steps self-PR. Step1/2 subagent review (CRITICAL 0, test MAJOR 보강). Step3 subagent 불가(credit)→직접 리뷰, 도메인 MAJOR(INFECTED row 보존) 발견·수정.",
+      "carry": []
     }
   }
 }

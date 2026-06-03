@@ -2,13 +2,13 @@
   "metadata": {
     "lastTaskNumber": 49,
     "projectPrefix": "CANDID",
-    "version": 443,
+    "version": 444,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T15:30:00+09:00"
+    "updatedAt": "2026-06-03T15:30:33+09:00"
   },
   "summary": {
-    "total": 47,
-    "done": 46,
+    "total": 49,
+    "done": 48,
     "inProgress": 1,
     "review": 0,
     "todo": 0
@@ -2503,7 +2503,7 @@
       "id": "CANDID-029",
       "title": "야간 배치: 30일 미제출 Draft 파일 정리 + ClamAV 스캔 골격",
       "description": "30일 이상 미제출 Draft 및 첨부 파일 자동 삭제 배치. ClamAV 비동기 스캔 큐 + virus_scan_status 갱신. INFECTED 시 자동 삭제 + 사용자 알림. [CANDID-010 FU 추가] email_verifications 테이블의 consumedAt 또는 expiresAt이 7일 이상 경과한 행 자동 삭제 — BR-PII-03(자동 파기)와 정합. user FK ON DELETE CASCADE도 함께 검증 (PR #33 H008).",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "low",
       "phase": 4,
@@ -2511,26 +2511,12 @@
         "CANDID-016"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "wejsa-u@hoji-20260603-141749",
-      "assignedAt": "2026-06-03T15:24:00+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "lib/files/scanner.ts",
-        "lib/batch/virus-scan.ts",
-        "lib/email/templates/infected-file.ts",
-        "lib/batch/runner.ts",
-        "lib/env.ts"
-      ],
-      "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 126,
-        "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "126",
-        "updatedAt": "2026-06-03T15:30:00+09:00"
-      },
-      "updatedAt": "2026-06-03T15:30:00+09:00",
+      "lockedFiles": [],
+      "workflowState": null,
+      "updatedAt": "2026-06-03T15:30:33+09:00",
       "steps": [
         {
           "number": 1,
@@ -2585,13 +2571,15 @@
           ],
           "estimatedLines": 450,
           "prLineLimit": 500,
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 126,
-          "branch": "feature/CANDID-029-step3"
+          "branch": "feature/CANDID-029-step3",
+          "mergedAt": "2026-06-03T15:30:33+09:00"
         }
       ],
       "currentStep": 3,
-      "specFile": "docs/sample-requirement.md"
+      "specFile": "docs/sample-requirement.md",
+      "completedAt": "2026-06-03T15:30:33+09:00"
     },
     "CANDID-030": {
       "id": "CANDID-030",
