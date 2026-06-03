@@ -75,7 +75,7 @@ export default async function JobDetailPage({ params }: PageProps) {
   const jsonLd = jsonLdScriptContent(buildJobPostingJsonLd(job, getEnv().NEXT_PUBLIC_APP_URL));
 
   return (
-    <main>
+    <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <JobDetailHeader job={job} />
       <JobDetailBody job={job} />

@@ -38,7 +38,7 @@ export default async function WithdrawPage() {
   const isSocialOnly = user.passwordHash === null;
 
   return (
-    <main aria-labelledby="withdraw-title">
+    <main id="main-content" aria-labelledby="withdraw-title">
       <header>
         <h1 id="withdraw-title">{WITHDRAW_LABELS.pageTitle}</h1>
         <p>{WITHDRAW_LABELS.pageDescription}</p>

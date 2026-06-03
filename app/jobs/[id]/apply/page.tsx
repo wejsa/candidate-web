@@ -55,7 +55,7 @@ export default async function ApplyPage({ params }: PageProps) {
   }
 
   return (
-    <main>
+    <main id="main-content">
       <ApplicationFormShell
         jobId={jobId}
         draftDbId={draft.id}

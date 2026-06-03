@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function ResetRequestPage(): React.JSX.Element {
   return (
-    <main aria-labelledby="reset-request-page-title">
+    <main id="main-content" aria-labelledby="reset-request-page-title">
       <header>
         <h1 id="reset-request-page-title">비밀번호를 잊으셨나요?</h1>
       </header>

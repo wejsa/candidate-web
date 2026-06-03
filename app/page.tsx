@@ -1,6 +1,6 @@
 export default function HomePage() {
   return (
-    <main>
+    <main id="main-content">
       <h1>candidate-web</h1>
       <p>자사 채용 사이트 지원자 프론트엔드. 본 페이지는 CANDID-001 셋업 검증용 임시 랜딩입니다.</p>
       <p>

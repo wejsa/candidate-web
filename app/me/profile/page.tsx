@@ -42,7 +42,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main>
+    <main id="main-content">
       <h1>프로필</h1>
       <ProfileView profile={profile} />
       <ProfileEditForm initialName={profile.name} phoneMasked={profile.phoneMasked} />
