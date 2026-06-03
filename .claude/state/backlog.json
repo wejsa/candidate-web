@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 451,
+    "version": 452,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T08:29:38Z"
+    "updatedAt": "2026-06-03T08:37:03Z"
   },
   "summary": {
     "total": 50,
@@ -3711,26 +3711,11 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260603-081433",
-      "assignedAt": "2026-06-03T08:29:38Z",
+      "assignedAt": "2026-06-03T08:37:03Z",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/_components/LogoutButton.tsx",
         "app/_components/SiteHeader.tsx",
-        "app/globals.css",
-        "app/jobs/[id]/_components/ApplyCta.tsx",
-        "app/jobs/[id]/_components/JobDetailBody.tsx",
-        "app/jobs/[id]/_components/JobDetailHeader.tsx",
-        "app/jobs/[id]/_components/ShareButton.tsx",
-        "app/jobs/[id]/page.module.css",
-        "app/jobs/[id]/page.tsx",
-        "app/jobs/_components/ClosedJobsSection.tsx",
-        "app/jobs/_components/JobCard.module.css",
-        "app/jobs/_components/JobCard.tsx",
-        "app/jobs/_components/JobFilters.module.css",
-        "app/jobs/_components/JobFilters.tsx",
-        "app/jobs/_components/Pagination.tsx",
-        "app/jobs/page.module.css",
-        "app/jobs/page.tsx",
         "app/layout.tsx",
         "app/login/_components/LoginForm.tsx",
         "app/login/page.tsx",
@@ -3746,7 +3731,7 @@
           "number": 1,
           "title": "결함 수정 — JobCard 링크 범위 + ApplyCta 라우트 버그",
           "description": "JobCard 제목만 <Link>, 직군/고용형태/경력·D-Day는 링크 밖 일반 텍스트(시각 재구성은 Step3). aria-label 유지. ApplyCta /mypage→/me. 회귀/컴포넌트 테스트. 스타일 변경 없음.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "app/jobs/_components/JobCard.tsx",
             "app/jobs/[id]/_components/ApplyCta.tsx",
@@ -3756,7 +3741,8 @@
           "prLineLimit": 250,
           "estimatedLines": 180,
           "prNumber": 128,
-          "branch": "feature/CANDID-050-step1"
+          "branch": "feature/CANDID-050-step1",
+          "mergedAt": "2026-06-03T08:37:03Z"
         },
         {
           "number": 2,
@@ -3813,17 +3799,17 @@
           "estimatedLines": 450
         }
       ],
-      "currentStep": 1,
+      "currentStep": 2,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 128,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T08:29:38Z"
+        "updatedAt": "2026-06-03T08:37:03Z"
       },
       "createdAt": "2026-06-03T08:12:34Z",
-      "updatedAt": "2026-06-03T08:29:38Z"
+      "updatedAt": "2026-06-03T08:37:03Z"
     }
   }
 }
