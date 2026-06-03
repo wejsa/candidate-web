@@ -17,10 +17,13 @@ import {
 
 beforeEach(() => {
   __resetMetricsRegistryForTesting();
+  // 파일 내 순서 의존 방지 — wireHttpMetrics가 설정한 전역 observer를 매 테스트 전 초기화.
+  setRequestObserver(null);
 });
 
 afterEach(() => {
   __resetMetricsRegistryForTesting();
+  setRequestObserver(null);
 });
 
 describe('metrics registry', () => {
@@ -113,6 +116,27 @@ describe('normalizeRoute', () => {
 
   it('알파벳 세그먼트(me, withdraw 등)는 보존한다', () => {
     expect(normalizeRoute('/api/v1/users/me/withdraw')).toBe('/api/v1/users/me/withdraw');
+  });
+
+  it('LONG_OPAQUE 16자 경계: 15자는 보존, 16자는 :id로 치환', () => {
+    expect(normalizeRoute('/t/deadbeefdeadbee')).toBe('/t/deadbeefdeadbee'); // 15자 — 미치환
+    expect(normalizeRoute('/t/deadbeefdeadbeef')).toBe('/t/:id'); // 16자 — 치환
+  });
+
+  it('대문자/혼합 hex 16자+도 :id로 치환한다(대소문자 무관)', () => {
+    expect(normalizeRoute('/t/ABCDEF0123456789')).toBe('/t/:id');
+  });
+
+  it('순수 숫자 세그먼트는 의도적으로 :id (연도/버전 포함 트레이드오프)', () => {
+    // 정규화는 PK/식별자 카디널리티 억제가 목적 — 숫자만이면 연도(2024)도 :id로 뭉갠다(의도).
+    expect(normalizeRoute('/posts/2024')).toBe('/posts/:id');
+    // 반면 영숫자 버전 슬러그(v2)는 보존 — false collapse 아님.
+    expect(normalizeRoute('/api/v2/jobs')).toBe('/api/v2/jobs');
+  });
+
+  it('빈 입력/루트/트레일링 슬래시 폴백', () => {
+    expect(normalizeRoute('')).toBe('/');
+    expect(normalizeRoute('/api/v1/jobs/')).toBe('/api/v1/jobs/'); // 트레일링 슬래시 보존
   });
 });
 
