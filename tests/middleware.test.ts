@@ -218,3 +218,57 @@ describe('일반 요청 응답 가공', () => {
 
   // production HSTS 부착은 tests/lib/security/headers.test.ts에서 단위 검증한다 — 미들웨어는 applySecurityHeaders 통과만 보장.
 });
+
+// CANDID-026 Step 1 — traceId 전파 시발점. 모든 경로에서 x-trace-id를 응답에 echo한다.
+describe('traceId 전파 (CANDID-026)', () => {
+  const TRACE_RE = /^[0-9A-Za-z-]{1,36}$/;
+  const W3C_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
+
+  it('수신 헤더가 없으면 새 traceId를 발급해 응답에 부착한다', () => {
+    const response = middleware(makeRequest('https://candidate.example.com/jobs'));
+    expect(response.headers.get('x-trace-id')).toMatch(TRACE_RE);
+  });
+
+  it('수신 x-trace-id를 그대로 echo한다', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/jobs', {
+        headers: { 'x-trace-id': 'upstream-trace-1' },
+      }),
+    );
+    expect(response.headers.get('x-trace-id')).toBe('upstream-trace-1');
+  });
+
+  it('W3C traceparent에서 trace-id를 추출해 echo한다', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/jobs', {
+        headers: { traceparent: `00-${W3C_TRACE_ID}-b7ad6b7169203331-01` },
+      }),
+    );
+    expect(response.headers.get('x-trace-id')).toBe(W3C_TRACE_ID);
+  });
+
+  it('HTTPS 리다이렉트 응답에도 x-trace-id가 부착된다', () => {
+    vi.stubEnv('FORCE_HTTPS_REDIRECT', 'true');
+    __resetCachedEnvForTesting();
+    const response = middleware(
+      makeRequest('http://candidate.example.com/jobs', {
+        headers: { 'x-trace-id': 'redir-trace' },
+      }),
+    );
+    expect(response.status).toBe(308);
+    expect(response.headers.get('x-trace-id')).toBe('redir-trace');
+  });
+
+  it('CSRF 403 응답에도 x-trace-id가 부착되고 body.traceId와 일치한다', async () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/api/v1/auth/login', {
+        method: 'POST',
+        headers: { origin: 'https://evil.example.com', 'x-trace-id': 'csrf-trace' },
+      }),
+    );
+    expect(response.status).toBe(403);
+    expect(response.headers.get('x-trace-id')).toBe('csrf-trace');
+    const body = (await response.json()) as { traceId: string };
+    expect(body.traceId).toBe('csrf-trace');
+  });
+});

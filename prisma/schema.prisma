@@ -536,9 +536,13 @@ model AuditLog {
   ipAddress    String?        @map("ip_address") @db.Inet
   userAgent    String?        @map("user_agent") @db.VarChar(500)
   metadataJson Json?          @map("metadata_json") @db.JsonB
+  // CANDID-026 Step 1 — 분산 추적 traceId. 영구 NULL 허용(과거 row 백필 불가). UUID(36)/W3C trace-id(32) 수용.
+  traceId      String?        @map("trace_id") @db.VarChar(36)
 
   @@index([actorUserId, occurredAt(sort: Desc)], map: "idx_audit_actor_occurred")
   @@index([resourceType, resourceId, occurredAt(sort: Desc)], map: "idx_audit_resource")
   @@index([eventType, occurredAt(sort: Desc)], map: "idx_audit_event")
+  // partial 인덱스 idx_audit_trace (trace_id) WHERE trace_id IS NOT NULL는 Prisma 미표현 →
+  // migration.sql raw SQL로 생성(과거 NULL row 인덱스 비대 방지).
   @@map("audit_logs")
 }
