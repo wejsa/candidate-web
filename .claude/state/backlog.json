@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 449,
+    "version": 450,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T08:14:33Z"
+    "updatedAt": "2026-06-03T08:19:37Z"
   },
   "summary": {
     "total": 50,
@@ -3711,17 +3711,117 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260603-081433",
-      "assignedAt": "2026-06-03T08:14:33Z",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-06-03T08:19:37Z",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "app/_components/LogoutButton.tsx",
+        "app/_components/SiteHeader.tsx",
+        "app/globals.css",
+        "app/jobs/[id]/_components/ApplyCta.tsx",
+        "app/jobs/[id]/_components/JobDetailBody.tsx",
+        "app/jobs/[id]/_components/JobDetailHeader.tsx",
+        "app/jobs/[id]/_components/ShareButton.tsx",
+        "app/jobs/[id]/page.module.css",
+        "app/jobs/[id]/page.tsx",
+        "app/jobs/_components/ClosedJobsSection.tsx",
+        "app/jobs/_components/JobCard.module.css",
+        "app/jobs/_components/JobCard.tsx",
+        "app/jobs/_components/JobFilters.module.css",
+        "app/jobs/_components/JobFilters.tsx",
+        "app/jobs/_components/Pagination.tsx",
+        "app/jobs/page.module.css",
+        "app/jobs/page.tsx",
+        "app/layout.tsx",
+        "app/login/_components/LoginForm.tsx",
+        "app/login/page.tsx",
+        "app/signup/_components/SignupForm.tsx",
+        "app/signup/page.tsx",
+        "lib/auth/redirect.ts"
+      ],
       "dependencies": [],
       "specFile": "docs/requirements/CANDID-050-spec.md",
       "source": "사용자 요청 (/skill-feature) — jobs UI 재구성 + 로그인/지원 동선 복구. CANDID-048 E2E 데모 중 발견.",
-      "steps": [],
-      "currentStep": 0,
-      "workflowState": null,
+      "steps": [
+        {
+          "number": 1,
+          "title": "결함 수정 — JobCard 링크 범위 + ApplyCta 라우트 버그",
+          "description": "JobCard 제목만 <Link>, 직군/고용형태/경력·D-Day는 링크 밖 일반 텍스트(시각 재구성은 Step3). aria-label 유지. ApplyCta /mypage→/me. 회귀/컴포넌트 테스트. 스타일 변경 없음.",
+          "status": "pending",
+          "files": [
+            "app/jobs/_components/JobCard.tsx",
+            "app/jobs/[id]/_components/ApplyCta.tsx",
+            "tests/app/jobs/JobCard.test.tsx",
+            "tests/app/jobs/[id]/ApplyCta.test.tsx"
+          ],
+          "prLineLimit": 250,
+          "estimatedLines": 180
+        },
+        {
+          "number": 2,
+          "title": "인증 UI — /login + /signup + 전역 헤더",
+          "description": "/login(redirect 복원 + safeInternalPath open-redirect 가드 + 에러코드 메시지) · /signup(가입→이메일 인증 안내) · SiteHeader(인증 상태별) layout 통합. 폼 검증은 서버 스키마 SSOT 재사용. E2E 비인증→로그인→apply 복원. ⚠️ 최대 스텝.",
+          "status": "pending",
+          "files": [
+            "app/login/page.tsx",
+            "app/login/_components/LoginForm.tsx",
+            "app/signup/page.tsx",
+            "app/signup/_components/SignupForm.tsx",
+            "app/_components/SiteHeader.tsx",
+            "app/_components/LogoutButton.tsx",
+            "lib/auth/redirect.ts",
+            "app/layout.tsx",
+            "e2e/journeys.spec.ts"
+          ],
+          "prLineLimit": 900,
+          "estimatedLines": 750
+        },
+        {
+          "number": 3,
+          "title": "/jobs 목록 재구성 — CSS Modules + 토큰 확장",
+          "description": "히어로/타이틀 + 필터 칩/셀렉트(쿼리스트링 계약 불변) + 반응형 카드 그리드(1→2→3열) + 마감 섹션 시각 구분 + 빈/로딩 상태. 데이터 계약·SEO·aria 보존. vitest-axe 회귀.",
+          "status": "pending",
+          "files": [
+            "app/globals.css",
+            "app/jobs/page.tsx",
+            "app/jobs/page.module.css",
+            "app/jobs/_components/JobCard.tsx",
+            "app/jobs/_components/JobCard.module.css",
+            "app/jobs/_components/JobFilters.tsx",
+            "app/jobs/_components/JobFilters.module.css",
+            "app/jobs/_components/ClosedJobsSection.tsx",
+            "app/jobs/_components/Pagination.tsx"
+          ],
+          "prLineLimit": 700,
+          "estimatedLines": 550
+        },
+        {
+          "number": 4,
+          "title": "/jobs/[id] 상세 재구성 — 칩 헤더 + 스티키 CTA",
+          "description": "칩 헤더(직군·고용형태·경력·마감) + 본문 레이아웃 + 강조/스티키 지원 CTA + 공유. JSON-LD·force-dynamic·sanitize·runtime=nodejs 보존. 모바일 CTA 접근성. 회귀 테스트.",
+          "status": "pending",
+          "files": [
+            "app/jobs/[id]/page.tsx",
+            "app/jobs/[id]/page.module.css",
+            "app/jobs/[id]/_components/JobDetailHeader.tsx",
+            "app/jobs/[id]/_components/JobDetailBody.tsx",
+            "app/jobs/[id]/_components/ApplyCta.tsx",
+            "app/jobs/[id]/_components/ShareButton.tsx"
+          ],
+          "prLineLimit": 600,
+          "estimatedLines": 450
+        }
+      ],
+      "currentStep": 1,
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T08:19:37Z"
+      },
       "createdAt": "2026-06-03T08:12:34Z",
-      "updatedAt": "2026-06-03T08:14:33Z"
+      "updatedAt": "2026-06-03T08:19:37Z"
     }
   }
 }
