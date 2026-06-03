@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 396,
+    "version": 399,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T10:07:51+09:00"
+    "updatedAt": "2026-06-03T10:37:28+09:00"
   },
   "summary": {
     "total": 47,
@@ -2236,7 +2236,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T10:07:51+09:00",
+      "assignedAt": "2026-06-03T10:37:28+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/oauth/[provider]/callback/route.ts",
@@ -2255,26 +2255,28 @@
         "prisma/schema.prisma"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 111,
         "fixLoopCount": null,
         "lastReviewDecision": null,
-        "updatedAt": "2026-06-03T10:07:51+09:00"
+        "autoChainArgs": "111 --auto-fix",
+        "updatedAt": "2026-06-03T10:37:28+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "traceId 전파 인프라 + trace_id 마이그레이션",
           "description": "middleware(Edge) traceId 주입 → withErrorHandler에서 AsyncLocalStorage 컨텍스트 seed → 에러응답 traceId 통일. trace_id VARCHAR(36) NULL 컬럼 + partial 인덱스(WHERE trace_id IS NOT NULL). 경량 ALS만(전체 OTel 보류).",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "prisma/schema.prisma",
             "lib/observability/trace-context.ts",
             "middleware.ts",
             "lib/errors/response.ts"
           ],
-          "estimatedLines": 380
+          "estimatedLines": 380,
+          "prNumber": 111
         },
         {
           "number": 2,
@@ -2343,14 +2345,12 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260603-094035",
-      "assignedAt": "2026-06-03T09:55:42+09:00",
+      "assignedAt": "2026-06-03T10:25:27+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "app/globals.css",
         "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
         "app/jobs/_components/JobCard.tsx",
         "app/jobs/_components/Pagination.tsx",
-        "app/layout.tsx",
         "app/me/_components/Timeline.tsx",
         "app/me/_components/WithdrawButton.tsx",
         "app/me/profile/_components/PasswordChangeForm.tsx",
@@ -2358,9 +2358,7 @@
         "app/me/withdraw/_components/ConfirmModal.tsx",
         "app/me/withdraw/_components/WithdrawForm.tsx",
         "lib/ui/use-focus-trap.ts",
-        "package.json",
         "tests/a11y/axe-pages.test.tsx",
-        "tests/a11y/foundation.test.tsx",
         "tests/a11y/keyboard-journey.test.tsx",
         "tests/app/jobs/[id]/apply/PersonalInfoStep.test.tsx",
         "tests/app/me/WithdrawButton.test.tsx",
@@ -2368,12 +2366,11 @@
         "tests/app/me/profile/ProfileEditForm.test.tsx",
         "tests/app/me/withdraw/ConfirmModal.test.tsx",
         "tests/app/me/withdraw/WithdrawForm.test.tsx",
-        "tests/lib/ui/use-focus-trap.test.tsx",
-        "tests/setup.ts"
+        "tests/lib/ui/use-focus-trap.test.tsx"
       ],
-      "updatedAt": "2026-06-03T09:55:42+09:00",
+      "updatedAt": "2026-06-03T10:25:27+09:00",
       "metadata": {
-        "version": 2
+        "version": 4
       },
       "steps": [
         {
@@ -2389,7 +2386,11 @@
           ],
           "estimatedLines": 420,
           "prLineLimit": 500,
-          "status": "pending"
+          "status": "merged",
+          "prNumber": 110,
+          "branch": "feature/CANDID-028-step1",
+          "mergedAt": "2026-06-03T10:25:27+09:00",
+          "actualLines": 352
         },
         {
           "number": 2,
@@ -2452,15 +2453,16 @@
           ]
         }
       ],
-      "currentStep": 1,
+      "currentStep": 2,
       "planPath": ".claude/temp/CANDID-028-plan.md",
       "workflowState": {
         "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
+        "lastCompletedSkill": "skill-merge-pr",
         "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-03T09:55:42+09:00"
+        "lastReviewDecision": "approved",
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T10:25:27+09:00"
       }
     },
     "CANDID-029": {

@@ -7,6 +7,15 @@
 // jsdom 환경 테스트(.test.tsx)에서만 실제 사용되며, node 환경 테스트에는 무해(matcher 등록만).
 import '@testing-library/jest-dom/vitest';
 
+// CANDID-028 Step 1 — vitest-axe 도입. `toHaveNoViolations` matcher 등록 + Vi.Assertion 타입 확장.
+// axe-core는 jsdom 레이아웃 부재로 color-contrast 룰을 자동 스킵하며, 시맨틱/라벨/role 위반을 검출한다.
+// 주의: vitest-axe@0.1.0의 `extend-expect`는 런타임 등록이 비어 있고(빈 모듈), 타입도 구버전
+//       `Vi` 네임스페이스만 augment한다. 따라서 런타임은 아래 `expect.extend`로, 타입은
+//       tests/vitest-axe.d.ts의 `'vitest'` 모듈 보강으로 직접 등록한다.
+import { expect } from 'vitest';
+import * as axeMatchers from 'vitest-axe/matchers';
+expect.extend(axeMatchers);
+
 process.env.DATABASE_URL ??= 'postgresql://test:test@localhost:5432/test_db';
 
 // 32 bytes hex — 테스트 전용 고정 키.
