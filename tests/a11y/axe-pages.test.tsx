@@ -19,8 +19,24 @@ import { WithdrawForm } from '@/app/me/withdraw/_components/WithdrawForm';
 import { LoginForm } from '@/app/login/_components/LoginForm';
 import { SignupForm } from '@/app/signup/_components/SignupForm';
 import { JobCard } from '@/app/jobs/_components/JobCard';
-import type { JobListItem } from '@/lib/jobs/types';
+import { JobDetailHeader } from '@/app/jobs/[id]/_components/JobDetailHeader';
+import type { JobListItem, JobDetail } from '@/lib/jobs/types';
 import type { DraftPrefill } from '@/lib/drafts/types';
+
+const jobDetailFixture: JobDetail = {
+  id: 1,
+  title: '프론트엔드 엔지니어',
+  employmentType: 'FULL_TIME',
+  careerLevel: 'EXPERIENCED',
+  category: { name: '개발', slug: 'dev' },
+  contentHtmlSanitized: '<p>본문</p>',
+  opensAt: new Date('2026-05-01T00:00:00Z'),
+  closesAt: new Date('2026-07-01T00:00:00Z'),
+  status: 'OPEN',
+  isClosed: false,
+  dDayLabel: 'D-29',
+  questions: [],
+};
 
 const jobCardFixture: JobListItem = {
   id: 1,
@@ -64,6 +80,7 @@ describe('실 컴포넌트 axe sweep (WCAG)', () => {
     ['SignupForm', () => <SignupForm redirectTo="/me" />],
     ['JobCard', () => <JobCard job={jobCardFixture} />],
     ['JobCard(closed)', () => <JobCard job={jobCardFixture} closed />],
+    ['JobDetailHeader', () => <JobDetailHeader job={jobDetailFixture} />],
   ])('%s — axe 위반 없음', async (_label, renderEl) => {
     const { container } = render(renderEl());
     expect(await axe(container, AXE_OPTS)).toHaveNoViolations();

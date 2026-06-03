@@ -84,7 +84,7 @@ export default async function JobDetailPage({ params }: PageProps) {
           <JobDetailBody job={job} />
         </div>
         {/* 데스크톱 sticky 사이드바 / 모바일 하단 고정 지원 바. */}
-        <aside className={styles.aside}>
+        <aside className={styles.aside} aria-label="지원 및 공유">
           <section aria-label="지원하기" className={styles.applyBox}>
             <ApplyCta jobId={job.id} state={cta.state} applicationNumber={cta.applicationNumber} />
           </section>
