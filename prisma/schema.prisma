@@ -320,6 +320,11 @@ enum AuditEventType {
   // CANDID-022 — 탈퇴 분기별 상세 이벤트 (USER_WITHDRAWN은 분기와 무관한 요청 시점 이벤트로 유지).
   USER_ANONYMIZED
   USER_HARD_DELETED
+  // CANDID-026 Step 4 — 이메일 인증 + OAuth 연결/해제 감사 이벤트.
+  EMAIL_VERIFIED
+  EMAIL_VERIFICATION_RESENT
+  OAUTH_LINKED
+  OAUTH_UNLINKED
 }
 
 model Application {

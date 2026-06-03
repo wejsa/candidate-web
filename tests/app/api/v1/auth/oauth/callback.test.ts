@@ -31,6 +31,7 @@ vi.mock('@/lib/auth/oauth/link', () => ({
 }));
 // CANDID-024 Step 5 — link 분기 세션 바인딩 재확인용.
 vi.mock('@/lib/auth/middleware', () => ({ getOptionalAuth: vi.fn() }));
+vi.mock('@/lib/audit/record', () => ({ recordAuditEventSafe: vi.fn() }));
 
 const { verifyOAuthStateCookie } = (await import('@/lib/auth/oauth/state')) as unknown as {
   verifyOAuthStateCookie: ReturnType<typeof vi.fn>;
@@ -46,6 +47,9 @@ const { linkOrCreateOAuthUser, linkProviderToCurrentUser } =
   };
 const { getOptionalAuth } = (await import('@/lib/auth/middleware')) as unknown as {
   getOptionalAuth: ReturnType<typeof vi.fn>;
+};
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: ReturnType<typeof vi.fn>;
 };
 const { GET } = await import('@/app/api/v1/auth/oauth/[provider]/callback/route');
 
@@ -231,6 +235,16 @@ describe('callback — link-add 모드', () => {
     expect(linkOrCreateOAuthUser).not.toHaveBeenCalled();
     // state cookie는 여전히 소멸.
     expect(setCookie).toMatch(/oauth_state=;[^,]*Max-Age=0/);
+    // CANDID-026 Step 4 — 연결 성공 시 OAUTH_LINKED 감사(provider metadata, PII-free).
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'OAUTH_LINKED',
+        actorUserId: 7,
+        resourceType: 'user',
+        resourceId: '7',
+        metadata: { provider: 'google' },
+      }),
+    );
   });
 
   it('ALREADY_LINKED → /me/profile?error=provider_already_linked', async () => {
@@ -251,6 +265,8 @@ describe('callback — link-add 모드', () => {
 
     expect(res.status).toBe(302);
     expect(res.headers.get('location')).toContain('error=provider_already_linked');
+    // 연결 실패(이미 연결됨)에는 OAUTH_LINKED를 발행하지 않는다.
+    expect(recordAuditEventSafe).not.toHaveBeenCalled();
   });
 
   // 리뷰 보안 MAJOR — 세션 바인딩: 현재 세션 ≠ state.linkUserId → 거부 (공유 단말 stale-state 방어).

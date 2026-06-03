@@ -17,6 +17,8 @@ vi.mock('@/lib/prisma', () => {
   };
 });
 
+vi.mock('@/lib/audit/record', () => ({ recordAuditEventSafe: vi.fn() }));
+
 const { __mocks } = (await import('@/lib/prisma')) as unknown as {
   __mocks: {
     queryRaw: Mock;
@@ -25,6 +27,9 @@ const { __mocks } = (await import('@/lib/prisma')) as unknown as {
     providerDelete: Mock;
     $transaction: Mock;
   };
+};
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: Mock;
 };
 const { unlinkProvider } = await import('@/lib/auth/oauth/unlink');
 const { AppError } = await import('@/lib/errors');
@@ -50,6 +55,17 @@ describe('unlinkProvider', () => {
     __mocks.providerFindMany.mockResolvedValue([{ provider: 'GOOGLE' }]);
 
     await unlinkProvider(input);
+
+    // CANDID-026 Step 4 — 해제 성공 후 OAUTH_UNLINKED 감사(provider metadata, PII-free).
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'OAUTH_UNLINKED',
+        actorUserId: 42,
+        resourceType: 'user',
+        resourceId: '42',
+        metadata: { provider: 'google' },
+      }),
+    );
 
     expect(__mocks.providerDelete).toHaveBeenCalledWith({
       where: { userId_provider: { userId: 42, provider: 'GOOGLE' } },

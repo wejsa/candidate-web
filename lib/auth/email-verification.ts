@@ -1,6 +1,8 @@
 import 'server-only';
+import { AuditEventType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
+import { recordAuditEventSafe } from '@/lib/audit/record';
 import { generateTokenHex, sha256Hex } from '@/lib/auth/token-hash';
 import { isUniqueViolationOn } from '@/lib/prisma/errors';
 
@@ -33,9 +35,7 @@ const RESEND_COOLDOWN_MS = 60 * 1000;
  * P2002 매핑 화이트리스트 — 본 인덱스의 충돌만 race-cooldown 시맨틱으로 매핑한다.
  * `email_verifications_token_hash_key`(sha256 충돌)는 시스템 에러로 전파.
  */
-const RESEND_COOLDOWN_UNIQUE_INDEXES = [
-  'uk_email_verifications_active_per_user',
-] as const;
+const RESEND_COOLDOWN_UNIQUE_INDEXES = ['uk_email_verifications_active_per_user'] as const;
 
 export interface ConsumeResult {
   userId: number;
@@ -68,7 +68,9 @@ export interface ResendResult {
  */
 export async function consumeVerificationToken(token: string): Promise<ConsumeResult> {
   const tokenHash = sha256Hex(token);
-  return prisma.$transaction(async (tx) => {
+  // 신규 인증 성공 시 트랜잭션 밖에서 감사 emit하기 위해 verificationId를 캡처한다(멱등 재클릭은 미발행).
+  let freshVerificationId: number | null = null;
+  const result = await prisma.$transaction(async (tx) => {
     const now = new Date();
     // race-free 직렬화 — UPDATE의 row lock이 동시 두 요청 중 하나만 통과시킨다.
     const result = await tx.emailVerification.updateMany({
@@ -102,7 +104,7 @@ export async function consumeVerificationToken(token: string): Promise<ConsumeRe
     // count=1 — 직렬화 승자. user.emailVerifiedAt 갱신.
     const row = await tx.emailVerification.findUnique({
       where: { tokenHash },
-      select: { userId: true },
+      select: { id: true, userId: true },
     });
     // count=1이면 방금 UPDATE한 row가 반드시 존재 — non-null 단언 안전.
     if (row === null) {
@@ -110,8 +112,23 @@ export async function consumeVerificationToken(token: string): Promise<ConsumeRe
       throw new AppError('SYS_INTERNAL_ERROR');
     }
     await tx.user.update({ where: { id: row.userId }, data: { emailVerifiedAt: now } });
+    freshVerificationId = row.id;
     return { userId: row.userId, emailVerifiedAt: now, alreadyVerified: false };
   });
+
+  // CANDID-026 Step 4 — EMAIL_VERIFIED 감사(신규 인증만). fail-open: 감사 실패가 인증을 막지 않음.
+  // metadata는 PII-free(verificationId만). 토큰/이메일 평문은 절대 미기록(PR #33 H007).
+  if (!result.alreadyVerified && freshVerificationId !== null) {
+    await recordAuditEventSafe({
+      eventType: AuditEventType.EMAIL_VERIFIED,
+      actorUserId: result.userId,
+      resourceType: 'user',
+      resourceId: String(result.userId),
+      metadata: { verificationId: freshVerificationId },
+    });
+  }
+
+  return result;
 }
 
 /**
@@ -161,8 +178,9 @@ export async function resendVerificationEmail(
   const tokenHash = sha256Hex(verificationToken);
   const expiresAt = new Date(now.getTime() + VERIFICATION_TTL_MS);
 
+  let newVerificationId: number;
   try {
-    await prisma.$transaction(async (tx) => {
+    newVerificationId = await prisma.$transaction(async (tx) => {
       // 기존 활성 토큰 invalidate (보안 — 이전 토큰 즉시 무효)
       if (active !== null) {
         await tx.emailVerification.update({
@@ -170,9 +188,11 @@ export async function resendVerificationEmail(
           data: { consumedAt: now },
         });
       }
-      await tx.emailVerification.create({
+      const created = await tx.emailVerification.create({
         data: { userId, tokenHash, expiresAt, lastSentAt: now },
+        select: { id: true },
       });
+      return created.id;
     });
   } catch (err) {
     // L-025 정밀 매핑 — `uk_email_verifications_active_per_user` 충돌만 cooldown 시맨틱.
@@ -182,6 +202,16 @@ export async function resendVerificationEmail(
     }
     throw err;
   }
+
+  // CANDID-026 Step 4 — EMAIL_VERIFICATION_RESENT 감사. fail-open(재발송을 막지 않음).
+  // metadata는 PII-free(verificationId만). 토큰/이메일 평문 미기록(PR #33 H007).
+  await recordAuditEventSafe({
+    eventType: AuditEventType.EMAIL_VERIFICATION_RESENT,
+    actorUserId: userId,
+    resourceType: 'user',
+    resourceId: String(userId),
+    metadata: { verificationId: newVerificationId },
+  });
 
   return {
     verificationToken,

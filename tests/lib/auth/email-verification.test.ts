@@ -11,12 +11,17 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
+vi.mock('@/lib/audit/record', () => ({ recordAuditEventSafe: vi.fn() }));
+
 const { prisma } = (await import('@/lib/prisma')) as unknown as {
   prisma: {
     $transaction: Mock;
     emailVerification: { findFirst: Mock };
     user: { findUnique: Mock };
   };
+};
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: Mock;
 };
 const { consumeVerificationToken, resendVerificationEmail } =
   await import('@/lib/auth/email-verification');
@@ -48,11 +53,11 @@ function makePrismaUniqueViolation(target: string | string[]): Prisma.PrismaClie
 }
 
 /** updateMany 성공 (count=1) + 이후 findUnique → row 시나리오 mock 빌더. */
-function txMocksConsumeSuccess(opts: { userId: number }) {
+function txMocksConsumeSuccess(opts: { userId: number; verificationId?: number }) {
   return {
     emailVerification: {
       updateMany: vi.fn(async () => ({ count: 1 })),
-      findUnique: vi.fn(async () => ({ userId: opts.userId })),
+      findUnique: vi.fn(async () => ({ id: opts.verificationId ?? 7, userId: opts.userId })),
       update: vi.fn(),
     },
     user: { update: vi.fn(async () => ({})) },
@@ -109,6 +114,17 @@ describe('consumeVerificationToken (CANDID-036 updateMany race-free)', () => {
       where: { id: 42 },
       data: { emailVerifiedAt: expect.any(Date) },
     });
+
+    // CANDID-026 Step 4 — 신규 인증 시 EMAIL_VERIFIED 감사(verificationId metadata, PII-free).
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'EMAIL_VERIFIED',
+        actorUserId: 42,
+        resourceType: 'user',
+        resourceId: '42',
+        metadata: { verificationId: 7 },
+      }),
+    );
   });
 
   it('토큰 부재 (count=0 + row=null) → AUTH_VERIFICATION_TOKEN_INVALID (400)', async () => {
@@ -156,6 +172,8 @@ describe('consumeVerificationToken (CANDID-036 updateMany race-free)', () => {
     expect(result.emailVerifiedAt).toEqual(verifiedAt);
     expect(txMocks.user.update).not.toHaveBeenCalled();
     expect(txMocks.emailVerification.update).not.toHaveBeenCalled();
+    // 멱등 재클릭은 EMAIL_VERIFIED를 재발행하지 않는다(신규 인증만 감사).
+    expect(recordAuditEventSafe).not.toHaveBeenCalled();
   });
 
   it('동시 클릭 시뮬레이션 — 두 번째 호출은 alreadyVerified=true (H013 회귀 가드)', async () => {
@@ -311,7 +329,7 @@ describe('resendVerificationEmail', () => {
         update: vi.fn(),
         create: vi.fn(async (args: { data: typeof createdData }) => {
           createdData = args.data;
-          return {};
+          return { id: 55 };
         }),
       },
     };
@@ -326,6 +344,17 @@ describe('resendVerificationEmail', () => {
     expect(createdData.tokenHash).toBe(sha256Hex(result.verificationToken));
     expect(createdData.expiresAt.getTime() - fixedNow.getTime()).toBe(24 * 60 * 60 * 1000);
     expect(createdData.lastSentAt).toEqual(fixedNow);
+
+    // CANDID-026 Step 4 — EMAIL_VERIFICATION_RESENT 감사(verificationId metadata, 평문 토큰 미기록).
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'EMAIL_VERIFICATION_RESENT',
+        actorUserId: 42,
+        resourceType: 'user',
+        resourceId: '42',
+        metadata: { verificationId: 55 },
+      }),
+    );
   });
 
   it('60s 쿨다운 위반 → AUTH_VERIFICATION_RESEND_COOLDOWN', async () => {

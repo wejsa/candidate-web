@@ -5,6 +5,7 @@ import { buildVerifyEmailMessage } from '@/lib/email/templates/verify-email';
 import { sendMail } from '@/lib/email/transport';
 import { prisma } from '@/lib/prisma';
 import { withErrorHandler } from '@/lib/errors';
+import { withTraceContext } from '@/lib/observability/trace-context';
 import { emailDomainOf, summarizeError } from '@/lib/logging/pii-safe';
 import {
   POLICIES,
@@ -30,48 +31,50 @@ import {
 //   USER_NOT_FOUND / AUTH_EMAIL_ALREADY_VERIFIED를 throw — withErrorHandler가 표준 7필드 응답으로 변환.
 
 export const POST = withErrorHandler(
-  withRateLimit(POLICIES.SIGNUP, async (request: NextRequest) => {
-    const { userId } = await requireAuth(request);
+  withTraceContext(
+    withRateLimit(POLICIES.SIGNUP, async (request: NextRequest) => {
+      const { userId } = await requireAuth(request);
 
-    // L-023 인라인 user-bucket RL — limited 시 429 즉시 반환, 정상 시 attachHeaders로 응답에 부착.
-    const userRateLimit = enforceUserRateLimit(
-      USER_POLICIES.RESEND_VERIFICATION_USER,
-      userId,
-      request,
-    );
-    if (userRateLimit.response !== null) return userRateLimit.response;
+      // L-023 인라인 user-bucket RL — limited 시 429 즉시 반환, 정상 시 attachHeaders로 응답에 부착.
+      const userRateLimit = enforceUserRateLimit(
+        USER_POLICIES.RESEND_VERIFICATION_USER,
+        userId,
+        request,
+      );
+      if (userRateLimit.response !== null) return userRateLimit.response;
 
-    const result = await resendVerificationEmail(userId);
+      const result = await resendVerificationEmail(userId);
 
-    // 사용자 정보 조회 (이메일/이름 — 메일 발송용). 진입 가드에서 user 존재는 검증되었으나
-    // 트랜잭션 사이 race로 deletion 가능 — fire-and-forget 분기에서 null 안전 처리.
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true, name: true },
-    });
-    if (user !== null) {
-      const mailMsg = buildVerifyEmailMessage({
-        to: user.email,
-        name: user.name,
-        token: result.verificationToken,
+      // 사용자 정보 조회 (이메일/이름 — 메일 발송용). 진입 가드에서 user 존재는 검증되었으나
+      // 트랜잭션 사이 race로 deletion 가능 — fire-and-forget 분기에서 null 안전 처리.
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true, name: true },
       });
-      // fire-and-forget (BR-TX-02) — 발송 실패는 가입 직후 재발송으로 회복.
-      void sendMail(mailMsg).catch((err) => {
-        // CANDID-036: 인라인 redact를 lib/logging/pii-safe로 추출 — 횡단 관심사.
-        console.error('[resend-verification] email send failed', {
-          userId,
-          emailDomain: emailDomainOf(user.email),
-          ...summarizeError(err),
+      if (user !== null) {
+        const mailMsg = buildVerifyEmailMessage({
+          to: user.email,
+          name: user.name,
+          token: result.verificationToken,
         });
-      });
-    }
+        // fire-and-forget (BR-TX-02) — 발송 실패는 가입 직후 재발송으로 회복.
+        void sendMail(mailMsg).catch((err) => {
+          // CANDID-036: 인라인 redact를 lib/logging/pii-safe로 추출 — 횡단 관심사.
+          console.error('[resend-verification] email send failed', {
+            userId,
+            emailDomain: emailDomainOf(user.email),
+            ...summarizeError(err),
+          });
+        });
+      }
 
-    const response = NextResponse.json(
-      { nextResendAvailableAt: result.nextResendAvailableAt.toISOString() },
-      { status: 200 },
-    );
-    // L-023: inner(user-bucket) 헤더를 먼저 부착 → 외부 withRateLimit이 후속 set 가드.
-    userRateLimit.attachHeaders(response);
-    return response;
-  }),
+      const response = NextResponse.json(
+        { nextResendAvailableAt: result.nextResendAvailableAt.toISOString() },
+        { status: 200 },
+      );
+      // L-023: inner(user-bucket) 헤더를 먼저 부착 → 외부 withRateLimit이 후속 set 가드.
+      userRateLimit.attachHeaders(response);
+      return response;
+    }),
+  ),
 );
