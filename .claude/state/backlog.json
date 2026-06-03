@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 396,
+    "version": 397,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T10:07:51+09:00"
+    "updatedAt": "2026-06-03T10:11:10+09:00"
   },
   "summary": {
     "total": 47,
@@ -2343,7 +2343,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260603-094035",
-      "assignedAt": "2026-06-03T09:55:42+09:00",
+      "assignedAt": "2026-06-03T10:11:10+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/globals.css",
@@ -2371,9 +2371,9 @@
         "tests/lib/ui/use-focus-trap.test.tsx",
         "tests/setup.ts"
       ],
-      "updatedAt": "2026-06-03T09:55:42+09:00",
+      "updatedAt": "2026-06-03T10:11:10+09:00",
       "metadata": {
-        "version": 2
+        "version": 3
       },
       "steps": [
         {
@@ -2389,7 +2389,9 @@
           ],
           "estimatedLines": 420,
           "prLineLimit": 500,
-          "status": "pending"
+          "status": "pr_created",
+          "prNumber": 110,
+          "branch": "feature/CANDID-028-step1"
         },
         {
           "number": 2,
@@ -2455,12 +2457,13 @@
       "currentStep": 1,
       "planPath": ".claude/temp/CANDID-028-plan.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 110,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-03T09:55:42+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "110 --auto-fix",
+        "updatedAt": "2026-06-03T10:11:10+09:00"
       }
     },
     "CANDID-029": {
