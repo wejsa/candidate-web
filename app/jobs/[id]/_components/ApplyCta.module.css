@@ -1,0 +1,57 @@
+/* CANDID-050 Step 4 — 지원 CTA 스타일 (CSS Modules). */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* 주요 CTA — 강조 풀폭 버튼(앵커 role=button). */
+.primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-link);
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.primary:hover {
+  background: var(--color-link-hover);
+  color: #ffffff;
+}
+
+.disabled {
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-weight: 700;
+  cursor: not-allowed;
+}
+
+.secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.secondary:hover {
+  background: var(--color-surface);
+  color: var(--color-link);
+}

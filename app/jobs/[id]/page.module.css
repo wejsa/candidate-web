@@ -1,0 +1,51 @@
+/* CANDID-050 Step 4 — 공고 상세 2단 레이아웃 + 스티키 지원 사이드바 (CSS Modules). */
+
+.page {
+  max-width: 960px;
+  margin: 0 auto; /* 전역 main 규칙에 의존하지 않고 명시(max-width 오버라이드와 정합). */
+}
+
+/* 데스크톱: 본문 + 사이드바 2단. 모바일: 1단(지원 박스 → 본문 — CTA를 본문 앞에). */
+.layout {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 879px) {
+  .aside {
+    order: -1; /* 모바일: 긴 본문 앞에 지원 CTA 노출 */
+  }
+}
+
+@media (min-width: 880px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+}
+
+.content {
+  min-width: 0; /* prose 오버플로 방지 */
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (min-width: 880px) {
+  .aside {
+    position: sticky;
+    top: var(--space-4);
+  }
+}
+
+.applyBox {
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+}

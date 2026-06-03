@@ -5,6 +5,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import styles from './ShareButton.module.css';
 
 interface Props {
   title: string;
@@ -69,8 +70,13 @@ export function ShareButton({ title }: Props) {
   };
 
   return (
-    <div>
-      <button type="button" onClick={handleClick} aria-label={`${title} URL 복사`}>
+    <div className={styles.share}>
+      <button
+        type="button"
+        onClick={handleClick}
+        aria-label={`${title} URL 복사`}
+        className={styles.button}
+      >
         URL 복사
       </button>
       {status === 'copied' && (
