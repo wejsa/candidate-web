@@ -1,7 +1,8 @@
 import 'server-only';
-import { AuthProviderType } from '@prisma/client';
+import { AuditEventType, AuthProviderType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
+import { recordAuditEventSafe } from '@/lib/audit/record';
 import type { OAuthProviderName } from '@/lib/auth/oauth/state';
 
 // CANDID-024 Step 4 — 소셜 계정 연결 해제 (US-MY-004).
@@ -58,9 +59,17 @@ export async function unlinkProvider(input: UnlinkProviderInput): Promise<void> 
     await tx.authProvider.delete({
       where: { userId_provider: { userId: input.userId, provider: providerEnum } },
     });
+  });
 
-    // 감사 로그: OAUTH_LINKED/UNLINKED 이벤트는 AuditEventType enum에 없어 마이그레이션이 필요하다.
-    // Step 4는 스키마 변경 없음 범위이므로 audit 이벤트 추가는 Step 5(link-add, 동일 enum 필요) 또는
-    // CANDID-026(감사 로그 AOP)로 위임한다. userAgent/ipAddress는 그때 사용하기 위해 시그니처에 유지.
+  // CANDID-026 Step 4 — OAUTH_UNLINKED 감사(트랜잭션 성공 후). fail-open: 감사 실패가 해제를 막지 않음.
+  // metadata는 PII-free(provider 이름만). traceId는 ALS 컨텍스트(라우트 withTraceContext)에서 자동.
+  await recordAuditEventSafe({
+    eventType: AuditEventType.OAUTH_UNLINKED,
+    actorUserId: input.userId,
+    resourceType: 'user',
+    resourceId: String(input.userId),
+    ipAddress: input.ipAddress ?? null,
+    userAgent: input.userAgent ?? null,
+    metadata: { provider: input.provider },
   });
 }
