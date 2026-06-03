@@ -7,7 +7,9 @@
  *
  * 대비비(흰 배경 #ffffff 기준, AA 텍스트 ≥4.5:1 / 비텍스트·UI ≥3:1):
  *   --color-text #1a1a1a ≈ 16:1 · --color-text-muted #595959 ≈ 7:1 · --color-link #0066cc ≈ 5.6:1
- *   --color-error #b3261e ≈ 5.9:1 · --color-border #767676 ≈ 4.5:1 · --color-focus #0b57d0 ≈ 5.3:1
+ *   --color-error #b3261e ≈ 5.9:1 · --color-focus #0b57d0 ≈ 5.3:1
+ *   --color-border #767676 ≈ 4.5:1 — **비텍스트 UI(폼 경계) 전용**, WCAG 1.4.11 3:1 기준 적용.
+ *     경계값(4.54)이라 본문/보조 텍스트 색으로 전용 금지(텍스트는 4.5:1 임계에 붙음).
  *   버튼: 흰 글자 on #0066cc ≈ 5.6:1.
  */
 
@@ -183,22 +185,11 @@ button[aria-disabled='true'] {
   color: var(--color-error);
 }
 
-/* 모달: 중앙 고정 + 가독 폭. 배경 inert/focus-trap은 CANDID-028 Step 2에서 추가. */
-[role='dialog'][aria-modal='true'] {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  width: calc(100% - 2rem);
-  max-width: 480px;
-  max-height: 90vh;
-  margin: auto;
-  overflow: auto;
-  padding: 1.5rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-}
+/*
+ * 모달 시각 스타일(position:fixed + 백드롭)은 배경 inert·focus-trap·body 스크롤락과
+ * 원자적으로 도입해야 한다(시각만 모달이고 배경이 인터랙티브한 중간 상태 방지). 따라서
+ * 본 스텝에서는 도입하지 않고 CANDID-028 Step 2(모달 focus 관리)에서 일괄 추가한다.
+ */
 
 /* 모션 민감 사용자 배려 (WCAG 2.3.3) */
 @media (prefers-reduced-motion: reduce) {
