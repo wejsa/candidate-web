@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 405,
+    "version": 406,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T11:04:35+09:00"
+    "updatedAt": "2026-06-03T11:09:58+09:00"
   },
   "summary": {
     "total": 47,
@@ -2344,26 +2344,18 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260603-094035",
-      "assignedAt": "2026-06-03T10:59:43+09:00",
+      "assignedAt": "2026-06-03T11:09:58+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
         "app/jobs/_components/JobCard.tsx",
         "app/jobs/_components/Pagination.tsx",
         "app/me/_components/Timeline.tsx",
-        "app/me/profile/_components/PasswordChangeForm.tsx",
-        "app/me/profile/_components/ProfileEditForm.tsx",
-        "app/me/withdraw/_components/WithdrawForm.tsx",
         "tests/a11y/axe-pages.test.tsx",
-        "tests/a11y/keyboard-journey.test.tsx",
-        "tests/app/jobs/[id]/apply/PersonalInfoStep.test.tsx",
-        "tests/app/me/profile/PasswordChangeForm.test.tsx",
-        "tests/app/me/profile/ProfileEditForm.test.tsx",
-        "tests/app/me/withdraw/WithdrawForm.test.tsx"
+        "tests/a11y/keyboard-journey.test.tsx"
       ],
-      "updatedAt": "2026-06-03T10:59:43+09:00",
+      "updatedAt": "2026-06-03T11:09:58+09:00",
       "metadata": {
-        "version": 7
+        "version": 8
       },
       "steps": [
         {
@@ -2424,12 +2416,14 @@
           ],
           "estimatedLines": 460,
           "prLineLimit": 600,
-          "status": "pr_created",
+          "status": "merged",
           "dependsOn": [
             1
           ],
           "prNumber": 113,
-          "branch": "feature/CANDID-028-step3"
+          "branch": "feature/CANDID-028-step3",
+          "mergedAt": "2026-06-03T11:09:58+09:00",
+          "actualLines": 224
         },
         {
           "number": 4,
@@ -2452,16 +2446,16 @@
           ]
         }
       ],
-      "currentStep": 3,
+      "currentStep": 4,
       "planPath": ".claude/temp/CANDID-028-plan.md",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 113,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "lastReviewDecision": null,
-        "autoChainArgs": "113 --auto-fix",
-        "updatedAt": "2026-06-03T10:59:43+09:00"
+        "lastReviewDecision": "approved",
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T11:09:58+09:00"
       }
     },
     "CANDID-029": {
