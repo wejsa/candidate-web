@@ -1,7 +1,8 @@
 import 'server-only';
-import { AuditEventType, type Prisma } from '@prisma/client';
+import { AuditEventType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
+import { recordAuditEvent } from '@/lib/audit/record';
 import { hashPassword, verifyPassword } from '@/lib/auth/password';
 
 // CANDID-024 Step 3 — 비밀번호 변경 서비스 (US-MY-004, POST /api/v1/users/me/password).
@@ -79,18 +80,19 @@ export async function changePassword(input: ChangePasswordInput): Promise<Change
       data: { revokedAt: now, revokedReason: 'password_change' },
     });
 
-    // 3) 감사 로그 — 평문 비밀번호 비포함 (mode만 기록).
-    await tx.auditLog.create({
-      data: {
-        actorUserId: input.userId,
+    // 3) 감사 로그 — 평문 비밀번호 비포함 (mode만 기록). emit SSOT 경유(traceId 자동 첨부).
+    await recordAuditEvent(
+      {
         eventType: AuditEventType.PASSWORD_CHANGE,
+        actorUserId: input.userId,
         resourceType: 'user',
         resourceId: String(input.userId),
         ipAddress: input.ipAddress ?? null,
         userAgent: input.userAgent ?? null,
-        metadataJson: { mode } as Prisma.InputJsonValue,
+        metadata: { mode },
       },
-    });
+      { tx },
+    );
 
     return revoked.count;
   });
