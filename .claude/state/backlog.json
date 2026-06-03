@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 415,
+    "version": 416,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T12:33:09+09:00"
+    "updatedAt": "2026-06-03T03:40:49Z"
   },
   "summary": {
     "total": 47,
@@ -2327,7 +2327,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-122756",
-      "assignedAt": "2026-06-03T03:30:26Z",
+      "assignedAt": "2026-06-03T03:40:49Z",
       "lockTTL": 10800,
       "lockedFiles": [
         "package.json",
@@ -2346,14 +2346,15 @@
           "number": 1,
           "title": "prom-client + 메트릭 레지스트리 싱글톤 + GET /api/metrics",
           "description": "prom-client 도입. lib/observability/metrics.ts: globalThis 싱글톤 Registry + collectDefaultMetrics + 커스텀 지표(가입/제출/철회/파일 카운터 + http_request_duration_seconds 히스토그램) SSOT 정의 + __resetMetricsRegistryForTesting(L-002). GET /api/metrics(runtime nodejs, METRICS_AUTH_TOKEN 토큰 가드→AUTH_FORBIDDEN).",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "package.json",
             "lib/observability/metrics.ts",
             "app/api/metrics/route.ts"
           ],
           "estimatedLines": 500,
-          "prLineLimit": 600
+          "prLineLimit": 600,
+          "prNumber": 117
         },
         {
           "number": 2,
@@ -2393,12 +2394,12 @@
       ],
       "currentStep": 1,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 117,
         "fixLoopCount": null,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-03T03:30:26Z"
+        "autoChainArgs": "117 --auto-fix",
+        "updatedAt": "2026-06-03T03:40:49Z"
       }
     },
     "CANDID-028": {
