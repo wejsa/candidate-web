@@ -64,7 +64,11 @@ export function ProfileEditForm({ initialName, phoneMasked }: ProfileEditFormPro
   }
 
   return (
-    <form onSubmit={submit} aria-labelledby="profile-edit-title">
+    <form
+      onSubmit={submit}
+      aria-labelledby="profile-edit-title"
+      aria-describedby={state.message !== null ? 'profile-edit-msg' : undefined}
+    >
       <h2 id="profile-edit-title">{L.heading}</h2>
 
       <label>
@@ -90,7 +94,9 @@ export function ProfileEditForm({ initialName, phoneMasked }: ProfileEditFormPro
       </label>
 
       {state.message !== null && (
-        <p role={state.status === 'error' ? 'alert' : 'status'}>{state.message}</p>
+        <p id="profile-edit-msg" role={state.status === 'error' ? 'alert' : 'status'}>
+          {state.message}
+        </p>
       )}
 
       <button type="submit" disabled={state.status === 'pending'}>
