@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
+import { SiteHeader } from '@/app/_components/SiteHeader';
 
 const SITE_NAME = 'candidate-web';
 
@@ -36,6 +37,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main-content" className="skip-link">
           본문 바로가기
         </a>
+        {/* CANDID-050 — 전역 헤더(인증 상태별 네비). skip-link 다음, 페이지 <main> 앞. */}
+        <SiteHeader />
         {children}
       </body>
     </html>

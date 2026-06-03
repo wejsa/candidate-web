@@ -1,5 +1,5 @@
 import { test, expect, request as apiRequest } from '@playwright/test';
-import { signupViaApi } from './fixtures/auth';
+import { signupViaApi, uniqueEmail, E2E_PASSWORD } from './fixtures/auth';
 
 // CANDID-048 Step 2 — 핵심 사용자 여정 E2E.
 // 인증 가드는 보호 API 401로 검증한다(페이지 redirect는 dev 서버 RSC 렌더 캐싱과 상호작용해
@@ -38,6 +38,57 @@ test.describe('인증 라운드트립 / 가드', () => {
     await page.goto('/me');
     await expect(page).toHaveURL(/\/me$/);
     await expect(page.getByRole('heading', { level: 1, name: '마이페이지' })).toBeVisible();
+  });
+});
+
+test.describe('로그인 UI / 가드 복원 (CANDID-050)', () => {
+  test('비인증 → /jobs/[id] "로그인하고 지원하기"가 /login?redirect=…apply 로 이동', async ({
+    page,
+    request,
+  }) => {
+    const res = await request.get('/api/v1/jobs');
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    test.skip(!body.items?.length, '공고 시드 없음 — 가드 복원 여정 스킵');
+
+    const job = body.items[0];
+    await page.goto(`/jobs/${job.id}`);
+    const cta = page.getByRole('button', { name: '로그인하고 지원하기' });
+    await expect(cta).toBeVisible();
+    await cta.click();
+    // /login으로 이동하며 apply 경로가 redirect로 보존된다.
+    await expect(page).toHaveURL(/\/login\?redirect=.*apply/);
+    await expect(page.getByRole('heading', { level: 1, name: '로그인' })).toBeVisible();
+  });
+
+  test('로그인 폼 제출 → 인증 상태로 /me 진입 + 보호 API 200', async ({ page, browser }) => {
+    // 계정은 클린 컨텍스트에서 생성(page에 쿠키 미부착 → page는 비인증으로 시작).
+    const apiCtx = await browser.newContext();
+    const email = uniqueEmail('login-ui');
+    const signup = await apiCtx.request.post('/api/v1/auth/signup', {
+      data: {
+        email,
+        password: E2E_PASSWORD,
+        passwordConfirm: E2E_PASSWORD,
+        name: 'E2E 로그인',
+        termsAgreed: true,
+        privacyAgreed: true,
+        ageConfirmed: true,
+      },
+    });
+    expect(signup.status(), (await signup.text()).slice(0, 200)).toBe(201);
+    await apiCtx.close();
+
+    await page.goto('/login');
+    // exact: true — 카드 제목 "이메일로 로그인"(aria-labelledby)과의 substring 충돌 회피.
+    await page.getByLabel('이메일', { exact: true }).fill(email);
+    await page.getByLabel('비밀번호', { exact: true }).fill(E2E_PASSWORD);
+    await page.getByRole('button', { name: '로그인', exact: true }).click();
+
+    // 기본 redirect(/me)로 이동 + 보호 API가 인증을 인식.
+    await page.waitForURL(/\/me$/);
+    const me = await page.request.get('/api/v1/users/me');
+    expect(me.status()).toBe(200);
   });
 });
 
