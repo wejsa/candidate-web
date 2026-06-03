@@ -298,18 +298,19 @@ describe('discardDraft — 작성 취소', () => {
     expect(basePrisma.$transaction).not.toHaveBeenCalled();
   });
 
-  it('첨부 없는 draft → S3 미호출, 트랜잭션에서 draft만 삭제', async () => {
+  it('첨부 없는 draft → S3 미호출, 트랜잭션에서 draftId 스코프 삭제 + draft 삭제', async () => {
     basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: 100 });
     basePrisma.resumeFile.findMany.mockResolvedValueOnce([]);
 
     await discardDraft(7, 42);
 
     expect(deleteResumeObject).not.toHaveBeenCalled();
-    expect(basePrisma.resumeFile.deleteMany).not.toHaveBeenCalled();
+    // 동시 제출 경합 방어: 첨부 0건이라도 draftId 스코프 deleteMany 수행(재부모화 행 제외).
+    expect(basePrisma.resumeFile.deleteMany).toHaveBeenCalledWith({ where: { draftId: 100 } });
     expect(basePrisma.applicationDraft.delete).toHaveBeenCalledWith({ where: { id: 100 } });
   });
 
-  it('첨부 있는 draft → S3 선삭제 후 resume_files + draft 삭제', async () => {
+  it('첨부 있는 draft → S3 선삭제 후 resume_files(draftId 스코프) + draft 삭제', async () => {
     basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: 100 });
     basePrisma.resumeFile.findMany.mockResolvedValueOnce([
       { id: 11, storedPath: 'resumes/2026/06/a.pdf' },
@@ -320,9 +321,8 @@ describe('discardDraft — 작성 취소', () => {
 
     expect(deleteResumeObject).toHaveBeenCalledTimes(2);
     expect(deleteResumeObject).toHaveBeenCalledWith('resumes/2026/06/a.pdf');
-    expect(basePrisma.resumeFile.deleteMany).toHaveBeenCalledWith({
-      where: { id: { in: [11, 12] } },
-    });
+    // id 기준이 아니라 draftId 기준 — 동시 제출로 재부모화된(draftId=null) 첨부 오삭제 방지.
+    expect(basePrisma.resumeFile.deleteMany).toHaveBeenCalledWith({ where: { draftId: 100 } });
     expect(basePrisma.applicationDraft.delete).toHaveBeenCalledWith({ where: { id: 100 } });
   });
 

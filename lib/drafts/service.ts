@@ -208,10 +208,11 @@ export async function discardDraft(userId: number, jobPostingId: number): Promis
   }
 
   // (2) DB 삭제 — resume_files row + draft (portfolio_links Cascade).
+  // 동시 제출(submit) 경합 방어: resume_files를 수집한 id가 아니라 **draftId 스코프**로 삭제한다.
+  // submit은 첨부를 application으로 재부모화(draftId→NULL, applicationId set)하므로, id 기준 삭제 시
+  // 방금 제출된 application의 첨부 row를 오삭제할 수 있다. draftId 기준이면 재부모화된 행은 제외된다.
   await basePrisma.$transaction(async (tx) => {
-    if (files.length > 0) {
-      await tx.resumeFile.deleteMany({ where: { id: { in: files.map((f) => f.id) } } });
-    }
+    await tx.resumeFile.deleteMany({ where: { draftId: draft.id } });
     await tx.applicationDraft.delete({ where: { id: draft.id } });
   });
 }
