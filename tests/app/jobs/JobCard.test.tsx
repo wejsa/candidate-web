@@ -46,6 +46,11 @@ describe('JobCard 링크 범위', () => {
     expect(screen.getByText('D-29')).toBeInTheDocument();
   });
 
+  it('dDayLabel이 null이면 마감일 span을 렌더하지 않는다(상시모집/마감 공고 경로)', () => {
+    const { container } = render(<JobCard job={{ ...job, dDayLabel: null }} />);
+    expect(container.querySelector('[aria-label="마감일"]')).toBeNull();
+  });
+
   it('마감 카드 — 제목 링크는 유지하고 마감 뱃지를 노출한다', () => {
     const { container } = render(<JobCard job={job} closed />);
     const article = container.querySelector('article');

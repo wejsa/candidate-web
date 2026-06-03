@@ -44,6 +44,13 @@ describe('ApplyCta 상태별 목적지', () => {
     expect(mypage).not.toHaveAttribute('href', '/mypage');
   });
 
+  it('ALREADY_APPLIED — applicationNumber 미전달 시 폴백 aria-label + /me 유지', () => {
+    // resolveApplyCta가 applicationNumber 없이 반환하는 경로(선택 필드) 커버.
+    render(<ApplyCta jobId={JOB_ID} state="ALREADY_APPLIED" />);
+    const mypage = screen.getByRole('link', { name: '마이페이지에서 확인' });
+    expect(mypage).toHaveAttribute('href', '/me');
+  });
+
   it('CLOSED — 비활성 "지원 마감" + 지원/로그인 링크 없음', () => {
     render(<ApplyCta jobId={JOB_ID} state="CLOSED" />);
     expect(screen.getByRole('button', { name: '지원 마감' })).toBeDisabled();
