@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 49,
     "projectPrefix": "CANDID",
-    "version": 438,
+    "version": 439,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T15:14:00+09:00"
+    "updatedAt": "2026-06-03T15:15:24+09:00"
   },
   "summary": {
     "total": 47,
@@ -2512,26 +2512,25 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-141749",
-      "assignedAt": "2026-06-03T15:10:00+09:00",
+      "assignedAt": "2026-06-03T15:15:24+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/batch/draft-retention.ts",
-        "lib/batch/virus-scan.ts",
-        "lib/batch/runner.ts",
         "lib/files/scanner.ts",
+        "lib/batch/virus-scan.ts",
         "lib/email/templates/infected-file.ts",
+        "lib/batch/runner.ts",
         "lib/env.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 124,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "124",
-        "updatedAt": "2026-06-03T15:14:00+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T15:15:24+09:00"
       },
-      "updatedAt": "2026-06-03T15:14:00+09:00",
+      "updatedAt": "2026-06-03T15:15:24+09:00",
       "steps": [
         {
           "number": 1,
@@ -2566,9 +2565,10 @@
           ],
           "estimatedLines": 420,
           "prLineLimit": 500,
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 124,
-          "branch": "feature/CANDID-029-step2"
+          "branch": "feature/CANDID-029-step2",
+          "mergedAt": "2026-06-03T15:15:24+09:00"
         },
         {
           "number": 3,
@@ -2588,7 +2588,7 @@
           "status": "pending"
         }
       ],
-      "currentStep": 2,
+      "currentStep": 3,
       "specFile": "docs/sample-requirement.md"
     },
     "CANDID-030": {
