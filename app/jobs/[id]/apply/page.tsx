@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
 import { getOrInitDraft } from '@/lib/drafts/service';
 import { loadUserPrefill } from '@/lib/drafts/user-prefill';
+import { listByDraft } from '@/lib/portfolios/service';
+import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import type { DraftPayloadV1 } from '@/lib/drafts/types';
 import { ApplicationFormShell } from '@/app/jobs/[id]/apply/_components/ApplicationFormShell';
@@ -54,15 +56,28 @@ export default async function ApplyPage({ params }: PageProps) {
     throw err;
   }
 
+  // 3. 단일 페이지 재구성에 필요한 부가 데이터: 공고명 + 이력서 첨부 여부 + 포트폴리오 링크.
+  const [job, resumeCount, portfolioLinks] = await Promise.all([
+    basePrisma.jobPosting.findUnique({ where: { id: jobId }, select: { title: true } }),
+    basePrisma.resumeFile.count({ where: { draftId: draft.id } }),
+    listByDraft({ userId: auth.userId, jobPostingId: jobId }),
+  ]);
+
   return (
     <main id="main-content">
       <ApplicationFormShell
         jobId={jobId}
+        jobTitle={job?.title ?? '채용 공고'}
         draftDbId={draft.id}
         initialPayload={draft.payloadJson as unknown as DraftPayloadV1}
         initialVersion={draft.version}
-        initialLastSavedAt={draft.lastSavedAt.toISOString()}
         prefill={prefill}
+        initialResumeAttached={resumeCount > 0}
+        initialPortfolioLinks={portfolioLinks.map((l) => ({
+          linkType: l.linkType,
+          url: l.url,
+          memo: l.memo,
+        }))}
       />
     </main>
   );

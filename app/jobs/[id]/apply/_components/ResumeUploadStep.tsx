@@ -31,6 +31,10 @@ interface Props {
   draftId: number;
   /** 부모 form payload에 첨부 메타를 반영 (Step 2 wiring) */
   onAttached?: (resumeFileId: number) => void;
+  /** 첨부 제거/실패 등으로 더 이상 유효 첨부가 없을 때 부모 상태 동기화 */
+  onCleared?: () => void;
+  /** 루트 fieldset에 주입할 클래스(스타일) */
+  className?: string;
 }
 
 // accept 속성용 확장자 리스트 ('.pdf,.docx,...' — 사용자 친화).
@@ -43,7 +47,7 @@ function readableSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-export function ResumeUploadStep({ draftId, onAttached }: Props) {
+export function ResumeUploadStep({ draftId, onAttached, onCleared, className }: Props) {
   const [state, dispatch] = useReducer(uploadReducer, INITIAL_UPLOAD_STATE);
   const [replaced, setReplaced] = useState<string[]>([]);
   const abortRef = useRef<AbortController | null>(null);
@@ -148,10 +152,11 @@ export function ResumeUploadStep({ draftId, onAttached }: Props) {
     dispatch({ type: 'reset' });
     lastFileRef.current = null;
     if (fileRef.current !== null) fileRef.current.value = '';
+    if (onCleared !== undefined) onCleared();
   };
 
   return (
-    <fieldset aria-label="이력서 첨부">
+    <fieldset aria-label="이력서 첨부" className={className}>
       <legend>이력서 첨부</legend>
       <p>허용 형식: PDF · DOCX · DOC · HWP · HWPX (최대 {MAX_MB}MB)</p>
 
