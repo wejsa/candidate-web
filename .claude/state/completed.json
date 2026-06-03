@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 45,
+    "version": 46,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-03T13:01:19+09:00"
+    "updatedAt": "2026-06-03T04:29:40Z"
   },
   "tasks": {
     "CANDID-022": {
@@ -1377,6 +1377,51 @@
       "stepCount": 4,
       "reviewSummary": "4스텝 전부 CRITICAL 0 (자기 PR COMMENT). 각 스텝 in-task 보강(L-019): S1 테스트 MAJOR(미들웨어 요청헤더 주입/병렬 ALS 격리/36자 경계/인젝션 가드), S2 보안 MAJOR(PII 가드 중첩·숫자 우회 차단), S3 보안 MAJOR(위조 XFF→@db.Inet INSERT 차단 + 감사 fail-open), S4 도메인 MAJOR(OAUTH_LINKED 멱등 과발행 차단 + runtime 명시). 보안 결함 0.",
       "note": "감사 로그 AOP + traceId 전파. Edge-safe traceId(middleware) + Node ALS 컨텍스트(withTraceContext) — 전체 OpenTelemetry는 P2 보류(경량 ALS). emit SSOT(recordAuditEvent) + PII-free metadata 가드(fail-closed) + 비-트랜잭션 emit fail-open. 9개 이벤트(LOGIN_*/APPLICATION_SUBMIT/PII_VIEW/EMAIL_*/OAUTH_*) + 기존 4 호출부 통일. audit_logs.trace_id + enum 4종 마이그(분리). FU: rate-limit 429 traceId 통일(Step2 노트 등재)."
+    },
+    "CANDID-027": {
+      "id": "CANDID-027",
+      "title": "Prometheus 메트릭 + 헬스체크",
+      "phase": 4,
+      "priority": "low",
+      "type": "feature",
+      "completedAt": "2026-06-03T04:29:40Z",
+      "assignee": "wejsa-u@hoji-20260603-122756",
+      "prs": [
+        {
+          "number": 117,
+          "title": "feat: CANDID-027 Step 1 - prom-client + 메트릭 레지스트리 + GET /api/metrics",
+          "mergedAt": "2026-06-03T03:50:06Z",
+          "additions": 406,
+          "deletions": 2,
+          "note": "prom-client 싱글톤 레지스트리 + /api/metrics(토큰 가드, 운영 fail-closed). 리뷰 CRITICAL 0. self-PR COMMENT."
+        },
+        {
+          "number": 119,
+          "title": "feat: CANDID-027 Step 2 - /api/health + /api/ready",
+          "mergedAt": "2026-06-03T03:58:43Z",
+          "additions": 172,
+          "deletions": 0,
+          "note": "liveness(의존성無) + readiness(SELECT 1 probe, DSN 누출 가드). CRITICAL 0."
+        },
+        {
+          "number": 120,
+          "title": "feat: CANDID-027 Step 3 - HTTP 요청 메트릭 계측 + normalizeRoute",
+          "mergedAt": "2026-06-03T04:14:18Z",
+          "additions": 320,
+          "deletions": 4,
+          "note": "withErrorHandler observer 훅(universal 유지) + instrumentation 배선 + 카디널리티 정규화. CRITICAL 0."
+        },
+        {
+          "number": 121,
+          "title": "feat: CANDID-027 Step 4 - 비즈니스 이벤트 카운터 + 문서",
+          "mergedAt": "2026-06-03T04:28:43Z",
+          "additions": 405,
+          "deletions": 191,
+          "note": "withBusinessMetric 4라우트 계측(429 미집계) + observability.md. CRITICAL 0."
+        }
+      ],
+      "totalLines": 1305,
+      "note": "관측 인프라: /metrics·/health·/ready + http_request_duration_seconds(NFR P95) + candidate_business_event_total. universal 모듈 오염 회피(observer 훅+instrumentation), route 레이어 계측으로 CANDID-026 잠금 회피. develop CANDID-026 완료分 머지 반영."
     }
   }
 }
