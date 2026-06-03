@@ -22,9 +22,10 @@
 //   - 확인 이메일 fire-and-forget + 로깅 (실패해도 응답 정상)
 
 import 'server-only';
-import { Prisma, StageType, JobStatus } from '@prisma/client';
+import { AuditEventType, Prisma, StageType, JobStatus } from '@prisma/client';
 import { prisma as wrappedPrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
+import { recordAuditEvent } from '@/lib/audit/record';
 import { encryptApplicationPiiSnapshotInput } from '@/lib/prisma/extends';
 import { issueApplicationNumber } from '@/lib/applications/number-generator';
 import { assertSubmitReady } from '@/lib/applications/validate';
@@ -163,6 +164,19 @@ export async function submitApplication({
           changedByUserId: userId,
         },
       });
+
+      // 8) 감사 로그 — APPLICATION_SUBMIT (CANDID-026 Step 3). BR-TX-01: 단일 트랜잭션 내 기록.
+      //    metadata는 PII-free(applicationNumber만). traceId는 ALS 컨텍스트에서 자동 첨부.
+      await recordAuditEvent(
+        {
+          eventType: AuditEventType.APPLICATION_SUBMIT,
+          actorUserId: userId,
+          resourceType: 'application',
+          resourceId: String(created.id),
+          metadata: { applicationNumber: created.applicationNumber },
+        },
+        { tx },
+      );
 
       return created;
     });

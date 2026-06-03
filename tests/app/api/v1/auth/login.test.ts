@@ -107,13 +107,14 @@ describe('POST /api/v1/auth/login — 정상', () => {
     );
   });
 
-  it('signin에 user-agent + ipAddress 컨텍스트 전달 (감사 로그 메타)', async () => {
+  it('signin에 user-agent + 추출된 클라이언트 IP 전달 (CANDID-026 감사 로그 메타)', async () => {
     signin.mockResolvedValueOnce(successResult);
     await POST(postRequest(validBody), undefined);
     expect(signin).toHaveBeenCalledTimes(1);
     const [input, opts] = signin.mock.calls[0] ?? [];
     expect(input).toEqual(validBody);
-    expect(opts).toMatchObject({ userAgent: 'vitest', ipAddress: null });
+    // TRUST_PROXY=true + x-forwarded-for → clientIpFromRequest가 IP 추출 (이전 TODO null 대체).
+    expect(opts).toMatchObject({ userAgent: 'vitest', ipAddress: '203.0.113.10' });
   });
 
   it('rememberMe=true 전달 → signin input.rememberMe 그대로 + refresh Expires 14일 회귀 가드 (test MAJOR H001)', async () => {

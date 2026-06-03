@@ -58,6 +58,8 @@ vi.mock('@/lib/email/transport', () => ({
   sendMail: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn() }));
+
 // encryptApplicationPiiSnapshotInput 결정적 mock (실제 정규화 호출 단언 가능)
 vi.mock('@/lib/prisma/extends', async () => {
   const actual = await vi.importActual<typeof import('@/lib/prisma/extends')>(
@@ -100,6 +102,9 @@ const { basePrisma, prisma } = (await import('@/lib/prisma')) as unknown as {
   };
 };
 const { sendMail } = (await import('@/lib/email/transport')) as unknown as { sendMail: Mock };
+const { recordAuditEvent } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEvent: Mock;
+};
 const { submitApplication } = await import('@/lib/applications/submit');
 
 const USER_ID = 42;
@@ -184,6 +189,23 @@ describe('submitApplication — happy path', () => {
     expect(result.applicationNumber).toBe('A-202605-00001');
     expect(result.currentStage).toBe('SUBMITTED');
     expect(result.submittedAt).toBe(NOW.toISOString());
+  });
+
+  // CANDID-026 Step 3 — APPLICATION_SUBMIT 감사를 트랜잭션 내부(tx)에서 emit (BR-TX-01).
+  it('APPLICATION_SUBMIT 감사를 tx로 emit (applicationNumber metadata)', async () => {
+    setupValidatePass();
+    setupTxSuccess();
+    await submitApplication({ userId: USER_ID, jobPostingId: JOB_POSTING_ID, now: NOW });
+    expect(recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'APPLICATION_SUBMIT',
+        actorUserId: USER_ID,
+        resourceType: 'application',
+        resourceId: String(APP_ID),
+        metadata: { applicationNumber: 'A-202605-00001' },
+      }),
+      expect.objectContaining({ tx: expect.anything() }),
+    );
   });
 
   it('PII snapshot 4쌍 컬럼이 ciphertext + keyVersion=1 (BR-PII-03 회귀 가드)', async () => {

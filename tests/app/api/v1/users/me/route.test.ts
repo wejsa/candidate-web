@@ -10,9 +10,13 @@ import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 
 vi.mock('@/lib/auth/middleware', () => ({ requireAuth: vi.fn() }));
 vi.mock('@/lib/users/profile-service', () => ({ getProfile: vi.fn(), updateProfile: vi.fn() }));
+vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn(), recordAuditEventSafe: vi.fn() }));
 
 const { requireAuth } = (await import('@/lib/auth/middleware')) as unknown as {
   requireAuth: Mock;
+};
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: Mock;
 };
 const { getProfile, updateProfile } = (await import('@/lib/users/profile-service')) as unknown as {
   getProfile: Mock;
@@ -66,6 +70,26 @@ describe('GET /api/v1/users/me', () => {
     expect(getProfile).toHaveBeenCalledWith(42);
   });
 
+  // CANDID-026 Step 3 — 복호화 PII 반환 지점에 PII_VIEW 감사. 조회 값은 metadata에 미기록(resourceId만).
+  it('PII_VIEW 감사 이벤트를 resourceId(userId)만으로 emit (값 미기록)', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 42 });
+    getProfile.mockResolvedValueOnce(profile);
+
+    await GET(getRequest(), undefined);
+
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'PII_VIEW',
+        actorUserId: 42,
+        resourceType: 'user',
+        resourceId: '42',
+      }),
+    );
+    // 조회된 PII 값이 metadata로 유출되지 않아야 한다.
+    const arg = recordAuditEventSafe.mock.calls[0]?.[0] as { metadata?: unknown };
+    expect(arg.metadata).toBeUndefined();
+  });
+
   it('미인증 → requireAuth가 throw한 AppError가 표준 401로 변환', async () => {
     requireAuth.mockRejectedValueOnce(new AppError('AUTH_TOKEN_INVALID'));
 
@@ -74,6 +98,8 @@ describe('GET /api/v1/users/me', () => {
     expect(res.status).toBe(401);
     expect((await res.json()).code).toBe('AUTH_TOKEN_INVALID');
     expect(getProfile).not.toHaveBeenCalled();
+    // 인증 실패한 익명 요청에는 PII_VIEW 감사가 기록되지 않아야 한다(감사 노이즈/오염 방지).
+    expect(recordAuditEventSafe).not.toHaveBeenCalled();
   });
 
   // 리뷰 MAJOR(test): requireAuth는 만료 시 AUTH_TOKEN_EXPIRED를 throw(middleware.ts) —
