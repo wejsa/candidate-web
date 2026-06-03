@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 44,
+    "version": 45,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-03T11:30:15+09:00"
+    "updatedAt": "2026-06-03T13:01:19+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1358,6 +1358,25 @@
       "stepCount": 4,
       "reviewSummary": "4스텝 전부 CRITICAL 0 (자기 PR COMMENT). 각 스텝 in-task 보강(L-019): S1 대비가드/CSS가드강화, S2 isConnected 포커스복원/trap edge, S3 필드연관 입력기인 한정/negative, S4 skip-link 상호일치/StepNav 경계. 보안 결함 0.",
       "note": "a11y WCAG 2.1 AA + 반응형 파운데이션. vitest-axe 도입. 가입/로그인 UI 부재로 가입 키보드여정 범위 외. JobCard/Pagination/Timeline은 전역 CSS 커버로 코드변경 불요. 동시 진행 CANDID-026와 파일 무충돌."
+    },
+    "CANDID-026": {
+      "id": "CANDID-026",
+      "title": "감사 로그 AOP (로그인/제출/PII 조회) + traceId 전파",
+      "phase": 4,
+      "priority": "low",
+      "type": "feature",
+      "completedAt": "2026-06-03T13:01:19+09:00",
+      "assignee": "wejsa-u@hoji-20260603-094036",
+      "prs": [
+        111,
+        114,
+        116,
+        118
+      ],
+      "totalMergedLines": 1586,
+      "stepCount": 4,
+      "reviewSummary": "4스텝 전부 CRITICAL 0 (자기 PR COMMENT). 각 스텝 in-task 보강(L-019): S1 테스트 MAJOR(미들웨어 요청헤더 주입/병렬 ALS 격리/36자 경계/인젝션 가드), S2 보안 MAJOR(PII 가드 중첩·숫자 우회 차단), S3 보안 MAJOR(위조 XFF→@db.Inet INSERT 차단 + 감사 fail-open), S4 도메인 MAJOR(OAUTH_LINKED 멱등 과발행 차단 + runtime 명시). 보안 결함 0.",
+      "note": "감사 로그 AOP + traceId 전파. Edge-safe traceId(middleware) + Node ALS 컨텍스트(withTraceContext) — 전체 OpenTelemetry는 P2 보류(경량 ALS). emit SSOT(recordAuditEvent) + PII-free metadata 가드(fail-closed) + 비-트랜잭션 emit fail-open. 9개 이벤트(LOGIN_*/APPLICATION_SUBMIT/PII_VIEW/EMAIL_*/OAUTH_*) + 기존 4 호출부 통일. audit_logs.trace_id + enum 4종 마이그(분리). FU: rate-limit 429 traceId 통일(Step2 노트 등재)."
     }
   }
 }
