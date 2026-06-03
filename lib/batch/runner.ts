@@ -6,6 +6,9 @@ import {
 } from '@/lib/batch/expired-rows';
 import { cleanupStaleDrafts } from '@/lib/batch/draft-retention';
 import { deleteBatchObject } from '@/lib/batch/storage';
+import { processPendingScans } from '@/lib/batch/virus-scan';
+import { getScanner } from '@/lib/files/scanner';
+import { notifyInfectedFile } from '@/lib/batch/notify';
 
 // CANDID-029 Step 1 — 야간 정리 배치 러너.
 //
@@ -33,6 +36,19 @@ export function defaultCleanupTasks(): CleanupTask[] {
     {
       name: 'stale-drafts',
       run: (db, now) => cleanupStaleDrafts(db, deleteBatchObject, now),
+    },
+    {
+      name: 'pending-virus-scans',
+      run: (db, now) =>
+        processPendingScans(
+          db,
+          {
+            scanner: getScanner(),
+            deleteObject: deleteBatchObject,
+            notifyInfected: notifyInfectedFile,
+          },
+          now,
+        ),
     },
   ];
 }
