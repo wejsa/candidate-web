@@ -5,7 +5,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 const refresh = vi.fn();
@@ -132,5 +132,27 @@ describe('WithdrawButton', () => {
     await user.click(screen.getByRole('button', { name: '취소' }));
     await user.click(screen.getByRole('button', { name: '지원 철회' }));
     expect(screen.getByLabelText('철회 사유 (선택)')).toHaveValue('');
+  });
+
+  // CANDID-028 Step 2 — focus-trap
+  it('오픈 시 포커스가 다이얼로그 내부로 이동', async () => {
+    render(<WithdrawButton applicationId={100} />);
+    await openModal();
+    expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true);
+  });
+
+  it('ESC → 모달 닫힘 + 트리거 버튼으로 포커스 복원', async () => {
+    render(<WithdrawButton applicationId={100} />);
+    await openModal();
+    const trigger = screen.getByRole('button', { name: '지원 철회' });
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('철회 확인은 destructive(.btn-danger) 스타일로 구분된다', async () => {
+    render(<WithdrawButton applicationId={100} />);
+    await openModal();
+    expect(screen.getByRole('button', { name: '철회 확인' })).toHaveClass('btn-danger');
   });
 });

@@ -160,4 +160,24 @@ describe('withErrorHandler', () => {
     expect(body.code).toBe('SYS_INTERNAL_ERROR');
     expect(body.message).toBe('서버 내부 오류가 발생했습니다.');
   });
+
+  // CANDID-026 Step 1 — 미들웨어 주입 x-trace-id를 에러 응답 traceId로 통일.
+  it('uses the x-trace-id request header as the error response traceId', async () => {
+    const handler = withErrorHandler(async () => {
+      throw new AppError('AUTH_FORBIDDEN');
+    });
+    const request = new NextRequest('http://localhost/api/v1/me', {
+      headers: { 'x-trace-id': 'mw-injected-trace' },
+    });
+    const body = await bodyOf(await handler(request, undefined));
+    expect(body.traceId).toBe('mw-injected-trace');
+  });
+
+  it('generates a uuid traceId when the x-trace-id header is absent', async () => {
+    const handler = withErrorHandler(async () => {
+      throw new AppError('AUTH_FORBIDDEN');
+    });
+    const body = await bodyOf(await handler(req('/api/v1/me'), undefined));
+    expect(body.traceId).toMatch(UUID_RE);
+  });
 });

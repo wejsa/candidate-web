@@ -5,10 +5,13 @@
 // 흐름: "지원 철회" → 확인 모달(사유 선택 입력) → POST /api/v1/applications/me/{id}/withdraw
 //   → 성공/409 시 router.refresh()로 RSC 재요청(result=WITHDRAWN 반영, 버튼 사라짐).
 // A11y(WCAG 2.1 AA): role="dialog" + aria-modal + aria-labelledby, textarea label, 에러 role="alert".
+// CANDID-028 Step 2 — useFocusTrap 도입(ESC·Tab trap·포커스 복원·스크롤락). 철회 확인은
+//   비가역 destructive 액션이므로 .btn-danger로 구분(취소 .btn-secondary).
 // 보안: 네트워크 예외를 try/catch로 흡수해 pending 영구 고착 방지(account WithdrawForm H001 패턴).
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useFocusTrap } from '@/lib/ui/use-focus-trap';
 
 interface Props {
   applicationId: number;
@@ -31,6 +34,9 @@ export function WithdrawButton({ applicationId }: Props): React.JSX.Element {
     setReason('');
     setState({ status: 'idle', error: null });
   }
+
+  // 모달 활성 동안 ESC·Tab trap·포커스 복원·스크롤락. ESC는 closeModal로 위임.
+  const dialogRef = useFocusTrap<HTMLDivElement>(open, closeModal);
 
   async function handleConfirm(): Promise<void> {
     setState({ status: 'pending', error: null });
@@ -66,7 +72,12 @@ export function WithdrawButton({ applicationId }: Props): React.JSX.Element {
       </button>
 
       {open && (
-        <div role="dialog" aria-modal="true" aria-labelledby="withdraw-dialog-title">
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="withdraw-dialog-title"
+        >
           <h3 id="withdraw-dialog-title">지원을 철회하시겠습니까?</h3>
           <p>철회 후에는 되돌릴 수 없습니다. 모집 기간 내라면 다시 지원할 수 있습니다.</p>
 
@@ -80,10 +91,20 @@ export function WithdrawButton({ applicationId }: Props): React.JSX.Element {
 
           {state.status === 'error' && <p role="alert">{state.error}</p>}
 
-          <button type="button" onClick={handleConfirm} disabled={state.status === 'pending'}>
+          <button
+            type="button"
+            className="btn-danger"
+            onClick={handleConfirm}
+            disabled={state.status === 'pending'}
+          >
             {state.status === 'pending' ? '처리 중…' : '철회 확인'}
           </button>
-          <button type="button" onClick={closeModal} disabled={state.status === 'pending'}>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={closeModal}
+            disabled={state.status === 'pending'}
+          >
             취소
           </button>
         </div>

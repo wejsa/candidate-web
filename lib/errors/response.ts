@@ -5,6 +5,7 @@ import { isAppError } from '@/lib/errors/app-error';
 import type { ErrorDetail } from '@/lib/errors/app-error';
 import { errorMessage, errorStatus } from '@/lib/errors/codes';
 import type { ErrorCode } from '@/lib/errors/codes';
+import { TRACE_HEADER, generateTraceId, normalizeTraceId } from '@/lib/observability/trace-header';
 
 // CANDID-007 Step 2 — 표준 에러 응답 빌더 + 전역 핸들러 + Route Handler 래퍼.
 // withErrorHandler로 감싼 Route Handler에서 throw된 예외를 handleApiError가
@@ -33,9 +34,6 @@ export interface ErrorResponseOptions {
   /** 요청 추적 ID. 미지정 시 새로 생성 — 전 구간 전파는 CANDID-026. */
   traceId?: string;
 }
-
-/** Next.js App Router Route Handler 시그니처. */
-type ApiRouteHandler<C> = (request: NextRequest, context: C) => Response | Promise<Response>;
 
 /** 운영 환경 여부 — 에러 핸들러는 throw하면 안 되므로 process.env를 직접 참조한다. */
 function isProduction(): boolean {
@@ -109,14 +107,21 @@ export function handleApiError(
   });
 }
 
+/** Next.js App Router Route Handler 시그니처. */
+type ApiRouteHandler<C> = (request: NextRequest, context: C) => Response | Promise<Response>;
+
 /**
  * Route Handler를 감싸 throw된 예외를 표준 에러 응답으로 변환하는 HOF.
- * 요청당 traceId를 생성해 handleApiError로 전달한다.
+ * CANDID-026 Step 1: 미들웨어가 주입한 요청 헤더 x-trace-id를 읽어 에러 응답 traceId로 사용한다
+ * (헤더 부재/부적합 시 신규 발급) → 미들웨어·에러 응답 간 traceId 통일.
+ * 본 래퍼는 universal(Edge/Node/client 그래프 공용)이라 node:async_hooks에 의존하지 않는다.
+ * 감사 emit이 인자 없이 traceId를 참조하도록 요청 범위 컨텍스트를 여는 것은 server 전용
+ * withTraceContext(@/lib/observability/trace-context)의 책임으로 분리했다.
  * 사용: `export const POST = withErrorHandler(async (req) => { ... });`
  */
 export function withErrorHandler<C = unknown>(handler: ApiRouteHandler<C>): ApiRouteHandler<C> {
   return async (request, context) => {
-    const traceId = crypto.randomUUID();
+    const traceId = normalizeTraceId(request.headers.get(TRACE_HEADER)) ?? generateTraceId();
     try {
       return await handler(request, context);
     } catch (error) {
