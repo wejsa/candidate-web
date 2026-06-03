@@ -2,7 +2,7 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 427,
+    "version": 428,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-06-03T14:17:49+09:00"
   },
@@ -2513,18 +2513,82 @@
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-141749",
       "assignedAt": "2026-06-03T14:17:49+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "lib/batch/types.ts",
+        "lib/batch/runner.ts",
+        "lib/batch/expired-rows.ts",
+        "lib/batch/draft-retention.ts",
+        "lib/batch/virus-scan.ts",
+        "scripts/batch/nightly-cleanup.ts",
+        "lib/files/scanner.ts",
+        "lib/email/templates/infected-file.ts",
+        "lib/env.ts",
+        "package.json"
+      ],
       "workflowState": {
-        "currentSkill": "skill-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
         "prNumber": null,
         "fixLoopCount": null,
         "lastReviewDecision": null,
-        "autoChainArgs": null,
+        "autoChainArgs": "--next chain",
         "updatedAt": "2026-06-03T14:17:49+09:00"
       },
-      "updatedAt": "2026-06-03T14:17:49+09:00"
+      "updatedAt": "2026-06-03T14:17:49+09:00",
+      "steps": [
+        {
+          "number": 1,
+          "title": "배치 러너 인프라 + 만료 토큰/멱등성 정리",
+          "description": "lib/batch 러너/타입 + 만료 행 정리(email_verifications 7일·password_reset·idempotency, paginated deleteMany) + tsx 엔트리포인트 + env(EMAIL_VERIFICATION_RETENTION_DAYS, BATCH_DELETE_CHUNK) + package.json batch:nightly. 태스크별 격리/멱등.",
+          "files": [
+            "lib/batch/types.ts",
+            "lib/batch/runner.ts",
+            "lib/batch/expired-rows.ts",
+            "scripts/batch/nightly-cleanup.ts",
+            "lib/env.ts",
+            "package.json",
+            "tests/lib/batch/expired-rows.test.ts",
+            "tests/lib/batch/runner.test.ts"
+          ],
+          "estimatedLines": 430,
+          "prLineLimit": 500,
+          "status": "pending"
+        },
+        {
+          "number": 2,
+          "title": "30일 미제출 Draft + 첨부 파일 orphan-safe 정리",
+          "description": "cleanupStaleDrafts(): lastSavedAt<now-30d chunk 조회 → draft 단위 (S3 객체 선삭제[tx 외부] → resume_files row 삭제 → draft 삭제[portfolio_links CASCADE]). S3 실패 skip→재시도 멱등. env DRAFT_RETENTION_DAYS. db-designer MAJOR(orphan/SET NULL) 반영.",
+          "files": [
+            "lib/batch/draft-retention.ts",
+            "lib/batch/runner.ts",
+            "lib/env.ts",
+            "tests/lib/batch/draft-retention.test.ts"
+          ],
+          "estimatedLines": 420,
+          "prLineLimit": 500,
+          "status": "pending"
+        },
+        {
+          "number": 3,
+          "title": "ClamAV 스캔 워커 골격 + INFECTED 자동삭제 + 사용자 알림",
+          "description": "VirusScanner 인터페이스 + 스텁 getScanner(CLAMAV_ENABLED flag) + processPendingScans(PENDING 픽업→상태갱신; INFECTED→S3+row 삭제+owner 메일[PII-free]) + 알림 템플릿 + __resetScannerForTesting. env CLAMAV_ENABLED/HOST/PORT.",
+          "files": [
+            "lib/files/scanner.ts",
+            "lib/batch/virus-scan.ts",
+            "lib/email/templates/infected-file.ts",
+            "lib/batch/runner.ts",
+            "lib/env.ts",
+            "tests/lib/batch/virus-scan.test.ts",
+            "tests/lib/files/scanner.test.ts"
+          ],
+          "estimatedLines": 450,
+          "prLineLimit": 500,
+          "status": "pending"
+        }
+      ],
+      "currentStep": 1,
+      "specFile": "docs/sample-requirement.md"
     },
     "CANDID-030": {
       "id": "CANDID-030",
