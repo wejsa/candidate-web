@@ -1,10 +1,12 @@
 // CANDID-014 Step 3 — 5-state CTA UI (client).
 // state는 서버(RSC)에서 resolveApplyCta로 결정 후 props로 내려옴 → 본 컴포넌트는 네비게이션만 담당.
+// CANDID-050 Step 4 — 강조 CTA 스타일(CSS Modules). role/label/href 불변(회귀 테스트 보존).
 
 'use client';
 
 import Link from 'next/link';
 import type { ApplyCtaState } from '@/lib/jobs/apply-cta';
+import styles from './ApplyCta.module.css';
 
 interface Props {
   jobId: number;
@@ -26,8 +28,8 @@ export function ApplyCta({ jobId, state, applicationNumber }: Props) {
   // 1) 마감 / 이미 지원 — 비활성 버튼 + 보조 액션 링크
   if (state === 'CLOSED') {
     return (
-      <div>
-        <button type="button" disabled aria-disabled="true">
+      <div className={styles.wrap}>
+        <button type="button" disabled aria-disabled="true" className={styles.disabled}>
           {LABEL.CLOSED}
         </button>
       </div>
@@ -35,12 +37,13 @@ export function ApplyCta({ jobId, state, applicationNumber }: Props) {
   }
   if (state === 'ALREADY_APPLIED') {
     return (
-      <div>
-        <button type="button" disabled aria-disabled="true">
+      <div className={styles.wrap}>
+        <button type="button" disabled aria-disabled="true" className={styles.disabled}>
           {LABEL.ALREADY_APPLIED}
         </button>
         <Link
           href="/me"
+          className={styles.secondary}
           aria-label={
             applicationNumber !== undefined
               ? `마이페이지에서 ${applicationNumber} 확인`
@@ -57,7 +60,7 @@ export function ApplyCta({ jobId, state, applicationNumber }: Props) {
   if (state === 'GUEST') {
     const redirect = encodeURIComponent(applyPath);
     return (
-      <Link href={`/login?redirect=${redirect}`} role="button">
+      <Link href={`/login?redirect=${redirect}`} role="button" className={styles.primary}>
         {LABEL.GUEST}
       </Link>
     );
@@ -65,7 +68,7 @@ export function ApplyCta({ jobId, state, applicationNumber }: Props) {
 
   // 3) 신규 지원 / 이어서 작성
   return (
-    <Link href={applyPath} role="button">
+    <Link href={applyPath} role="button" className={styles.primary}>
       {state === 'RESUME_DRAFT' ? LABEL.RESUME_DRAFT : LABEL.APPLY}
     </Link>
   );

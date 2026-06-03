@@ -16,6 +16,7 @@ import { JobDetailHeader } from '@/app/jobs/[id]/_components/JobDetailHeader';
 import { JobDetailBody } from '@/app/jobs/[id]/_components/JobDetailBody';
 import { ShareButton } from '@/app/jobs/[id]/_components/ShareButton';
 import { ApplyCta } from '@/app/jobs/[id]/_components/ApplyCta';
+import styles from './page.module.css';
 
 const ParamsSchema = z.object({
   id: z.coerce.number().int().positive(),
@@ -75,16 +76,23 @@ export default async function JobDetailPage({ params }: PageProps) {
   const jsonLd = jsonLdScriptContent(buildJobPostingJsonLd(job, getEnv().NEXT_PUBLIC_APP_URL));
 
   return (
-    <main id="main-content">
+    <main id="main-content" className={styles.page}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <JobDetailHeader job={job} />
-      <JobDetailBody job={job} />
-      <section aria-label="지원하기">
-        <ApplyCta jobId={job.id} state={cta.state} applicationNumber={cta.applicationNumber} />
-      </section>
-      <section aria-label="공유">
-        <ShareButton title={job.title} />
-      </section>
+      <div className={styles.layout}>
+        <div className={styles.content}>
+          <JobDetailBody job={job} />
+        </div>
+        {/* 데스크톱 sticky 사이드바 / 모바일 하단 고정 지원 바. */}
+        <aside className={styles.aside}>
+          <section aria-label="지원하기" className={styles.applyBox}>
+            <ApplyCta jobId={job.id} state={cta.state} applicationNumber={cta.applicationNumber} />
+          </section>
+          <section aria-label="공유">
+            <ShareButton title={job.title} />
+          </section>
+        </aside>
+      </div>
     </main>
   );
 }
