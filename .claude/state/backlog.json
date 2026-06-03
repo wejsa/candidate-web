@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 411,
+    "version": 414,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T11:35:46+09:00"
+    "updatedAt": "2026-06-03T12:32:32+09:00"
   },
   "summary": {
     "total": 47,
@@ -2236,7 +2236,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T11:35:46+09:00",
+      "assignedAt": "2026-06-03T12:32:32+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/oauth/[provider]/callback/route.ts",
@@ -2248,13 +2248,13 @@
         "prisma/schema.prisma"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 116,
         "fixLoopCount": null,
-        "lastReviewDecision": null,
-        "autoChainArgs": "116 --auto-fix",
-        "updatedAt": "2026-06-03T11:35:46+09:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "116",
+        "updatedAt": "2026-06-03T12:32:32+09:00"
       },
       "steps": [
         {
@@ -2320,14 +2320,88 @@
       "id": "CANDID-027",
       "title": "Prometheus 메트릭 + 헬스체크",
       "description": "주요 비즈니스 이벤트 메트릭(가입/제출/철회/파일 업로드). /health, /ready 엔드포인트. 응답 P95 < 300ms(목록)/800ms(제출) 가시화.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "low",
       "phase": 4,
       "dependencies": [
         "CANDID-007"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "wejsa-u@hoji-20260603-122756",
+      "assignedAt": "2026-06-03T03:30:26Z",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "package.json",
+        "lib/observability/metrics.ts",
+        "lib/errors/response.ts",
+        "app/api/metrics/route.ts",
+        "app/api/health/route.ts",
+        "app/api/ready/route.ts",
+        "app/api/v1/auth/signup/route.ts",
+        "app/api/v1/applications/route.ts",
+        "app/api/v1/applications/me/[id]/withdraw/route.ts",
+        "app/api/v1/files/resume/confirm/route.ts"
+      ],
+      "steps": [
+        {
+          "number": 1,
+          "title": "prom-client + 메트릭 레지스트리 싱글톤 + GET /api/metrics",
+          "description": "prom-client 도입. lib/observability/metrics.ts: globalThis 싱글톤 Registry + collectDefaultMetrics + 커스텀 지표(가입/제출/철회/파일 카운터 + http_request_duration_seconds 히스토그램) SSOT 정의 + __resetMetricsRegistryForTesting(L-002). GET /api/metrics(runtime nodejs, METRICS_AUTH_TOKEN 토큰 가드→AUTH_FORBIDDEN).",
+          "status": "pending",
+          "files": [
+            "package.json",
+            "lib/observability/metrics.ts",
+            "app/api/metrics/route.ts"
+          ],
+          "estimatedLines": 500,
+          "prLineLimit": 600
+        },
+        {
+          "number": 2,
+          "title": "GET /api/health + GET /api/ready (liveness/readiness)",
+          "description": "health=liveness 항상 200{status,uptime,timestamp}. ready=readiness prisma $queryRaw SELECT 1 → 200{db:up}/503{db:down}. 둘 다 runtime nodejs, export 직접 단위 테스트.",
+          "status": "pending",
+          "files": [
+            "app/api/health/route.ts",
+            "app/api/ready/route.ts"
+          ],
+          "estimatedLines": 280
+        },
+        {
+          "number": 3,
+          "title": "HTTP duration/count 계측 (withErrorHandler) + normalizeRoute",
+          "description": "withErrorHandler에 처리시간 측정 추가(성공/에러 모두 http_request_duration_seconds 기록). L-023: inner response 헤더(traceId) 보존-측정만. normalizeRoute로 동적 세그먼트→:id 정규화(카디널리티 방지) + 가드 단위테스트(L-034).",
+          "status": "pending",
+          "files": [
+            "lib/errors/response.ts",
+            "lib/observability/metrics.ts"
+          ],
+          "estimatedLines": 320
+        },
+        {
+          "number": 4,
+          "title": "비즈니스 카운터 계측 (가입/제출/철회/파일업로드, route 레이어)",
+          "description": "CANDID-026 잠금(submit.ts) 회피 위해 route 핸들러에서 카운터 증가. signup/applications(POST)/withdraw/file-confirm 성공·실패 result 라벨. 잠금 교집합 0 검증됨.",
+          "status": "pending",
+          "files": [
+            "app/api/v1/auth/signup/route.ts",
+            "app/api/v1/applications/route.ts",
+            "app/api/v1/applications/me/[id]/withdraw/route.ts",
+            "app/api/v1/files/resume/confirm/route.ts"
+          ],
+          "estimatedLines": 320
+        }
+      ],
+      "currentStep": 1,
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": null,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-03T03:30:26Z"
+      }
     },
     "CANDID-028": {
       "id": "CANDID-028",
