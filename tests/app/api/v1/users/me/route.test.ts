@@ -10,13 +10,13 @@ import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 
 vi.mock('@/lib/auth/middleware', () => ({ requireAuth: vi.fn() }));
 vi.mock('@/lib/users/profile-service', () => ({ getProfile: vi.fn(), updateProfile: vi.fn() }));
-vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn() }));
+vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn(), recordAuditEventSafe: vi.fn() }));
 
 const { requireAuth } = (await import('@/lib/auth/middleware')) as unknown as {
   requireAuth: Mock;
 };
-const { recordAuditEvent } = (await import('@/lib/audit/record')) as unknown as {
-  recordAuditEvent: Mock;
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: Mock;
 };
 const { getProfile, updateProfile } = (await import('@/lib/users/profile-service')) as unknown as {
   getProfile: Mock;
@@ -77,7 +77,7 @@ describe('GET /api/v1/users/me', () => {
 
     await GET(getRequest(), undefined);
 
-    expect(recordAuditEvent).toHaveBeenCalledWith(
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'PII_VIEW',
         actorUserId: 42,
@@ -86,7 +86,7 @@ describe('GET /api/v1/users/me', () => {
       }),
     );
     // 조회된 PII 값이 metadata로 유출되지 않아야 한다.
-    const arg = recordAuditEvent.mock.calls[0]?.[0] as { metadata?: unknown };
+    const arg = recordAuditEventSafe.mock.calls[0]?.[0] as { metadata?: unknown };
     expect(arg.metadata).toBeUndefined();
   });
 
@@ -98,6 +98,8 @@ describe('GET /api/v1/users/me', () => {
     expect(res.status).toBe(401);
     expect((await res.json()).code).toBe('AUTH_TOKEN_INVALID');
     expect(getProfile).not.toHaveBeenCalled();
+    // 인증 실패한 익명 요청에는 PII_VIEW 감사가 기록되지 않아야 한다(감사 노이즈/오염 방지).
+    expect(recordAuditEventSafe).not.toHaveBeenCalled();
   });
 
   // 리뷰 MAJOR(test): requireAuth는 만료 시 AUTH_TOKEN_EXPIRED를 throw(middleware.ts) —

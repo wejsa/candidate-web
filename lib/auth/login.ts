@@ -2,7 +2,7 @@ import 'server-only';
 import { AuditEventType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
-import { recordAuditEvent } from '@/lib/audit/record';
+import { recordAuditEventSafe } from '@/lib/audit/record';
 import { issueAccessToken } from '@/lib/auth/jwt';
 import { issueRefreshSession } from '@/lib/auth/session';
 import { verifyPassword } from '@/lib/auth/password';
@@ -68,6 +68,8 @@ export interface SigninResult {
 /**
  * 로그인 감사 이벤트 emit (CANDID-026 Step 3) — metadata는 PII-free reason 코드만.
  * traceId는 ALS 컨텍스트(라우트의 withTraceContext)에서 자동 첨부, email 평문은 절대 미기록.
+ * fail-open(recordAuditEventSafe): 감사 write 실패가 인증 응답을 바꾸지 않게 격리한다 — 가용성 보호 +
+ * 실패 분기 간 응답 분기(500 vs 401) 차이로 인한 enumeration 신호 차단(BR-AUTH-03).
  */
 async function emitLoginAudit(
   eventType: AuditEventType,
@@ -75,7 +77,7 @@ async function emitLoginAudit(
   options: SigninOptions,
   reason?: string,
 ): Promise<void> {
-  await recordAuditEvent({
+  await recordAuditEventSafe({
     eventType,
     actorUserId: userId,
     resourceType: 'user',

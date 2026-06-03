@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { AuditEventType } from '@prisma/client';
 import { requireAuth } from '@/lib/auth/middleware';
-import { recordAuditEvent } from '@/lib/audit/record';
+import { recordAuditEventSafe } from '@/lib/audit/record';
 import { withErrorHandler } from '@/lib/errors';
 import { withTraceContext } from '@/lib/observability/trace-context';
 import {
@@ -30,7 +30,7 @@ export const GET = withErrorHandler(
   withTraceContext(async (request: NextRequest) => {
     const ctx = await requireAuth(request);
     const profile = await getProfile(ctx.userId);
-    await recordAuditEvent({
+    await recordAuditEventSafe({
       eventType: AuditEventType.PII_VIEW,
       actorUserId: ctx.userId,
       resourceType: 'user',

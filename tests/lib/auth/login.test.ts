@@ -31,13 +31,13 @@ vi.mock('@/lib/auth/session', () => ({
   })),
 }));
 
-vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn() }));
+vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn(), recordAuditEventSafe: vi.fn() }));
 
 const { prisma } = (await import('@/lib/prisma')) as unknown as {
   prisma: { user: { findUnique: Mock; updateMany: Mock } };
 };
-const { recordAuditEvent } = (await import('@/lib/audit/record')) as unknown as {
-  recordAuditEvent: Mock;
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: Mock;
 };
 const { verifyPassword } = (await import('@/lib/auth/password')) as unknown as {
   verifyPassword: Mock;
@@ -407,7 +407,7 @@ describe('signin — 감사 이벤트 (CANDID-026)', () => {
 
     await signin(validInput, { ipAddress: '10.0.0.9', userAgent: 'vitest-ua' });
 
-    expect(recordAuditEvent).toHaveBeenCalledWith(
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'LOGIN_SUCCESS',
         actorUserId: 42,
@@ -425,7 +425,7 @@ describe('signin — 감사 이벤트 (CANDID-026)', () => {
 
     await expect(signin(validInput)).rejects.toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
 
-    expect(recordAuditEvent).toHaveBeenCalledWith(
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'LOGIN_FAILURE',
         actorUserId: 42,
@@ -439,7 +439,7 @@ describe('signin — 감사 이벤트 (CANDID-026)', () => {
 
     await expect(signin(validInput)).rejects.toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
 
-    expect(recordAuditEvent).toHaveBeenCalledWith(
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'LOGIN_FAILURE', actorUserId: null }),
     );
   });
@@ -451,8 +451,39 @@ describe('signin — 감사 이벤트 (CANDID-026)', () => {
 
     await expect(signin(validInput)).rejects.toMatchObject({ code: 'AUTH_ACCOUNT_LOCKED' });
 
-    expect(recordAuditEvent).toHaveBeenCalledWith(
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'LOGIN_FAILURE', metadata: { reason: 'account_locked' } }),
+    );
+  });
+
+  // 리뷰 보강(PR #116) — 비활성 사용자도 LOGIN_FAILURE emit (침해 신호 감사), ip/ua 핀 고정.
+  it('비활성(SUSPENDED) 사용자 → LOGIN_FAILURE emit (actorUserId=user.id, ip/ua 전파)', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce(makeActiveUser({ status: 'SUSPENDED' as const }));
+
+    await expect(
+      signin(validInput, { ipAddress: '198.51.100.7', userAgent: 'audit-ua' }),
+    ).rejects.toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
+
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'LOGIN_FAILURE',
+        actorUserId: 42,
+        metadata: { reason: 'invalid_credentials' },
+        ipAddress: '198.51.100.7',
+        userAgent: 'audit-ua',
+      }),
+    );
+  });
+
+  it('issueRefreshSession 실패 시 LOGIN_SUCCESS는 emit되지 않는다 (발급 후 감사 순서)', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce(makeActiveUser());
+    prisma.user.updateMany.mockResolvedValue({ count: 1 });
+    issueRefreshSession.mockRejectedValueOnce(new Error('refresh insert failed'));
+
+    await expect(signin(validInput)).rejects.toThrow('refresh insert failed');
+
+    expect(recordAuditEventSafe).not.toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'LOGIN_SUCCESS' }),
     );
   });
 });
