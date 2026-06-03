@@ -3040,5 +3040,13 @@
     "stepNumber": 3,
     "prNumber": 113,
     "at": "2026-06-03T11:09:58+09:00"
+  },
+  {
+    "action": "reviewed",
+    "taskId": "CANDID-026",
+    "stepNumber": 2,
+    "prNumber": 114,
+    "decision": "COMMENT",
+    "at": "2026-06-03T11:15:15+09:00"
   }
 ]
