@@ -22,9 +22,10 @@
 //   (L-006 이중 방어: 저장측 sanitize는 API 경계, 출력측 sanitize는 UI 렌더).
 
 import 'server-only';
-import { ApplicationResult, AuditEventType, type Prisma } from '@prisma/client';
+import { ApplicationResult, AuditEventType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
+import { recordAuditEvent } from '@/lib/audit/record';
 import type { WithdrawnApplicationSummary } from '@/lib/applications/types';
 
 interface WithdrawInput {
@@ -75,17 +76,19 @@ export async function withdrawApplication({
     }
 
     // 감사 로그 — 사유 평문은 metadata에 넣지 않는다(BR-PII-02). 존재 여부만 기록.
-    await tx.auditLog.create({
-      data: {
-        actorUserId: userId,
+    // emit SSOT 경유(traceId 자동 첨부 + PII-free 가드).
+    await recordAuditEvent(
+      {
         eventType: AuditEventType.APPLICATION_WITHDRAW,
+        actorUserId: userId,
         resourceType: 'application',
         resourceId: String(applicationId),
         ipAddress,
         userAgent,
-        metadataJson: { hasReason: reason !== null && reason !== '' } as Prisma.InputJsonValue,
+        metadata: { hasReason: reason !== null && reason !== '' },
       },
-    });
+      { tx },
+    );
   });
 
   return {
