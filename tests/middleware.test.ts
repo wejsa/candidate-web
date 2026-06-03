@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { __resetCachedEnvForTesting } from '@/lib/env';
 import { __resetCorsCacheForTesting } from '@/lib/security/cors';
@@ -217,4 +217,101 @@ describe('일반 요청 응답 가공', () => {
   });
 
   // production HSTS 부착은 tests/lib/security/headers.test.ts에서 단위 검증한다 — 미들웨어는 applySecurityHeaders 통과만 보장.
+});
+
+// CANDID-026 Step 1 — traceId 전파 시발점. 모든 경로에서 x-trace-id를 응답에 echo한다.
+describe('traceId 전파 (CANDID-026)', () => {
+  const TRACE_RE = /^[0-9A-Za-z-]{1,36}$/;
+  const W3C_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
+
+  it('수신 헤더가 없으면 새 traceId를 발급해 응답에 부착한다', () => {
+    const response = middleware(makeRequest('https://candidate.example.com/jobs'));
+    expect(response.headers.get('x-trace-id')).toMatch(TRACE_RE);
+  });
+
+  it('수신 x-trace-id를 그대로 echo한다', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/jobs', {
+        headers: { 'x-trace-id': 'upstream-trace-1' },
+      }),
+    );
+    expect(response.headers.get('x-trace-id')).toBe('upstream-trace-1');
+  });
+
+  it('W3C traceparent에서 trace-id를 추출해 echo한다', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/jobs', {
+        headers: { traceparent: `00-${W3C_TRACE_ID}-b7ad6b7169203331-01` },
+      }),
+    );
+    expect(response.headers.get('x-trace-id')).toBe(W3C_TRACE_ID);
+  });
+
+  it('HTTPS 리다이렉트 응답에도 x-trace-id가 부착된다', () => {
+    vi.stubEnv('FORCE_HTTPS_REDIRECT', 'true');
+    __resetCachedEnvForTesting();
+    const response = middleware(
+      makeRequest('http://candidate.example.com/jobs', {
+        headers: { 'x-trace-id': 'redir-trace' },
+      }),
+    );
+    expect(response.status).toBe(308);
+    expect(response.headers.get('x-trace-id')).toBe('redir-trace');
+  });
+
+  it('CSRF 403 응답에도 x-trace-id가 부착되고 body.traceId와 일치한다', async () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/api/v1/auth/login', {
+        method: 'POST',
+        headers: { origin: 'https://evil.example.com', 'x-trace-id': 'csrf-trace' },
+      }),
+    );
+    expect(response.status).toBe(403);
+    expect(response.headers.get('x-trace-id')).toBe('csrf-trace');
+    const body = (await response.json()) as { traceId: string };
+    expect(body.traceId).toBe('csrf-trace');
+  });
+
+  // 리뷰 보강(PR #111) — 일반 경로의 핵심 계약: 다운스트림 요청 헤더 주입(echo와 별개 경로).
+  it('일반 경로: 다운스트림 요청 헤더에 x-trace-id를 주입한다', () => {
+    const spy = vi.spyOn(NextResponse, 'next');
+    try {
+      middleware(
+        makeRequest('https://candidate.example.com/api/v1/jobs', {
+          headers: { 'x-trace-id': 'inject-trace' },
+        }),
+      );
+      const passed = spy.mock.calls[0]?.[0]?.request?.headers as Headers | undefined;
+      expect(passed?.get('x-trace-id')).toBe('inject-trace');
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('CORS preflight(OPTIONS) 응답에도 x-trace-id가 부착된다', () => {
+    const response = middleware(
+      makeRequest('https://candidate.example.com/api/v1/auth/login', {
+        method: 'OPTIONS',
+        headers: {
+          origin: 'https://candidate.example.com',
+          'access-control-request-method': 'POST',
+          'x-trace-id': 'preflight-trace',
+        },
+      }),
+    );
+    expect(response.status).toBe(204);
+    expect(response.headers.get('x-trace-id')).toBe('preflight-trace');
+  });
+
+  it('H003 421(호스트 위조) 응답에도 x-trace-id가 부착된다', () => {
+    vi.stubEnv('FORCE_HTTPS_REDIRECT', 'true');
+    __resetCachedEnvForTesting();
+    const response = middleware(
+      makeRequest('http://evil.example.com/jobs', {
+        headers: { 'x-trace-id': 'evil-trace' },
+      }),
+    );
+    expect(response.status).toBe(421);
+    expect(response.headers.get('x-trace-id')).toBe('evil-trace');
+  });
 });

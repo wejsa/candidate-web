@@ -4,41 +4,64 @@ import { errorResponse, isAppError } from '@/lib/errors';
 import { applySecurityHeaders } from '@/lib/security/headers';
 import { applyCorsHeaders, buildPreflightResponse, getAllowedOrigins } from '@/lib/security/cors';
 import { assertAllowedOrigin } from '@/lib/security/origin';
+import {
+  TRACE_HEADER,
+  generateTraceId,
+  resolveIncomingTraceId,
+} from '@/lib/observability/trace-header';
 
 // CANDID-009 Step 1 — Edge runtime 진입점 (HTTPS 308 / CORS preflight / 보안 헤더).
 // Step 2 추가: CSRF Origin 검증(state-changing methods) + H001 TRUST_PROXY + H003 Host 화이트리스트.
-// Edge runtime 호환 — Node 모듈 의존 금지.
+// CANDID-026 Step 1 추가: traceId 전파 시발점 — 수신 헤더(x-trace-id/traceparent) 해석 또는 신규 발급 후
+//   ① 다운스트림 핸들러가 읽도록 요청 헤더 x-trace-id 주입, ② 모든 응답에 x-trace-id echo.
+// Edge runtime 호환 — Node 모듈 의존 금지(trace-header.ts는 crypto.randomUUID만 사용).
 
 export function middleware(request: NextRequest): NextResponse {
   const env = getEnv();
+  const traceId = resolveIncomingTraceId((name) => request.headers.get(name)) ?? generateTraceId();
 
   // 1) HTTPS 강제 — BR-SEC-01.
   if (env.FORCE_HTTPS_REDIRECT && !isSecureRequest(request, env.TRUST_PROXY)) {
-    return buildHttpsRedirect(request);
+    return withTraceHeader(buildHttpsRedirect(request), traceId);
   }
 
   // 2) CORS preflight — OPTIONS는 미들웨어에서 즉시 종결. Origin 검증보다 우선 (OPTIONS는 CSRF 비대상).
   if (request.method === 'OPTIONS') {
-    return applySecurityHeaders(buildPreflightResponse(request));
+    return withTraceHeader(applySecurityHeaders(buildPreflightResponse(request)), traceId);
   }
 
   // 3) CSRF Origin 검증 — Step 2(BR-SEC-02). state-changing methods 한정.
-  //    assertAllowedOrigin이 AppError를 throw하면 표준 403 응답으로 변환.
+  //    assertAllowedOrigin이 AppError를 throw하면 표준 403 응답으로 변환. traceId 명시 전달로 통일.
   try {
     assertAllowedOrigin(request);
   } catch (err) {
     if (isAppError(err)) {
-      return applySecurityHeaders(
-        errorResponse(request, err.code, { message: err.message, details: err.details }),
+      return withTraceHeader(
+        applySecurityHeaders(
+          errorResponse(request, err.code, {
+            message: err.message,
+            details: err.details,
+            traceId,
+          }),
+        ),
+        traceId,
       );
     }
     throw err;
   }
 
-  // 4) 일반 요청: 다음 핸들러로 패스 + 응답 가공.
-  const response = NextResponse.next();
+  // 4) 일반 요청: traceId를 요청 헤더에 주입해 다음 핸들러로 패스 + 응답 가공.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(TRACE_HEADER, traceId);
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
   applySecurityHeaders(response);
   applyCorsHeaders(response, request.headers.get('origin'));
+  return withTraceHeader(response, traceId);
+}
+
+/** 응답에 x-trace-id를 부여한다 — 클라이언트/APM이 요청을 추적하도록 모든 경로에서 echo. */
+function withTraceHeader(response: NextResponse, traceId: string): NextResponse {
+  response.headers.set(TRACE_HEADER, traceId);
   return response;
 }
 
