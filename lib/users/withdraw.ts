@@ -37,9 +37,10 @@
 
 import 'server-only';
 import { randomBytes } from 'node:crypto';
-import { AuditEventType, type Prisma, UserStatus } from '@prisma/client';
+import { AuditEventType, UserStatus } from '@prisma/client';
 import { prisma as wrappedPrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
+import { recordAuditEvent } from '@/lib/audit/record';
 import { verifyPassword } from '@/lib/auth/password';
 import { revokeAllForUser } from '@/lib/auth/session';
 import type { WithdrawInput, WithdrawResult } from '@/lib/users/types';
@@ -61,6 +62,7 @@ export function buildAnonymizedEmail(userId: number): string {
 /**
  * AuditLog 1행 emit — metadataJson은 PII-free 키만 (count, length, mode).
  * 평문 reason/email/passwordHash는 절대 포함하지 않음 (BR-PII-02).
+ * CANDID-026 Step 2: emit SSOT(recordAuditEvent)에 위임 — traceId 자동 첨부 + PII-free 가드 공통화.
  */
 async function emitAudit(
   tx: WithdrawTx,
@@ -72,17 +74,18 @@ async function emitAudit(
     ipAddress: string | null;
   },
 ): Promise<void> {
-  await tx.auditLog.create({
-    data: {
-      actorUserId: params.userId,
+  await recordAuditEvent(
+    {
       eventType: params.eventType,
+      actorUserId: params.userId,
       resourceType: 'user',
       resourceId: String(params.userId),
       ipAddress: params.ipAddress,
       userAgent: params.userAgent,
-      metadataJson: params.metadata as Prisma.InputJsonValue,
+      metadata: params.metadata,
     },
-  });
+    { tx },
+  );
 }
 
 /**

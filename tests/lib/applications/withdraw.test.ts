@@ -89,6 +89,8 @@ describe('withdrawApplication', () => {
         resourceId: '9',
         ipAddress: null,
         userAgent: null,
+        // CANDID-026 Step 2: emit SSOT 경유로 traceId 자동 첨부 (컨텍스트 밖이면 null).
+        traceId: null,
         metadataJson: { hasReason: false },
       },
     });
