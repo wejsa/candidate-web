@@ -3090,5 +3090,12 @@
     ],
     "totalMergedLines": 1126,
     "at": "2026-06-03T11:30:15+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-026",
+    "stepNumber": 3,
+    "prNumber": 116,
+    "at": "2026-06-03T11:35:46+09:00"
   }
 ]

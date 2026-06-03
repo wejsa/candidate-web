@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 410,
+    "version": 411,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T11:30:15+09:00"
+    "updatedAt": "2026-06-03T11:35:46+09:00"
   },
   "summary": {
     "total": 47,
@@ -2236,7 +2236,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T11:16:02+09:00",
+      "assignedAt": "2026-06-03T11:35:46+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/oauth/[provider]/callback/route.ts",
@@ -2248,13 +2248,13 @@
         "prisma/schema.prisma"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 116,
         "fixLoopCount": null,
         "lastReviewDecision": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T11:16:02+09:00"
+        "autoChainArgs": "116 --auto-fix",
+        "updatedAt": "2026-06-03T11:35:46+09:00"
       },
       "steps": [
         {
@@ -2291,13 +2291,14 @@
           "number": 3,
           "title": "신규 이벤트 A: LOGIN_*/APPLICATION_SUBMIT/PII_VIEW",
           "description": "login.ts signin()에 LOGIN_SUCCESS/FAILURE, submit.ts 트랜잭션 내부 APPLICATION_SUBMIT, GET /users/me에 PII_VIEW(resourceId만, 값 금지) emit.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/auth/login.ts",
             "lib/applications/submit.ts",
             "app/api/v1/users/me/route.ts"
           ],
-          "estimatedLines": 450
+          "estimatedLines": 450,
+          "prNumber": 116
         },
         {
           "number": 4,
