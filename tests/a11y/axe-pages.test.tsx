@@ -18,7 +18,20 @@ import { PasswordChangeForm } from '@/app/me/profile/_components/PasswordChangeF
 import { WithdrawForm } from '@/app/me/withdraw/_components/WithdrawForm';
 import { LoginForm } from '@/app/login/_components/LoginForm';
 import { SignupForm } from '@/app/signup/_components/SignupForm';
+import { JobCard } from '@/app/jobs/_components/JobCard';
+import type { JobListItem } from '@/lib/jobs/types';
 import type { DraftPrefill } from '@/lib/drafts/types';
+
+const jobCardFixture: JobListItem = {
+  id: 1,
+  title: '프론트엔드 엔지니어',
+  employmentType: 'FULL_TIME',
+  careerLevel: 'EXPERIENCED',
+  category: { name: '개발', slug: 'dev' },
+  opensAt: new Date('2026-05-01T00:00:00Z'),
+  closesAt: new Date('2026-07-01T00:00:00Z'),
+  dDayLabel: 'D-29',
+};
 
 const AXE_OPTS = {
   rules: {
@@ -49,6 +62,8 @@ describe('실 컴포넌트 axe sweep (WCAG)', () => {
     ['WithdrawForm(password)', () => <WithdrawForm isSocialOnly={false} />],
     ['LoginForm', () => <LoginForm redirectTo="/me" />],
     ['SignupForm', () => <SignupForm redirectTo="/me" />],
+    ['JobCard', () => <JobCard job={jobCardFixture} />],
+    ['JobCard(closed)', () => <JobCard job={jobCardFixture} closed />],
   ])('%s — axe 위반 없음', async (_label, renderEl) => {
     const { container } = render(renderEl());
     expect(await axe(container, AXE_OPTS)).toHaveNoViolations();

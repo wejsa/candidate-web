@@ -12,6 +12,7 @@ import { useCallback, useTransition } from 'react';
 import { CAREER_LABEL, EMPLOYMENT_LABEL } from '@/lib/jobs/labels';
 import { applyFilterChange, buildResetUrl, type FilterField } from '@/lib/jobs/filter-changes';
 import { JobListQuerySchema, type ParsedJobListQuery } from '@/lib/jobs/schema';
+import styles from './JobFilters.module.css';
 
 export interface JobFiltersProps {
   basePath?: string;
@@ -60,7 +61,7 @@ export function JobFilters({ basePath = '/jobs', categories = [] }: JobFiltersPr
   }, [basePath, router]);
 
   return (
-    <section aria-label="공고 필터" aria-busy={pending}>
+    <section aria-label="공고 필터" aria-busy={pending} className={styles.filters}>
       <label>
         직군
         <select

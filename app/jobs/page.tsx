@@ -10,6 +10,7 @@ import { ClosedJobsSection } from '@/app/jobs/_components/ClosedJobsSection';
 import { JobCard } from '@/app/jobs/_components/JobCard';
 import { JobFilters } from '@/app/jobs/_components/JobFilters';
 import { Pagination } from '@/app/jobs/_components/Pagination';
+import styles from './page.module.css';
 
 interface PageProps {
   searchParams: Record<string, string | string[] | undefined>;
@@ -50,21 +51,24 @@ export default async function JobsPage({ searchParams }: PageProps) {
   const data = await listJobs(query);
 
   return (
-    <main id="main-content">
-      <h1>채용 공고</h1>
+    <main id="main-content" className={styles.page}>
+      <header className={styles.hero}>
+        <h1 className={styles.heroTitle}>채용 공고</h1>
+        <p className={styles.heroSubtitle}>지금 모집 중인 포지션에 지원해 보세요.</p>
+      </header>
       {/* JobCategory 목록 prefetch는 F-6 follow-up — 본 step에선 빈 배열 */}
       <JobFilters categories={[]} />
       {data.items.length === 0 ? (
-        <p>조건에 맞는 공고가 없습니다.</p>
+        <p className={styles.empty}>조건에 맞는 공고가 없습니다.</p>
       ) : (
         <>
-          <p aria-live="polite">
+          <p aria-live="polite" className={styles.count}>
             총 {data.pagination.total.toLocaleString('ko-KR')}건 · 페이지 {data.pagination.page}/
             {data.pagination.totalPages}
           </p>
-          <ul>
+          <ul className={styles.grid}>
             {data.items.map((job) => (
-              <li key={job.id}>
+              <li key={job.id} className={styles.gridItem}>
                 <JobCard job={job} />
               </li>
             ))}
