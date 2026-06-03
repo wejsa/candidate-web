@@ -3221,5 +3221,14 @@
     "stepNumber": 3,
     "prNumber": 126,
     "at": "2026-06-03T15:24:00+09:00"
+  },
+  {
+    "action": "reviewed",
+    "decision": "COMMENT",
+    "taskId": "CANDID-029",
+    "stepNumber": 3,
+    "prNumber": 126,
+    "at": "2026-06-03T15:30:00+09:00",
+    "note": "subagents unavailable - direct review; MAJOR INFECTED-row-preserve fixed"
   }
 ]
