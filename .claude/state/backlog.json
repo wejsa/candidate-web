@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 49,
     "projectPrefix": "CANDID",
-    "version": 445,
+    "version": 446,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T06:34:07Z"
+    "updatedAt": "2026-06-03T06:48:11Z"
   },
   "summary": {
     "total": 49,
@@ -3627,7 +3627,7 @@
       "phase": 4,
       "type": "test",
       "assignee": "wejsa-u@hoji-20260603-143929",
-      "assignedAt": "2026-06-03T06:34:07Z",
+      "assignedAt": "2026-06-03T06:48:11Z",
       "lockedFiles": [
         "e2e/fixtures/auth.ts",
         "e2e/journeys.spec.ts",
@@ -3655,24 +3655,25 @@
           "number": 2,
           "title": "E2E 픽스처(공고 시드+signup 인증) + 인증/지원/마이페이지 여정",
           "description": "e2e/fixtures: prisma 공고 주입 시드 + signup API storageState 인증. journeys.spec.ts: 시드 공고→목록→상세→지원 폼 진입, 비인증 apply 리다이렉트, 인증 /me. 이력서 업로드는 범위 외.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "e2e/fixtures/seed.ts",
             "e2e/fixtures/auth.ts",
             "e2e/journeys.spec.ts"
           ],
           "estimatedLines": 600,
-          "prLineLimit": 800
+          "prLineLimit": 800,
+          "prNumber": 127
         }
       ],
       "currentStep": 2,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 127,
         "fixLoopCount": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T06:34:07Z"
+        "autoChainArgs": "127 --auto-fix",
+        "updatedAt": "2026-06-03T06:48:11Z"
       },
       "createdAt": "2026-06-03T05:38:55Z",
       "updatedAt": "2026-06-03T05:38:55Z",
