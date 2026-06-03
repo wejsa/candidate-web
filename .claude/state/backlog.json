@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 450,
+    "version": 451,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T08:19:37Z"
+    "updatedAt": "2026-06-03T08:29:38Z"
   },
   "summary": {
     "total": 50,
@@ -3711,7 +3711,7 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260603-081433",
-      "assignedAt": "2026-06-03T08:19:37Z",
+      "assignedAt": "2026-06-03T08:29:38Z",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/_components/LogoutButton.tsx",
@@ -3746,7 +3746,7 @@
           "number": 1,
           "title": "결함 수정 — JobCard 링크 범위 + ApplyCta 라우트 버그",
           "description": "JobCard 제목만 <Link>, 직군/고용형태/경력·D-Day는 링크 밖 일반 텍스트(시각 재구성은 Step3). aria-label 유지. ApplyCta /mypage→/me. 회귀/컴포넌트 테스트. 스타일 변경 없음.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/jobs/_components/JobCard.tsx",
             "app/jobs/[id]/_components/ApplyCta.tsx",
@@ -3754,7 +3754,9 @@
             "tests/app/jobs/[id]/ApplyCta.test.tsx"
           ],
           "prLineLimit": 250,
-          "estimatedLines": 180
+          "estimatedLines": 180,
+          "prNumber": 128,
+          "branch": "feature/CANDID-050-step1"
         },
         {
           "number": 2,
@@ -3813,15 +3815,15 @@
       ],
       "currentStep": 1,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 128,
         "fixLoopCount": 0,
         "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T08:19:37Z"
+        "updatedAt": "2026-06-03T08:29:38Z"
       },
       "createdAt": "2026-06-03T08:12:34Z",
-      "updatedAt": "2026-06-03T08:19:37Z"
+      "updatedAt": "2026-06-03T08:29:38Z"
     }
   }
 }
