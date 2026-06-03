@@ -14,25 +14,28 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { withErrorHandler } from '@/lib/errors';
 import { ConfirmRequestSchema } from '@/lib/files/validation';
 import { confirmResumeUpload } from '@/lib/files/confirm';
+import { withBusinessMetric } from '@/lib/observability/metrics';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export const POST = withErrorHandler(async (request: NextRequest) => {
-  const auth = await requireAuth(request);
-  const body = ConfirmRequestSchema.parse(await request.json());
+export const POST = withErrorHandler(
+  withBusinessMetric('file_upload', async (request: NextRequest) => {
+    const auth = await requireAuth(request);
+    const body = ConfirmRequestSchema.parse(await request.json());
 
-  const result = await confirmResumeUpload({ userId: auth.userId, request: body });
+    const result = await confirmResumeUpload({ userId: auth.userId, request: body });
 
-  return NextResponse.json(
-    {
-      id: result.id,
-      virusScanStatus: result.virusScanStatus,
-      uploadedAt: result.uploadedAt.toISOString(),
-    },
-    {
-      status: 201,
-      headers: { 'Cache-Control': 'private, no-store' },
-    },
-  );
-});
+    return NextResponse.json(
+      {
+        id: result.id,
+        virusScanStatus: result.virusScanStatus,
+        uploadedAt: result.uploadedAt.toISOString(),
+      },
+      {
+        status: 201,
+        headers: { 'Cache-Control': 'private, no-store' },
+      },
+    );
+  }),
+);

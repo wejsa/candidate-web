@@ -1,4 +1,6 @@
+import type { NextRequest } from 'next/server';
 import { Registry, Counter, Histogram, collectDefaultMetrics } from 'prom-client';
+import { setRequestObserver } from '@/lib/errors/response';
 
 // CANDID-027 Step 1 — Prometheus 메트릭 레지스트리 (관측 SSOT).
 //
@@ -84,6 +86,99 @@ export function getMetricsRegistry(): Registry {
  */
 export function recordBusinessEvent(event: BusinessEvent, result: EventResult = 'success'): void {
   getMetricsBundle().businessEvents.inc({ event, result });
+}
+
+// CANDID-027 Step 3 — HTTP 요청 메트릭 기록.
+// route 라벨은 동적 세그먼트(id/uuid/지원번호 등)를 :id로 정규화해 시계열 카디널리티 폭발을 막는다.
+
+const UUID_SEGMENT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NUMERIC_SEGMENT = /^\d+$/;
+const APP_NUMBER_SEGMENT = /^A-\d{6}-\d{5}$/; // BR-APP-05 지원번호 A-YYYYMM-NNNNN
+const LONG_OPAQUE_SEGMENT = /^[0-9a-fA-F]{16,}$/; // 토큰/해시류 불투명 식별자
+
+/** 경로의 동적 세그먼트를 `:id`로 치환한다(쿼리스트링 제외 pathname 입력 가정). */
+export function normalizeRoute(pathname: string): string {
+  if (!pathname || pathname === '/') return '/';
+  const normalized = pathname
+    .split('/')
+    .map((seg) => {
+      if (seg === '') return seg;
+      if (
+        UUID_SEGMENT.test(seg) ||
+        NUMERIC_SEGMENT.test(seg) ||
+        APP_NUMBER_SEGMENT.test(seg) ||
+        LONG_OPAQUE_SEGMENT.test(seg)
+      ) {
+        return ':id';
+      }
+      return seg;
+    })
+    .join('/');
+  return normalized || '/';
+}
+
+function statusClass(status: number): StatusClass {
+  if (status >= 500) return '5xx';
+  if (status >= 400) return '4xx';
+  if (status >= 300) return '3xx';
+  return '2xx';
+}
+
+/** HTTP 요청 1건의 처리 시간을 히스토그램에 기록한다(라우트는 정규화). */
+export function recordHttpRequest(
+  method: string,
+  pathname: string,
+  status: number,
+  durationSeconds: number,
+): void {
+  getMetricsBundle().httpRequestDuration.observe(
+    {
+      method: method.toUpperCase(),
+      route: normalizeRoute(pathname),
+      status_class: statusClass(status),
+    },
+    durationSeconds,
+  );
+}
+
+/**
+ * withErrorHandler의 요청 관측자로 recordHttpRequest를 주입한다.
+ * instrumentation.ts(register)가 Node 런타임 부팅 시 1회 호출 — Edge/universal 그래프에는
+ * prom-client가 유입되지 않는다(lib/errors/response는 콜백만 보유).
+ */
+export function wireHttpMetrics(): void {
+  setRequestObserver(recordHttpRequest);
+}
+
+/**
+ * CANDID-027 Step 4 — 라우트 핸들러를 감싸 비즈니스 이벤트 1건을 기록하는 HOF.
+ * 2xx 응답 → success, 그 외 status 또는 throw → failure(후자는 그대로 재던짐).
+ * CANDID-026이 잠근 서비스 레이어(lib/applications/submit.ts 등)를 건드리지 않고 라우트에서 계측한다.
+ * variadic 제네릭으로 (request) / (request, context) 두 시그니처 모두 지원(첫 인자는 NextRequest 강제).
+ * 주의:
+ *  - 멱등 재요청(application_submit cache hit)도 2xx면 success로 집계된다 — "성공 응답 served" 의미.
+ *  - rate-limit 거부(429)는 비즈니스 결과가 아니므로 집계에서 제외한다 — 외부 IP-limit(래퍼 바깥에서
+ *    조기 반환되어 애초에 미진입)과 내부 user-limit(429)의 집계 의미를 일관시킨다(PR #121 도메인 리뷰).
+ */
+export function withBusinessMetric<A extends [NextRequest, ...unknown[]]>(
+  event: BusinessEvent,
+  handler: (...args: A) => Response | Promise<Response>,
+): (...args: A) => Promise<Response> {
+  return async (...args: A) => {
+    try {
+      const response = await handler(...args);
+      if (response.status !== 429) {
+        recordBusinessEvent(
+          event,
+          response.status >= 200 && response.status < 300 ? 'success' : 'failure',
+        );
+      }
+      return response;
+    } catch (error) {
+      recordBusinessEvent(event, 'failure');
+      throw error;
+    }
+  };
 }
 
 /** 직렬화된 Prometheus 텍스트(exposition format)를 반환한다. */

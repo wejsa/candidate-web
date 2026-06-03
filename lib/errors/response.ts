@@ -110,6 +110,39 @@ export function handleApiError(
 /** Next.js App Router Route Handler 시그니처. */
 type ApiRouteHandler<C> = (request: NextRequest, context: C) => Response | Promise<Response>;
 
+// CANDID-027 Step 3 — 요청 관측 훅.
+// withErrorHandler가 매 요청의 (method, pathname, status, 처리시간)을 관측자에게 흘려보낸다.
+// 본 모듈은 universal(middleware=Edge 그래프 포함)이라 Node 전용 메트릭 라이브러리(prom-client)를
+// 직접 import하지 않는다 — instrumentation.ts가 Node 부팅 시 metrics.recordHttpRequest를
+// setRequestObserver로 주입한다. Edge/관측자 미설정 시 no-op.
+type RequestObserver = (
+  method: string,
+  pathname: string,
+  status: number,
+  durationSeconds: number,
+) => void;
+
+let requestObserver: RequestObserver | null = null;
+
+/** 요청 관측자를 등록/해제한다(테스트는 null로 초기화). */
+export function setRequestObserver(observer: RequestObserver | null): void {
+  requestObserver = observer;
+}
+
+function observeRequest(request: NextRequest, response: Response, startedAtMs: number): void {
+  if (!requestObserver) return;
+  try {
+    requestObserver(
+      request.method,
+      request.nextUrl.pathname,
+      response.status,
+      (Date.now() - startedAtMs) / 1000,
+    );
+  } catch {
+    // best-effort 텔레메트리 — 관측 실패가 요청 처리를 깨뜨리지 않도록 무시.
+  }
+}
+
 /**
  * Route Handler를 감싸 throw된 예외를 표준 에러 응답으로 변환하는 HOF.
  * CANDID-026 Step 1: 미들웨어가 주입한 요청 헤더 x-trace-id를 읽어 에러 응답 traceId로 사용한다
@@ -122,10 +155,15 @@ type ApiRouteHandler<C> = (request: NextRequest, context: C) => Response | Promi
 export function withErrorHandler<C = unknown>(handler: ApiRouteHandler<C>): ApiRouteHandler<C> {
   return async (request, context) => {
     const traceId = normalizeTraceId(request.headers.get(TRACE_HEADER)) ?? generateTraceId();
+    const startedAtMs = Date.now();
+    let response: Response;
     try {
-      return await handler(request, context);
+      response = await handler(request, context);
     } catch (error) {
-      return handleApiError(error, request, traceId);
+      response = handleApiError(error, request, traceId);
     }
+    // 응답 객체를 변형하지 않고 status만 읽어 관측 — inner 헤더(traceId 등) 보존(L-023).
+    observeRequest(request, response, startedAtMs);
+    return response;
   };
 }

@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 422,
+    "version": 426,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T13:01:19+09:00"
+    "updatedAt": "2026-06-03T04:29:40Z"
   },
   "summary": {
     "total": 47,
@@ -2307,7 +2307,7 @@
       "id": "CANDID-027",
       "title": "Prometheus 메트릭 + 헬스체크",
       "description": "주요 비즈니스 이벤트 메트릭(가입/제출/철회/파일 업로드). /health, /ready 엔드포인트. 응답 P95 < 300ms(목록)/800ms(제출) 가시화.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "low",
       "phase": 4,
@@ -2315,17 +2315,10 @@
         "CANDID-007"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "wejsa-u@hoji-20260603-122756",
-      "assignedAt": "2026-06-03T03:59:03Z",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "lib/errors/response.ts",
-        "lib/observability/metrics.ts",
-        "app/api/v1/auth/signup/route.ts",
-        "app/api/v1/applications/route.ts",
-        "app/api/v1/applications/me/[id]/withdraw/route.ts",
-        "app/api/v1/files/resume/confirm/route.ts"
-      ],
+      "lockedFiles": [],
       "steps": [
         {
           "number": 1,
@@ -2359,36 +2352,34 @@
           "number": 3,
           "title": "HTTP duration/count 계측 (withErrorHandler) + normalizeRoute",
           "description": "withErrorHandler에 처리시간 측정 추가(성공/에러 모두 http_request_duration_seconds 기록). L-023: inner response 헤더(traceId) 보존-측정만. normalizeRoute로 동적 세그먼트→:id 정규화(카디널리티 방지) + 가드 단위테스트(L-034).",
-          "status": "pending",
+          "status": "merged",
           "files": [
             "lib/errors/response.ts",
             "lib/observability/metrics.ts"
           ],
-          "estimatedLines": 320
+          "estimatedLines": 320,
+          "prNumber": 120,
+          "mergedAt": "2026-06-03T04:14:37Z"
         },
         {
           "number": 4,
           "title": "비즈니스 카운터 계측 (가입/제출/철회/파일업로드, route 레이어)",
           "description": "CANDID-026 잠금(submit.ts) 회피 위해 route 핸들러에서 카운터 증가. signup/applications(POST)/withdraw/file-confirm 성공·실패 result 라벨. 잠금 교집합 0 검증됨.",
-          "status": "pending",
+          "status": "merged",
           "files": [
             "app/api/v1/auth/signup/route.ts",
             "app/api/v1/applications/route.ts",
             "app/api/v1/applications/me/[id]/withdraw/route.ts",
             "app/api/v1/files/resume/confirm/route.ts"
           ],
-          "estimatedLines": 320
+          "estimatedLines": 320,
+          "prNumber": 121,
+          "mergedAt": "2026-06-03T04:29:40Z"
         }
       ],
-      "currentStep": 3,
-      "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
-        "fixLoopCount": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T03:59:03Z"
-      }
+      "currentStep": 4,
+      "workflowState": null,
+      "completedAt": "2026-06-03T04:29:40Z"
     },
     "CANDID-028": {
       "id": "CANDID-028",
