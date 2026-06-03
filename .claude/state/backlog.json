@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 411,
+    "version": 412,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T11:35:46+09:00"
+    "updatedAt": "2026-06-03T03:27:56Z"
   },
   "summary": {
     "total": 47,
@@ -2320,14 +2320,18 @@
       "id": "CANDID-027",
       "title": "Prometheus 메트릭 + 헬스체크",
       "description": "주요 비즈니스 이벤트 메트릭(가입/제출/철회/파일 업로드). /health, /ready 엔드포인트. 응답 P95 < 300ms(목록)/800ms(제출) 가시화.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "low",
       "phase": 4,
       "dependencies": [
         "CANDID-007"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "wejsa-u@hoji-20260603-122756",
+      "assignedAt": "2026-06-03T03:27:56Z",
+      "lockTTL": 1800,
+      "lockedFiles": []
     },
     "CANDID-028": {
       "id": "CANDID-028",
