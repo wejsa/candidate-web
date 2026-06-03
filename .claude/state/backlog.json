@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 403,
+    "version": 405,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T10:49:23+09:00"
+    "updatedAt": "2026-06-03T11:04:35+09:00"
   },
   "summary": {
     "total": 47,
@@ -2236,7 +2236,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T10:49:23+09:00",
+      "assignedAt": "2026-06-03T11:04:35+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/oauth/[provider]/callback/route.ts",
@@ -2252,13 +2252,13 @@
         "prisma/schema.prisma"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 114,
         "fixLoopCount": null,
         "lastReviewDecision": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T10:49:23+09:00"
+        "autoChainArgs": "114 --auto-fix",
+        "updatedAt": "2026-06-03T11:04:35+09:00"
       },
       "steps": [
         {
@@ -2280,14 +2280,15 @@
           "number": 2,
           "title": "감사 emit SSOT 헬퍼 + 기존 3 호출부 통일",
           "description": "lib/audit/record.ts recordAuditEvent(tx 지원, traceId 자동주입, metadata PII-free allowlist 가드). withdraw×2/password-change 인라인 create를 헬퍼로 통일(trace_id 채움). PII-free 회귀 가드 테스트 동반. [리뷰 FU#111] rate-limit.ts 429 경로 traceId 통일 + audit emit은 getTraceId()(정규화 경유)만 사용.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/audit/record.ts",
             "lib/users/withdraw.ts",
             "lib/applications/withdraw.ts",
             "lib/users/password-change.ts"
           ],
-          "estimatedLines": 450
+          "estimatedLines": 450,
+          "prNumber": 114
         },
         {
           "number": 3,
@@ -2343,7 +2344,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260603-094035",
-      "assignedAt": "2026-06-03T10:49:04+09:00",
+      "assignedAt": "2026-06-03T10:59:43+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
@@ -2360,9 +2361,9 @@
         "tests/app/me/profile/ProfileEditForm.test.tsx",
         "tests/app/me/withdraw/WithdrawForm.test.tsx"
       ],
-      "updatedAt": "2026-06-03T10:49:04+09:00",
+      "updatedAt": "2026-06-03T10:59:43+09:00",
       "metadata": {
-        "version": 6
+        "version": 7
       },
       "steps": [
         {
@@ -2423,10 +2424,12 @@
           ],
           "estimatedLines": 460,
           "prLineLimit": 600,
-          "status": "pending",
+          "status": "pr_created",
           "dependsOn": [
             1
-          ]
+          ],
+          "prNumber": 113,
+          "branch": "feature/CANDID-028-step3"
         },
         {
           "number": 4,
@@ -2452,13 +2455,13 @@
       "currentStep": 3,
       "planPath": ".claude/temp/CANDID-028-plan.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 113,
         "fixLoopCount": 0,
-        "lastReviewDecision": "approved",
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T10:49:04+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "113 --auto-fix",
+        "updatedAt": "2026-06-03T10:59:43+09:00"
       }
     },
     "CANDID-029": {
