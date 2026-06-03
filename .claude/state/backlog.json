@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 403,
+    "version": 404,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T10:49:23+09:00"
+    "updatedAt": "2026-06-03T10:59:43+09:00"
   },
   "summary": {
     "total": 47,
@@ -2343,7 +2343,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260603-094035",
-      "assignedAt": "2026-06-03T10:49:04+09:00",
+      "assignedAt": "2026-06-03T10:59:43+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
@@ -2360,9 +2360,9 @@
         "tests/app/me/profile/ProfileEditForm.test.tsx",
         "tests/app/me/withdraw/WithdrawForm.test.tsx"
       ],
-      "updatedAt": "2026-06-03T10:49:04+09:00",
+      "updatedAt": "2026-06-03T10:59:43+09:00",
       "metadata": {
-        "version": 6
+        "version": 7
       },
       "steps": [
         {
@@ -2423,10 +2423,12 @@
           ],
           "estimatedLines": 460,
           "prLineLimit": 600,
-          "status": "pending",
+          "status": "pr_created",
           "dependsOn": [
             1
-          ]
+          ],
+          "prNumber": 113,
+          "branch": "feature/CANDID-028-step3"
         },
         {
           "number": 4,
@@ -2452,13 +2454,13 @@
       "currentStep": 3,
       "planPath": ".claude/temp/CANDID-028-plan.md",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 113,
         "fixLoopCount": 0,
-        "lastReviewDecision": "approved",
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T10:49:04+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "113 --auto-fix",
+        "updatedAt": "2026-06-03T10:59:43+09:00"
       }
     },
     "CANDID-029": {
