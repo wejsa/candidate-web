@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 48,
     "projectPrefix": "CANDID",
-    "version": 429,
+    "version": 430,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T05:38:55Z"
+    "updatedAt": "2026-06-03T05:39:29Z"
   },
   "summary": {
     "total": 47,
@@ -3631,19 +3631,27 @@
       "id": "CANDID-048",
       "title": "Playwright E2E 도입 + 핵심 사용자 여정 스모크",
       "description": "@playwright/test 도입(playwright.config + webServer 부팅). 핵심 사용자 여정 E2E: 공고 목록→상세, 회원가입→이메일 미인증 상태, 로그인, 지원서 3단계 작성·임시저장, 제출(멱등), 마이페이지. headless 스크린샷 산출. /api/health·/api/ready·/api/metrics 스모크 포함. 실행 검증은 Docker(postgres+minio) 기동 전제 — chromium 바이너리는 캐시에 존재.",
-      "status": "todo",
+      "status": "in_progress",
       "priority": "medium",
       "phase": 4,
       "type": "test",
-      "assignee": null,
-      "assignedAt": null,
+      "assignee": "wejsa-u@hoji-20260603-143929",
+      "assignedAt": "2026-06-03T05:39:29Z",
       "lockedFiles": [],
       "dependencies": [],
       "steps": [],
       "currentStep": 0,
-      "workflowState": null,
+      "workflowState": {
+        "currentSkill": "skill-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": null,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-03T05:39:29Z"
+      },
       "createdAt": "2026-06-03T05:38:55Z",
-      "updatedAt": "2026-06-03T05:38:55Z"
+      "updatedAt": "2026-06-03T05:38:55Z",
+      "lockTTL": 1800
     }
   }
 }
