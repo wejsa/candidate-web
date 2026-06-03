@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 418,
+    "version": 419,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T03:50:39Z"
+    "updatedAt": "2026-06-03T03:55:26Z"
   },
   "summary": {
     "total": 47,
@@ -2328,7 +2328,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-122756",
-      "assignedAt": "2026-06-03T03:50:39Z",
+      "assignedAt": "2026-06-03T03:55:26Z",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/health/route.ts",
@@ -2360,12 +2360,13 @@
           "number": 2,
           "title": "GET /api/health + GET /api/ready (liveness/readiness)",
           "description": "health=liveness 항상 200{status,uptime,timestamp}. ready=readiness prisma $queryRaw SELECT 1 → 200{db:up}/503{db:down}. 둘 다 runtime nodejs, export 직접 단위 테스트.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/api/health/route.ts",
             "app/api/ready/route.ts"
           ],
-          "estimatedLines": 280
+          "estimatedLines": 280,
+          "prNumber": 119
         },
         {
           "number": 3,
@@ -2394,12 +2395,12 @@
       ],
       "currentStep": 2,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 119,
         "fixLoopCount": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T03:50:39Z"
+        "autoChainArgs": "119 --auto-fix",
+        "updatedAt": "2026-06-03T03:55:26Z"
       }
     },
     "CANDID-028": {
