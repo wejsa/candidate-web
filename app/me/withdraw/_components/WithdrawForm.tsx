@@ -77,6 +77,14 @@ export function WithdrawForm({ isSocialOnly }: Props): React.JSX.Element {
     setState({ status: 'error', error: message });
   }
 
+  // 입력값 기인 에러(불일치/누락)만 password 필드를 invalid로 표기 — 429/네트워크 등
+  // form-level 에러는 필드 정합성과 무관하므로 연관하지 않는다(리뷰 D-1). 메시지 자체는
+  // role=alert로 항상 announce된다.
+  const isPasswordError =
+    state.status === 'error' &&
+    (state.error === WITHDRAW_LABELS.errorPasswordMismatch ||
+      state.error === WITHDRAW_LABELS.errorPasswordRequired);
+
   return (
     <section aria-labelledby="withdraw-form-title">
       <h2 id="withdraw-form-title">{WITHDRAW_LABELS.formHeading}</h2>
@@ -99,8 +107,8 @@ export function WithdrawForm({ isSocialOnly }: Props): React.JSX.Element {
             onChange={(e) => setPasswordConfirmation(e.target.value)}
             placeholder={WITHDRAW_LABELS.passwordFieldPlaceholder}
             autoComplete="current-password"
-            aria-invalid={state.status === 'error'}
-            aria-describedby={state.status === 'error' ? 'withdraw-form-error' : undefined}
+            aria-invalid={isPasswordError}
+            aria-describedby={isPasswordError ? 'withdraw-form-error' : undefined}
             required
             disabled={state.status === 'pending'}
           />

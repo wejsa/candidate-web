@@ -27,4 +27,19 @@ describe('PersonalInfoStep 에러 연관', () => {
     expect(err).not.toBeNull();
     expect(err).toHaveAttribute('role', 'alert');
   });
+
+  it('연락처 정정 → aria-describedby/에러 span 제거 (stale 참조 방지)', async () => {
+    const { container } = render(
+      <PersonalInfoStep value={undefined} prefill={prefill} onChange={vi.fn()} />,
+    );
+    const phone = container.querySelector('input[type="tel"]') as HTMLInputElement;
+    await userEvent.type(phone, 'abc');
+    expect(phone).toHaveAttribute('aria-describedby', 'err-phone');
+
+    await userEvent.clear(phone);
+    await userEvent.type(phone, '010-1234-5678'); // PHONE_REGEX 충족 → phone 에러 해소
+
+    expect(phone).not.toHaveAttribute('aria-describedby');
+    expect(document.getElementById('err-phone')).toBeNull();
+  });
 });

@@ -60,6 +60,10 @@ export function PasswordChangeForm({ hasPassword }: PasswordChangeFormProps) {
     setState({ status: 'error', message: classifyPasswordChangeError(response.status) });
   }
 
+  // confirm 필드는 불일치(field-specific)일 때만 invalid + 메시지 연관. 서버 오류 등
+  // form-level 메시지는 confirm에 연관하지 않는다(리뷰 D-2 — 비대칭 해소).
+  const isMismatch = state.status === 'error' && state.message === L.errorMismatch;
+
   return (
     <form onSubmit={submit} aria-labelledby="password-change-title">
       <h2 id="password-change-title">{L.heading}</h2>
@@ -95,8 +99,8 @@ export function PasswordChangeForm({ hasPassword }: PasswordChangeFormProps) {
           value={confirm}
           autoComplete="new-password"
           onChange={(e) => setConfirm(e.target.value)}
-          aria-invalid={state.status === 'error' && state.message === L.errorMismatch}
-          aria-describedby={state.status === 'error' ? 'password-change-msg' : undefined}
+          aria-invalid={isMismatch}
+          aria-describedby={isMismatch ? 'password-change-msg' : undefined}
           required
         />
       </label>

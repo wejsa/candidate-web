@@ -36,4 +36,22 @@ describe('WithdrawForm 에러 연관', () => {
     expect(pw).toHaveAttribute('aria-describedby', 'withdraw-form-error');
     expect(document.getElementById('withdraw-form-error')).toHaveTextContent(L.errorPasswordMismatch);
   });
+
+  it('요청 과다(429) → password aria-invalid=false + 미연관 (메시지는 표시)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ status: 429, ok: false, json: async () => ({}) })),
+    );
+    const user = userEvent.setup();
+    render(<WithdrawForm isSocialOnly={false} />);
+
+    await user.type(screen.getByLabelText(L.passwordFieldLabel), 'somepassword');
+    await user.click(screen.getByRole('button', { name: L.submitButton }));
+    await user.click(screen.getByRole('button', { name: L.modalConfirmButton }));
+
+    expect(await screen.findByText(L.errorRateLimited)).toBeInTheDocument();
+    const pw = screen.getByLabelText(L.passwordFieldLabel);
+    expect(pw).toHaveAttribute('aria-invalid', 'false'); // rate-limit은 입력값 무관
+    expect(pw).not.toHaveAttribute('aria-describedby');
+  });
 });
