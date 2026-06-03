@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 448,
+    "version": 449,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T08:12:34Z"
+    "updatedAt": "2026-06-03T08:14:33Z"
   },
   "summary": {
     "total": 50,
     "done": 48,
-    "inProgress": 1,
+    "inProgress": 2,
     "review": 0,
-    "todo": 1
+    "todo": 0
   },
   "phases": {
     "1": {
@@ -3706,13 +3706,13 @@
       "id": "CANDID-050",
       "title": "공고 탐색/지원 여정 UI 재구성 + 인증 UI 보강",
       "description": "coupang.jobs 채용 보드 패턴 참고로 /jobs 목록·/jobs/[id] 상세 UI를 CSS Modules+디자인토큰 확장으로 재구성하고, 깨진 공고탐색→로그인→지원 여정을 복구한다. (1)JobCard 전체가 단일 Link라 카드 텍스트가 전부 링크색 상속 → 제목만 네비·facet은 비링크 칩. (2)ApplyCta GUEST가 /login으로 보내나 로그인 페이지 자체가 없어 404 → /login(redirect 복원·open-redirect 가드)+/signup(이메일 인증 안내) 신규(백엔드 /api/v1/auth/* 재사용). (3)ApplyCta ALREADY_APPLIED의 /mypage→/me 라우트 버그 수정. (4)전역 헤더/네비(인증 상태별) 추가. 기존 a11y(WCAG 2.1 AA, CANDID-028 토큰)·SEO(SSR/SSG·JSON-LD)·데이터 계약 보존. 새 외부 의존성 없음(Next.js 내장 CSS Modules).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 2,
-      "assignee": null,
-      "assignedAt": null,
-      "lockTTL": null,
+      "assignee": "wejsa-u@hoji-20260603-081433",
+      "assignedAt": "2026-06-03T08:14:33Z",
+      "lockTTL": 1800,
       "lockedFiles": [],
       "dependencies": [],
       "specFile": "docs/requirements/CANDID-050-spec.md",
@@ -3721,7 +3721,7 @@
       "currentStep": 0,
       "workflowState": null,
       "createdAt": "2026-06-03T08:12:34Z",
-      "updatedAt": "2026-06-03T08:12:34Z"
+      "updatedAt": "2026-06-03T08:14:33Z"
     }
   }
 }
