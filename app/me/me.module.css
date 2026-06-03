@@ -1,0 +1,368 @@
+/* CANDID — 마이페이지 대시보드 재구성(A안: 히어로 + 통계 + 상태 카드 + 전형 진행바).
+   전역 토큰(globals.css의 --color-*, --shadow-*, --space-*, --radius) 재사용.
+   상태 색은 WCAG AA 대비를 만족하는 값으로 모듈 로컬 정의(globals 비파괴). */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ── 히어로 ───────────────────────────────────────── */
+.hero {
+  padding: var(--space-6);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  /* 은은한 그라데이션 — 대비는 텍스트색(--color-text)이 책임 */
+  background: linear-gradient(135deg, var(--color-accent-weak), var(--color-surface));
+  box-shadow: var(--shadow-sm);
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.heroSubtitle {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* ── 통계 타일 ─────────────────────────────────────── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+}
+
+@media (max-width: 560px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statTile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  /* 좌측 강조 바 */
+  border-left: 4px solid var(--color-border);
+}
+
+.statTile.info {
+  border-left-color: #0066cc;
+}
+.statTile.draft {
+  border-left-color: #8a5a00;
+}
+.statTile.success {
+  border-left-color: #137333;
+}
+.statTile.total {
+  border-left-color: #595959;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* ── 섹션 ──────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.sectionCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ── 카드 그리드 ───────────────────────────────────── */
+.cardList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  position: relative; /* stretched-link 기준 */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card:focus-within {
+  box-shadow: var(--shadow-md);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+/* 카드 표면 전체를 상세 링크 클릭 영역으로 확장(stretched link). */
+.titleLink {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.titleLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.titleLink:hover {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.cardNumber {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.detailLink {
+  color: var(--color-link);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ── 상태 배지 ─────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 배지 앞 컬러 점 — 이모지 대신 항상 렌더되는 CSS 도트(배지 텍스트색 상속). */
+.badgeDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.badge.info {
+  background: var(--color-accent-weak);
+  color: #0a4ea3;
+}
+.badge.success {
+  background: #e6f4ea;
+  color: #137333;
+}
+.badge.failed {
+  background: var(--color-surface-2);
+  color: #595959;
+}
+.badge.withdrawn {
+  background: var(--color-surface-2);
+  color: #767676;
+}
+.badge.draft {
+  background: #fef7e0;
+  color: #8a5a00;
+}
+
+/* ── 전형 진행바(4단계 스테퍼) ─────────────────────── */
+.progress {
+  display: flex;
+  align-items: flex-start;
+}
+
+.progressStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  gap: var(--space-1);
+  position: relative;
+}
+
+/* 연결선 — 각 스텝의 점 왼쪽으로 이전 점과 연결 */
+.progressStep:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: 6px; /* dot 중심 */
+  right: 50%;
+  left: -50%;
+  height: 2px;
+  background: var(--color-surface-2);
+}
+
+.progressStep.done::before,
+.progressStep.current::before {
+  background: var(--trackColor, var(--color-link));
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid var(--color-surface-2);
+  background: var(--color-bg);
+  z-index: 1;
+}
+
+.progressStep.done .dot {
+  border-color: var(--trackColor, var(--color-link));
+  background: var(--trackColor, var(--color-link));
+}
+
+.progressStep.current .dot {
+  border-color: var(--trackColor, var(--color-link));
+  background: var(--color-bg);
+  box-shadow: 0 0 0 3px var(--trackHalo, var(--color-accent-weak));
+}
+
+.stepLabel {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.progressStep.current .stepLabel {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* 진행바 톤 — 결과별 색을 CSS 변수로 주입 */
+.tone-info {
+  --trackColor: #0066cc;
+  --trackHalo: var(--color-accent-weak);
+}
+.tone-success {
+  --trackColor: #137333;
+  --trackHalo: #e6f4ea;
+}
+.tone-danger {
+  --trackColor: #b3261e;
+  --trackHalo: #fce8e6;
+}
+.tone-muted {
+  --trackColor: #767676;
+  --trackHalo: var(--color-surface-2);
+}
+
+/* ── 작성중(Draft) 카드 — 앰버 강조 + 액션 ──────────── */
+.draftCard {
+  border-left: 4px solid #8a5a00;
+}
+
+.draftAction {
+  /* stretched-link 미사용 카드라 일반 링크. globals 버튼/링크 스타일 상속 */
+  align-self: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+.draftClosedNote {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+/* ── 빈 상태 ───────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* 이모지 대신 CSS로 그린 중립 아이콘(점선 원) — 환경 무관 항상 렌더. */
+.emptyIcon {
+  width: 2rem;
+  height: 2rem;
+  border: 2px dashed var(--color-border);
+  border-radius: 999px;
+  opacity: 0.6;
+}

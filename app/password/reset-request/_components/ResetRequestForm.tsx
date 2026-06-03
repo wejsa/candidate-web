@@ -8,6 +8,7 @@
 // 형식 오류(400)·과도 요청(429)만 사용자 입력 결함으로 인라인 에러 처리.
 
 import { useState } from 'react';
+import styles from '@/app/_components/auth.module.css';
 
 const LABELS = {
   heading: '비밀번호 재설정',
@@ -69,13 +70,15 @@ export function ResetRequestForm(): React.JSX.Element {
 
   if (state.status === 'done') {
     return (
-      <section aria-labelledby="reset-request-done-title">
-        <h2 id="reset-request-done-title">{LABELS.heading}</h2>
+      <section className={styles.card} aria-labelledby="reset-request-done-title">
+        <h2 id="reset-request-done-title" className={styles.cardTitle}>
+          {LABELS.heading}
+        </h2>
         <p role="status" aria-live="polite">
           {state.message ??
             '입력하신 이메일이 가입되어 있다면 재설정 안내 메일을 보냈습니다.'}
         </p>
-        <p>
+        <p className={styles.altLinks}>
           <a href="/login">{LABELS.backToLogin}</a>
         </p>
       </section>
@@ -83,10 +86,13 @@ export function ResetRequestForm(): React.JSX.Element {
   }
 
   return (
-    <section aria-labelledby="reset-request-form-title">
-      <h2 id="reset-request-form-title">{LABELS.heading}</h2>
+    <section className={styles.card} aria-labelledby="reset-request-form-title">
+      <h2 id="reset-request-form-title" className={styles.cardTitle}>
+        {LABELS.heading}
+      </h2>
       <p>{LABELS.description}</p>
       <form
+        className={styles.form}
         onSubmit={(e) => {
           e.preventDefault();
           if (email.trim().length === 0) {
@@ -111,17 +117,17 @@ export function ResetRequestForm(): React.JSX.Element {
           />
         </label>
         {state.status === 'error' && state.message !== null && (
-          <p id="reset-request-error" role="alert" aria-live="polite">
+          <p id="reset-request-error" className={styles.error} role="alert" aria-live="polite">
             {state.message}
           </p>
         )}
-        <div>
-          <button type="submit" disabled={state.status === 'pending'}>
-            {state.status === 'pending' ? LABELS.submitting : LABELS.submit}
-          </button>
-          <a href="/login">{LABELS.backToLogin}</a>
-        </div>
+        <button type="submit" className={styles.primary} disabled={state.status === 'pending'}>
+          {state.status === 'pending' ? LABELS.submitting : LABELS.submit}
+        </button>
       </form>
+      <p className={styles.altLinks}>
+        <a href="/login">{LABELS.backToLogin}</a>
+      </p>
     </section>
   );
 }

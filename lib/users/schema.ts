@@ -37,14 +37,22 @@ const PROFILE_PHONE_FIELD = z
     return digits.length >= 9 && digits.length <= 11;
   }, '연락처는 9~11자리 숫자여야 합니다.');
 
+/** 생년월일 — YYYY-MM-DD (normalizeBirthDate와 동일 기준). 자동 채움(지원서 prefill)에 사용. */
+const PROFILE_BIRTHDATE_FIELD = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, '생년월일은 YYYY-MM-DD 형식이어야 합니다.');
+
 export const ProfileUpdateSchema = z
   .object({
     name: PROFILE_NAME_FIELD.optional(),
     /** 신규 연락처 문자열 또는 null(삭제). 미전달 시 연락처 미변경. */
     phone: z.union([PROFILE_PHONE_FIELD, z.null()]).optional(),
+    /** 생년월일 문자열(YYYY-MM-DD) 또는 null(삭제). 미전달 시 미변경. */
+    birthDate: z.union([PROFILE_BIRTHDATE_FIELD, z.null()]).optional(),
   })
   .strict()
-  .refine((o) => o.name !== undefined || 'phone' in o, {
+  .refine((o) => o.name !== undefined || 'phone' in o || 'birthDate' in o, {
     message: '수정할 항목이 없습니다.',
   });
 

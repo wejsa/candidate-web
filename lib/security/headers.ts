@@ -13,8 +13,15 @@ export type SecurityHeaders = Readonly<Record<string, string>>;
 /**
  * CSP(Content-Security-Policy) 정책 — dev/test는 Next HMR(eval, ws) 허용 위해 완화,
  * prod는 strict. nonce 도입(script-src 'nonce-...')은 후속 task에서 — MVP는 'self' 기반.
+ *
+ * connect-src에 S3/스토리지 엔드포인트 origin을 추가한다 — 이력서 첨부는 브라우저가 presigned URL로
+ * S3/MinIO에 직접 PUT/GET하므로(cross-origin) connect-src에 없으면 CSP가 차단한다(US-APP-003).
  */
-function contentSecurityPolicy(nodeEnv: 'production' | 'development' | 'test'): string {
+function contentSecurityPolicy(
+  nodeEnv: 'production' | 'development' | 'test',
+  storageOrigin: string | null,
+): string {
+  const connectExtra = storageOrigin !== null ? ` ${storageOrigin}` : '';
   const base = [
     "default-src 'self'",
     "img-src 'self' data: https:",
@@ -29,7 +36,7 @@ function contentSecurityPolicy(nodeEnv: 'production' | 'development' | 'test'): 
       ...base,
       "script-src 'self'",
       "style-src 'self' 'unsafe-inline'", // Tailwind/CSS-in-JS inline style 대응
-      "connect-src 'self'",
+      `connect-src 'self'${connectExtra}`,
       'upgrade-insecure-requests',
     ].join('; ');
   }
@@ -38,8 +45,18 @@ function contentSecurityPolicy(nodeEnv: 'production' | 'development' | 'test'): 
     ...base,
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "style-src 'self' 'unsafe-inline'",
-    "connect-src 'self' ws: wss:", // HMR websocket
+    `connect-src 'self' ws: wss:${connectExtra}`, // HMR websocket + 스토리지 직접 업로드
   ].join('; ');
+}
+
+/** S3_ENDPOINT에서 connect-src에 넣을 origin(scheme://host[:port])을 추출한다. 미설정/파싱 실패 시 null. */
+function storageOriginFromEnv(s3Endpoint: string | undefined): string | null {
+  if (s3Endpoint === undefined || s3Endpoint === '') return null;
+  try {
+    return new URL(s3Endpoint).origin;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -54,7 +71,10 @@ export function buildSecurityHeaders(): SecurityHeaders {
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'geolocation=(), camera=(), microphone=(), payment=()',
     'X-DNS-Prefetch-Control': 'off',
-    'Content-Security-Policy': contentSecurityPolicy(env.NODE_ENV),
+    'Content-Security-Policy': contentSecurityPolicy(
+      env.NODE_ENV,
+      storageOriginFromEnv(env.S3_ENDPOINT),
+    ),
   };
   if (env.NODE_ENV === 'production') {
     headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload';

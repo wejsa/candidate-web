@@ -14,6 +14,7 @@ import { PasswordChangeForm } from '@/app/me/profile/_components/PasswordChangeF
 import { SocialAccountsSection } from '@/app/me/profile/_components/SocialAccountsSection';
 import { AppError } from '@/lib/errors';
 import type { ProfileDto } from '@/lib/users/types';
+import styles from '@/app/me/profile/profile.module.css';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -42,10 +43,17 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main id="main-content">
-      <h1>프로필</h1>
+    <main id="main-content" className={styles.page}>
+      <header className={styles.hero}>
+        <h1 className={styles.heroTitle}>프로필</h1>
+        <p className={styles.heroSubtitle}>계정 정보를 확인하고 수정합니다.</p>
+      </header>
       <ProfileView profile={profile} />
-      <ProfileEditForm initialName={profile.name} phoneMasked={profile.phoneMasked} />
+      <ProfileEditForm
+        initialName={profile.name}
+        phoneMasked={profile.phoneMasked}
+        birthDateMasked={profile.birthDateMasked}
+      />
       <PasswordChangeForm hasPassword={profile.hasPassword} />
       <SocialAccountsSection providers={profile.providers} />
     </main>

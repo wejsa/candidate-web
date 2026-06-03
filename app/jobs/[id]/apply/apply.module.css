@@ -1,0 +1,270 @@
+/* CANDID — 지원서 작성 단일 페이지(첨부 + 지원) 재구성. 전역 토큰 재사용. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.hero {
+  padding: var(--space-6);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--color-accent-weak), var(--color-surface));
+  box-shadow: var(--shadow-sm);
+}
+
+.heroEyebrow {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.heroJob {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* 섹션 카드 */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.card legend,
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0;
+}
+
+.cardHint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.required {
+  margin-left: var(--space-1);
+  color: var(--color-error);
+  font-size: 0.85rem;
+}
+
+.optional {
+  margin-left: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+/* 프로필 미완성 게이트 */
+.gate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid #8a5a00;
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: #fef7e0;
+  color: #5c3d00;
+}
+
+.gateTitle {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* 신입/경력 토글 */
+.choiceRow {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.choice:has(input:checked) {
+  border-color: var(--color-link);
+  background: var(--color-accent-weak);
+  font-weight: 600;
+}
+
+/* 포트폴리오 링크 행 */
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linkRow {
+  display: grid;
+  grid-template-columns: 9rem 1fr auto;
+  gap: var(--space-2);
+  align-items: start;
+}
+
+@media (max-width: 560px) {
+  .linkRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.linkRow select,
+.linkRow input {
+  margin: 0;
+}
+
+.removeBtn {
+  min-height: var(--touch-min);
+}
+
+.addBtn {
+  align-self: flex-start;
+}
+
+.savedNote {
+  color: #137333;
+  font-size: 0.85rem;
+}
+
+.errorNote {
+  color: var(--color-error);
+  font-size: 0.85rem;
+}
+
+/* 첨부 상태 요약 + 제출 바 */
+.submitBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.checkItem.ok {
+  color: var(--color-text);
+}
+
+.checkMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-border);
+  font-size: 0.7rem;
+}
+
+.checkItem.ok .checkMark {
+  border-color: #137333;
+  background: #137333;
+  color: #fff;
+}
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-weight: 400;
+  margin: 0;
+}
+
+.submitBtn {
+  min-height: var(--touch-min);
+  padding: 0.65rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--color-link);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--color-link-hover);
+}
+
+.submitBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.submitError {
+  margin: 0;
+  color: var(--color-error);
+  font-size: 0.9rem;
+}
+
+.success {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: 1px solid #137333;
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: #e6f4ea;
+}
+
+.successTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0b5128;
+}
+
+/* 이력서 첨부 영역(ResumeUploadStep 루트에 주입) */
+.resumeFieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}

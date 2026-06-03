@@ -1,0 +1,161 @@
+/* CANDID — 프로필 페이지 카드 재구성. /me 대시보드·지원 페이지와 동일한 토큰/언어. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.hero {
+  padding: var(--space-6);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--color-accent-weak), var(--color-surface));
+  box-shadow: var(--shadow-sm);
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.heroSubtitle {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* 섹션 카드 */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* 계정 정보 정의 목록 */
+.dl {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+
+.dl dt {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.dl dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 폼 */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.primary {
+  align-self: flex-start;
+  min-height: var(--touch-min);
+  margin-top: var(--space-2);
+  padding: 0.5rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--color-link);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-link-hover);
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.msg {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.msgError {
+  color: var(--color-error);
+}
+
+.msgOk {
+  color: #137333;
+}
+
+/* 소셜 계정 목록 */
+.socialList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.socialRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+}
+
+.socialName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.statusLinked {
+  background: #e6f4ea;
+  color: #137333;
+}
+
+.statusUnlinked {
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+}
+
+.socialActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}

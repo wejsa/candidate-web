@@ -72,7 +72,10 @@ describe('실 컴포넌트 axe sweep (WCAG)', () => {
   it.each<[string, () => React.JSX.Element]>([
     ['PersonalInfoStep', () => <PersonalInfoStep value={undefined} prefill={prefill} onChange={vi.fn()} />],
     ['ConfirmModal', () => <ConfirmModal onConfirm={vi.fn()} onCancel={vi.fn()} />],
-    ['ProfileEditForm', () => <ProfileEditForm initialName="홍길동" phoneMasked={null} />],
+    [
+      'ProfileEditForm',
+      () => <ProfileEditForm initialName="홍길동" phoneMasked={null} birthDateMasked={null} />,
+    ],
     ['PasswordChangeForm', () => <PasswordChangeForm hasPassword={true} />],
     ['WithdrawForm(social-only)', () => <WithdrawForm isSocialOnly={true} />],
     ['WithdrawForm(password)', () => <WithdrawForm isSocialOnly={false} />],

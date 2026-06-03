@@ -14,10 +14,12 @@ import {
   isEmptyPayload,
   classifyProfileUpdateError,
 } from '@/lib/users/profile-form';
+import styles from '@/app/me/profile/profile.module.css';
 
 interface ProfileEditFormProps {
   initialName: string;
   phoneMasked: string | null;
+  birthDateMasked: string | null;
 }
 
 interface FormState {
@@ -25,16 +27,21 @@ interface FormState {
   message: string | null;
 }
 
-export function ProfileEditForm({ initialName, phoneMasked }: ProfileEditFormProps) {
+export function ProfileEditForm({
+  initialName,
+  phoneMasked,
+  birthDateMasked,
+}: ProfileEditFormProps) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
   const [phone, setPhone] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [state, setState] = useState<FormState>({ status: 'idle', message: null });
 
   async function submit(e: FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
 
-    const payload = buildProfileUpdatePayload({ name, phone }, { name: initialName });
+    const payload = buildProfileUpdatePayload({ name, phone, birthDate }, { name: initialName });
     if (isEmptyPayload(payload)) {
       setState({ status: 'error', message: L.noChange });
       return;
@@ -55,6 +62,7 @@ export function ProfileEditForm({ initialName, phoneMasked }: ProfileEditFormPro
 
     if (response.status === 200) {
       setPhone('');
+      setBirthDate('');
       setState({ status: 'done', message: L.saved });
       router.refresh();
       return;
@@ -65,11 +73,14 @@ export function ProfileEditForm({ initialName, phoneMasked }: ProfileEditFormPro
 
   return (
     <form
+      className={`${styles.card} ${styles.form}`}
       onSubmit={submit}
       aria-labelledby="profile-edit-title"
       aria-describedby={state.message !== null ? 'profile-edit-msg' : undefined}
     >
-      <h2 id="profile-edit-title">{L.heading}</h2>
+      <h2 id="profile-edit-title" className={styles.cardTitle}>
+        {L.heading}
+      </h2>
 
       <label>
         {L.nameLabel}
@@ -93,13 +104,32 @@ export function ProfileEditForm({ initialName, phoneMasked }: ProfileEditFormPro
         />
       </label>
 
+      <label>
+        {L.birthDateLabel}
+        <input
+          type="date"
+          value={birthDate}
+          aria-describedby="profile-birth-hint"
+          placeholder={birthDateMasked !== null ? `현재: ${birthDateMasked}` : undefined}
+          onChange={(e) => setBirthDate(e.target.value)}
+        />
+      </label>
+      <p id="profile-birth-hint" className={styles.hint}>
+        {birthDateMasked !== null ? `현재: ${birthDateMasked} · ` : ''}
+        {L.birthDateHint}
+      </p>
+
       {state.message !== null && (
-        <p id="profile-edit-msg" role={state.status === 'error' ? 'alert' : 'status'}>
+        <p
+          id="profile-edit-msg"
+          className={`${styles.msg} ${state.status === 'error' ? styles.msgError : styles.msgOk}`}
+          role={state.status === 'error' ? 'alert' : 'status'}
+        >
           {state.message}
         </p>
       )}
 
-      <button type="submit" disabled={state.status === 'pending'}>
+      <button type="submit" className={styles.primary} disabled={state.status === 'pending'}>
         {state.status === 'pending' ? L.submitting : L.submit}
       </button>
     </form>

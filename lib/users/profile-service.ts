@@ -3,7 +3,7 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { encryptUserPiiInput } from '@/lib/prisma/extends';
 import { AppError } from '@/lib/errors';
-import { maskPhone } from '@/lib/pii/mask';
+import { maskPhone, maskBirthDate } from '@/lib/pii/mask';
 import type { ProfileDto, ProfileProviderName } from '@/lib/users/types';
 import type { ProfileUpdateBody } from '@/lib/users/schema';
 
@@ -38,8 +38,9 @@ export async function getProfile(userId: number): Promise<ProfileDto> {
   return {
     name: user.name,
     email: user.email,
-    // user.phone: piiExtension이 복호화한 평문 string | null. maskPhone으로만 노출.
+    // user.phone/birthDate: piiExtension이 복호화한 평문 string | null. 마스킹으로만 노출.
     phoneMasked: maskPhone(user.phone),
+    birthDateMasked: maskBirthDate(user.birthDate),
     hasPassword: user.passwordHash !== null,
     providers: user.authProviders.map((p) => ({
       provider: toProviderName(p.provider),
@@ -61,6 +62,10 @@ export async function updateProfile(userId: number, input: ProfileUpdateBody): P
   if ('phone' in input) {
     // phone 입력 시에만 암호화 컬럼 동시 갱신. encryptUserPiiInput가 normalizePhone로 형식 재검증.
     Object.assign(data, encryptUserPiiInput({ phone: input.phone ?? null }));
+  }
+  if ('birthDate' in input) {
+    // birthDate 입력 시에만 암호화 컬럼 동시 갱신. encryptUserPiiInput가 normalizeBirthDate로 형식 재검증.
+    Object.assign(data, encryptUserPiiInput({ birthDate: input.birthDate ?? null }));
   }
 
   const result = await prisma.user.updateMany({

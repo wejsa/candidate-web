@@ -8,6 +8,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { PASSWORD_CHANGE_LABELS as L, classifyPasswordChangeError } from '@/lib/users/profile-form';
+import styles from '@/app/me/profile/profile.module.css';
 
 interface PasswordChangeFormProps {
   /** 비밀번호 설정 여부 — false면 소셜 전용 최초 설정 모드(현재 비번 불요). */
@@ -65,8 +66,14 @@ export function PasswordChangeForm({ hasPassword }: PasswordChangeFormProps) {
   const isMismatch = state.status === 'error' && state.message === L.errorMismatch;
 
   return (
-    <form onSubmit={submit} aria-labelledby="password-change-title">
-      <h2 id="password-change-title">{L.heading}</h2>
+    <form
+      className={`${styles.card} ${styles.form}`}
+      onSubmit={submit}
+      aria-labelledby="password-change-title"
+    >
+      <h2 id="password-change-title" className={styles.cardTitle}>
+        {L.heading}
+      </h2>
 
       {hasPassword && (
         <label>
@@ -106,12 +113,16 @@ export function PasswordChangeForm({ hasPassword }: PasswordChangeFormProps) {
       </label>
 
       {state.message !== null && (
-        <p id="password-change-msg" role={state.status === 'error' ? 'alert' : 'status'}>
+        <p
+          id="password-change-msg"
+          className={`${styles.msg} ${state.status === 'error' ? styles.msgError : styles.msgOk}`}
+          role={state.status === 'error' ? 'alert' : 'status'}
+        >
           {state.message}
         </p>
       )}
 
-      <button type="submit" disabled={state.status === 'pending'}>
+      <button type="submit" className={styles.primary} disabled={state.status === 'pending'}>
         {state.status === 'pending' ? L.submitting : L.submit}
       </button>
     </form>

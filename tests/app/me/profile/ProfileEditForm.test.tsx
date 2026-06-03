@@ -18,7 +18,7 @@ afterEach(() => {
 
 describe('ProfileEditForm 에러 연관', () => {
   it('변경 없음 제출 → 메시지 id + form aria-describedby 연결', async () => {
-    render(<ProfileEditForm initialName="홍길동" phoneMasked={null} />);
+    render(<ProfileEditForm initialName="홍길동" phoneMasked={null} birthDateMasked={null} />);
     await userEvent.setup().click(screen.getByRole('button', { name: L.submit }));
 
     const msg = document.getElementById('profile-edit-msg');

@@ -4,7 +4,7 @@
 //   application_drafts.id(draftDbId)여야 한다. 서버 issueResumePresign이 draftId로
 //   applicationDraft.findUnique({ where: { id } })를 수행하므로, 공고 id를 넘기면 draft 조회가 어긋난다.
 //
-// 모킹 경계: ResumeUploadStep(prop 캡처) + 형제 컴포넌트/자동저장 훅(렌더 부수효과 차단).
+// 모킹 경계: ResumeUploadStep(prop 캡처) + 형제 컴포넌트(PortfolioLinksSection) + next/navigation.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
@@ -18,32 +18,18 @@ vi.mock('@/app/jobs/[id]/apply/_components/ResumeUploadStep', () => ({
     return null;
   },
 }));
-vi.mock('@/app/jobs/[id]/apply/_components/PersonalInfoStep', () => ({
-  PersonalInfoStep: () => null,
+vi.mock('@/app/jobs/[id]/apply/_components/PortfolioLinksSection', () => ({
+  PortfolioLinksSection: () => null,
 }));
-vi.mock('@/app/jobs/[id]/apply/_components/StepNavigation', () => ({
-  StepNavigation: () => null,
-}));
-vi.mock('@/app/jobs/[id]/apply/_components/AutoSaveIndicator', () => ({
-  AutoSaveIndicator: () => null,
-}));
-vi.mock('@/lib/drafts/use-auto-save', () => ({
-  useAutoSave: () => ({
-    notifyChange: vi.fn(),
-    saveNow: vi.fn(),
-    status: 'idle',
-    lastSavedAt: null,
-    version: 1,
-    errorMessage: null,
-  }),
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
 }));
 
 import { ApplicationFormShell } from '@/app/jobs/[id]/apply/_components/ApplicationFormShell';
 
-// currentStep=2로 진입 → ResumeUploadStep이 즉시 렌더된다. step1_personal은 옵셔널이라 생략.
-const payloadAtStep2: DraftPayloadV1 = {
+const basePayload: DraftPayloadV1 = {
   schemaVersion: 1,
-  meta: { currentStep: 2, completedSteps: [1] },
+  meta: { currentStep: 1, completedSteps: [] },
 };
 const prefill: DraftPrefill = { email: 'a@example.com', name: null, phone: null, birthDate: null };
 
@@ -57,11 +43,13 @@ describe('ApplicationFormShell — draftId 의미 정합 (D-MAJOR-1 / CANDID-040
     render(
       <ApplicationFormShell
         jobId={7}
+        jobTitle="프론트엔드 엔지니어"
         draftDbId={12345}
-        initialPayload={payloadAtStep2}
+        initialPayload={basePayload}
         initialVersion={1}
-        initialLastSavedAt="2026-06-02T00:00:00Z"
         prefill={prefill}
+        initialResumeAttached={false}
+        initialPortfolioLinks={[]}
       />,
     );
 

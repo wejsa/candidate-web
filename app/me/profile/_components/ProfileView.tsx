@@ -5,6 +5,7 @@
 // 평문 PII는 props로 전달되지 않는다 — phoneMasked(마스킹) / hasPassword(boolean)만 받는다.
 
 import type { ProfileDto } from '@/lib/users/types';
+import styles from '@/app/me/profile/profile.module.css';
 
 interface ProfileViewProps {
   profile: ProfileDto;
@@ -12,15 +13,19 @@ interface ProfileViewProps {
 
 export function ProfileView({ profile }: ProfileViewProps) {
   return (
-    <section aria-labelledby="profile-account-title">
-      <h2 id="profile-account-title">계정 정보</h2>
-      <dl>
+    <section className={styles.card} aria-labelledby="profile-account-title">
+      <h2 id="profile-account-title" className={styles.cardTitle}>
+        계정 정보
+      </h2>
+      <dl className={styles.dl}>
         <dt>이름</dt>
         <dd>{profile.name}</dd>
         <dt>이메일</dt>
         <dd>{profile.email}</dd>
         <dt>연락처</dt>
         <dd>{profile.phoneMasked ?? '미등록'}</dd>
+        <dt>생년월일</dt>
+        <dd>{profile.birthDateMasked ?? '미등록'}</dd>
         <dt>비밀번호</dt>
         <dd>{profile.hasPassword ? '설정됨' : '미설정 (소셜 로그인 전용)'}</dd>
       </dl>
