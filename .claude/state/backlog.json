@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 48,
     "projectPrefix": "CANDID",
-    "version": 433,
+    "version": 434,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T14:17:49+09:00"
+    "updatedAt": "2026-06-03T14:58:06+09:00"
   },
   "summary": {
     "total": 47,
@@ -2512,30 +2512,26 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-141749",
-      "assignedAt": "2026-06-03T14:17:49+09:00",
+      "assignedAt": "2026-06-03T14:58:06+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/batch/types.ts",
-        "lib/batch/runner.ts",
-        "lib/batch/expired-rows.ts",
         "lib/batch/draft-retention.ts",
         "lib/batch/virus-scan.ts",
-        "scripts/batch/nightly-cleanup.ts",
+        "lib/batch/runner.ts",
         "lib/files/scanner.ts",
         "lib/email/templates/infected-file.ts",
-        "lib/env.ts",
-        "package.json"
+        "lib/env.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 122,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "122",
-        "updatedAt": "2026-06-03T14:17:49+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T14:58:06+09:00"
       },
-      "updatedAt": "2026-06-03T14:17:49+09:00",
+      "updatedAt": "2026-06-03T14:58:06+09:00",
       "steps": [
         {
           "number": 1,
@@ -2553,9 +2549,10 @@
           ],
           "estimatedLines": 430,
           "prLineLimit": 500,
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 122,
-          "branch": "feature/CANDID-029-step1"
+          "branch": "feature/CANDID-029-step1",
+          "mergedAt": "2026-06-03T14:58:06+09:00"
         },
         {
           "number": 2,
@@ -2589,7 +2586,7 @@
           "status": "pending"
         }
       ],
-      "currentStep": 1,
+      "currentStep": 2,
       "specFile": "docs/sample-requirement.md"
     },
     "CANDID-030": {
