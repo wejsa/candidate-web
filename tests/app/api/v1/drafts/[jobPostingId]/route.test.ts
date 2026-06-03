@@ -5,12 +5,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { __resetCachedEnvForTesting } from '@/lib/env';
 import { __resetCorsCacheForTesting } from '@/lib/security/cors';
+import { __resetRateLimitStateForTesting } from '@/lib/security/rate-limit';
 
 vi.mock('@/lib/drafts/service', async () => {
   const actual = await vi.importActual<typeof import('@/lib/drafts/service')>(
     '@/lib/drafts/service',
   );
-  return { ...actual, getOrInitDraft: vi.fn(), upsertDraft: vi.fn() };
+  return { ...actual, getOrInitDraft: vi.fn(), upsertDraft: vi.fn(), discardDraft: vi.fn() };
 });
 vi.mock('@/lib/drafts/user-prefill', () => ({
   loadUserPrefill: vi.fn(),
@@ -20,9 +21,12 @@ vi.mock('@/lib/auth/middleware', () => ({
   requireAuth: vi.fn(),
 }));
 
-const { getOrInitDraft, upsertDraft } = (await import('@/lib/drafts/service')) as unknown as {
+const { getOrInitDraft, upsertDraft, discardDraft } = (await import(
+  '@/lib/drafts/service'
+)) as unknown as {
   getOrInitDraft: Mock;
   upsertDraft: Mock;
+  discardDraft: Mock;
 };
 const { loadUserPrefill, assertUserMinAge } = (await import('@/lib/drafts/user-prefill')) as unknown as {
   loadUserPrefill: Mock;
@@ -31,7 +35,7 @@ const { loadUserPrefill, assertUserMinAge } = (await import('@/lib/drafts/user-p
 const { requireAuth } = (await import('@/lib/auth/middleware')) as unknown as {
   requireAuth: Mock;
 };
-const { GET, PUT, runtime } = await import('@/app/api/v1/drafts/[jobPostingId]/route');
+const { GET, PUT, DELETE, runtime } = await import('@/app/api/v1/drafts/[jobPostingId]/route');
 const { AppError } = await import('@/lib/errors');
 const { initialPayload } = await import('@/lib/drafts/schema');
 
@@ -39,6 +43,7 @@ beforeEach(() => {
   vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://candidate.example.com');
   __resetCachedEnvForTesting();
   __resetCorsCacheForTesting();
+  __resetRateLimitStateForTesting(); // DELETE는 rate-limit 적용 — 테스트 간 버킷 격리
   vi.clearAllMocks();
 });
 
@@ -346,5 +351,42 @@ describe('PUT /api/v1/drafts/[jobPostingId]', () => {
     );
     expect(res.status).toBe(401);
     expect(upsertDraft).not.toHaveBeenCalled();
+  });
+});
+
+function deleteRequest(jobPostingId: string): NextRequest {
+  return new NextRequest(`https://candidate.example.com/api/v1/drafts/${jobPostingId}`, {
+    method: 'DELETE',
+    headers: { 'user-agent': 'vitest' },
+  });
+}
+
+describe('DELETE /api/v1/drafts/[jobPostingId]', () => {
+  it('204 → discardDraft(userId, jobPostingId, {userAgent}) 위임', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 100 });
+    discardDraft.mockResolvedValueOnce(undefined);
+
+    const res = await DELETE(deleteRequest('42'), { params: { jobPostingId: '42' } });
+
+    expect(res.status).toBe(204);
+    expect(discardDraft).toHaveBeenCalledWith(100, 42, { userAgent: 'vitest' });
+  });
+
+  it('인증 실패(401) → discardDraft 미호출', async () => {
+    requireAuth.mockRejectedValueOnce(new AppError('AUTH_TOKEN_INVALID'));
+
+    const res = await DELETE(deleteRequest('42'), { params: { jobPostingId: '42' } });
+
+    expect(res.status).toBe(401);
+    expect(discardDraft).not.toHaveBeenCalled();
+  });
+
+  it('jobPostingId 비정상(abc) → 400 + discardDraft 미호출', async () => {
+    requireAuth.mockResolvedValueOnce({ userId: 100 });
+
+    const res = await DELETE(deleteRequest('abc'), { params: { jobPostingId: 'abc' } });
+
+    expect(res.status).toBe(400);
+    expect(discardDraft).not.toHaveBeenCalled();
   });
 });

@@ -325,6 +325,8 @@ enum AuditEventType {
   EMAIL_VERIFICATION_RESENT
   OAUTH_LINKED
   OAUTH_UNLINKED
+  // CANDID — 지원서 작성 중 Draft 폐기(작성 취소). PII 첨부 삭제 추적성.
+  DRAFT_DISCARD
 }
 
 model Application {
