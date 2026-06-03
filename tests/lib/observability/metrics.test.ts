@@ -33,6 +33,13 @@ describe('metrics registry', () => {
     expect(metricsContentType()).toContain('text/plain');
     expect(metricsContentType()).toContain('version=0.0.4');
   });
+
+  it('http_request_duration 히스토그램이 레지스트리에 등록된다', async () => {
+    // 관측(Step 3 wiring) 전이라 prom-client는 버킷 시계열을 아직 렌더하지 않으므로
+    // 인스턴스 등록 사실(TYPE 헤더)만 회귀 가드한다. 버킷 경계(0.3/0.8) 검증은 Step 3.
+    const text = await renderMetrics();
+    expect(text).toContain('# TYPE http_request_duration_seconds histogram');
+  });
 });
 
 describe('recordBusinessEvent', () => {
@@ -68,11 +75,9 @@ describe('__resetMetricsRegistryForTesting', () => {
 
     __resetMetricsRegistryForTesting();
 
-    // reset 직후 카운터는 미관측 상태 → 해당 라벨 라인이 0 또는 부재.
+    // reset 직후 해당 라벨 시계열 자체가 부재해야 한다(값 1이 아님이 아니라 라인 전체 부재 — 위양성 방지).
     const after = await renderMetrics();
-    expect(after).not.toContain(
-      'candidate_business_event_total{event="application_withdraw",result="success"} 1',
-    );
+    expect(after).not.toContain('event="application_withdraw"');
   });
 
   it('reset 후에도 재등록 예외 없이 새 레지스트리를 생성한다', async () => {

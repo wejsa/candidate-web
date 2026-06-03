@@ -3,8 +3,9 @@ import { Registry, Counter, Histogram, collectDefaultMetrics } from 'prom-client
 // CANDID-027 Step 1 — Prometheus 메트릭 레지스트리 (관측 SSOT).
 //
 // 설계 요지:
-//   - Registry/지표 인스턴스를 globalThis에 캐싱(lib/prisma.ts와 동일 패턴) — Next.js dev
+//   - Registry/지표 인스턴스를 globalThis에 캐싱(lib/prisma.ts와 유사한 싱글톤 보존) — Next.js dev
 //     핫리로드 / vitest 다중 파일 로드 시 prom-client의 중복 등록 예외를 방지한다.
+//     (단, 캐싱 조건은 prisma와 다름 — getMetricsBundle 주석 참조.)
 //   - 커스텀 지표 정의의 단일 진실원. 비즈니스 카운터(Step 4)와 HTTP 히스토그램(Step 3)의
 //     "인스턴스"는 여기서 생성하고, "기록 호출부"만 각 스텝에서 wiring한다.
 //   - prom-client는 Node 전용(process 지표 수집). 소비 엔드포인트는 runtime='nodejs' 강제.
@@ -62,7 +63,9 @@ function createMetricsBundle(): MetricsBundle {
   return { registry, businessEvents, httpRequestDuration };
 }
 
-/** lazy 싱글톤 접근자 — 최초 호출 시 1회 생성 후 globalThis에 보존. */
+// lazy 싱글톤 접근자 — 최초 호출 시 1회 생성 후 globalThis에 보존.
+// 주의: lib/prisma.ts는 NODE_ENV!=='production'에서만 globalThis에 캐싱(dev 핫리로드 한정)하지만,
+//   메트릭 카운터는 운영에서도 요청 간 누적이 보존돼야 하므로 환경 무관하게 무조건 캐싱한다.
 function getMetricsBundle(): MetricsBundle {
   if (!globalThis.__metrics) {
     globalThis.__metrics = createMetricsBundle();

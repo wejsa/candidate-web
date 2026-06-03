@@ -40,13 +40,64 @@ describe('GET /api/metrics — 인증', () => {
     expect(body.code).toBe('AUTH_FORBIDDEN');
   });
 
-  it('토큰 설정 + 잘못된 Bearer 토큰 시 403', async () => {
+  it('토큰 설정 + 길이 다른 잘못된 토큰 시 403 (safeEqual 길이 가드 분기)', async () => {
+    vi.stubEnv('METRICS_AUTH_TOKEN', 'secret-scrape-token'); // 19자
+    const res = await GET(request({ authorization: 'Bearer short' }), undefined);
+    expect(res.status).toBe(403);
+  });
+
+  it('토큰 설정 + 동일 길이 다른 내용 토큰 시 403 (timingSafeEqual 본문 경로)', async () => {
+    vi.stubEnv('METRICS_AUTH_TOKEN', 'secret-scrape-token'); // 19자
+    // 기대값과 같은 19자라 길이 가드를 통과 → timingSafeEqual 실제 호출부 검증.
+    const res = await GET(request({ authorization: 'Bearer secret-scrape-toke!' }), undefined);
+    expect(res.status).toBe(403);
+  });
+
+  it.each([
+    ['스킴 불일치(Basic)', 'Basic secret-scrape-token'],
+    ['Bearer 접두어 없는 raw 토큰', 'secret-scrape-token'],
+    ['Bearer 뒤 공백만', 'Bearer    '],
+  ])('토큰 설정 + %s → 403', async (_label, header) => {
     vi.stubEnv('METRICS_AUTH_TOKEN', 'secret-scrape-token');
-    const res = await GET(request({ authorization: 'Bearer wrong-token' }), undefined);
+    const res = await GET(request({ authorization: header }), undefined);
     expect(res.status).toBe(403);
   });
 
   it('토큰 설정 + 올바른 Bearer 토큰 시 200', async () => {
+    vi.stubEnv('METRICS_AUTH_TOKEN', 'secret-scrape-token');
+    const res = await GET(request({ authorization: 'Bearer secret-scrape-token' }), undefined);
+    expect(res.status).toBe(200);
+  });
+
+  it('소문자 bearer 스킴 + 올바른 토큰 시 200 (정규식 i 플래그)', async () => {
+    vi.stubEnv('METRICS_AUTH_TOKEN', 'secret-scrape-token');
+    const res = await GET(request({ authorization: 'bearer secret-scrape-token' }), undefined);
+    expect(res.status).toBe(200);
+  });
+
+  it('토큰 뒤 trailing 공백이 있어도 trim 후 일치 시 200', async () => {
+    vi.stubEnv('METRICS_AUTH_TOKEN', 'secret-scrape-token');
+    const res = await GET(request({ authorization: 'Bearer secret-scrape-token   ' }), undefined);
+    expect(res.status).toBe(200);
+  });
+
+  it('METRICS_AUTH_TOKEN 공백만 설정 시 미설정과 동일 취급 — 비운영은 open(200)', async () => {
+    vi.stubEnv('METRICS_AUTH_TOKEN', '   '); // trim 후 빈값 → open
+    const res = await GET(request(), undefined);
+    expect(res.status).toBe(200);
+  });
+
+  it('운영(production) + 토큰 미설정 시 fail-closed 403', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('METRICS_AUTH_TOKEN', '');
+    const res = await GET(request(), undefined);
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.code).toBe('AUTH_FORBIDDEN');
+  });
+
+  it('운영(production) + 올바른 토큰 시 200', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('METRICS_AUTH_TOKEN', 'secret-scrape-token');
     const res = await GET(request({ authorization: 'Bearer secret-scrape-token' }), undefined);
     expect(res.status).toBe(200);
