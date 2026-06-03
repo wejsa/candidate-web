@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { VirusScanStatus } from '@prisma/client';
 import { AppError } from '@/lib/errors';
+import { __resetMetricsRegistryForTesting, renderMetrics } from '@/lib/observability/metrics';
 
 // CANDID-016 Step 2 — POST /api/v1/files/resume/confirm route 통합.
 
@@ -93,5 +94,37 @@ describe('POST /api/v1/files/resume/confirm', () => {
     confirmResumeUpload.mockRejectedValue(new AppError('SYS_VALIDATION_FAILED'));
     const response = await POST(postRequest(validBody), undefined);
     expect(response.status).toBe(400);
+  });
+});
+
+// CANDID-027 Step 4 — 라우트에 withBusinessMetric('file_upload')가 실제로 배선됐는지 검증
+// (HOF 단위 테스트만으로는 라우트 배선 누락/오타 회귀를 잡지 못함 — end-to-end 가시성).
+describe('POST /api/v1/files/resume/confirm — 비즈니스 메트릭 배선', () => {
+  beforeEach(() => {
+    __resetMetricsRegistryForTesting();
+  });
+  afterEach(() => {
+    __resetMetricsRegistryForTesting();
+  });
+
+  it('201 성공 시 file_upload success 카운터 증가', async () => {
+    requireAuth.mockResolvedValue({ userId: 42 });
+    confirmResumeUpload.mockResolvedValue({
+      id: 99,
+      virusScanStatus: VirusScanStatus.PENDING,
+      uploadedAt: new Date('2026-05-25T00:10:00Z'),
+    });
+    await POST(postRequest(validBody), undefined);
+    expect(await renderMetrics()).toContain(
+      'candidate_business_event_total{event="file_upload",result="success"} 1',
+    );
+  });
+
+  it('인증 실패(throw) 시 file_upload failure 카운터 증가', async () => {
+    requireAuth.mockRejectedValue(new AppError('AUTH_TOKEN_INVALID'));
+    await POST(postRequest(validBody), undefined);
+    expect(await renderMetrics()).toContain(
+      'candidate_business_event_total{event="file_upload",result="failure"} 1',
+    );
   });
 });

@@ -1,3 +1,4 @@
+import type { NextRequest } from 'next/server';
 import { Registry, Counter, Histogram, collectDefaultMetrics } from 'prom-client';
 import { setRequestObserver } from '@/lib/errors/response';
 
@@ -153,20 +154,25 @@ export function wireHttpMetrics(): void {
  * CANDID-027 Step 4 — 라우트 핸들러를 감싸 비즈니스 이벤트 1건을 기록하는 HOF.
  * 2xx 응답 → success, 그 외 status 또는 throw → failure(후자는 그대로 재던짐).
  * CANDID-026이 잠근 서비스 레이어(lib/applications/submit.ts 등)를 건드리지 않고 라우트에서 계측한다.
- * variadic 제네릭으로 (request) / (request, context) 두 시그니처 모두 지원.
- * 주의: 멱등 재요청(application_submit cache hit)도 2xx면 success로 집계된다 — "성공 응답 served" 의미.
+ * variadic 제네릭으로 (request) / (request, context) 두 시그니처 모두 지원(첫 인자는 NextRequest 강제).
+ * 주의:
+ *  - 멱등 재요청(application_submit cache hit)도 2xx면 success로 집계된다 — "성공 응답 served" 의미.
+ *  - rate-limit 거부(429)는 비즈니스 결과가 아니므로 집계에서 제외한다 — 외부 IP-limit(래퍼 바깥에서
+ *    조기 반환되어 애초에 미진입)과 내부 user-limit(429)의 집계 의미를 일관시킨다(PR #121 도메인 리뷰).
  */
-export function withBusinessMetric<A extends unknown[]>(
+export function withBusinessMetric<A extends [NextRequest, ...unknown[]]>(
   event: BusinessEvent,
   handler: (...args: A) => Response | Promise<Response>,
 ): (...args: A) => Promise<Response> {
   return async (...args: A) => {
     try {
       const response = await handler(...args);
-      recordBusinessEvent(
-        event,
-        response.status >= 200 && response.status < 300 ? 'success' : 'failure',
-      );
+      if (response.status !== 429) {
+        recordBusinessEvent(
+          event,
+          response.status >= 200 && response.status < 300 ? 'success' : 'failure',
+        );
+      }
       return response;
     } catch (error) {
       recordBusinessEvent(event, 'failure');

@@ -34,6 +34,11 @@ Prometheus exposition format 메트릭.
 | 지표 | 타입 | 라벨 | 설명 |
 |------|------|------|------|
 | `candidate_business_event_total` | counter | `event`(signup/application_submit/application_withdraw/file_upload), `result`(success/failure) | 주요 비즈니스 이벤트 누적 횟수. 라우트 레이어에서 `withBusinessMetric`으로 계측(2xx=success/그외=failure). |
+
+#### `candidate_business_event_total` 집계 규칙 (운영자 주의)
+- **429(rate-limit) 제외**: rate-limit 거부는 비즈니스 결과가 아니므로 success/failure 어느 쪽으로도 집계하지 않는다(외부 IP-limit은 래퍼 진입 전 조기 반환되어 애초에 미집계 — 내부 user-limit 429도 동일하게 제외하여 일관).
+- **멱등 재요청(application_submit)**: cache hit(2xx)도 success로 집계된다("성공 응답 served" 의미). 따라서 success 수 = 실제 신규 제출 수 + 멱등 재시도 수.
+- **`file_upload`**: 바이너리 업로드가 아니라 `/files/resume/confirm`(업로드 확정) 시점에 집계된다.
 | `http_request_duration_seconds` | histogram | `method`, `route`, `status_class`(2xx~5xx) | HTTP 처리 시간. 버킷에 NFR 경계(0.3s 목록 / 0.8s 제출) 포함. `route`는 동적 세그먼트(id/uuid/지원번호/긴해시)가 `:id`로 정규화됨(카디널리티 억제). |
 | Node 기본 지표 | (default) | — | heap/eventloop/gc 등 `collectDefaultMetrics`. |
 

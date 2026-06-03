@@ -201,6 +201,16 @@ describe('withBusinessMetric', () => {
     );
   });
 
+  it('429(rate-limit) 응답은 success/failure 어느 쪽으로도 집계하지 않는다', async () => {
+    const wrapped = withBusinessMetric('application_withdraw', async (_req: NextRequest) =>
+      NextResponse.json({ error: 'rate limited' }, { status: 429 }),
+    );
+    const res = await wrapped(new NextRequest('http://localhost/api/v1/applications/me/1/withdraw'));
+    expect(res.status).toBe(429);
+    const text = await renderMetrics();
+    expect(text).not.toContain('event="application_withdraw"');
+  });
+
   it('handler가 throw하면 failure 기록 후 에러를 그대로 재던진다', async () => {
     const boom = new Error('submit failed');
     const wrapped = withBusinessMetric('application_submit', async (_req: NextRequest) => {
