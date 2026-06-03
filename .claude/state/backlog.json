@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 394,
+    "version": 395,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T09:40:36+09:00"
+    "updatedAt": "2026-06-03T09:55:42+09:00"
   },
   "summary": {
     "total": 47,
@@ -2267,12 +2267,124 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "jaese@hoji-20260603-094035",
-      "assignedAt": "2026-06-03T09:40:36+09:00",
-      "lockTTL": 1800,
-      "lockedFiles": [],
-      "updatedAt": "2026-06-03T09:40:36+09:00",
+      "assignedAt": "2026-06-03T09:55:42+09:00",
+      "lockTTL": 10800,
+      "lockedFiles": [
+        "app/globals.css",
+        "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
+        "app/jobs/_components/JobCard.tsx",
+        "app/jobs/_components/Pagination.tsx",
+        "app/layout.tsx",
+        "app/me/_components/Timeline.tsx",
+        "app/me/_components/WithdrawButton.tsx",
+        "app/me/profile/_components/PasswordChangeForm.tsx",
+        "app/me/profile/_components/ProfileEditForm.tsx",
+        "app/me/withdraw/_components/ConfirmModal.tsx",
+        "app/me/withdraw/_components/WithdrawForm.tsx",
+        "lib/ui/use-focus-trap.ts",
+        "package.json",
+        "tests/a11y/axe-pages.test.tsx",
+        "tests/a11y/foundation.test.tsx",
+        "tests/a11y/keyboard-journey.test.tsx",
+        "tests/app/jobs/[id]/apply/PersonalInfoStep.test.tsx",
+        "tests/app/me/WithdrawButton.test.tsx",
+        "tests/app/me/profile/PasswordChangeForm.test.tsx",
+        "tests/app/me/profile/ProfileEditForm.test.tsx",
+        "tests/app/me/withdraw/ConfirmModal.test.tsx",
+        "tests/app/me/withdraw/WithdrawForm.test.tsx",
+        "tests/lib/ui/use-focus-trap.test.tsx",
+        "tests/setup.ts"
+      ],
+      "updatedAt": "2026-06-03T09:55:42+09:00",
       "metadata": {
-        "version": 1
+        "version": 2
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "파운데이션: viewport + 디자인 토큰 + 전역 a11y/반응형 CSS (+vitest-axe)",
+          "description": "globals.css 색토큰(AA 대비)+element 전역 스타일+:focus-visible+반응형 breakpoint(320/768/1024/1920)+min44px 터치타깃+reduced-motion+.visually-hidden/.skip-link. layout.tsx viewport export+skip-link. vitest-axe 도입+파운데이션 axe 스모크(L-034 가드 테스트 동반).",
+          "files": [
+            "app/globals.css",
+            "app/layout.tsx",
+            "package.json",
+            "tests/setup.ts",
+            "tests/a11y/foundation.test.tsx"
+          ],
+          "estimatedLines": 420,
+          "prLineLimit": 500,
+          "status": "pending"
+        },
+        {
+          "number": 2,
+          "title": "모달 focus 관리 (trap+복원+배경 inert)",
+          "description": "lib/ui/use-focus-trap.ts 재사용 훅(focus trap+복원+배경 inert/aria-hidden). ConfirmModal(ESC만 있음)+WithdrawButton inline modal(trap·ESC 없음) 보강. user-event Tab 순환·복원·ESC 단정. L-002 reset helper.",
+          "files": [
+            "lib/ui/use-focus-trap.ts",
+            "app/me/withdraw/_components/ConfirmModal.tsx",
+            "app/me/_components/WithdrawButton.tsx",
+            "tests/lib/ui/use-focus-trap.test.tsx",
+            "tests/app/me/withdraw/ConfirmModal.test.tsx",
+            "tests/app/me/WithdrawButton.test.tsx"
+          ],
+          "estimatedLines": 380,
+          "prLineLimit": 500,
+          "status": "pending",
+          "dependsOn": [
+            1
+          ]
+        },
+        {
+          "number": 3,
+          "title": "폼 에러 연관 일관성 + 동적 라이브 영역 마감",
+          "description": "모든 input↔error를 id+aria-describedby 일관 연결+aria-invalid 보강. PersonalInfoStep(phone/birthDate)·ProfileEditForm·PasswordChangeForm·WithdrawForm. axe+testing-library 단정.",
+          "files": [
+            "app/jobs/[id]/apply/_components/PersonalInfoStep.tsx",
+            "app/me/profile/_components/ProfileEditForm.tsx",
+            "app/me/profile/_components/PasswordChangeForm.tsx",
+            "app/me/withdraw/_components/WithdrawForm.tsx",
+            "tests/app/jobs/[id]/apply/PersonalInfoStep.test.tsx",
+            "tests/app/me/profile/ProfileEditForm.test.tsx",
+            "tests/app/me/profile/PasswordChangeForm.test.tsx",
+            "tests/app/me/withdraw/WithdrawForm.test.tsx"
+          ],
+          "estimatedLines": 460,
+          "prLineLimit": 600,
+          "status": "pending",
+          "dependsOn": [
+            1
+          ]
+        },
+        {
+          "number": 4,
+          "title": "반응형/landmark/heading 마감 + 키보드 여정 + 최종 axe sweep",
+          "description": "320/768/1920 reflow 코드 검증, heading 계층·landmark 점검, 공고탐색→상세→지원4스텝→제출 키보드 도달 테스트, 대표 페이지 axe sweep. Step1 커버리지 따라 축소·Step3 병합 가능.",
+          "files": [
+            "app/jobs/_components/JobCard.tsx",
+            "app/jobs/_components/Pagination.tsx",
+            "app/me/_components/Timeline.tsx",
+            "tests/a11y/keyboard-journey.test.tsx",
+            "tests/a11y/axe-pages.test.tsx"
+          ],
+          "estimatedLines": 420,
+          "prLineLimit": 600,
+          "status": "pending",
+          "dependsOn": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "currentStep": 1,
+      "planPath": ".claude/temp/CANDID-028-plan.md",
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-03T09:55:42+09:00"
       }
     },
     "CANDID-029": {
