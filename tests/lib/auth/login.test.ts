@@ -31,8 +31,13 @@ vi.mock('@/lib/auth/session', () => ({
   })),
 }));
 
+vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn(), recordAuditEventSafe: vi.fn() }));
+
 const { prisma } = (await import('@/lib/prisma')) as unknown as {
   prisma: { user: { findUnique: Mock; updateMany: Mock } };
+};
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: Mock;
 };
 const { verifyPassword } = (await import('@/lib/auth/password')) as unknown as {
   verifyPassword: Mock;
@@ -391,5 +396,94 @@ describe('signin — race-free updateMany 패턴 (L-024 회귀 가드)', () => {
       | undefined;
     // L-024 회귀 가드 — lockedUntil: null 조건으로 동시 LOCK 전이 race 차단
     expect(call?.where.lockedUntil).toBeNull();
+  });
+});
+
+// CANDID-026 Step 3 — 로그인 감사 이벤트 emit (LOGIN_SUCCESS / LOGIN_FAILURE).
+describe('signin — 감사 이벤트 (CANDID-026)', () => {
+  it('성공 시 LOGIN_SUCCESS를 actorUserId/ip/ua와 함께 emit', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce(makeActiveUser());
+    prisma.user.updateMany.mockResolvedValue({ count: 1 });
+
+    await signin(validInput, { ipAddress: '10.0.0.9', userAgent: 'vitest-ua' });
+
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'LOGIN_SUCCESS',
+        actorUserId: 42,
+        resourceType: 'user',
+        resourceId: '42',
+        ipAddress: '10.0.0.9',
+        userAgent: 'vitest-ua',
+      }),
+    );
+  });
+
+  it('비밀번호 불일치 시 LOGIN_FAILURE(invalid_credentials) emit', async () => {
+    verifyPassword.mockResolvedValueOnce(false);
+    prisma.user.findUnique.mockResolvedValueOnce(makeActiveUser());
+
+    await expect(signin(validInput)).rejects.toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
+
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'LOGIN_FAILURE',
+        actorUserId: 42,
+        metadata: { reason: 'invalid_credentials' },
+      }),
+    );
+  });
+
+  it('이메일 부재 시 LOGIN_FAILURE를 actorUserId=null로 emit (enumeration 방지)', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce(null);
+
+    await expect(signin(validInput)).rejects.toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
+
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'LOGIN_FAILURE', actorUserId: null }),
+    );
+  });
+
+  it('잠금 상태 시 LOGIN_FAILURE(account_locked) emit', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce(
+      makeActiveUser({ lockedUntil: new Date('2999-01-01T00:00:00Z') }),
+    );
+
+    await expect(signin(validInput)).rejects.toMatchObject({ code: 'AUTH_ACCOUNT_LOCKED' });
+
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'LOGIN_FAILURE', metadata: { reason: 'account_locked' } }),
+    );
+  });
+
+  // 리뷰 보강(PR #116) — 비활성 사용자도 LOGIN_FAILURE emit (침해 신호 감사), ip/ua 핀 고정.
+  it('비활성(SUSPENDED) 사용자 → LOGIN_FAILURE emit (actorUserId=user.id, ip/ua 전파)', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce(makeActiveUser({ status: 'SUSPENDED' as const }));
+
+    await expect(
+      signin(validInput, { ipAddress: '198.51.100.7', userAgent: 'audit-ua' }),
+    ).rejects.toMatchObject({ code: 'AUTH_INVALID_CREDENTIALS' });
+
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'LOGIN_FAILURE',
+        actorUserId: 42,
+        metadata: { reason: 'invalid_credentials' },
+        ipAddress: '198.51.100.7',
+        userAgent: 'audit-ua',
+      }),
+    );
+  });
+
+  it('issueRefreshSession 실패 시 LOGIN_SUCCESS는 emit되지 않는다 (발급 후 감사 순서)', async () => {
+    prisma.user.findUnique.mockResolvedValueOnce(makeActiveUser());
+    prisma.user.updateMany.mockResolvedValue({ count: 1 });
+    issueRefreshSession.mockRejectedValueOnce(new Error('refresh insert failed'));
+
+    await expect(signin(validInput)).rejects.toThrow('refresh insert failed');
+
+    expect(recordAuditEventSafe).not.toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'LOGIN_SUCCESS' }),
+    );
   });
 });

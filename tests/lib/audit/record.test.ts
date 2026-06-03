@@ -4,6 +4,7 @@ import {
   AuditMetadataError,
   assertPiiFreeMetadata,
   recordAuditEvent,
+  recordAuditEventSafe,
 } from '@/lib/audit/record';
 import { runWithTrace } from '@/lib/observability/trace-context';
 
@@ -146,6 +147,24 @@ describe('assertPiiFreeMetadata — PII-free 회귀 가드 (BR-PII-01/02)', () =
 });
 
 // 리뷰 보강(PR #114) — 가드의 우회 경계(중첩/숫자/대소문자/false-positive)를 회귀 박제.
+// CANDID-026 Step 3 — 비-트랜잭션 emit fail-open: 감사 실패가 본 흐름을 막지 않는다.
+describe('recordAuditEventSafe — fail-open', () => {
+  it('basePrisma write 실패를 삼키고 throw하지 않는다 (경고 로깅)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    baseCreate.mockRejectedValueOnce(new Error('db down'));
+    await expect(
+      recordAuditEventSafe({ eventType: AuditEventType.LOGIN_SUCCESS, actorUserId: 1 }),
+    ).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('audit-emit-failed'));
+    warn.mockRestore();
+  });
+
+  it('정상 시 basePrisma로 기록한다', async () => {
+    await recordAuditEventSafe({ eventType: AuditEventType.PII_VIEW, actorUserId: 7 });
+    expect(baseCreate).toHaveBeenCalledOnce();
+  });
+});
+
 describe('assertPiiFreeMetadata — 우회 경계 회귀 가드', () => {
   it.each([
     ['중첩 객체', { actor: { email: 'a@b.com' } }],

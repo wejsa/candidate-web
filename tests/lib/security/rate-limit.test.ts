@@ -5,6 +5,7 @@ import {
   __resetRateLimitStateForTesting,
   POLICIES,
   checkRateLimit,
+  clientIpFromRequest,
   rateLimitKeyByIp,
   withRateLimit,
 } from '@/lib/security/rate-limit';
@@ -60,6 +61,56 @@ describe('rateLimitKeyByIp (MAJOR-SEC-1 보강 — TRUST_PROXY 분리)', () => {
 
   it('헤더 모두 부재 시 unknown 키 반환', () => {
     expect(rateLimitKeyByIp(req())).toBe('ip:unknown');
+  });
+});
+
+// CANDID-026 Step 3 — 감사 로그 IP 추출(원값/null) + SEC-1: @db.Inet 위반 INSERT 차단(IP 형식 검증).
+describe('clientIpFromRequest (감사 IP — TRUST_PROXY 게이트 + INET 검증)', () => {
+  describe('TRUST_PROXY=true', () => {
+    beforeEach(() => {
+      vi.stubEnv('TRUST_PROXY', 'true');
+      __resetCachedEnvForTesting();
+    });
+
+    it('x-forwarded-for 첫 IP 원값(ip: 프리픽스 없이)', () => {
+      expect(clientIpFromRequest(req({ 'x-forwarded-for': '203.0.113.10, 10.0.0.1' }))).toBe(
+        '203.0.113.10',
+      );
+    });
+
+    it('XFF 부재 시 x-real-ip 폴백', () => {
+      expect(clientIpFromRequest(req({ 'x-real-ip': '198.51.100.5' }))).toBe('198.51.100.5');
+    });
+
+    it('유효 IPv6도 통과', () => {
+      expect(clientIpFromRequest(req({ 'x-forwarded-for': '2001:db8::1' }))).toBe('2001:db8::1');
+    });
+
+    it.each([
+      ['비-IP 문자열', 'not-an-ip'],
+      ['포트 포함', '1.2.3.4:5678'],
+      ['스크립트 주입', '<script>'],
+      ['옥텟 초과', '999.1.1.1'],
+    ])('SEC-1: INET 부적합 XFF(%s)는 null 반환 (INSERT 위반 차단)', (_label, value) => {
+      expect(clientIpFromRequest(req({ 'x-forwarded-for': value }))).toBeNull();
+    });
+  });
+
+  describe('TRUST_PROXY=false (기본)', () => {
+    beforeEach(() => {
+      vi.stubEnv('TRUST_PROXY', 'false');
+      __resetCachedEnvForTesting();
+    });
+
+    it('스푸핑된 신뢰 헤더를 무시하고 null', () => {
+      expect(clientIpFromRequest(req({ 'x-forwarded-for': '1.2.3.4' }))).toBeNull();
+    });
+  });
+
+  it('헤더/ip 전부 부재 시 null', () => {
+    vi.stubEnv('TRUST_PROXY', 'true');
+    __resetCachedEnvForTesting();
+    expect(clientIpFromRequest(req())).toBeNull();
   });
 });
 
