@@ -7,6 +7,7 @@ import { ApplicationResult } from '@prisma/client';
 import type { MyApplicationCard, MyDraftCard } from '@/lib/my-page/types';
 import { resultLabel } from '@/lib/my-page/stage-labels';
 import { StageProgress } from '@/app/me/_components/StageProgress';
+import { DiscardDraftButton } from '@/app/me/_components/DiscardDraftButton';
 import styles from '@/app/me/me.module.css';
 
 /** 결과 → 배지 표시(텍스트·톤). 진행 중이면 현재 단계 라벨을 노출. */
@@ -99,13 +100,17 @@ export function DraftCard({ card }: DraftCardProps) {
         </span>
       </p>
 
-      {isClosedJob ? (
+      {isClosedJob && (
         <p className={styles.draftClosedNote}>공고 마감 — 이어서 작성할 수 없습니다.</p>
-      ) : (
-        <Link href={`/jobs/${card.jobPostingId}/apply`} className={styles.draftAction}>
-          이어서 작성 ›
-        </Link>
       )}
+      <div className={styles.draftActions}>
+        {!isClosedJob && (
+          <Link href={`/jobs/${card.jobPostingId}/apply`} className={styles.draftAction}>
+            이어서 작성 ›
+          </Link>
+        )}
+        <DiscardDraftButton jobPostingId={card.jobPostingId} />
+      </div>
     </article>
   );
 }
