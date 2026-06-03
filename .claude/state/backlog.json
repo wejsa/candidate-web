@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 409,
+    "version": 410,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T11:19:35+09:00"
+    "updatedAt": "2026-06-03T11:30:15+09:00"
   },
   "summary": {
     "total": 47,
-    "done": 43,
-    "inProgress": 2,
+    "done": 44,
+    "inProgress": 1,
     "review": 0,
     "todo": 2
   },
@@ -2332,7 +2332,7 @@
       "id": "CANDID-028",
       "title": "접근성 WCAG 2.1 AA + 320~1920px 반응형",
       "description": "폼 라벨, 키보드 네비게이션, 대비비. iOS Safari 15+/Chrome 90+ 검증. 키보드만으로 가입~제출 완주 가능.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "low",
       "phase": 4,
@@ -2340,19 +2340,13 @@
         "CANDID-019"
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
-      "assignee": "jaese@hoji-20260603-094035",
-      "assignedAt": "2026-06-03T11:19:35+09:00",
+      "assignee": null,
+      "assignedAt": null,
       "lockTTL": 10800,
-      "lockedFiles": [
-        "app/jobs/_components/JobCard.tsx",
-        "app/jobs/_components/Pagination.tsx",
-        "app/me/_components/Timeline.tsx",
-        "tests/a11y/axe-pages.test.tsx",
-        "tests/a11y/keyboard-journey.test.tsx"
-      ],
-      "updatedAt": "2026-06-03T11:19:35+09:00",
+      "lockedFiles": [],
+      "updatedAt": "2026-06-03T11:30:15+09:00",
       "metadata": {
-        "version": 9
+        "version": 10
       },
       "steps": [
         {
@@ -2435,27 +2429,22 @@
           ],
           "estimatedLines": 420,
           "prLineLimit": 600,
-          "status": "pr_created",
+          "status": "merged",
           "dependsOn": [
             1,
             2,
             3
           ],
           "prNumber": 115,
-          "branch": "feature/CANDID-028-step4"
+          "branch": "feature/CANDID-028-step4",
+          "mergedAt": "2026-06-03T11:30:15+09:00",
+          "actualLines": 154
         }
       ],
       "currentStep": 4,
       "planPath": ".claude/temp/CANDID-028-plan.md",
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 115,
-        "fixLoopCount": 0,
-        "lastReviewDecision": null,
-        "autoChainArgs": "115 --auto-fix",
-        "updatedAt": "2026-06-03T11:19:35+09:00"
-      }
+      "workflowState": null,
+      "completedAt": "2026-06-03T11:30:15+09:00"
     },
     "CANDID-029": {
       "id": "CANDID-029",
