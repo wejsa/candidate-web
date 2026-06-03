@@ -17,6 +17,8 @@ vi.mock('@/lib/prisma', () => {
   };
 });
 
+vi.mock('@/lib/audit/record', () => ({ recordAuditEventSafe: vi.fn() }));
+
 const { __mocks } = (await import('@/lib/prisma')) as unknown as {
   __mocks: {
     queryRaw: Mock;
@@ -25,6 +27,9 @@ const { __mocks } = (await import('@/lib/prisma')) as unknown as {
     providerDelete: Mock;
     $transaction: Mock;
   };
+};
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: Mock;
 };
 const { unlinkProvider } = await import('@/lib/auth/oauth/unlink');
 const { AppError } = await import('@/lib/errors');
@@ -50,6 +55,17 @@ describe('unlinkProvider', () => {
     __mocks.providerFindMany.mockResolvedValue([{ provider: 'GOOGLE' }]);
 
     await unlinkProvider(input);
+
+    // CANDID-026 Step 4 — 해제 성공 후 OAUTH_UNLINKED 감사(provider metadata, PII-free).
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'OAUTH_UNLINKED',
+        actorUserId: 42,
+        resourceType: 'user',
+        resourceId: '42',
+        metadata: { provider: 'google' },
+      }),
+    );
 
     expect(__mocks.providerDelete).toHaveBeenCalledWith({
       where: { userId_provider: { userId: 42, provider: 'GOOGLE' } },
@@ -99,6 +115,8 @@ describe('unlinkProvider', () => {
 
     await expect(unlinkProvider(input)).rejects.toMatchObject({ code: 'USER_LAST_AUTH_METHOD' });
     expect(__mocks.providerDelete).not.toHaveBeenCalled();
+    // 리뷰 보강(PR #118) — 해제 거부 시 OAUTH_UNLINKED 미발행(트랜잭션 내 throw → tx 밖 emit 도달 불가).
+    expect(recordAuditEventSafe).not.toHaveBeenCalled();
   });
 
   // 리뷰 MAJOR(test): 마지막 인증수단 거부 경계 명시 — 무비번 + 대상 provider만(비대상 0) → 거부.
