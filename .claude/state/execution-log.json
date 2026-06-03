@@ -2950,5 +2950,20 @@
     "prNumber": 110,
     "branch": "feature/CANDID-028-step1",
     "at": "2026-06-03T10:11:10+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-028",
+    "stepNumber": 1,
+    "prNumber": 110,
+    "decision": "APPROVED (self-PR COMMENT)",
+    "at": "2026-06-03T10:25:27+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-028",
+    "stepNumber": 1,
+    "prNumber": 110,
+    "at": "2026-06-03T10:25:27+09:00"
   }
 ]
