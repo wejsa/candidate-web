@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 424,
+    "version": 425,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T04:14:37Z"
+    "updatedAt": "2026-06-03T04:23:36Z"
   },
   "summary": {
     "total": 47,
@@ -2316,7 +2316,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-122756",
-      "assignedAt": "2026-06-03T04:14:37Z",
+      "assignedAt": "2026-06-03T04:23:36Z",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/signup/route.ts",
@@ -2370,24 +2370,25 @@
           "number": 4,
           "title": "비즈니스 카운터 계측 (가입/제출/철회/파일업로드, route 레이어)",
           "description": "CANDID-026 잠금(submit.ts) 회피 위해 route 핸들러에서 카운터 증가. signup/applications(POST)/withdraw/file-confirm 성공·실패 result 라벨. 잠금 교집합 0 검증됨.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/api/v1/auth/signup/route.ts",
             "app/api/v1/applications/route.ts",
             "app/api/v1/applications/me/[id]/withdraw/route.ts",
             "app/api/v1/files/resume/confirm/route.ts"
           ],
-          "estimatedLines": 320
+          "estimatedLines": 320,
+          "prNumber": 121
         }
       ],
       "currentStep": 4,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 121,
         "fixLoopCount": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T04:14:37Z"
+        "autoChainArgs": "121 --auto-fix",
+        "updatedAt": "2026-06-03T04:23:36Z"
       }
     },
     "CANDID-028": {
