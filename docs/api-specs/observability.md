@@ -54,3 +54,46 @@ curl -H "Authorization: Bearer $METRICS_AUTH_TOKEN" http://localhost:3000/api/me
 ## 배선
 - `instrumentation.ts`의 `register()`가 Node 부팅 시 `wireHttpMetrics()`를 호출 → `withErrorHandler`의 요청 관측자로 `recordHttpRequest` 주입.
 - `lib/errors/response.ts`는 universal(Edge middleware 그래프 포함)이라 prom-client를 직접 import하지 않고 콜백 훅(`setRequestObserver`)만 보유.
+
+## 야간 정리 배치 (CANDID-029)
+
+외부 스케줄러(cron / k8s CronJob / GitHub Actions)가 트리거하는 Node CLI 배치입니다.
+엔트리포인트 `scripts/batch/nightly-cleanup.ts`(tsx). 로직은 `lib/batch/*` — `'server-only'`를 import하지 않고
+PrismaClient·S3 삭제기·mailer를 주입(DI)받아 CLI 컨텍스트에서 동작합니다.
+
+### 실행
+```
+pnpm batch:nightly
+```
+
+### 정리 태스크 (순차, 태스크별 격리)
+| 태스크 | 대상 | 동작 |
+|--------|------|------|
+| `expired-email-verifications` | `email_verifications` | `EMAIL_VERIFICATION_RETENTION_DAYS`(7)일 경과 consumed/expired 행 삭제 |
+| `expired-password-reset-tokens` | `password_reset_tokens` | `expiresAt < now` 삭제 |
+| `expired-idempotency-keys` | `idempotency_keys` | `expiresAt < now` 삭제 |
+| `stale-drafts` | `application_drafts` + 첨부 | `lastSavedAt < now-DRAFT_RETENTION_DAYS`(30) — S3 객체 선삭제 → resume_files row 삭제 → draft 삭제(BR-FILE-06) |
+| `pending-virus-scans` | `resume_files` (PENDING) | 스캔 판정 → CLEAN/FAILED 상태 갱신, INFECTED는 S3+row 삭제 + 소유자 알림(BR-FILE-04) |
+
+> 토큰/멱등성 테이블은 PII 컬럼이 없는 운영 위생 대상입니다. BR-PII-03/04 PII 자동 파기(User/Application 스냅샷)는 별도 범위.
+> ClamAV는 **골격**입니다 — `CLAMAV_ENABLED=false`(기본) 또는 미구현 시 스캔은 `SKIPPED`(PENDING 유지, 임의 CLEAN 처리 안 함). 실제 clamd 클라이언트는 후속 작업.
+
+### Exit Code
+| 코드 | 의미 |
+|-----|-----|
+| 0 | 모든 태스크 성공 |
+| 1 | 1개 이상 태스크 실패(부분 실패 포함) 또는 치명적 오류 |
+
+### 관련 환경변수
+| 변수 | 기본 | 설명 |
+|------|------|------|
+| `EMAIL_VERIFICATION_RETENTION_DAYS` | 7 | 이메일 인증 행 보존 일수 |
+| `DRAFT_RETENTION_DAYS` | 30 | 미제출 Draft 보존 일수 |
+| `BATCH_DELETE_CHUNK` | 1000 | 청크 페이지네이션 크기(최대 10000) |
+| `CLAMAV_ENABLED` / `CLAMAV_HOST` / `CLAMAV_PORT` | false / — / — | 바이러스 스캔(골격) |
+
+### 안전성
+- 태스크별 **격리 실행** — 한 태스크 실패가 나머지를 중단시키지 않음(`runNightlyCleanup`).
+- 모든 정리는 **멱등**(재실행 안전), 대량 삭제는 청크/cursor 페이지네이션.
+- 에러는 PII 누출 방지를 위해 `ErrorName(PrismaCode)`만 기록(BR-PII-02). 로그/메일에 원본 파일명은 escape.
+- 배치 PrismaClient는 `connect_timeout`/`socket_timeout` 보수적 부여로 cron hang/중첩 방지.
