@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 455,
+    "version": 456,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T09:44:34Z"
+    "updatedAt": "2026-06-03T09:54:09Z"
   },
   "summary": {
     "total": 50,
@@ -3711,18 +3711,15 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260603-081433",
-      "assignedAt": "2026-06-03T09:44:34Z",
+      "assignedAt": "2026-06-03T09:54:09Z",
       "lockTTL": 10800,
       "lockedFiles": [
-        "app/globals.css",
-        "app/jobs/_components/ClosedJobsSection.tsx",
-        "app/jobs/_components/JobCard.module.css",
-        "app/jobs/_components/JobCard.tsx",
-        "app/jobs/_components/JobFilters.module.css",
-        "app/jobs/_components/JobFilters.tsx",
-        "app/jobs/_components/Pagination.tsx",
-        "app/jobs/page.module.css",
-        "app/jobs/page.tsx"
+        "app/jobs/[id]/_components/ApplyCta.tsx",
+        "app/jobs/[id]/_components/JobDetailBody.tsx",
+        "app/jobs/[id]/_components/JobDetailHeader.tsx",
+        "app/jobs/[id]/_components/ShareButton.tsx",
+        "app/jobs/[id]/page.module.css",
+        "app/jobs/[id]/page.tsx"
       ],
       "dependencies": [],
       "specFile": "docs/requirements/CANDID-050-spec.md",
@@ -3771,7 +3768,7 @@
           "number": 3,
           "title": "/jobs 목록 재구성 — CSS Modules + 토큰 확장",
           "description": "히어로/타이틀 + 필터 칩/셀렉트(쿼리스트링 계약 불변) + 반응형 카드 그리드(1→2→3열) + 마감 섹션 시각 구분 + 빈/로딩 상태. 데이터 계약·SEO·aria 보존. vitest-axe 회귀.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "app/globals.css",
             "app/jobs/page.tsx",
@@ -3786,7 +3783,8 @@
           "prLineLimit": 700,
           "estimatedLines": 550,
           "prNumber": 130,
-          "branch": "feature/CANDID-050-step3"
+          "branch": "feature/CANDID-050-step3",
+          "mergedAt": "2026-06-03T09:54:09Z"
         },
         {
           "number": 4,
@@ -3805,17 +3803,17 @@
           "estimatedLines": 450
         }
       ],
-      "currentStep": 3,
+      "currentStep": 4,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 130,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T09:44:34Z"
+        "updatedAt": "2026-06-03T09:54:09Z"
       },
       "createdAt": "2026-06-03T08:12:34Z",
-      "updatedAt": "2026-06-03T09:44:34Z"
+      "updatedAt": "2026-06-03T09:54:09Z"
     }
   }
 }
