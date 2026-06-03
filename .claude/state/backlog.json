@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 454,
+    "version": 455,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T09:28:52Z"
+    "updatedAt": "2026-06-03T09:44:34Z"
   },
   "summary": {
     "total": 50,
@@ -3711,7 +3711,7 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260603-081433",
-      "assignedAt": "2026-06-03T09:28:52Z",
+      "assignedAt": "2026-06-03T09:44:34Z",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/globals.css",
@@ -3771,7 +3771,7 @@
           "number": 3,
           "title": "/jobs 목록 재구성 — CSS Modules + 토큰 확장",
           "description": "히어로/타이틀 + 필터 칩/셀렉트(쿼리스트링 계약 불변) + 반응형 카드 그리드(1→2→3열) + 마감 섹션 시각 구분 + 빈/로딩 상태. 데이터 계약·SEO·aria 보존. vitest-axe 회귀.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/globals.css",
             "app/jobs/page.tsx",
@@ -3784,7 +3784,9 @@
             "app/jobs/_components/Pagination.tsx"
           ],
           "prLineLimit": 700,
-          "estimatedLines": 550
+          "estimatedLines": 550,
+          "prNumber": 130,
+          "branch": "feature/CANDID-050-step3"
         },
         {
           "number": 4,
@@ -3805,15 +3807,15 @@
       ],
       "currentStep": 3,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 130,
         "fixLoopCount": 0,
         "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T09:28:52Z"
+        "updatedAt": "2026-06-03T09:44:34Z"
       },
       "createdAt": "2026-06-03T08:12:34Z",
-      "updatedAt": "2026-06-03T09:28:52Z"
+      "updatedAt": "2026-06-03T09:44:34Z"
     }
   }
 }
