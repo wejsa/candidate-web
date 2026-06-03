@@ -16,6 +16,8 @@ import { ConfirmModal } from '@/app/me/withdraw/_components/ConfirmModal';
 import { ProfileEditForm } from '@/app/me/profile/_components/ProfileEditForm';
 import { PasswordChangeForm } from '@/app/me/profile/_components/PasswordChangeForm';
 import { WithdrawForm } from '@/app/me/withdraw/_components/WithdrawForm';
+import { LoginForm } from '@/app/login/_components/LoginForm';
+import { SignupForm } from '@/app/signup/_components/SignupForm';
 import type { DraftPrefill } from '@/lib/drafts/types';
 
 const AXE_OPTS = {
@@ -45,6 +47,8 @@ describe('실 컴포넌트 axe sweep (WCAG)', () => {
     ['PasswordChangeForm', () => <PasswordChangeForm hasPassword={true} />],
     ['WithdrawForm(social-only)', () => <WithdrawForm isSocialOnly={true} />],
     ['WithdrawForm(password)', () => <WithdrawForm isSocialOnly={false} />],
+    ['LoginForm', () => <LoginForm redirectTo="/me" />],
+    ['SignupForm', () => <SignupForm redirectTo="/me" />],
   ])('%s — axe 위반 없음', async (_label, renderEl) => {
     const { container } = render(renderEl());
     expect(await axe(container, AXE_OPTS)).toHaveNoViolations();
