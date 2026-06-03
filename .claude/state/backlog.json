@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 458,
+    "version": 459,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T10:15:25Z"
+    "updatedAt": "2026-06-03T10:16:08Z"
   },
   "summary": {
     "total": 50,
-    "done": 49,
-    "inProgress": 1,
+    "done": 50,
+    "inProgress": 0,
     "review": 0,
     "todo": 0
   },
