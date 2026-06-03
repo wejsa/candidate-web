@@ -23,8 +23,12 @@ export default defineConfig({
   outputDir: 'test-results',
   use: {
     baseURL: BASE_URL,
-    headless: true,
-    trace: 'on-first-retry',
+    // 헤드리스 기본. 라이브 브라우저 창은 `pnpm test:e2e:headed`(WSLg/X11 디스플레이 필요).
+    headless: !process.env.E2E_HEADED,
+    // 브라우저 동작을 "보여주기" — 로컬은 항상 비디오+trace 녹화(HTML 리포트에서 재생),
+    // CI는 실패분만(아티팩트 비대화 방지). `pnpm exec playwright show-report`로 열람.
+    video: process.env.CI ? 'retain-on-failure' : 'on',
+    trace: process.env.CI ? 'on-first-retry' : 'on',
     screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

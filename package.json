@@ -21,6 +21,8 @@
     "test:integration": "vitest run --config vitest.config.integration.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "E2E_HEADED=1 playwright test --headed",
+    "test:e2e:report": "playwright show-report",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "db:migrate": "prisma migrate dev",
