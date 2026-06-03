@@ -129,6 +129,49 @@ describe('cleanupStaleDrafts', () => {
     expect(transaction).not.toHaveBeenCalled(); // 트랜잭션 진입 안 함 → row/draft 보존
   });
 
+  it('한 draft의 여러 파일 중 일부 S3 삭제 후 실패하면 draft 보존(tx 미진입)', async () => {
+    const { db, applicationDraft, resumeFile, transaction } = makeDb();
+    applicationDraft.findMany.mockResolvedValueOnce([{ id: 5 }]).mockResolvedValueOnce([]);
+    resumeFile.findMany.mockResolvedValueOnce([
+      { id: 11, storedPath: 'resumes/2026/05/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee.pdf' },
+      { id: 12, storedPath: 'resumes/2026/05/ffffffff-bbbb-cccc-dddd-eeeeeeeeeeee.pdf' },
+    ]);
+    // 첫 파일 성공, 둘째 실패 → s3Ok=false. (이미 삭제된 첫 파일은 다음 배치에서 NoSuchKey 멱등.)
+    const deleteObject = vi
+      .fn()
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('s3 timeout'));
+
+    const n = await cleanupStaleDrafts(db, deleteObject, NOW, 1);
+
+    expect(n).toBe(0);
+    expect(deleteObject).toHaveBeenCalledTimes(2);
+    expect(transaction).not.toHaveBeenCalled(); // row/draft 보존 → orphan 방지
+  });
+
+  it('같은 청크에 성공/실패 draft 혼재 — 성공분만 삭제·카운트, cursor는 청크 끝까지 전진', async () => {
+    const { db, applicationDraft, resumeFile, tx, transaction } = makeDb();
+    applicationDraft.findMany
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }]) // A(id=1, 첨부 없음), B(id=2, S3 실패)
+      .mockResolvedValueOnce([]);
+    resumeFile.findMany
+      .mockResolvedValueOnce([]) // A: 첨부 없음 → 성공 삭제
+      .mockResolvedValueOnce([
+        { id: 21, storedPath: 'resumes/2026/05/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee.pdf' },
+      ]); // B: 첨부 있음, S3 실패
+    const deleteObject = vi.fn().mockRejectedValue(new Error('s3 down'));
+
+    const n = await cleanupStaleDrafts(db, deleteObject, NOW, 2);
+
+    expect(n).toBe(1); // A만 삭제
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(tx.applicationDraft.delete).toHaveBeenCalledWith({ where: { id: 1 } });
+    // 실패한 B(id=2)도 포함해 cursor가 청크 끝(2)까지 전진 → 다음 조회는 id>2.
+    expect(applicationDraft.findMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ id: { gt: 2 } }) }),
+    );
+  });
+
   it('cursor 페이지네이션 — chunk를 가득 채우면 마지막 id 이후로 이어 조회한다', async () => {
     const { db, applicationDraft, resumeFile } = makeDb();
     applicationDraft.findMany
