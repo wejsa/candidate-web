@@ -3055,5 +3055,13 @@
     "stepNumber": 2,
     "prNumber": 114,
     "at": "2026-06-03T11:16:02+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-028",
+    "stepNumber": 4,
+    "prNumber": 115,
+    "branch": "feature/CANDID-028-step4",
+    "at": "2026-06-03T11:19:35+09:00"
   }
 ]
