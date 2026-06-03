@@ -3214,5 +3214,17 @@
     "stepNumber": 1,
     "prNumber": 125,
     "at": "2026-06-03T06:19:02Z"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-049",
+    "stepNumber": 1,
+    "prNumber": 125,
+    "at": "2026-06-03T06:28:26Z"
+  },
+  {
+    "action": "task_completed",
+    "taskId": "CANDID-049",
+    "at": "2026-06-03T06:28:26Z"
   }
 ]
