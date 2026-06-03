@@ -186,6 +186,16 @@ export const USER_POLICIES = Object.freeze({
     maxRequests: 10,
   } satisfies UserRateLimitPolicy),
   /**
+   * CANDID — 지원서 작성 중 Draft 폐기(작성 취소) user-bucket. 자원 소모형(첨부 S3 DeleteObject +
+   * 트랜잭션) abuse 차단. 멱등 no-op도 매 호출 DB 조회 비용이 발생하므로 user 단위 제한.
+   * 시간당 20회: 정상 사용자(소수 draft 정리 + 재시도) 흡수, 남용 차단. withdraw 보안 컨트롤과 정합.
+   */
+  DISCARD_DRAFT_USER: Object.freeze({
+    name: 'discard_draft_user',
+    windowMs: 3_600_000,
+    maxRequests: 20,
+  } satisfies UserRateLimitPolicy),
+  /**
    * CANDID-024 Step 2 — 프로필 수정(이름/연락처) user-bucket. 저빈도 작업이나 PII 재암호화
    * 폭주 + 스크립트 오류 다중 호출 차단. 시간당 20회: 정상 편집/재시도 흡수, 남용은 차단.
    */

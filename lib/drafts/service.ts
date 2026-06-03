@@ -4,7 +4,7 @@
 // - 마감/DRAFT 공고 차단
 
 import 'server-only';
-import { JobStatus, Prisma } from '@prisma/client';
+import { AuditEventType, JobStatus, Prisma } from '@prisma/client';
 // CANDID-015 Step 2 L-019 (D-MAJOR-2): wrapped `prisma` import 제거 — service.ts는
 // applicationDraft만 다루고 piiExtension 대상 아니므로 basePrisma만 사용. PII wrapper
 // 우회 안티패턴 진입점 차단.
@@ -12,6 +12,7 @@ import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { initialPayload } from '@/lib/drafts/schema';
 import { deleteResumeObject } from '@/lib/files/storage';
+import { recordAuditEventSafe } from '@/lib/audit/record';
 import type { DraftPayloadV1 } from '@/lib/drafts/types';
 
 interface JobGate {
@@ -189,8 +190,17 @@ export async function upsertDraft({
  *   (2) 트랜잭션: resume_files row 삭제 → draft 삭제(portfolio_links는 onDelete Cascade).
  *
  * 멱등: draft 미존재면 no-op(이미 폐기됨). 제출 완료로 draft가 사라진 경우도 동일.
+ *
+ * 감사: 삭제 성공 후 DRAFT_DISCARD 이벤트 기록(recordAuditEventSafe — fail-open).
+ *   트랜잭션 내부 기록을 쓰지 않는 이유: S3 객체는 트랜잭션 *전에* 이미 삭제되므로, 트랜잭션이
+ *   감사 실패로 롤백되면 "DB row 존재 + S3 없음"의 더 나쁜 orphan이 된다. 따라서 삭제는 끝까지
+ *   완료하고 감사는 best-effort로 분리한다(개인정보보호법 추적성 ↔ orphan 회피 trade-off).
  */
-export async function discardDraft(userId: number, jobPostingId: number): Promise<void> {
+export async function discardDraft(
+  userId: number,
+  jobPostingId: number,
+  opts: { userAgent?: string | null } = {},
+): Promise<void> {
   const draft = await basePrisma.applicationDraft.findUnique({
     where: { userId_jobPostingId: { userId, jobPostingId } },
     select: { id: true },
@@ -214,6 +224,17 @@ export async function discardDraft(userId: number, jobPostingId: number): Promis
   await basePrisma.$transaction(async (tx) => {
     await tx.resumeFile.deleteMany({ where: { draftId: draft.id } });
     await tx.applicationDraft.delete({ where: { id: draft.id } });
+  });
+
+  // (3) 감사 — 파괴적 PII 삭제 추적성(개인정보보호법). PII-free metadata만(jobPostingId/파일수).
+  await recordAuditEventSafe({
+    eventType: AuditEventType.DRAFT_DISCARD,
+    actorUserId: userId,
+    resourceType: 'application_draft',
+    resourceId: String(draft.id),
+    ipAddress: null, // X-Forwarded-For 미신뢰 — withdraw 라우트와 일관
+    userAgent: opts.userAgent ?? null,
+    metadata: { jobPostingId, fileCount: files.length },
   });
 }
 

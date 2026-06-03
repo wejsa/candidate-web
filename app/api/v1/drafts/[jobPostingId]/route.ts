@@ -14,6 +14,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/auth/middleware';
 import { withErrorHandler } from '@/lib/errors';
+import {
+  POLICIES,
+  USER_POLICIES,
+  enforceUserRateLimit,
+  withRateLimit,
+} from '@/lib/security/rate-limit';
 import { JobPostingIdParamSchema, DraftPutRequestSchema } from '@/lib/drafts/schema';
 import { getOrInitDraft, upsertDraft, discardDraft } from '@/lib/drafts/service';
 import { loadUserPrefill, assertUserMinAge } from '@/lib/drafts/user-prefill';
@@ -78,13 +84,30 @@ export const PUT = withErrorHandler(async (request: NextRequest, ctx: RouteCtx) 
   return NextResponse.json(body, { status: 200 });
 });
 
-export const DELETE = withErrorHandler(async (request: NextRequest, ctx: RouteCtx) => {
-  const auth = await requireAuth(request);
-  const raw = await ctx.params;
-  const { jobPostingId } = JobPostingIdParamSchema.parse(raw);
+// 보안 컨트롤(withdraw 라우트 정합): withRateLimit(IP 10회/분) + enforceUserRateLimit(사용자 20회/시간).
+// 파괴적·자원 소모형(첨부 S3 DeleteObject + 트랜잭션) 엔드포인트 abuse 차단.
+export const DELETE = withErrorHandler(
+  withRateLimit(POLICIES.LOGIN, async (request: NextRequest, ctx: RouteCtx) => {
+    const auth = await requireAuth(request);
 
-  // 본인 소유 draft 폐기 (멱등). 첨부 S3 + portfolio_links 정리는 service가 처리.
-  await discardDraft(auth.userId, jobPostingId);
+    const userRateLimit = enforceUserRateLimit(
+      USER_POLICIES.DISCARD_DRAFT_USER,
+      auth.userId,
+      request,
+    );
+    if (userRateLimit.response !== null) return userRateLimit.response;
 
-  return new NextResponse(null, { status: 204 });
-});
+    const raw = await ctx.params;
+    const { jobPostingId } = JobPostingIdParamSchema.parse(raw);
+
+    // 본인 소유 draft 폐기 (멱등). 첨부 S3 + portfolio_links 정리는 service가 처리.
+    // UA는 클라이언트 제어 문자열 — 감사 테이블 비대화 방지 위해 512자 클램프.
+    await discardDraft(auth.userId, jobPostingId, {
+      userAgent: request.headers.get('user-agent')?.slice(0, 512) ?? null,
+    });
+
+    const response = new NextResponse(null, { status: 204 });
+    userRateLimit.attachHeaders(response);
+    return response;
+  }),
+);

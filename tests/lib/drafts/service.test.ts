@@ -37,6 +37,10 @@ vi.mock('@/lib/files/storage', () => ({
   deleteResumeObject: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('@/lib/audit/record', () => ({
+  recordAuditEventSafe: vi.fn().mockResolvedValue(undefined),
+}));
+
 const { basePrisma } = (await import('@/lib/prisma')) as unknown as {
   basePrisma: {
     jobPosting: { findUnique: Mock };
@@ -47,6 +51,9 @@ const { basePrisma } = (await import('@/lib/prisma')) as unknown as {
 };
 const { deleteResumeObject } = (await import('@/lib/files/storage')) as unknown as {
   deleteResumeObject: Mock;
+};
+const { recordAuditEventSafe } = (await import('@/lib/audit/record')) as unknown as {
+  recordAuditEventSafe: Mock;
 };
 const { getOrInitDraft, upsertDraft, discardDraft } = await import('@/lib/drafts/service');
 const { AppError } = await import('@/lib/errors');
@@ -67,6 +74,8 @@ beforeEach(() => {
   basePrisma.$transaction.mockClear(); // 구현(콜백 실행) 유지, 호출 기록만 초기화
   deleteResumeObject.mockReset();
   deleteResumeObject.mockResolvedValue(undefined);
+  recordAuditEventSafe.mockReset();
+  recordAuditEventSafe.mockResolvedValue(undefined);
 });
 
 describe('getOrInitDraft — 공고 게이트', () => {
@@ -296,6 +305,35 @@ describe('discardDraft — 작성 취소', () => {
     expect(basePrisma.resumeFile.findMany).not.toHaveBeenCalled();
     expect(deleteResumeObject).not.toHaveBeenCalled();
     expect(basePrisma.$transaction).not.toHaveBeenCalled();
+    expect(recordAuditEventSafe).not.toHaveBeenCalled(); // 아무 것도 안 했으니 감사 없음
+  });
+
+  it('삭제 성공 시 DRAFT_DISCARD 감사 기록 (PII-free metadata)', async () => {
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: 100 });
+    basePrisma.resumeFile.findMany.mockResolvedValueOnce([
+      { id: 11, storedPath: 'resumes/2026/06/a.pdf' },
+    ]);
+
+    await discardDraft(7, 42, { userAgent: 'UA/1.0' });
+
+    expect(recordAuditEventSafe).toHaveBeenCalledTimes(1);
+    const arg = recordAuditEventSafe.mock.calls[0]![0] as Record<string, unknown>;
+    expect(arg.eventType).toBe('DRAFT_DISCARD');
+    expect(arg.actorUserId).toBe(7);
+    expect(arg.resourceType).toBe('application_draft');
+    expect(arg.resourceId).toBe('100');
+    expect(arg.metadata).toEqual({ jobPostingId: 42, fileCount: 1 });
+  });
+
+  it('S3 실패로 삭제 실패 시 감사 미기록', async () => {
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: 100 });
+    basePrisma.resumeFile.findMany.mockResolvedValueOnce([
+      { id: 11, storedPath: 'resumes/2026/06/a.pdf' },
+    ]);
+    deleteResumeObject.mockRejectedValueOnce(new Error('S3 down'));
+
+    await expect(discardDraft(7, 42)).rejects.toThrow('S3 down');
+    expect(recordAuditEventSafe).not.toHaveBeenCalled();
   });
 
   it('첨부 없는 draft → S3 미호출, 트랜잭션에서 draftId 스코프 삭제 + draft 삭제', async () => {

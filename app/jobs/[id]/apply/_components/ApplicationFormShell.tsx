@@ -10,7 +10,6 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { CareerLevel, DraftPayloadV1, DraftPrefill } from '@/lib/drafts/types';
 import { ResumeUploadStep } from './ResumeUploadStep';
@@ -49,7 +48,6 @@ export function ApplicationFormShell({
   initialResumeAttached,
   initialPortfolioLinks,
 }: Props) {
-  const router = useRouter();
   const versionRef = useRef(initialVersion);
 
   const [resumeAttached, setResumeAttached] = useState(initialResumeAttached);
