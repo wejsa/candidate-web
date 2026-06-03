@@ -133,6 +133,15 @@ const envSchema = z
     BATCH_DELETE_CHUNK: z.coerce.number().int().positive().max(10_000).default(1000),
     // 미제출 Draft + 첨부 파일 보존 일수 — lastSavedAt이 이 일수 경과 시 야간 배치가 삭제(BR-FILE-06).
     DRAFT_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
+
+    // CANDID-029 Step 3: 바이러스 스캔(BR-FILE-04 골격). 실제 clamd 클라이언트는 후속 작업이라
+    // 기본 비활성(false) — 활성 시에도 현재는 SKIPPED 폴백(미검사 파일을 임의로 CLEAN 처리 안 함).
+    CLAMAV_ENABLED: z
+      .string()
+      .optional()
+      .transform((v) => v === 'true' || v === '1'),
+    CLAMAV_HOST: z.string().optional(),
+    CLAMAV_PORT: z.coerce.number().int().min(1).max(65535).optional(),
   })
   .refine((e) => e.JWT_ACCESS_SECRET !== e.JWT_REFRESH_SECRET, {
     // CANDID-006: Access/Refresh secret 분리 강제 — 동일 값이면 누수 영향 격리 무력화.

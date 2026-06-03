@@ -3209,26 +3209,22 @@
     "at": "2026-06-03T06:02:05Z"
   },
   {
-    "action": "merged",
-    "taskId": "CANDID-029",
-    "stepNumber": 2,
-    "prNumber": 124,
-    "at": "2026-06-03T15:15:24+09:00"
-  },
-  {
     "action": "pr_created",
-    "taskId": "CANDID-029",
-    "stepNumber": 3,
-    "prNumber": 126,
-    "at": "2026-06-03T15:24:00+09:00"
+    "taskId": "CANDID-049",
+    "stepNumber": 1,
+    "prNumber": 125,
+    "at": "2026-06-03T06:19:02Z"
   },
   {
-    "action": "reviewed",
-    "decision": "COMMENT",
-    "taskId": "CANDID-029",
-    "stepNumber": 3,
-    "prNumber": 126,
-    "at": "2026-06-03T15:30:00+09:00",
-    "note": "subagents unavailable - direct review; MAJOR INFECTED-row-preserve fixed"
+    "action": "merged",
+    "taskId": "CANDID-049",
+    "stepNumber": 1,
+    "prNumber": 125,
+    "at": "2026-06-03T06:28:26Z"
+  },
+  {
+    "action": "task_completed",
+    "taskId": "CANDID-049",
+    "at": "2026-06-03T06:28:26Z"
   }
 ]

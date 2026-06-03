@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 46,
+    "version": 47,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-03T04:29:40Z"
+    "updatedAt": "2026-06-03T06:28:26Z"
   },
   "tasks": {
     "CANDID-022": {
@@ -1422,6 +1422,24 @@
       ],
       "totalLines": 1305,
       "note": "관측 인프라: /metrics·/health·/ready + http_request_duration_seconds(NFR P95) + candidate_business_event_total. universal 모듈 오염 회피(observer 훅+instrumentation), route 레이어 계측으로 CANDID-026 잠금 회피. develop CANDID-026 완료分 머지 반영."
+    },
+    "CANDID-049": {
+      "id": "CANDID-049",
+      "title": "공고목록 /jobs 크래시 수정 — unstable_cache Date 직렬화(closesAt rehydrate)",
+      "phase": 2,
+      "priority": "high",
+      "type": "bug",
+      "completedAt": "2026-06-03T06:28:26Z",
+      "assignee": "wejsa-u",
+      "prs": [
+        {
+          "number": 125,
+          "title": "fix: CANDID-049 공고목록 /jobs 크래시 (unstable_cache Date 직렬화)",
+          "mergedAt": "2026-06-03T06:28:26Z",
+          "note": "toCard/listIndexableJobs 캐시 경계 Date 재수화(list.ts+sitemap-data.ts). CANDID-048 E2E 발견. 공개 /jobs 자가-DoS 제거. CRITICAL 0."
+        }
+      ],
+      "note": "unstable_cache JSON 직렬화로 Date→string 환원 → computeDDay/.getTime() 크래시. list.ts toCard + sitemap-data.ts ISO DTO 패턴 통일. 회귀: JSON 라운드트립 직접 재현 + 통합 경로."
     }
   }
 }

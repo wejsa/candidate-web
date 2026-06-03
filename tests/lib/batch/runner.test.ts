@@ -102,12 +102,13 @@ describe('runNightlyCleanup', () => {
 });
 
 describe('defaultCleanupTasks', () => {
-  it('정리 4종을 고정 순서로 등록한다', () => {
+  it('정리 5종을 고정 순서로 등록한다', () => {
     expect(defaultCleanupTasks().map((t) => t.name)).toEqual([
       'expired-email-verifications',
       'expired-password-reset-tokens',
       'expired-idempotency-keys',
       'stale-drafts',
+      'pending-virus-scans',
     ]);
   });
 
@@ -118,14 +119,15 @@ describe('defaultCleanupTasks', () => {
       passwordResetToken: { findMany, deleteMany: vi.fn() },
       idempotencyKey: { findMany, deleteMany: vi.fn() },
       applicationDraft: { findMany, deleteMany: vi.fn(), delete: vi.fn() },
-      resumeFile: { findMany, deleteMany: vi.fn() },
+      resumeFile: { findMany, deleteMany: vi.fn(), update: vi.fn(), delete: vi.fn() },
+      user: { findUnique: vi.fn() },
     } as unknown as PrismaClient;
 
     const tasks = defaultCleanupTasks();
     for (const task of tasks) {
       await task.run(db, NOW);
     }
-    // 4 태스크 각각 자신의 델리게이트 findMany를 1회씩 호출(빈 결과로 즉시 종료) → 총 4회.
-    expect(findMany).toHaveBeenCalledTimes(4);
+    // 5 태스크 각각 자신의 델리게이트 findMany를 1회씩 호출(빈 결과로 즉시 종료) → 총 5회.
+    expect(findMany).toHaveBeenCalledTimes(5);
   });
 });

@@ -61,4 +61,15 @@ describe('listIndexableJobs', () => {
     basePrisma.jobPosting.findMany.mockResolvedValue([]);
     expect(await listIndexableJobs()).toEqual([]);
   });
+
+  // CANDID-049 회귀 — unstable_cache가 캐시값을 JSON 직렬화해도 updatedAt 계약(Date)이 유지되는지.
+  // 캐시에는 ISO 문자열 DTO(updatedAtIso)로 저장되고 경계에서 new Date로 재수화 → 직렬화 안전.
+  it('CANDID-049: updatedAt를 Date로 반환한다 (ISO DTO 경계 재수화 — 직렬화 안전)', async () => {
+    basePrisma.jobPosting.findMany.mockResolvedValue([
+      { id: 1, updatedAt: new Date('2026-05-01T00:00:00.000Z') },
+    ]);
+    const jobs = await listIndexableJobs();
+    expect(jobs[0]?.updatedAt).toBeInstanceOf(Date);
+    expect(jobs[0]?.updatedAt.toISOString()).toBe('2026-05-01T00:00:00.000Z');
+  });
 });
