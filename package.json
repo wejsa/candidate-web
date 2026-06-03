@@ -24,6 +24,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
+    "batch:nightly": "tsx scripts/batch/nightly-cleanup.ts",
     "db:studio": "prisma studio",
     "check:migrations": "node scripts/check-migrations-no-concurrently.mjs",
     "check:guard-wiring": "node scripts/meta/check-guard-wiring-consistency.mjs",
