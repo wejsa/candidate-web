@@ -67,16 +67,23 @@ function buildOrderBy(sort: SortKey): Prisma.JobPostingOrderByWithRelationInput[
   return [{ opensAt: 'desc' }, { id: 'desc' }];
 }
 
-function toCard(row: CardRow, now: Date): JobListItem {
+// CANDID-049: unstable_cache는 캐시 결과를 JSON 직렬화하므로 캐시 히트 시 Date 컬럼이 string으로
+// 되돌아온다(line 89의 "Date 직렬화 회피" 의도는 fetchListData 반환값 자체가 직렬화되어 무효).
+// 그대로 computeDDay(closesAt.getTime())에 넘기면 string에 .getTime() 호출로 /jobs가 크래시한다.
+// → 캐시 경계(toCard)에서 Date로 재수화한다. new Date(Date|string) 모두 안전.
+// 테스트: tests/lib/jobs/list.test.ts가 JSON 라운드트립으로 직렬화 재현 후 본 함수를 직접 검증(L-003).
+export function toCard(row: CardRow, now: Date): JobListItem {
+  const opensAt = new Date(row.opensAt);
+  const closesAt = row.closesAt === null ? null : new Date(row.closesAt);
   return {
     id: row.id,
     title: row.title,
     employmentType: row.employmentType,
     careerLevel: row.careerLevel,
     category: row.jobCategory,
-    opensAt: row.opensAt,
-    closesAt: row.closesAt,
-    dDayLabel: computeDDay(row.closesAt, now),
+    opensAt,
+    closesAt,
+    dDayLabel: computeDDay(closesAt, now),
   };
 }
 

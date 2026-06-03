@@ -30,6 +30,7 @@ const {
   CLOSED_PREVIEW_COUNT,
   computeDDay,
   listJobs,
+  toCard,
 } = await import('@/lib/jobs/list');
 
 function row(overrides: Partial<Record<string, unknown>> = {}) {
@@ -230,5 +231,42 @@ describe('listJobs', () => {
     expect(res.items).toEqual([]);
     expect(res.pagination.totalPages).toBe(1);
     expect(res.pagination.hasMore).toBe(false);
+  });
+});
+
+// CANDID-049 회귀 — unstable_cache JSON 직렬화로 closesAt/opensAt가 string으로 되돌아와도
+// toCard가 Date로 재수화해 computeDDay(closesAt.getTime()) 크래시를 막는지 검증.
+// (기존 listJobs 테스트는 unstable_cache를 pass-through로 mock해 직렬화를 재현하지 못했음 — 본 버그를 놓친 원인.)
+describe('toCard — 캐시 직렬화 회귀 (CANDID-049)', () => {
+  const now = new Date('2026-06-01T00:00:00Z');
+
+  // unstable_cache 캐시 히트 시의 실제 입력을 JSON 라운드트립으로 재현(Date→string).
+  function serialized(overrides: Partial<Record<string, unknown>> = {}) {
+    return JSON.parse(JSON.stringify(row(overrides))) as Parameters<typeof toCard>[0];
+  }
+
+  it('직렬화된(string) closesAt에도 크래시 없이 Date로 재수화한다', () => {
+    const input = serialized({ closesAt: new Date('2026-06-26T00:00:00Z') });
+    expect(typeof (input as { closesAt: unknown }).closesAt).toBe('string'); // 전제: 직렬화로 string
+
+    const card = toCard(input, now);
+
+    expect(card.closesAt).toBeInstanceOf(Date);
+    expect(card.opensAt).toBeInstanceOf(Date);
+    expect((card.closesAt as Date).toISOString()).toBe('2026-06-26T00:00:00.000Z');
+    expect(card.dDayLabel).toBe('D-25'); // 2026-06-01 → 06-26 = 25일
+  });
+
+  it('직렬화된 입력에서도 closesAt=null(상시모집)을 보존한다', () => {
+    const input = serialized({ closesAt: null });
+    const card = toCard(input, now);
+    expect(card.closesAt).toBeNull();
+    expect(card.dDayLabel).toBe('상시모집');
+  });
+
+  it('Date 인스턴스 입력(캐시 미스 경로)도 동일하게 동작한다', () => {
+    const card = toCard(row({ closesAt: new Date('2026-06-26T00:00:00Z') }), now);
+    expect(card.closesAt).toBeInstanceOf(Date);
+    expect(card.dDayLabel).toBe('D-25');
   });
 });
