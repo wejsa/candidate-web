@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "lastTaskNumber": 48,
+    "lastTaskNumber": 49,
     "projectPrefix": "CANDID",
-    "version": 436,
+    "version": 437,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T15:10:00+09:00"
+    "updatedAt": "2026-06-03T06:12:11Z"
   },
   "summary": {
     "total": 47,
@@ -3690,6 +3690,45 @@
       "createdAt": "2026-06-03T05:38:55Z",
       "updatedAt": "2026-06-03T05:38:55Z",
       "lockTTL": 7200
+    },
+    "CANDID-049": {
+      "id": "CANDID-049",
+      "title": "공고 목록 /jobs 크래시 수정 — unstable_cache Date 직렬화(closesAt rehydrate)",
+      "description": "lib/jobs/list.ts unstable_cache가 결과를 JSON 직렬화하여 closesAt(Date)→string. 이후 toCard→computeDDay(closesAt.getTime()) TypeError로 /jobs가 데이터 존재 시 크래시. CANDID-048 E2E가 발견. toCard에서 closesAt 재수화(new Date) + 회귀 테스트.",
+      "status": "in_progress",
+      "priority": "high",
+      "phase": 2,
+      "type": "bug",
+      "assignee": "wejsa-u@hoji-20260603-151211",
+      "assignedAt": "2026-06-03T06:12:11Z",
+      "lockTTL": 3600,
+      "lockedFiles": [
+        "lib/jobs/list.ts",
+        "tests/lib/jobs/list.test.ts"
+      ],
+      "dependencies": [],
+      "steps": [
+        {
+          "number": 1,
+          "title": "toCard closesAt rehydrate + 회귀 테스트",
+          "status": "pending",
+          "files": [
+            "lib/jobs/list.ts",
+            "tests/lib/jobs/list.test.ts"
+          ]
+        }
+      ],
+      "currentStep": 1,
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": null,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-03T06:12:11Z"
+      },
+      "createdAt": "2026-06-03T06:12:11Z",
+      "updatedAt": "2026-06-03T06:12:11Z"
     }
   }
 }
