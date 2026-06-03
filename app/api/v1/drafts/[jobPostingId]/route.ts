@@ -2,6 +2,7 @@
 //
 // GET: Draft 진입 (없으면 초기 payload 생성) + User PII prefill (Step 2에서 추가)
 // PUT: 자동/수동 저장 — 낙관적 락 (body.version)
+// DELETE: 작성 중 Draft 폐기 (작성 취소) — 첨부 S3 + portfolio_links 정리. 멱등(204).
 //
 // 보안 컨트롤:
 //   requireAuth — 인증 실패 → AUTH_TOKEN_*
@@ -14,7 +15,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/auth/middleware';
 import { withErrorHandler } from '@/lib/errors';
 import { JobPostingIdParamSchema, DraftPutRequestSchema } from '@/lib/drafts/schema';
-import { getOrInitDraft, upsertDraft } from '@/lib/drafts/service';
+import { getOrInitDraft, upsertDraft, discardDraft } from '@/lib/drafts/service';
 import { loadUserPrefill, assertUserMinAge } from '@/lib/drafts/user-prefill';
 import type { DraftGetResponse, DraftPayloadV1, DraftPutResponse } from '@/lib/drafts/types';
 
@@ -75,4 +76,15 @@ export const PUT = withErrorHandler(async (request: NextRequest, ctx: RouteCtx) 
     lastSavedAt: result.lastSavedAt.toISOString(),
   };
   return NextResponse.json(body, { status: 200 });
+});
+
+export const DELETE = withErrorHandler(async (request: NextRequest, ctx: RouteCtx) => {
+  const auth = await requireAuth(request);
+  const raw = await ctx.params;
+  const { jobPostingId } = JobPostingIdParamSchema.parse(raw);
+
+  // 본인 소유 draft 폐기 (멱등). 첨부 S3 + portfolio_links 정리는 service가 처리.
+  await discardDraft(auth.userId, jobPostingId);
+
+  return new NextResponse(null, { status: 204 });
 });

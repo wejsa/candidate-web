@@ -334,9 +334,68 @@
 
 .draftAction {
   /* stretched-link 미사용 카드라 일반 링크. globals 버튼/링크 스타일 상속 */
-  align-self: flex-start;
   position: relative;
   z-index: 1;
+}
+
+/* 작성 중 카드 액션 행 (이어서 작성 + 작성 취소) */
+.draftActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: auto;
+  position: relative;
+  z-index: 1; /* stretched-link ::after 위에 오도록 */
+}
+
+.draftDiscard {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-error);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.draftDiscard:hover:not(:disabled) {
+  background: none;
+  opacity: 0.8;
+}
+
+.discardConfirm {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+}
+
+.discardPrompt {
+  color: var(--color-text-muted);
+}
+
+.discardCancel {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.discardCancel:hover:not(:disabled) {
+  background: none;
+  text-decoration: underline;
+}
+
+.errorNote {
+  color: var(--color-error);
+  font-size: 0.8rem;
 }
 
 .draftClosedNote {

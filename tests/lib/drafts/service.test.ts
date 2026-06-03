@@ -10,33 +10,45 @@ vi.mock('@/lib/prisma', () => {
   const draftFindUnique = vi.fn();
   const draftCreate = vi.fn();
   const draftUpdateMany = vi.fn();
-  return {
-    basePrisma: {
-      jobPosting: { findUnique: jobPostingFindUnique },
-      applicationDraft: {
-        findUnique: draftFindUnique,
-        create: draftCreate,
-        updateMany: draftUpdateMany,
-      },
-    },
-    prisma: {
-      jobPosting: { findUnique: jobPostingFindUnique },
-      applicationDraft: {
-        findUnique: draftFindUnique,
-        create: draftCreate,
-        updateMany: draftUpdateMany,
-      },
-    },
+  const draftDelete = vi.fn();
+  const resumeFindMany = vi.fn();
+  const resumeDeleteMany = vi.fn();
+  // $transaction: 콜백에 tx(resumeFile.deleteMany + applicationDraft.delete) 주입.
+  const txClient = {
+    resumeFile: { deleteMany: resumeDeleteMany },
+    applicationDraft: { delete: draftDelete },
   };
+  const $transaction = vi.fn((cb: (tx: typeof txClient) => unknown) => cb(txClient));
+  const base = {
+    jobPosting: { findUnique: jobPostingFindUnique },
+    applicationDraft: {
+      findUnique: draftFindUnique,
+      create: draftCreate,
+      updateMany: draftUpdateMany,
+      delete: draftDelete,
+    },
+    resumeFile: { findMany: resumeFindMany, deleteMany: resumeDeleteMany },
+    $transaction,
+  };
+  return { basePrisma: base, prisma: base };
 });
+
+vi.mock('@/lib/files/storage', () => ({
+  deleteResumeObject: vi.fn().mockResolvedValue(undefined),
+}));
 
 const { basePrisma } = (await import('@/lib/prisma')) as unknown as {
   basePrisma: {
     jobPosting: { findUnique: Mock };
-    applicationDraft: { findUnique: Mock; create: Mock; updateMany: Mock };
+    applicationDraft: { findUnique: Mock; create: Mock; updateMany: Mock; delete: Mock };
+    resumeFile: { findMany: Mock; deleteMany: Mock };
+    $transaction: Mock;
   };
 };
-const { getOrInitDraft, upsertDraft } = await import('@/lib/drafts/service');
+const { deleteResumeObject } = (await import('@/lib/files/storage')) as unknown as {
+  deleteResumeObject: Mock;
+};
+const { getOrInitDraft, upsertDraft, discardDraft } = await import('@/lib/drafts/service');
 const { AppError } = await import('@/lib/errors');
 const { initialPayload } = await import('@/lib/drafts/schema');
 
@@ -49,6 +61,12 @@ beforeEach(() => {
   basePrisma.applicationDraft.findUnique.mockReset();
   basePrisma.applicationDraft.create.mockReset();
   basePrisma.applicationDraft.updateMany.mockReset();
+  basePrisma.applicationDraft.delete.mockReset();
+  basePrisma.resumeFile.findMany.mockReset();
+  basePrisma.resumeFile.deleteMany.mockReset();
+  basePrisma.$transaction.mockClear(); // 구현(콜백 실행) 유지, 호출 기록만 초기화
+  deleteResumeObject.mockReset();
+  deleteResumeObject.mockResolvedValue(undefined);
 });
 
 describe('getOrInitDraft — 공고 게이트', () => {
@@ -266,5 +284,69 @@ describe('upsertDraft — 낙관적 락 (L-024)', () => {
         now: NOW,
       }),
     ).rejects.toMatchObject({ code: 'JOB_CLOSED' });
+  });
+});
+
+describe('discardDraft — 작성 취소', () => {
+  it('draft 미존재 → no-op (멱등): 삭제/스토리지 호출 없음', async () => {
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce(null);
+
+    await expect(discardDraft(7, 42)).resolves.toBeUndefined();
+
+    expect(basePrisma.resumeFile.findMany).not.toHaveBeenCalled();
+    expect(deleteResumeObject).not.toHaveBeenCalled();
+    expect(basePrisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('첨부 없는 draft → S3 미호출, 트랜잭션에서 draftId 스코프 삭제 + draft 삭제', async () => {
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: 100 });
+    basePrisma.resumeFile.findMany.mockResolvedValueOnce([]);
+
+    await discardDraft(7, 42);
+
+    expect(deleteResumeObject).not.toHaveBeenCalled();
+    // 동시 제출 경합 방어: 첨부 0건이라도 draftId 스코프 deleteMany 수행(재부모화 행 제외).
+    expect(basePrisma.resumeFile.deleteMany).toHaveBeenCalledWith({ where: { draftId: 100 } });
+    expect(basePrisma.applicationDraft.delete).toHaveBeenCalledWith({ where: { id: 100 } });
+  });
+
+  it('첨부 있는 draft → S3 선삭제 후 resume_files(draftId 스코프) + draft 삭제', async () => {
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: 100 });
+    basePrisma.resumeFile.findMany.mockResolvedValueOnce([
+      { id: 11, storedPath: 'resumes/2026/06/a.pdf' },
+      { id: 12, storedPath: 'resumes/2026/06/b.pdf' },
+    ]);
+
+    await discardDraft(7, 42);
+
+    expect(deleteResumeObject).toHaveBeenCalledTimes(2);
+    expect(deleteResumeObject).toHaveBeenCalledWith('resumes/2026/06/a.pdf');
+    // id 기준이 아니라 draftId 기준 — 동시 제출로 재부모화된(draftId=null) 첨부 오삭제 방지.
+    expect(basePrisma.resumeFile.deleteMany).toHaveBeenCalledWith({ where: { draftId: 100 } });
+    expect(basePrisma.applicationDraft.delete).toHaveBeenCalledWith({ where: { id: 100 } });
+  });
+
+  it('S3 삭제 실패 시 throw — DB 삭제 미수행 (orphan 방지)', async () => {
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce({ id: 100 });
+    basePrisma.resumeFile.findMany.mockResolvedValueOnce([
+      { id: 11, storedPath: 'resumes/2026/06/a.pdf' },
+    ]);
+    deleteResumeObject.mockRejectedValueOnce(new Error('S3 down'));
+
+    await expect(discardDraft(7, 42)).rejects.toThrow('S3 down');
+
+    expect(basePrisma.$transaction).not.toHaveBeenCalled();
+    expect(basePrisma.applicationDraft.delete).not.toHaveBeenCalled();
+  });
+
+  it('본인 스코프 — findUnique가 (userId, jobPostingId) 복합키로 조회', async () => {
+    basePrisma.applicationDraft.findUnique.mockResolvedValueOnce(null);
+
+    await discardDraft(7, 42);
+
+    expect(basePrisma.applicationDraft.findUnique).toHaveBeenCalledWith({
+      where: { userId_jobPostingId: { userId: 7, jobPostingId: 42 } },
+      select: { id: true },
+    });
   });
 });

@@ -11,6 +11,7 @@ import { JobStatus, Prisma } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { initialPayload } from '@/lib/drafts/schema';
+import { deleteResumeObject } from '@/lib/files/storage';
 import type { DraftPayloadV1 } from '@/lib/drafts/types';
 
 interface JobGate {
@@ -177,5 +178,42 @@ export async function upsertDraft({
     throw new AppError('APP_DRAFT_CONFLICT');
   }
   return updated;
+}
+
+/**
+ * 작성 중 Draft 폐기 (US-MY — 작성 취소). 본인 소유 draft만.
+ *
+ * BR-FILE-06 배치(cleanupStaleDrafts)와 동일한 순서를 미러:
+ *   (1) 첨부 이력서 S3 객체 선삭제 — 트랜잭션 *외부*(BR-TX-02 외부 호출 격리).
+ *       하나라도 실패하면 draft 보존 후 throw → orphan S3 방지(사용자 재시도 / 배치 폴백).
+ *   (2) 트랜잭션: resume_files row 삭제 → draft 삭제(portfolio_links는 onDelete Cascade).
+ *
+ * 멱등: draft 미존재면 no-op(이미 폐기됨). 제출 완료로 draft가 사라진 경우도 동일.
+ */
+export async function discardDraft(userId: number, jobPostingId: number): Promise<void> {
+  const draft = await basePrisma.applicationDraft.findUnique({
+    where: { userId_jobPostingId: { userId, jobPostingId } },
+    select: { id: true },
+  });
+  if (draft === null) return; // 멱등 — 이미 없음
+
+  const files = await basePrisma.resumeFile.findMany({
+    where: { draftId: draft.id },
+    select: { id: true, storedPath: true },
+  });
+
+  // (1) S3 객체 선삭제 (트랜잭션 외부). 실패 시 throw — draft 보존(orphan 방지).
+  for (const file of files) {
+    await deleteResumeObject(file.storedPath);
+  }
+
+  // (2) DB 삭제 — resume_files row + draft (portfolio_links Cascade).
+  // 동시 제출(submit) 경합 방어: resume_files를 수집한 id가 아니라 **draftId 스코프**로 삭제한다.
+  // submit은 첨부를 application으로 재부모화(draftId→NULL, applicationId set)하므로, id 기준 삭제 시
+  // 방금 제출된 application의 첨부 row를 오삭제할 수 있다. draftId 기준이면 재부모화된 행은 제외된다.
+  await basePrisma.$transaction(async (tx) => {
+    await tx.resumeFile.deleteMany({ where: { draftId: draft.id } });
+    await tx.applicationDraft.delete({ where: { id: draft.id } });
+  });
 }
 
