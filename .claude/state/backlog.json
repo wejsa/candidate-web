@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 417,
+    "version": 421,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T12:50:05+09:00"
+    "updatedAt": "2026-06-03T12:59:44+09:00"
   },
   "summary": {
     "total": 47,
@@ -2236,7 +2236,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T12:50:05+09:00",
+      "assignedAt": "2026-06-03T12:59:44+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/oauth/[provider]/callback/route.ts",
@@ -2245,13 +2245,13 @@
         "prisma/schema.prisma"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 118,
         "fixLoopCount": null,
-        "lastReviewDecision": null,
-        "autoChainArgs": "118 --auto-fix",
-        "updatedAt": "2026-06-03T12:50:05+09:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "118",
+        "updatedAt": "2026-06-03T12:59:44+09:00"
       },
       "steps": [
         {
@@ -2328,15 +2328,11 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-122756",
-      "assignedAt": "2026-06-03T03:40:49Z",
+      "assignedAt": "2026-06-03T03:59:03Z",
       "lockTTL": 10800,
       "lockedFiles": [
-        "package.json",
-        "lib/observability/metrics.ts",
         "lib/errors/response.ts",
-        "app/api/metrics/route.ts",
-        "app/api/health/route.ts",
-        "app/api/ready/route.ts",
+        "lib/observability/metrics.ts",
         "app/api/v1/auth/signup/route.ts",
         "app/api/v1/applications/route.ts",
         "app/api/v1/applications/me/[id]/withdraw/route.ts",
@@ -2347,7 +2343,7 @@
           "number": 1,
           "title": "prom-client + 메트릭 레지스트리 싱글톤 + GET /api/metrics",
           "description": "prom-client 도입. lib/observability/metrics.ts: globalThis 싱글톤 Registry + collectDefaultMetrics + 커스텀 지표(가입/제출/철회/파일 카운터 + http_request_duration_seconds 히스토그램) SSOT 정의 + __resetMetricsRegistryForTesting(L-002). GET /api/metrics(runtime nodejs, METRICS_AUTH_TOKEN 토큰 가드→AUTH_FORBIDDEN).",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "package.json",
             "lib/observability/metrics.ts",
@@ -2355,18 +2351,21 @@
           ],
           "estimatedLines": 500,
           "prLineLimit": 600,
-          "prNumber": 117
+          "prNumber": 117,
+          "mergedAt": "2026-06-03T03:50:39Z"
         },
         {
           "number": 2,
           "title": "GET /api/health + GET /api/ready (liveness/readiness)",
           "description": "health=liveness 항상 200{status,uptime,timestamp}. ready=readiness prisma $queryRaw SELECT 1 → 200{db:up}/503{db:down}. 둘 다 runtime nodejs, export 직접 단위 테스트.",
-          "status": "pending",
+          "status": "merged",
           "files": [
             "app/api/health/route.ts",
             "app/api/ready/route.ts"
           ],
-          "estimatedLines": 280
+          "estimatedLines": 280,
+          "prNumber": 119,
+          "mergedAt": "2026-06-03T03:59:03Z"
         },
         {
           "number": 3,
@@ -2393,14 +2392,14 @@
           "estimatedLines": 320
         }
       ],
-      "currentStep": 1,
+      "currentStep": 3,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 117,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": null,
-        "autoChainArgs": "117 --auto-fix",
-        "updatedAt": "2026-06-03T03:40:49Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T03:59:03Z"
       }
     },
     "CANDID-028": {

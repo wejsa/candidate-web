@@ -3126,5 +3126,34 @@
     "stepNumber": 4,
     "prNumber": 118,
     "at": "2026-06-03T12:50:05+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-027",
+    "stepNumber": 1,
+    "prNumber": 117,
+    "at": "2026-06-03T03:50:39Z"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-027",
+    "stepNumber": 2,
+    "prNumber": 119,
+    "at": "2026-06-03T03:55:26Z"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-027",
+    "stepNumber": 2,
+    "prNumber": 119,
+    "at": "2026-06-03T03:59:03Z"
+  },
+  {
+    "action": "reviewed",
+    "taskId": "CANDID-026",
+    "stepNumber": 4,
+    "prNumber": 118,
+    "decision": "COMMENT",
+    "at": "2026-06-03T12:59:44+09:00"
   }
 ]
