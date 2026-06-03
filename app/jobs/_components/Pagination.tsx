@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import type { ParsedJobListQuery } from '@/lib/jobs/list';
 import { buildPageUrl, getPageWindow } from '@/lib/jobs/pagination-url';
+import styles from './Pagination.module.css';
 
 export interface PaginationProps {
   page: number;
@@ -22,8 +23,8 @@ export function Pagination({ page, totalPages, query, basePath = '/jobs' }: Pagi
   const lastInWindow = windowPages[windowPages.length - 1] ?? 1;
 
   return (
-    <nav aria-label="페이지 네비게이션">
-      <ul>
+    <nav aria-label="페이지 네비게이션" className={styles.pagination}>
+      <ul className={styles.list}>
         {hasPrev && (
           <li>
             <Link rel="prev" href={buildPageUrl({ basePath, query, page: page - 1 })}>

@@ -1,0 +1,63 @@
+/* CANDID-050 Step 3 — 공고 필터 바 (CSS Modules). 쿼리 로직은 불변, 시각만 재구성.
+   descendant 선택자로 기존 bare label/select/button을 카드형 툴바로 정렬. */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+/* 각 필터(label) — 라벨 위, 컨트롤 아래의 세로 묶음. 가변폭. */
+.filters > label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.filters select {
+  min-width: 8.5rem;
+  margin-top: 0;
+  background: var(--color-bg);
+  font-weight: 400;
+  color: var(--color-text);
+}
+
+/* "마감 공고 표시" 체크박스 행 — 가로 정렬. */
+.filters > label:has(input[type='checkbox']) {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 400;
+  color: var(--color-text);
+  min-height: var(--touch-min);
+}
+
+.filters button {
+  min-height: var(--touch-min);
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filters button:hover {
+  background: var(--color-surface-2);
+}
+
+.filters button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

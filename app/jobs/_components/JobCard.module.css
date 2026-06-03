@@ -1,0 +1,115 @@
+/* CANDID-050 Step 3 — 공고 카드 시각 재구성. 전역 토큰 재사용. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.closed {
+  opacity: 0.6;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+/* 제목 링크 — 카드 표면 전체를 클릭 영역으로 확장(stretched link). 색은 본문색 유지. */
+.titleLink {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.titleLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.titleLink:hover {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.card {
+  position: relative; /* stretched-link 기준 */
+}
+
+.dday {
+  flex: 0 0 auto;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-accent-weak);
+  color: var(--color-link-hover);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.closedBadge {
+  flex: 0 0 auto;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* 메타: dt(라벨)는 스크린리더용으로 숨기고 dd(값)만 칩으로 노출 → 시각 노이즈 감소, 접근성 유지. */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.metaRow {
+  display: contents;
+}
+
+.dt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.chip {
+  margin: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}

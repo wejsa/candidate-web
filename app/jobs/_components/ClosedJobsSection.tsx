@@ -4,6 +4,7 @@
 
 import type { JobListItem } from '@/lib/jobs/types';
 import { JobCard } from './JobCard';
+import grid from '../page.module.css';
 
 export interface ClosedJobsSectionProps {
   items: JobListItem[];
@@ -14,12 +15,12 @@ export function ClosedJobsSection({ items }: ClosedJobsSectionProps) {
 
   return (
     <section aria-label="마감된 공고">
-      <hr aria-hidden style={{ margin: '24px 0' }} />
+      <hr aria-hidden />
       <h2>마감된 공고</h2>
-      <p>최근 마감된 공고 {items.length}건입니다.</p>
-      <ul>
+      <p className={grid.count}>최근 마감된 공고 {items.length}건입니다.</p>
+      <ul className={grid.grid}>
         {items.map((job) => (
-          <li key={`closed-${job.id}`}>
+          <li key={`closed-${job.id}`} className={grid.gridItem}>
             <JobCard job={job} closed />
           </li>
         ))}
