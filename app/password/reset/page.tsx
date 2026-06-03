@@ -22,7 +22,7 @@ export default function ResetPage({ searchParams }: PageProps): React.JSX.Elemen
   const token = typeof raw === 'string' ? raw : '';
 
   return (
-    <main aria-labelledby="reset-page-title">
+    <main id="main-content" aria-labelledby="reset-page-title">
       <header>
         <h1 id="reset-page-title">비밀번호 재설정</h1>
       </header>

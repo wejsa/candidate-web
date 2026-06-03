@@ -60,7 +60,7 @@ export default async function MyApplicationDetailPage({ params }: PageProps) {
   // 단계/결과 라벨은 lib service에서 한국어 매핑되어 옴.
 
   return (
-    <main>
+    <main id="main-content">
       <h1>지원 상세 — {detail.summary.jobTitle}</h1>
 
       <section aria-labelledby="summary-title">
