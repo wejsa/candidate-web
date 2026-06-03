@@ -375,7 +375,7 @@ describe('resendVerificationEmail', () => {
       lastSentAt: new Date(fixedNow.getTime() - 90_000), // 90초 전
     });
     const txMocks = {
-      emailVerification: { update: vi.fn(async () => ({})), create: vi.fn(async () => ({})) },
+      emailVerification: { update: vi.fn(async () => ({})), create: vi.fn(async () => ({ id: 77 })) },
     };
     prisma.$transaction.mockImplementation(async (cb) => cb(txMocks));
 
@@ -388,6 +388,14 @@ describe('resendVerificationEmail', () => {
     });
     // 신규 토큰 생성
     expect(txMocks.emailVerification.create).toHaveBeenCalled();
+    // 리뷰 보강(PR #118) — invalidate 분기도 신규 verificationId로 EMAIL_VERIFICATION_RESENT 발행.
+    expect(recordAuditEventSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'EMAIL_VERIFICATION_RESENT',
+        actorUserId: 42,
+        metadata: { verificationId: 77 },
+      }),
+    );
   });
 
   it('TOCTOU race deep defense — uk_active_per_user P2002 → AUTH_VERIFICATION_RESEND_COOLDOWN (L-025)', async () => {

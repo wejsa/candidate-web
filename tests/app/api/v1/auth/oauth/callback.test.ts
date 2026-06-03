@@ -247,6 +247,27 @@ describe('callback — link-add 모드', () => {
     );
   });
 
+  // 리뷰 보강(PR #118) — 멱등 link-add('already', no-op)는 OAUTH_LINKED 미발행(EMAIL_VERIFIED와 동일 원칙).
+  it("linkProviderToCurrentUser가 'already'(멱등 no-op) 반환 → OAUTH_LINKED 미발행, /me/profile?linked 복귀", async () => {
+    verifyOAuthStateCookie.mockReturnValue({
+      provider: 'google',
+      redirect: '/me/profile',
+      codeVerifier: 'v',
+      linkUserId: 7,
+    });
+    getOptionalAuth.mockResolvedValue({ userId: 7 });
+    linkProviderToCurrentUser.mockResolvedValue('already');
+
+    const req = makeRequest('/api/v1/auth/oauth/google/callback?code=ABC&state=XYZ', {
+      oauth_state: 'cookie.signed',
+    });
+    const res = await GET(req, { params: Promise.resolve({ provider: 'google' }) });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toContain('linked=google');
+    expect(recordAuditEventSafe).not.toHaveBeenCalled();
+  });
+
   it('ALREADY_LINKED → /me/profile?error=provider_already_linked', async () => {
     verifyOAuthStateCookie.mockReturnValue({
       provider: 'github',

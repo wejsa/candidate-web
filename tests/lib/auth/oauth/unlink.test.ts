@@ -115,6 +115,8 @@ describe('unlinkProvider', () => {
 
     await expect(unlinkProvider(input)).rejects.toMatchObject({ code: 'USER_LAST_AUTH_METHOD' });
     expect(__mocks.providerDelete).not.toHaveBeenCalled();
+    // 리뷰 보강(PR #118) — 해제 거부 시 OAUTH_UNLINKED 미발행(트랜잭션 내 throw → tx 밖 emit 도달 불가).
+    expect(recordAuditEventSafe).not.toHaveBeenCalled();
   });
 
   // 리뷰 MAJOR(test): 마지막 인증수단 거부 경계 명시 — 무비번 + 대상 provider만(비대상 0) → 거부.

@@ -7,6 +7,9 @@ import { prisma } from '@/lib/prisma';
 import { withErrorHandler } from '@/lib/errors';
 import { withTraceContext } from '@/lib/observability/trace-context';
 import { emailDomainOf, summarizeError } from '@/lib/logging/pii-safe';
+
+// withTraceContext(node:async_hooks) + prisma 사용 → Edge 번들 유입 방지 위해 Node 런타임 명시.
+export const runtime = 'nodejs';
 import {
   POLICIES,
   USER_POLICIES,

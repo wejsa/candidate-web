@@ -15,6 +15,10 @@ import { getProvider, isOAuthProviderEnabled } from '@/lib/auth/oauth';
 import { linkOrCreateOAuthUser, linkProviderToCurrentUser } from '@/lib/auth/oauth/link';
 import { resolveCallbackRedirect } from '@/lib/auth/oauth/redirect';
 import { getOptionalAuth } from '@/lib/auth/middleware';
+import { clientIpFromRequest } from '@/lib/security/rate-limit';
+
+// withTraceContext(node:async_hooks) + prisma 사용 → Edge 번들 유입 방지 위해 Node 런타임 명시.
+export const runtime = 'nodejs';
 
 // CANDID-012 Step 3 — GET /api/v1/auth/oauth/{provider}/callback.
 //
@@ -124,8 +128,13 @@ export const GET = withErrorHandler(
       }
 
       const profileUrl = new URL('/me/profile', getEnv().NEXT_PUBLIC_APP_URL);
+      let linkAction: Awaited<ReturnType<typeof linkProviderToCurrentUser>>;
       try {
-        await linkProviderToCurrentUser({ userId: stateResult.linkUserId, provider, profile });
+        linkAction = await linkProviderToCurrentUser({
+          userId: stateResult.linkUserId,
+          provider,
+          profile,
+        });
       } catch (err) {
         if (err instanceof AppError && err.code === 'USER_PROVIDER_ALREADY_LINKED') {
           profileUrl.searchParams.set('error', 'provider_already_linked');
@@ -140,15 +149,19 @@ export const GET = withErrorHandler(
         }
         throw err;
       }
-      // CANDID-026 Step 4 — OAUTH_LINKED 감사(연결 성공). fail-open. metadata는 provider 이름만(PII-free).
-      await recordAuditEventSafe({
-        eventType: AuditEventType.OAUTH_LINKED,
-        actorUserId: stateResult.linkUserId,
-        resourceType: 'user',
-        resourceId: String(stateResult.linkUserId),
-        userAgent: request.headers.get('user-agent'),
-        metadata: { provider },
-      });
+      // CANDID-026 Step 4 — OAUTH_LINKED 감사(실제 신규 연결만). 멱등 'already'(no-op)는 미발행 —
+      // EMAIL_VERIFIED의 !alreadyVerified 가드와 동일 원칙(발생하지 않은 상태 전이 미기록). fail-open.
+      if (linkAction === 'linked') {
+        await recordAuditEventSafe({
+          eventType: AuditEventType.OAUTH_LINKED,
+          actorUserId: stateResult.linkUserId,
+          resourceType: 'user',
+          resourceId: String(stateResult.linkUserId),
+          ipAddress: clientIpFromRequest(request),
+          userAgent: request.headers.get('user-agent'),
+          metadata: { provider },
+        });
+      }
       profileUrl.searchParams.set('linked', provider);
       const r = NextResponse.redirect(profileUrl, { status: 302 });
       clearStateCookie(r);
