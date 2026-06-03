@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 392,
+    "version": 393,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-02T23:34:12+09:00"
+    "updatedAt": "2026-06-03T09:40:36+09:00"
   },
   "summary": {
     "total": 47,
@@ -2226,7 +2226,7 @@
       "id": "CANDID-026",
       "title": "감사 로그 AOP (로그인/제출/PII 조회) + traceId 전파",
       "description": "audit_logs 테이블 + Next.js middleware/decorator 패턴으로 일괄 기록. 분산 추적 traceId 전 구간 전파(OpenTelemetry). [CANDID-010 FU 추가] consumeVerificationToken/resendVerificationEmail 호출에 EMAIL_VERIFIED/EMAIL_VERIFICATION_RESENT audit event 발행 — userId, verificationId, IP, lastSentAt 메타데이터 포함. 토큰/이메일 평문은 metadata에서 제외 (PR #33 H007).",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "low",
       "phase": 4,
@@ -2234,7 +2234,12 @@
         "CANDID-005",
         "CANDID-018"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "wejsa-u@hoji-20260603-094036",
+      "assignedAt": "2026-06-03T09:40:36+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "workflowState": null
     },
     "CANDID-027": {
       "id": "CANDID-027",
