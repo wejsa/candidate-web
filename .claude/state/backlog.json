@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 49,
     "projectPrefix": "CANDID",
-    "version": 439,
+    "version": 440,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T15:15:24+09:00"
+    "updatedAt": "2026-06-03T06:19:02Z"
   },
   "summary": {
     "total": 47,
@@ -3700,7 +3700,7 @@
       "phase": 2,
       "type": "bug",
       "assignee": "wejsa-u@hoji-20260603-151211",
-      "assignedAt": "2026-06-03T06:12:11Z",
+      "assignedAt": "2026-06-03T06:19:02Z",
       "lockTTL": 3600,
       "lockedFiles": [
         "lib/jobs/list.ts",
@@ -3711,21 +3711,22 @@
         {
           "number": 1,
           "title": "toCard closesAt rehydrate + 회귀 테스트",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "lib/jobs/list.ts",
             "tests/lib/jobs/list.test.ts"
-          ]
+          ],
+          "prNumber": 125
         }
       ],
       "currentStep": 1,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": null,
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 125,
         "fixLoopCount": null,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-03T06:12:11Z"
+        "autoChainArgs": "125 --auto-fix",
+        "updatedAt": "2026-06-03T06:19:02Z"
       },
       "createdAt": "2026-06-03T06:12:11Z",
       "updatedAt": "2026-06-03T06:12:11Z"
