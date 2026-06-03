@@ -73,7 +73,7 @@ pnpm batch:nightly
 | `expired-password-reset-tokens` | `password_reset_tokens` | `expiresAt < now` 삭제 |
 | `expired-idempotency-keys` | `idempotency_keys` | `expiresAt < now` 삭제 |
 | `stale-drafts` | `application_drafts` + 첨부 | `lastSavedAt < now-DRAFT_RETENTION_DAYS`(30) — S3 객체 선삭제 → resume_files row 삭제 → draft 삭제(BR-FILE-06) |
-| `pending-virus-scans` | `resume_files` (PENDING) | 스캔 판정 → CLEAN/FAILED 상태 갱신, INFECTED는 S3+row 삭제 + 소유자 알림(BR-FILE-04) |
+| `pending-virus-scans` | `resume_files` (PENDING) | 스캔 판정 → CLEAN/FAILED 상태 갱신. INFECTED는 악성 파일(S3) 삭제 + row를 INFECTED로 보존(audit) + 소유자 알림(BR-FILE-04) |
 
 > 토큰/멱등성 테이블은 PII 컬럼이 없는 운영 위생 대상입니다. BR-PII-03/04 PII 자동 파기(User/Application 스냅샷)는 별도 범위.
 > ClamAV는 **골격**입니다 — `CLAMAV_ENABLED=false`(기본) 또는 미구현 시 스캔은 `SKIPPED`(PENDING 유지, 임의 CLEAN 처리 안 함). 실제 clamd 클라이언트는 후속 작업.

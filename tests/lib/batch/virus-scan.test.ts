@@ -98,7 +98,7 @@ describe('processPendingScans', () => {
     });
   });
 
-  it('INFECTED — owner 조회 → S3 삭제 → row 삭제 → 알림 발송', async () => {
+  it('INFECTED — owner 조회 → S3 객체 삭제 → row INFECTED 보존(삭제 X) → 알림 발송', async () => {
     const { db, resumeFile, user } = makeDb();
     resumeFile.findMany.mockResolvedValueOnce([PENDING_FILE]).mockResolvedValueOnce([]);
     user.findUnique.mockResolvedValueOnce({ email: 'owner@example.com', name: '홍길동' });
@@ -107,17 +107,21 @@ describe('processPendingScans', () => {
     const n = await processPendingScans(db, deps, NOW, 1);
 
     expect(n).toBe(1);
-    expect(deleteObject).toHaveBeenCalledWith(PENDING_FILE.storedPath);
-    expect(resumeFile.delete).toHaveBeenCalledWith({ where: { id: 3 } });
+    expect(deleteObject).toHaveBeenCalledWith(PENDING_FILE.storedPath); // 악성 파일(S3) 삭제
+    // row는 audit 보존 — INFECTED 상태 갱신, delete 호출 안 함 (resume.ts/partial UNIQUE 정합).
+    expect(resumeFile.update).toHaveBeenCalledWith({
+      where: { id: 3 },
+      data: { virusScanStatus: 'INFECTED', scannedAt: NOW },
+    });
+    expect(resumeFile.delete).not.toHaveBeenCalled();
     expect(notifyInfected).toHaveBeenCalledWith({
       to: 'owner@example.com',
       name: '홍길동',
       filename: 'malware.pdf',
     });
-    expect(resumeFile.update).not.toHaveBeenCalled(); // 삭제 경로라 update 없음
   });
 
-  it('INFECTED — S3 삭제 실패해도 row 삭제 + 알림은 진행(best-effort)', async () => {
+  it('INFECTED — S3 삭제 실패해도 row INFECTED 갱신 + 알림은 진행(best-effort)', async () => {
     const { db, resumeFile, user } = makeDb();
     resumeFile.findMany.mockResolvedValueOnce([PENDING_FILE]).mockResolvedValueOnce([]);
     user.findUnique.mockResolvedValueOnce({ email: 'o@x.com', name: 'A' });
@@ -126,11 +130,14 @@ describe('processPendingScans', () => {
 
     await processPendingScans(db, deps, NOW, 1);
 
-    expect(resumeFile.delete).toHaveBeenCalledWith({ where: { id: 3 } });
+    expect(resumeFile.update).toHaveBeenCalledWith({
+      where: { id: 3 },
+      data: { virusScanStatus: 'INFECTED', scannedAt: NOW },
+    });
     expect(notifyInfected).toHaveBeenCalledOnce();
   });
 
-  it('INFECTED — owner가 없으면 알림 생략(삭제는 진행)', async () => {
+  it('INFECTED — owner가 없으면 알림 생략(상태 갱신은 진행)', async () => {
     const { db, resumeFile, user } = makeDb();
     resumeFile.findMany.mockResolvedValueOnce([PENDING_FILE]).mockResolvedValueOnce([]);
     user.findUnique.mockResolvedValueOnce(null);
@@ -138,7 +145,7 @@ describe('processPendingScans', () => {
 
     await processPendingScans(db, deps, NOW, 1);
 
-    expect(resumeFile.delete).toHaveBeenCalled();
+    expect(resumeFile.update).toHaveBeenCalled();
     expect(notifyInfected).not.toHaveBeenCalled();
   });
 
@@ -150,7 +157,7 @@ describe('processPendingScans', () => {
     deps.notifyInfected = vi.fn().mockRejectedValue(new Error('smtp down'));
 
     await expect(processPendingScans(db, deps, NOW, 1)).resolves.toBe(1);
-    expect(resumeFile.delete).toHaveBeenCalled();
+    expect(resumeFile.update).toHaveBeenCalled();
   });
 
   it('cursor 페이지네이션 — chunk를 채우면 마지막 id 이후로 이어 조회', async () => {
