@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "lastTaskNumber": 47,
+    "lastTaskNumber": 48,
     "projectPrefix": "CANDID",
-    "version": 430,
+    "version": 433,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-06-03T14:17:49+09:00"
   },
@@ -3628,6 +3628,68 @@
       ],
       "workflowState": null,
       "completedAt": "2026-06-02T21:51:07+09:00"
+    },
+    "CANDID-048": {
+      "id": "CANDID-048",
+      "title": "Playwright E2E 도입 + 핵심 사용자 여정 스모크",
+      "description": "@playwright/test 도입(playwright.config + webServer 부팅). 핵심 사용자 여정 E2E: 공고 목록→상세, 회원가입→이메일 미인증 상태, 로그인, 지원서 3단계 작성·임시저장, 제출(멱등), 마이페이지. headless 스크린샷 산출. /api/health·/api/ready·/api/metrics 스모크 포함. 실행 검증은 Docker(postgres+minio) 기동 전제 — chromium 바이너리는 캐시에 존재.",
+      "status": "in_progress",
+      "priority": "medium",
+      "phase": 4,
+      "type": "test",
+      "assignee": "wejsa-u@hoji-20260603-143929",
+      "assignedAt": "2026-06-03T05:49:58Z",
+      "lockedFiles": [
+        "playwright.config.ts",
+        "package.json",
+        ".gitignore",
+        "e2e/smoke.spec.ts",
+        "e2e/fixtures/seed.ts",
+        "e2e/fixtures/auth.ts",
+        "e2e/journeys.spec.ts"
+      ],
+      "dependencies": [],
+      "steps": [
+        {
+          "number": 1,
+          "title": "Playwright 스캐폴딩 + 인프라/페이지 스모크",
+          "description": "@playwright/test 도입(playwright.config webServer=pnpm dev + /api/health 헬스체크). e2e/smoke.spec.ts: /api/health·/api/ready·/api/metrics + / · /jobs 렌더. package.json devDep/scripts, .gitignore.",
+          "status": "pending",
+          "files": [
+            "playwright.config.ts",
+            "package.json",
+            ".gitignore",
+            "e2e/smoke.spec.ts"
+          ],
+          "estimatedLines": 450,
+          "prLineLimit": 600
+        },
+        {
+          "number": 2,
+          "title": "E2E 픽스처(공고 시드+signup 인증) + 인증/지원/마이페이지 여정",
+          "description": "e2e/fixtures: prisma 공고 주입 시드 + signup API storageState 인증. journeys.spec.ts: 시드 공고→목록→상세→지원 폼 진입, 비인증 apply 리다이렉트, 인증 /me. 이력서 업로드는 범위 외.",
+          "status": "pending",
+          "files": [
+            "e2e/fixtures/seed.ts",
+            "e2e/fixtures/auth.ts",
+            "e2e/journeys.spec.ts"
+          ],
+          "estimatedLines": 600,
+          "prLineLimit": 800
+        }
+      ],
+      "currentStep": 1,
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": null,
+        "autoChainArgs": "--all",
+        "updatedAt": "2026-06-03T05:49:58Z"
+      },
+      "createdAt": "2026-06-03T05:38:55Z",
+      "updatedAt": "2026-06-03T05:38:55Z",
+      "lockTTL": 7200
     }
   }
 }

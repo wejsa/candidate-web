@@ -1,7 +1,12 @@
 import { getEnv } from '@/lib/env';
 import type { BatchDb } from '@/lib/batch/types';
 
-// CANDID-029 Step 1 — 만료 행 정리 (BR-PII-03/04 자동 파기 + 인프라 정합).
+// CANDID-029 Step 1 — 만료 행 정리 (운영 데이터 위생 + 인프라 정합).
+//
+// 범위 주의: 본 3개 테이블은 PII 컬럼이 없다(tokenHash/userId/timestamp만). 따라서 이 정리는
+//   BR-PII-03/04의 "PII 자동 파기"(User PII·Application 스냅샷 1년 파기) 의무를 충족하지 *않는다*.
+//   그 PII 파기는 별도 스텝에서 다룬다. 본 작업은 만료 토큰/멱등성 키의 운영 위생이며,
+//   retro H008("만료/소진 토큰 cleanup cron 부재")의 후속이다.
 //
 // 대상 3종:
 //   1. email_verifications — consumedAt 또는 expiresAt이 보존 일수 경과 (CANDID-010 FU).

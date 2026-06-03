@@ -124,6 +124,13 @@ const envSchema = z
     // CANDID-023 Step 4 (US-MY-003) — 지원 철회 어드민 Slack 알림 webhook (선택).
     // 미설정 시 알림 no-op (BR-TX-02 트랜잭션 외 fire-and-forget). 관리자 설정값이라 SSRF 사용자입력 아님.
     SLACK_WEBHOOK_URL: z.string().url().optional(),
+
+    // CANDID-029: 야간 정리 배치 파라미터.
+    // email_verifications 운영 위생 보존 일수 — consumedAt/expiresAt이 이 일수 경과 시 삭제.
+    // (PII 컬럼 없는 토큰 테이블이라 BR-PII-03/04 PII 파기 의무와는 별개 — retro H008 후속.)
+    EMAIL_VERIFICATION_RETENTION_DAYS: z.coerce.number().int().positive().default(7),
+    // 대량 삭제 청크 크기 — long-running tx/autovacuum 지연 방지 페이지네이션 단위.
+    BATCH_DELETE_CHUNK: z.coerce.number().int().positive().max(10_000).default(1000),
   })
   .refine((e) => e.JWT_ACCESS_SECRET !== e.JWT_REFRESH_SECRET, {
     // CANDID-006: Access/Refresh secret 분리 강제 — 동일 값이면 누수 영향 격리 무력화.

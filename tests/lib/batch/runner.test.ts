@@ -25,6 +25,10 @@ describe('describeError', () => {
     expect(describeError(new TypeError('boom'))).toBe('TypeError');
   });
 
+  it('code가 빈 문자열이면 name만 반환(code 미노출)', () => {
+    expect(describeError(Object.assign(new Error('msg'), { code: '' }))).toBe('Error');
+  });
+
   it('비-Error throw는 UnknownError', () => {
     expect(describeError('string throw')).toBe('UnknownError');
     expect(describeError({ secret: 'x' })).toBe('UnknownError');
@@ -73,6 +77,27 @@ describe('runNightlyCleanup', () => {
     const run: Mock = vi.fn().mockResolvedValue(0);
     await runNightlyCleanup(fakeDb, NOW, [{ name: 'x', run }]);
     expect(run).toHaveBeenCalledWith(fakeDb, NOW);
+  });
+
+  it('모든 태스크 실패 시 totalDeleted=0, hasError=true', async () => {
+    const tasks: CleanupTask[] = [
+      { name: 'a', run: vi.fn().mockRejectedValue(new Error('x')) },
+      { name: 'b', run: vi.fn().mockRejectedValue(new Error('y')) },
+    ];
+
+    const result = await runNightlyCleanup(fakeDb, NOW, tasks);
+
+    expect(result.totalDeleted).toBe(0);
+    expect(result.hasError).toBe(true);
+    expect(result.tasks.every((t) => t.error !== null)).toBe(true);
+  });
+
+  it('태스크가 비어 있으면 totalDeleted=0, hasError=false', async () => {
+    const result = await runNightlyCleanup(fakeDb, NOW, []);
+
+    expect(result.totalDeleted).toBe(0);
+    expect(result.hasError).toBe(false);
+    expect(result.tasks).toEqual([]);
   });
 });
 
