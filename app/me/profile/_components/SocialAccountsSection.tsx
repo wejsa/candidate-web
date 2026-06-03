@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SOCIAL_ACCOUNTS_LABELS as L, classifyUnlinkError } from '@/lib/users/profile-form';
 import type { ProfileProvider, ProfileProviderName } from '@/lib/users/types';
+import styles from '@/app/me/profile/profile.module.css';
 
 const PROVIDER_LABELS: Record<ProfileProviderName, string> = {
   google: 'Google',
@@ -49,35 +50,49 @@ export function SocialAccountsSection({ providers }: SocialAccountsSectionProps)
   }
 
   return (
-    <section aria-labelledby="social-accounts-title">
-      <h2 id="social-accounts-title">{L.heading}</h2>
-      <ul>
+    <section className={styles.card} aria-labelledby="social-accounts-title">
+      <h2 id="social-accounts-title" className={styles.cardTitle}>
+        {L.heading}
+      </h2>
+      <ul className={styles.socialList}>
         {ALL_PROVIDERS.map((provider) => {
           const isLinked = linked.has(provider);
           return (
-            <li key={provider}>
-              <span>{PROVIDER_LABELS[provider]}</span>
-              {isLinked ? (
-                <button
-                  type="button"
-                  disabled={pending === provider}
-                  onClick={() => void unlink(provider)}
+            <li key={provider} className={styles.socialRow}>
+              <span className={styles.socialName}>
+                <span
+                  className={`${styles.statusChip} ${isLinked ? styles.statusLinked : styles.statusUnlinked}`}
                 >
-                  {pending === provider ? L.unlinking : L.unlink}
-                </button>
-              ) : (
-                <>
-                  <span> · {L.notLinked} · </span>
-                  {/* link-add는 OAuth 전체 페이지 리다이렉트 흐름 → 일반 anchor 네비게이션 */}
+                  {isLinked ? '연결됨' : L.notLinked}
+                </span>
+                {PROVIDER_LABELS[provider]}
+              </span>
+              <span className={styles.socialActions}>
+                {isLinked ? (
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    disabled={pending === provider}
+                    onClick={() => void unlink(provider)}
+                  >
+                    {pending === provider ? L.unlinking : L.unlink}
+                  </button>
+                ) : (
+                  /* link-add는 OAuth 전체 페이지 리다이렉트 흐름 → 일반 anchor 네비게이션 */
                   <a href={`/api/v1/auth/oauth/${provider}?mode=link`}>{L.connect}</a>
-                </>
-              )}
+                )}
+              </span>
             </li>
           );
         })}
       </ul>
       {message !== null && (
-        <p role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</p>
+        <p
+          className={`${styles.msg} ${message.kind === 'error' ? styles.msgError : styles.msgOk}`}
+          role={message.kind === 'error' ? 'alert' : 'status'}
+        >
+          {message.text}
+        </p>
       )}
     </section>
   );

@@ -51,6 +51,8 @@ export interface ProfileDto {
   email: string;
   /** 마스킹된 연락처 (예: '010-****-5678'). 미등록 시 null. 평문은 노출하지 않는다. */
   phoneMasked: string | null;
+  /** 마스킹된 생년월일 (예: '1990-**-**'). 미등록 시 null. 평문은 노출하지 않는다. */
+  birthDateMasked: string | null;
   /** 비밀번호 설정 여부 — 소셜 전용 계정 식별 + 비번 변경 폼 분기용. 해시는 노출하지 않는다. */
   hasPassword: boolean;
   /** 연결된 소셜 계정 목록 (연결일 오름차순). */

@@ -8,6 +8,8 @@ export const PROFILE_EDIT_LABELS = {
   nameLabel: '이름',
   phoneLabel: '연락처',
   phonePlaceholder: '010-1234-5678 (변경 시에만 입력)',
+  birthDateLabel: '생년월일',
+  birthDateHint: '지원서 제출에 사용됩니다.',
   submit: '저장',
   submitting: '저장 중…',
   saved: '프로필이 저장되었습니다.',
@@ -21,15 +23,17 @@ export const PROFILE_EDIT_LABELS = {
 export interface ProfileUpdatePayload {
   name?: string;
   phone?: string;
+  birthDate?: string;
 }
 
 /**
  * 폼 입력 → PATCH 페이로드. 변경된 항목만 포함한다 (부분 갱신).
  * - name: trim 후 비어있지 않고 원본과 다르면 포함.
  * - phone: 입력이 비어있지 않으면 포함 (현재 값은 마스킹 표시라 비교 불가 → 입력 시 항상 전송).
+ * - birthDate: 입력이 비어있지 않으면 포함 (마스킹 표시라 비교 불가 → 입력 시 항상 전송).
  */
 export function buildProfileUpdatePayload(
-  input: { name: string; phone: string },
+  input: { name: string; phone: string; birthDate?: string },
   original: { name: string },
 ): ProfileUpdatePayload {
   const payload: ProfileUpdatePayload = {};
@@ -41,11 +45,19 @@ export function buildProfileUpdatePayload(
   if (trimmedPhone !== '') {
     payload.phone = trimmedPhone;
   }
+  const trimmedBirthDate = (input.birthDate ?? '').trim();
+  if (trimmedBirthDate !== '') {
+    payload.birthDate = trimmedBirthDate;
+  }
   return payload;
 }
 
 export function isEmptyPayload(payload: ProfileUpdatePayload): boolean {
-  return payload.name === undefined && payload.phone === undefined;
+  return (
+    payload.name === undefined &&
+    payload.phone === undefined &&
+    payload.birthDate === undefined
+  );
 }
 
 /** PATCH 응답 status → 사용자 안내 메시지. */
