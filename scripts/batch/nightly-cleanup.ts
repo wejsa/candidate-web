@@ -8,9 +8,13 @@
 //   직접 생성·주입하고 종료 시 $disconnect한다.
 import { PrismaClient } from '@prisma/client';
 import { runNightlyCleanup } from '@/lib/batch/runner';
+import { withBatchTimeouts } from '@/lib/batch/db';
 
 async function main(): Promise<void> {
-  const db = new PrismaClient();
+  // 배치 전용 클라이언트. cron 환경에서 DB 응답 지연 시 배치가 무한 대기하면 다음 스케줄과
+  // 겹쳐 커넥션이 누적될 수 있다. DATABASE_URL에 연결/문장 타임아웃 파라미터가 없으면 보수적으로
+  // 부여한다(이미 지정돼 있으면 사용자 값을 존중 — 덮어쓰지 않음).
+  const db = new PrismaClient({ datasourceUrl: withBatchTimeouts(process.env.DATABASE_URL) });
   try {
     const result = await runNightlyCleanup(db);
     for (const task of result.tasks) {

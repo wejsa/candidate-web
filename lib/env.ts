@@ -126,7 +126,8 @@ const envSchema = z
     SLACK_WEBHOOK_URL: z.string().url().optional(),
 
     // CANDID-029: 야간 정리 배치 파라미터.
-    // email_verifications 자동 파기 보존 일수 — consumedAt/expiresAt이 이 일수 경과 시 삭제(BR-PII-03).
+    // email_verifications 운영 위생 보존 일수 — consumedAt/expiresAt이 이 일수 경과 시 삭제.
+    // (PII 컬럼 없는 토큰 테이블이라 BR-PII-03/04 PII 파기 의무와는 별개 — retro H008 후속.)
     EMAIL_VERIFICATION_RETENTION_DAYS: z.coerce.number().int().positive().default(7),
     // 대량 삭제 청크 크기 — long-running tx/autovacuum 지연 방지 페이지네이션 단위.
     BATCH_DELETE_CHUNK: z.coerce.number().int().positive().max(10_000).default(1000),

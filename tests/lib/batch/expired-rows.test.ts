@@ -81,6 +81,38 @@ describe('cleanupExpiredEmailVerifications', () => {
     expect(emailVerification.findMany).toHaveBeenCalledTimes(2);
     expect(emailVerification.deleteMany).toHaveBeenCalledTimes(2);
   });
+
+  it('마지막 청크가 chunkSize와 정확히 일치하면 추가 빈 조회 후 종료한다(경계값)', async () => {
+    // deleteAllChunks 종료 조건 `rows.length < chunkSize`의 경계 — 정확히 가득 찬 청크면
+    // 한 번 더 조회해 빈 결과를 받고서야 종료한다(조기 종료/무한 루프 회귀 가드).
+    const { db, emailVerification } = makeDb();
+    emailVerification.findMany
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }]) // 정확히 chunkSize=2
+      .mockResolvedValueOnce([]); // 추가 빈 조회
+    emailVerification.deleteMany.mockResolvedValueOnce({ count: 2 });
+
+    const n = await cleanupExpiredEmailVerifications(db, NOW, 2);
+
+    expect(n).toBe(2);
+    expect(emailVerification.findMany).toHaveBeenCalledTimes(2);
+    expect(emailVerification.deleteMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('deleteMany가 0을 반환해도 chunkSize 미만 가드로 종료한다(무한 루프 방지)', async () => {
+    // 소스가 명시한 안전 계약: deleteRows가 비정상적으로 0을 반환해도 rows.length < chunkSize로 종료.
+    const { db, emailVerification } = makeDb();
+    emailVerification.findMany
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
+      .mockResolvedValueOnce([{ id: 3 }]); // chunkSize(2) 미만 → 종료
+    emailVerification.deleteMany
+      .mockResolvedValueOnce({ count: 0 }) // 경합 등으로 0 삭제
+      .mockResolvedValueOnce({ count: 1 });
+
+    const n = await cleanupExpiredEmailVerifications(db, NOW, 2);
+
+    expect(n).toBe(1);
+    expect(emailVerification.findMany).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('cleanupExpiredPasswordResetTokens', () => {
@@ -96,6 +128,32 @@ describe('cleanupExpiredPasswordResetTokens', () => {
       expect.objectContaining({ where: { expiresAt: { lt: NOW } } }),
     );
     expect(passwordResetToken.deleteMany).toHaveBeenCalledWith({ where: { id: { in: [9] } } });
+  });
+
+  it('만료 토큰이 없으면 삭제하지 않고 0 반환(멱등 재실행)', async () => {
+    const { db, passwordResetToken } = makeDb();
+    passwordResetToken.findMany.mockResolvedValueOnce([]);
+
+    const n = await cleanupExpiredPasswordResetTokens(db, NOW);
+
+    expect(n).toBe(0);
+    expect(passwordResetToken.deleteMany).not.toHaveBeenCalled();
+  });
+
+  it('청크 크기를 초과하면 다음 청크를 이어서 삭제한다(페이지네이션)', async () => {
+    const { db, passwordResetToken } = makeDb();
+    passwordResetToken.findMany
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
+      .mockResolvedValueOnce([{ id: 3 }]);
+    passwordResetToken.deleteMany
+      .mockResolvedValueOnce({ count: 2 })
+      .mockResolvedValueOnce({ count: 1 });
+
+    const n = await cleanupExpiredPasswordResetTokens(db, NOW, 2);
+
+    expect(n).toBe(3);
+    expect(passwordResetToken.findMany).toHaveBeenCalledTimes(2);
+    expect(passwordResetToken.deleteMany).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -135,5 +193,24 @@ describe('cleanupExpiredIdempotencyKeys', () => {
 
     expect(n).toBe(0);
     expect(idempotencyKey.deleteMany).not.toHaveBeenCalled();
+  });
+
+  it('청크 크기를 초과하면 다음 청크를 이어서 삭제한다(페이지네이션)', async () => {
+    const { db, idempotencyKey } = makeDb();
+    idempotencyKey.findMany
+      .mockResolvedValueOnce([
+        { userId: 1, key: 'a' },
+        { userId: 2, key: 'b' },
+      ])
+      .mockResolvedValueOnce([{ userId: 3, key: 'c' }]);
+    idempotencyKey.deleteMany
+      .mockResolvedValueOnce({ count: 2 })
+      .mockResolvedValueOnce({ count: 1 });
+
+    const n = await cleanupExpiredIdempotencyKeys(db, NOW, 2);
+
+    expect(n).toBe(3);
+    expect(idempotencyKey.findMany).toHaveBeenCalledTimes(2);
+    expect(idempotencyKey.deleteMany).toHaveBeenCalledTimes(2);
   });
 });
