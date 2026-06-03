@@ -3133,5 +3133,12 @@
     "stepNumber": 1,
     "prNumber": 117,
     "at": "2026-06-03T03:50:39Z"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-027",
+    "stepNumber": 2,
+    "prNumber": 119,
+    "at": "2026-06-03T03:55:26Z"
   }
 ]
