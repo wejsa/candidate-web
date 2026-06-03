@@ -84,9 +84,14 @@ export function PersonalInfoStep({ value, prefill, onChange }: Props) {
             placeholder="010-XXXX-XXXX"
             onChange={(e) => update('phone', e.target.value)}
             aria-invalid={errors.phone !== undefined}
+            aria-describedby={errors.phone !== undefined ? 'err-phone' : undefined}
             required
           />
-          {errors.phone !== undefined && <span role="alert">{errors.phone}</span>}
+          {errors.phone !== undefined && (
+            <span id="err-phone" role="alert">
+              {errors.phone}
+            </span>
+          )}
         </label>
 
         <label>
@@ -96,9 +101,14 @@ export function PersonalInfoStep({ value, prefill, onChange }: Props) {
             value={draft.birthDate}
             onChange={(e) => update('birthDate', e.target.value)}
             aria-invalid={errors.birthDate !== undefined}
+            aria-describedby={errors.birthDate !== undefined ? 'err-birthDate' : undefined}
             required
           />
-          {errors.birthDate !== undefined && <span role="alert">{errors.birthDate}</span>}
+          {errors.birthDate !== undefined && (
+            <span id="err-birthDate" role="alert">
+              {errors.birthDate}
+            </span>
+          )}
         </label>
 
         <label>
@@ -134,9 +144,14 @@ export function PersonalInfoStep({ value, prefill, onChange }: Props) {
                 update('careerMonths', n);
               }}
               aria-invalid={errors.careerMonths !== undefined}
+              aria-describedby={errors.careerMonths !== undefined ? 'err-careerMonths' : undefined}
               required
             />
-            {errors.careerMonths !== undefined && <span role="alert">{errors.careerMonths}</span>}
+            {errors.careerMonths !== undefined && (
+              <span id="err-careerMonths" role="alert">
+                {errors.careerMonths}
+              </span>
+            )}
           </label>
         )}
 

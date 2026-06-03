@@ -3025,5 +3025,28 @@
     "stepNumber": 2,
     "prNumber": 114,
     "at": "2026-06-03T11:04:35+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-028",
+    "stepNumber": 3,
+    "prNumber": 113,
+    "decision": "APPROVED (self-PR COMMENT)",
+    "at": "2026-06-03T11:09:58+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-028",
+    "stepNumber": 3,
+    "prNumber": 113,
+    "at": "2026-06-03T11:09:58+09:00"
+  },
+  {
+    "action": "reviewed",
+    "taskId": "CANDID-026",
+    "stepNumber": 2,
+    "prNumber": 114,
+    "decision": "COMMENT",
+    "at": "2026-06-03T11:15:15+09:00"
   }
 ]
