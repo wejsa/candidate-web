@@ -55,3 +55,9 @@ docker-compose.override.yml
 
 # Uploaded files (local dev)
 uploads/
+
+# CANDID-048 — Playwright E2E 산출물
+/test-results/
+/playwright-report/
+/blob-report/
+/e2e/.auth/
