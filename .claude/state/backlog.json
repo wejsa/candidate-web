@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 402,
+    "version": 403,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T10:49:04+09:00"
+    "updatedAt": "2026-06-03T10:49:23+09:00"
   },
   "summary": {
     "total": 47,
@@ -2236,7 +2236,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T10:47:35+09:00",
+      "assignedAt": "2026-06-03T10:49:23+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/oauth/[provider]/callback/route.ts",
@@ -2247,28 +2247,25 @@
         "lib/auth/email-verification.ts",
         "lib/auth/login.ts",
         "lib/auth/oauth/unlink.ts",
-        "lib/errors/response.ts",
-        "lib/observability/trace-context.ts",
         "lib/users/password-change.ts",
         "lib/users/withdraw.ts",
-        "middleware.ts",
         "prisma/schema.prisma"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 111,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": null,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "111",
-        "updatedAt": "2026-06-03T10:47:35+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T10:49:23+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "traceId 전파 인프라 + trace_id 마이그레이션",
           "description": "middleware(Edge) traceId 주입 → withErrorHandler에서 AsyncLocalStorage 컨텍스트 seed → 에러응답 traceId 통일. trace_id VARCHAR(36) NULL 컬럼 + partial 인덱스(WHERE trace_id IS NOT NULL). 경량 ALS만(전체 OTel 보류).",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "prisma/schema.prisma",
             "lib/observability/trace-context.ts",
@@ -2276,7 +2273,8 @@
             "lib/errors/response.ts"
           ],
           "estimatedLines": 380,
-          "prNumber": 111
+          "prNumber": 111,
+          "mergedAt": "2026-06-03T10:49:23+09:00"
         },
         {
           "number": 2,
@@ -2317,7 +2315,7 @@
           "estimatedLines": 360
         }
       ],
-      "currentStep": 1
+      "currentStep": 2
     },
     "CANDID-027": {
       "id": "CANDID-027",
