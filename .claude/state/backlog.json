@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 452,
+    "version": 453,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T08:37:03Z"
+    "updatedAt": "2026-06-03T09:14:19Z"
   },
   "summary": {
     "total": 50,
@@ -3711,7 +3711,7 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260603-081433",
-      "assignedAt": "2026-06-03T08:37:03Z",
+      "assignedAt": "2026-06-03T09:14:19Z",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/_components/LogoutButton.tsx",
@@ -3748,7 +3748,7 @@
           "number": 2,
           "title": "인증 UI — /login + /signup + 전역 헤더",
           "description": "/login(redirect 복원 + safeInternalPath open-redirect 가드 + 에러코드 메시지) · /signup(가입→이메일 인증 안내) · SiteHeader(인증 상태별) layout 통합. 폼 검증은 서버 스키마 SSOT 재사용. E2E 비인증→로그인→apply 복원. ⚠️ 최대 스텝.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/login/page.tsx",
             "app/login/_components/LoginForm.tsx",
@@ -3761,7 +3761,9 @@
             "e2e/journeys.spec.ts"
           ],
           "prLineLimit": 900,
-          "estimatedLines": 750
+          "estimatedLines": 750,
+          "prNumber": 129,
+          "branch": "feature/CANDID-050-step2"
         },
         {
           "number": 3,
@@ -3801,15 +3803,15 @@
       ],
       "currentStep": 2,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 129,
         "fixLoopCount": 0,
         "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T08:37:03Z"
+        "updatedAt": "2026-06-03T09:14:19Z"
       },
       "createdAt": "2026-06-03T08:12:34Z",
-      "updatedAt": "2026-06-03T08:37:03Z"
+      "updatedAt": "2026-06-03T09:14:19Z"
     }
   }
 }
