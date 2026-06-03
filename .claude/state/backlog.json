@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 393,
+    "version": 394,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-06-03T09:40:36+09:00"
   },
   "summary": {
     "total": 47,
     "done": 43,
-    "inProgress": 1,
+    "inProgress": 2,
     "review": 0,
-    "todo": 4
+    "todo": 2
   },
   "phases": {
     "1": {
@@ -2258,14 +2258,22 @@
       "id": "CANDID-028",
       "title": "접근성 WCAG 2.1 AA + 320~1920px 반응형",
       "description": "폼 라벨, 키보드 네비게이션, 대비비. iOS Safari 15+/Chrome 90+ 검증. 키보드만으로 가입~제출 완주 가능.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "low",
       "phase": 4,
       "dependencies": [
         "CANDID-019"
       ],
-      "createdAt": "2026-05-12T18:22:05+09:00"
+      "createdAt": "2026-05-12T18:22:05+09:00",
+      "assignee": "jaese@hoji-20260603-094035",
+      "assignedAt": "2026-06-03T09:40:36+09:00",
+      "lockTTL": 1800,
+      "lockedFiles": [],
+      "updatedAt": "2026-06-03T09:40:36+09:00",
+      "metadata": {
+        "version": 1
+      }
     },
     "CANDID-029": {
       "id": "CANDID-029",
