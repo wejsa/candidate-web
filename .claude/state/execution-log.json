@@ -3226,5 +3226,17 @@
     "action": "task_completed",
     "taskId": "CANDID-049",
     "at": "2026-06-03T06:28:26Z"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-029",
+    "stepNumber": 3,
+    "prNumber": 126,
+    "at": "2026-06-03T15:30:33+09:00"
+  },
+  {
+    "action": "task_completed",
+    "taskId": "CANDID-029",
+    "at": "2026-06-03T15:30:33+09:00"
   }
 ]
