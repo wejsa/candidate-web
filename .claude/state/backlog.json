@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 423,
+    "version": 424,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T04:10:20Z"
+    "updatedAt": "2026-06-03T04:14:37Z"
   },
   "summary": {
     "total": 47,
@@ -2316,11 +2316,9 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-122756",
-      "assignedAt": "2026-06-03T04:10:20Z",
+      "assignedAt": "2026-06-03T04:14:37Z",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/errors/response.ts",
-        "lib/observability/metrics.ts",
         "app/api/v1/auth/signup/route.ts",
         "app/api/v1/applications/route.ts",
         "app/api/v1/applications/me/[id]/withdraw/route.ts",
@@ -2359,13 +2357,14 @@
           "number": 3,
           "title": "HTTP duration/count 계측 (withErrorHandler) + normalizeRoute",
           "description": "withErrorHandler에 처리시간 측정 추가(성공/에러 모두 http_request_duration_seconds 기록). L-023: inner response 헤더(traceId) 보존-측정만. normalizeRoute로 동적 세그먼트→:id 정규화(카디널리티 방지) + 가드 단위테스트(L-034).",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/errors/response.ts",
             "lib/observability/metrics.ts"
           ],
           "estimatedLines": 320,
-          "prNumber": 120
+          "prNumber": 120,
+          "mergedAt": "2026-06-03T04:14:37Z"
         },
         {
           "number": 4,
@@ -2381,14 +2380,14 @@
           "estimatedLines": 320
         }
       ],
-      "currentStep": 3,
+      "currentStep": 4,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 120,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": null,
-        "autoChainArgs": "120 --auto-fix",
-        "updatedAt": "2026-06-03T04:10:20Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T04:14:37Z"
       }
     },
     "CANDID-028": {
