@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 50,
     "projectPrefix": "CANDID",
-    "version": 456,
+    "version": 457,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T09:54:09Z"
+    "updatedAt": "2026-06-03T10:05:46Z"
   },
   "summary": {
     "total": 50,
@@ -3711,7 +3711,7 @@
       "priority": "high",
       "phase": 2,
       "assignee": "wejsa-u@hoji-20260603-081433",
-      "assignedAt": "2026-06-03T09:54:09Z",
+      "assignedAt": "2026-06-03T10:05:46Z",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/jobs/[id]/_components/ApplyCta.tsx",
@@ -3790,7 +3790,7 @@
           "number": 4,
           "title": "/jobs/[id] 상세 재구성 — 칩 헤더 + 스티키 CTA",
           "description": "칩 헤더(직군·고용형태·경력·마감) + 본문 레이아웃 + 강조/스티키 지원 CTA + 공유. JSON-LD·force-dynamic·sanitize·runtime=nodejs 보존. 모바일 CTA 접근성. 회귀 테스트.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "app/jobs/[id]/page.tsx",
             "app/jobs/[id]/page.module.css",
@@ -3800,20 +3800,22 @@
             "app/jobs/[id]/_components/ShareButton.tsx"
           ],
           "prLineLimit": 600,
-          "estimatedLines": 450
+          "estimatedLines": 450,
+          "prNumber": 131,
+          "branch": "feature/CANDID-050-step4"
         }
       ],
       "currentStep": 4,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 131,
         "fixLoopCount": 0,
         "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T09:54:09Z"
+        "updatedAt": "2026-06-03T10:05:46Z"
       },
       "createdAt": "2026-06-03T08:12:34Z",
-      "updatedAt": "2026-06-03T09:54:09Z"
+      "updatedAt": "2026-06-03T10:05:46Z"
     }
   }
 }
