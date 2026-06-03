@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 420,
+    "version": 421,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T03:59:03Z"
+    "updatedAt": "2026-06-03T12:59:44+09:00"
   },
   "summary": {
     "total": 47,
@@ -2236,7 +2236,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T12:50:05+09:00",
+      "assignedAt": "2026-06-03T12:59:44+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/oauth/[provider]/callback/route.ts",
@@ -2245,13 +2245,13 @@
         "prisma/schema.prisma"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 118,
         "fixLoopCount": null,
-        "lastReviewDecision": null,
-        "autoChainArgs": "118 --auto-fix",
-        "updatedAt": "2026-06-03T12:50:05+09:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "118",
+        "updatedAt": "2026-06-03T12:59:44+09:00"
       },
       "steps": [
         {
