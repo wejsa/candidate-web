@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 describe('지원서 단계 이동 키보드 접근', () => {
-  it('이전/다음이 실 button + nav 랜드마크이며 Tab으로 도달한다', async () => {
+  it('중간 단계: 이전/다음이 실 button + nav 랜드마크이며 Tab으로 도달한다', async () => {
     const onPrev = vi.fn();
     const onNext = vi.fn();
     const user = userEvent.setup();
@@ -34,15 +34,37 @@ describe('지원서 단계 이동 키보드 접근', () => {
     await user.keyboard('{Enter}');
     expect(onNext).toHaveBeenCalledTimes(1);
   });
+
+  it('첫 단계: 이전 버튼 disabled → Tab은 다음으로 건너뛴다', async () => {
+    const user = userEvent.setup();
+    render(<StepNavigation currentStep={1} onPrev={vi.fn()} onNext={vi.fn()} />);
+    expect(screen.getByRole('button', { name: '이전' })).toBeDisabled();
+    await user.tab();
+    expect(screen.getByRole('button', { name: '다음' })).toHaveFocus(); // disabled 이전을 건너뜀
+  });
+
+  it('마지막 단계: 다음 버튼은 제출 라벨 + disabled', () => {
+    render(<StepNavigation currentStep={3} onPrev={vi.fn()} onNext={vi.fn()} />);
+    const submit = screen.getByRole('button', { name: /제출/ });
+    expect(submit).toBeDisabled();
+    expect(screen.getByRole('button', { name: '이전' })).toBeEnabled();
+  });
 });
 
 describe('skip-link 배선 (WCAG 2.4.1)', () => {
-  const read = (p: string): string => readFileSync(path.resolve(process.cwd(), p), 'utf8');
+  // 주석 false-pass 방지(리뷰): 블록/라인/JSX 주석 제거 후 매칭. (layout 주석에 <main id="main-content">가 등장)
+  const readStripped = (p: string): string =>
+    readFileSync(path.resolve(process.cwd(), p), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\/\/.*$/gm, '');
 
-  it('레이아웃 skip-link가 #main-content를 가리킨다', () => {
-    const layout = read('app/layout.tsx');
+  // 레이아웃 skip-link의 앵커를 추출해 페이지 main id와 상호 일치를 단언(한쪽 오타 검출).
+  const layout = readStripped('app/layout.tsx');
+  const anchor = layout.match(/href="#([\w-]+)"/)?.[1];
+
+  it('레이아웃 skip-link(.skip-link)가 fragment 앵커를 가리킨다', () => {
     expect(layout).toMatch(/className="skip-link"/);
-    expect(layout).toMatch(/href="#main-content"/);
+    expect(anchor).toBeDefined();
   });
 
   it.each([
@@ -56,7 +78,8 @@ describe('skip-link 배선 (WCAG 2.4.1)', () => {
     'app/me/withdraw/page.tsx',
     'app/password/reset/page.tsx',
     'app/password/reset-request/page.tsx',
-  ])('%s 의 <main>에 id="main-content" 앵커가 있다', (page) => {
-    expect(read(page)).toMatch(/<main id="main-content"/);
+  ])('%s 의 <main>에 레이아웃 앵커와 동일한 id가 있다', (page) => {
+    expect(anchor).toBeDefined();
+    expect(readStripped(page)).toMatch(new RegExp(`<main id="${anchor}"`));
   });
 });
