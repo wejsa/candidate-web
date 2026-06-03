@@ -5,7 +5,8 @@ import { basePrisma } from '@/lib/prisma';
 import { getTraceId } from '@/lib/observability/trace-context';
 
 // CANDID-026 Step 2 — 감사 로그 emit SSOT.
-// audit_logs INSERT의 단일 진입점. 4개 모듈이 인라인 반복하던 auditLog.create를 본 헬퍼로 통일한다.
+// audit_logs INSERT의 단일 진입점. 3개 모듈(users/applications withdraw, password-change)이 인라인
+// 반복하던 auditLog.create를 본 헬퍼로 통일한다.
 //   - traceId: ALS 컨텍스트(getTraceId, CANDID-026 Step 1)에서 자동 첨부 — 호출측 인자 불필요.
 //   - metadata: PII-free 가드(assertPiiFreeMetadata)로 평문 PII/토큰 유입을 차단(BR-PII-01/02).
 //   - ipAddress는 전용 컬럼으로만 — metadata 중복 금지(정규화).
@@ -20,7 +21,7 @@ export class AuditMetadataError extends Error {
   }
 }
 
-// metadata 키 화이트리스트가 아닌 블랙리스트 — PII로 해석될 수 있는 키 이름을 차단한다.
+// metadata 키 화이트리스트가 아닌 블랙리스트 — PII로 해석될 수 있는 키 이름을 차단한다(정확 일치).
 const FORBIDDEN_METADATA_KEYS = new Set([
   'email',
   'phone',
@@ -36,20 +37,39 @@ const FORBIDDEN_METADATA_KEYS = new Set([
   'address',
   'name',
   'fullname',
+  'username',
+  'firstname',
+  'lastname',
 ]);
 
-// 값 자체가 PII로 보이는 패턴 — 이메일(@), 전화번호 형태.
+// 값 자체가 PII로 보이는 패턴 — 이메일(@), 전화번호(구분자/무구분자), 주민번호, 장문 연속 숫자.
 const PII_VALUE_PATTERNS: readonly RegExp[] = [
   /@/,
-  /\b\d{2,4}[-.\s]?\d{3,4}[-.\s]?\d{4}\b/,
+  /\b\d{2,4}[-.\s]?\d{3,4}[-.\s]?\d{4}\b/, // 전화 (구분자)
+  /\b\d{6}[-\s]?\d{7}\b/, // 주민등록번호
+  /\d{10,}/, // 전화(무구분 11자리)·긴 식별자 — 감사 metadata에 들어올 이유 없음(fail-closed)
 ];
 
 const MAX_METADATA_VALUE_LENGTH = 256;
 
+/** 스칼라 값(문자열/숫자)을 문자열화해 길이·PII 패턴을 검사한다. */
+function assertScalarPiiFree(key: string, value: string | number): void {
+  const text = String(value);
+  if (text.length > MAX_METADATA_VALUE_LENGTH) {
+    throw new AuditMetadataError(`audit metadata 값이 너무 김: "${key}" (>${MAX_METADATA_VALUE_LENGTH})`);
+  }
+  for (const pattern of PII_VALUE_PATTERNS) {
+    if (pattern.test(text)) {
+      throw new AuditMetadataError(`audit metadata 값이 PII 패턴과 일치: "${key}"`);
+    }
+  }
+}
+
 /**
  * metadata가 PII-free인지 검증한다. 위반 시 AuditMetadataError throw(fail-closed).
  * - 금지 키(email/phone/token/name/birth 등) 차단
- * - 문자열 값이 이메일/전화 패턴이거나 과도하게 길면 차단(평문 PII·토큰 유입 방지)
+ * - 문자열·숫자 값이 이메일/전화/주민번호 패턴이거나 과도하게 길면 차단(평문 PII·토큰 유입 방지)
+ * - 중첩 객체/배열 금지 — 감사 metadata는 평면 스칼라만 허용(재귀 사각지대 차단, fail-closed).
  */
 export function assertPiiFreeMetadata(
   metadata: Record<string, unknown> | undefined,
@@ -59,15 +79,12 @@ export function assertPiiFreeMetadata(
     if (FORBIDDEN_METADATA_KEYS.has(key.toLowerCase())) {
       throw new AuditMetadataError(`audit metadata에 금지 키 포함: "${key}"`);
     }
-    if (typeof value === 'string') {
-      if (value.length > MAX_METADATA_VALUE_LENGTH) {
-        throw new AuditMetadataError(`audit metadata 값이 너무 김: "${key}" (>${MAX_METADATA_VALUE_LENGTH})`);
-      }
-      for (const pattern of PII_VALUE_PATTERNS) {
-        if (pattern.test(value)) {
-          throw new AuditMetadataError(`audit metadata 값이 PII 패턴과 일치: "${key}"`);
-        }
-      }
+    if (value !== null && typeof value === 'object') {
+      // 중첩 구조는 값 내부 PII 검사를 우회하므로 평면 강제 — 호출부는 스칼라 키만 사용한다.
+      throw new AuditMetadataError(`audit metadata는 평면 스칼라만 허용(중첩/배열 불가): "${key}"`);
+    }
+    if (typeof value === 'string' || typeof value === 'number') {
+      assertScalarPiiFree(key, value);
     }
   }
   return metadata;

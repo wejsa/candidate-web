@@ -144,3 +144,47 @@ describe('assertPiiFreeMetadata — PII-free 회귀 가드 (BR-PII-01/02)', () =
     expect(tx.create).not.toHaveBeenCalled();
   });
 });
+
+// 리뷰 보강(PR #114) — 가드의 우회 경계(중첩/숫자/대소문자/false-positive)를 회귀 박제.
+describe('assertPiiFreeMetadata — 우회 경계 회귀 가드', () => {
+  it.each([
+    ['중첩 객체', { actor: { email: 'a@b.com' } }],
+    ['배열', { refs: ['010-1234-5678'] }],
+    ['빈 객체도 평면 위반', { ctx: {} }],
+  ])('중첩/배열 값(%s)은 평면 위반으로 throw', (_label, meta) => {
+    expect(() => assertPiiFreeMetadata(meta)).toThrow(AuditMetadataError);
+  });
+
+  it.each([
+    ['전화 무구분 10자리(숫자)', { contactNo: 1012345678 }],
+    ['전화 무구분 11자리(문자열)', { contactNo: '01012345678' }],
+    ['주민번호', { rrn: '900101-1234567' }],
+    ['장문 식별자(숫자)', { id: 12345678901 }],
+  ])('숫자/긴 연속 숫자 PII(%s)는 throw', (_label, meta) => {
+    expect(() => assertPiiFreeMetadata(meta)).toThrow(AuditMetadataError);
+  });
+
+  it.each([['EMAIL'], ['Phone'], ['Birth_Date'], ['Username']])(
+    '대문자/혼합 변형 금지 키 "%s"도 차단(toLowerCase)',
+    (key) => {
+      expect(() => assertPiiFreeMetadata({ [key]: 'x' })).toThrow(AuditMetadataError);
+    },
+  );
+
+  it.each([
+    ['mode', { mode: 'changed' }],
+    ['reasonLength', { reasonLength: 12 }],
+    ['count', { count: 3 }],
+    ['hasReason', { hasReason: true }],
+    ['applicationNumber', { applicationNumber: 'A-202606-00001' }],
+    ['provider', { provider: 'google' }],
+    ['nameLength(부분일치 아님)', { nameLength: 4 }],
+  ])('정상 PII-free 키/값 "%s"은 통과(false-positive 없음)', (_label, meta) => {
+    expect(() => assertPiiFreeMetadata(meta)).not.toThrow();
+  });
+
+  it('256자 정확 경계는 통과, 257자는 throw (off-by-one 가드)', () => {
+    expect(() => assertPiiFreeMetadata({ blob: 'x'.repeat(256) })).not.toThrow();
+    expect(() => assertPiiFreeMetadata({ blob: 'x'.repeat(257) })).toThrow(AuditMetadataError);
+  });
+});
