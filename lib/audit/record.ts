@@ -138,3 +138,21 @@ export async function recordAuditEvent(
     },
   });
 }
+
+/**
+ * 비-트랜잭션 감사 emit용 fail-open 래퍼 — 감사 write 실패가 본 흐름(로그인/PII 조회)을 막지 않는다.
+ * 감사는 cross-cutting 보조 관심사이므로 audit_logs 장애가 로그인 불가/조회 불가로 증폭되지 않게 격리한다.
+ * 트랜잭션 내부 기록(BR-TX-01, 예: APPLICATION_SUBMIT)은 실패 시 롤백이 정상이므로 recordAuditEvent를 직접 쓴다.
+ * 실패는 PII-free하게 로깅만 한다(eventType/원인 메시지 — 평문 PII·토큰 미포함).
+ */
+export async function recordAuditEventSafe(input: RecordAuditInput): Promise<void> {
+  try {
+    await recordAuditEvent(input);
+  } catch (error) {
+    console.warn(
+      `[audit-emit-failed] eventType=${input.eventType} err=${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+}

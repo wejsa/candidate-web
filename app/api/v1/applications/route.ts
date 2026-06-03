@@ -38,84 +38,88 @@ import {
   storeResponse,
 } from '@/lib/idempotency/store';
 import { AppError, withErrorHandler } from '@/lib/errors';
+import { withTraceContext } from '@/lib/observability/trace-context';
 
 /** 응답 상태 — submit 성공은 201 Created. */
 const SUBMIT_RESPONSE_STATUS = 201;
 
-export const POST = withErrorHandler(async (request: NextRequest) => {
-  // 1) 인증 (실패 시 AppError throw — withErrorHandler가 표준 응답 변환)
-  const { userId } = await requireAuth(request);
+// withTraceContext: traceId 컨텍스트 seed → submitApplication 내부 APPLICATION_SUBMIT 감사에 전파(CANDID-026 Step 3).
+export const POST = withErrorHandler(
+  withTraceContext(async (request: NextRequest) => {
+    // 1) 인증 (실패 시 AppError throw — withErrorHandler가 표준 응답 변환)
+    const { userId } = await requireAuth(request);
 
-  // 2) Idempotency-Key 헤더 검증 (BR-APP-06)
-  const rawKey = request.headers.get('Idempotency-Key');
-  if (rawKey === null || rawKey.length === 0) {
-    throw new AppError('SYS_VALIDATION_FAILED', {
-      message: 'Idempotency-Key 헤더가 필요합니다.',
-      details: [{ field: 'Idempotency-Key', reason: 'header missing' }],
-    });
-  }
-  let idempotencyKey: string;
-  try {
-    idempotencyKey = IdempotencyKeySchema.parse(rawKey);
-  } catch (err) {
-    if (err instanceof z.ZodError) {
+    // 2) Idempotency-Key 헤더 검증 (BR-APP-06)
+    const rawKey = request.headers.get('Idempotency-Key');
+    if (rawKey === null || rawKey.length === 0) {
       throw new AppError('SYS_VALIDATION_FAILED', {
-        message: 'Idempotency-Key 형식이 올바르지 않습니다.',
-        details: err.issues.map((i) => ({
-          field: 'Idempotency-Key',
-          reason: i.message,
-        })),
+        message: 'Idempotency-Key 헤더가 필요합니다.',
+        details: [{ field: 'Idempotency-Key', reason: 'header missing' }],
       });
     }
-    throw err;
-  }
+    let idempotencyKey: string;
+    try {
+      idempotencyKey = IdempotencyKeySchema.parse(rawKey);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        throw new AppError('SYS_VALIDATION_FAILED', {
+          message: 'Idempotency-Key 형식이 올바르지 않습니다.',
+          details: err.issues.map((i) => ({
+            field: 'Idempotency-Key',
+            reason: i.message,
+          })),
+        });
+      }
+      throw err;
+    }
 
-  // 3) Body 파싱 — JSON parse 실패는 SYS_VALIDATION_FAILED로 통합 (ZodError와 동일 status 400)
-  let rawBody: unknown;
-  try {
-    rawBody = await request.json();
-  } catch {
-    throw new AppError('SYS_VALIDATION_FAILED', {
-      message: '요청 본문이 유효한 JSON이 아닙니다.',
-    });
-  }
-
-  // 4) 멱등성 lookup (parse 전 raw body 해시 — body 검증 실패도 멱등 응답 보존)
-  // requestHash는 raw body 기준 — 같은 사용자가 같은 key + 같은 의미 body라면 zod 결과와 무관하게 일치.
-  const requestHash = hashRequestBody(rawBody);
-  let cached;
-  try {
-    cached = await lookupAndVerify(userId, idempotencyKey, requestHash);
-  } catch (err) {
-    if (err instanceof IdempotencyRequestMismatchError) {
+    // 3) Body 파싱 — JSON parse 실패는 SYS_VALIDATION_FAILED로 통합 (ZodError와 동일 status 400)
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
       throw new AppError('SYS_VALIDATION_FAILED', {
-        message: 'Idempotency-Key가 다른 요청 본문과 함께 재사용되었습니다.',
+        message: '요청 본문이 유효한 JSON이 아닙니다.',
       });
     }
-    throw err;
-  }
-  if (cached !== null) {
-    // 캐시 hit — 첫 응답을 그대로 재현 (PII-free 응답이므로 평문 JSON 안전)
-    return NextResponse.json(cached.responseJson, { status: cached.responseStatus });
-  }
 
-  // 5) Body 검증 (cache miss인 경우만 — cache hit는 첫 검증 결과를 그대로 반환)
-  const body = SubmitRequestSchema.parse(rawBody);
+    // 4) 멱등성 lookup (parse 전 raw body 해시 — body 검증 실패도 멱등 응답 보존)
+    // requestHash는 raw body 기준 — 같은 사용자가 같은 key + 같은 의미 body라면 zod 결과와 무관하게 일치.
+    const requestHash = hashRequestBody(rawBody);
+    let cached;
+    try {
+      cached = await lookupAndVerify(userId, idempotencyKey, requestHash);
+    } catch (err) {
+      if (err instanceof IdempotencyRequestMismatchError) {
+        throw new AppError('SYS_VALIDATION_FAILED', {
+          message: 'Idempotency-Key가 다른 요청 본문과 함께 재사용되었습니다.',
+        });
+      }
+      throw err;
+    }
+    if (cached !== null) {
+      // 캐시 hit — 첫 응답을 그대로 재현 (PII-free 응답이므로 평문 JSON 안전)
+      return NextResponse.json(cached.responseJson, { status: cached.responseStatus });
+    }
 
-  // 6) 제출 실행 (validate + 트랜잭션 + 이메일 fire-and-forget)
-  const summary = await submitApplication({
-    userId,
-    jobPostingId: body.jobPostingId,
-  });
+    // 5) Body 검증 (cache miss인 경우만 — cache hit는 첫 검증 결과를 그대로 반환)
+    const body = SubmitRequestSchema.parse(rawBody);
 
-  // 7) 멱등성 레코드 저장 (P2002 race는 create-only로 첫 응답 winner — storeResponse 내부 처리)
-  await storeResponse({
-    userId,
-    key: idempotencyKey,
-    requestHash,
-    responseJson: summary,
-    responseStatus: SUBMIT_RESPONSE_STATUS,
-  });
+    // 6) 제출 실행 (validate + 트랜잭션 + 이메일 fire-and-forget)
+    const summary = await submitApplication({
+      userId,
+      jobPostingId: body.jobPostingId,
+    });
 
-  return NextResponse.json(summary, { status: SUBMIT_RESPONSE_STATUS });
-});
+    // 7) 멱등성 레코드 저장 (P2002 race는 create-only로 첫 응답 winner — storeResponse 내부 처리)
+    await storeResponse({
+      userId,
+      key: idempotencyKey,
+      requestHash,
+      responseJson: summary,
+      responseStatus: SUBMIT_RESPONSE_STATUS,
+    });
+
+    return NextResponse.json(summary, { status: SUBMIT_RESPONSE_STATUS });
+  }),
+);

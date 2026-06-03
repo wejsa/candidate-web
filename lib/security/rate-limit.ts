@@ -55,6 +55,43 @@ export function rateLimitKeyByIp(request: NextRequest): string {
   return directIp !== '' ? `ip:${directIp}` : 'ip:unknown';
 }
 
+// IPv4(옥텟 ≤255) / IPv6(hex+콜론, 선택적 IPv4 suffix) 검증. Edge-safe(정규식만, node:net 미사용).
+// 위조 X-Forwarded-For가 @db.Inet 컬럼에 INSERT되어 22P02로 로그인을 깨뜨리는 것을 사전 차단한다(SEC-1).
+const IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+const IPV6_RE = /^[0-9a-fA-F:]+(\.\d{1,3}){0,3}$/;
+
+function isInetValue(value: string): boolean {
+  const ipv4 = IPV4_RE.exec(value);
+  if (ipv4 !== null) {
+    return ipv4.slice(1).every((octet) => Number(octet) <= 255);
+  }
+  // IPv6는 콜론을 반드시 포함(loose) — 임의 문자열/포트 표기/스크립트 등을 거부.
+  return value.includes(':') && IPV6_RE.test(value);
+}
+
+/**
+ * 클라이언트 IP 원값 추출(감사 로그 ip_address용) — rateLimitKeyByIp와 동일 TRUST_PROXY 게이트.
+ * 신뢰 헤더(X-Forwarded-For/X-Real-IP)는 TRUST_PROXY=true에서만, 그 외에는 NextRequest.ip.
+ * IPv4/IPv6 형식 검증 통과 값만 반환하고, 부재/부적합 시 null(SEC-1: @db.Inet 위반 INSERT 차단).
+ * CANDID-026 감사 이벤트(LOGIN 등)에서 IP 기록에 사용한다.
+ */
+export function clientIpFromRequest(request: NextRequest): string | null {
+  const candidate = ((): string => {
+    const env = getEnv();
+    if (env.TRUST_PROXY) {
+      const forwarded = request.headers.get('x-forwarded-for');
+      if (forwarded !== null && forwarded !== '') {
+        const first = forwarded.split(',')[0]?.trim() ?? '';
+        if (first !== '') return first;
+      }
+      const real = request.headers.get('x-real-ip');
+      if (real !== null && real !== '') return real.trim();
+    }
+    return (request as { ip?: string }).ip ?? '';
+  })();
+  return candidate !== '' && isInetValue(candidate) ? candidate : null;
+}
+
 /**
  * BR-SEC-04 정책 카탈로그 — 변경 시점이 곧 SSOT. 호출측은 import해서 사용.
  *
