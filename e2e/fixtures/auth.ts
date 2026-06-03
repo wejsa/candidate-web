@@ -8,9 +8,9 @@ import { type Page, expect } from '@playwright/test';
 /** 비밀번호 — 10자 이상 + 3-of-4 문자군(대/소/숫자/특수) 충족(lib/auth/validation). */
 export const E2E_PASSWORD = 'E2eTest1234!';
 
-/** 실행마다 고유 이메일 — dev DB의 UNIQUE(email) 충돌/테스트 간 간섭 방지. */
+/** 실행마다 고유 이메일 — dev DB의 UNIQUE(email) 충돌/테스트 간 간섭 방지(@example.com=RFC 2606 예약). */
 export function uniqueEmail(prefix = 'e2e'): string {
-  return `${prefix}+${Date.now()}-${Math.floor(Math.random() * 1_000_000)}@example.com`;
+  return `${prefix}+${crypto.randomUUID()}@example.com`;
 }
 
 /**
@@ -29,7 +29,9 @@ export async function signupViaApi(page: Page, email = uniqueEmail()): Promise<{
       ageConfirmed: true,
     },
   });
-  // 실패 시 본문을 메시지에 실어 디버깅 용이.
-  expect(res.status(), `signup 실패: ${await res.text()}`).toBe(201);
+  // 실패 시 본문(앞 200자만)을 메시지에 실어 디버깅 — 토큰/장문 노출 방지 위해 길이 제한.
+  expect(res.status(), `signup 실패(${res.status()}): ${(await res.text()).slice(0, 200)}`).toBe(
+    201,
+  );
   return { email };
 }
