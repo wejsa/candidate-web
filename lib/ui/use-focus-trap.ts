@@ -86,7 +86,11 @@ export function useFocusTrap<T extends HTMLElement>(
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = previousOverflow;
       // 트리거 요소로 포커스 복원 (모달 닫힘 후 키보드 맥락 유지).
-      previouslyFocused?.focus?.();
+      // isConnected 가드: 성공-navigate/RSC refresh 경로에서 트리거가 이미 DOM에서
+      // 제거됐으면 복원을 건너뛴다(분리된 노드 focus는 무의미 — 리뷰 D-MAJOR).
+      if (previouslyFocused?.isConnected === true) {
+        previouslyFocused.focus?.();
+      }
     };
   }, [active]);
 

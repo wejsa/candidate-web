@@ -82,4 +82,62 @@ describe('useFocusTrap', () => {
     rerender(<Harness active={false} />);
     expect(document.activeElement).toBe(getByTestId('outside'));
   });
+
+  // --- 리뷰 보강: negative/edge 분기 (disabled 제외 / 외부 포커스 재진입 / focusables 0 / overflow 복원 / 제거된 트리거) ---
+
+  it('disabled 요소는 trap 경계에서 제외된다', () => {
+    function H(): React.JSX.Element {
+      const ref = useFocusTrap<HTMLDivElement>(true);
+      return (
+        <div ref={ref} role="dialog" aria-modal="true">
+          <button data-testid="first" type="button">
+            first
+          </button>
+          <button data-testid="disabled-last" type="button" disabled>
+            disabled
+          </button>
+        </div>
+      );
+    }
+    const { getByTestId } = render(<H />);
+    getByTestId('first').focus(); // 활성 focusable이 first 하나뿐 → 경계
+    fireEvent.keyDown(getByTestId('first'), { key: 'Tab' });
+    expect(document.activeElement).toBe(getByTestId('first')); // disabled로 이동하지 않음
+  });
+
+  it('포커스가 컨테이너 밖에 있을 때 Tab은 첫 요소로 강제 재진입한다', () => {
+    const { getByTestId } = render(<Harness active />);
+    getByTestId('outside').focus();
+    fireEvent.keyDown(document, { key: 'Tab' });
+    expect(document.activeElement).toBe(getByTestId('first'));
+  });
+
+  it('focusable이 0개여도 Tab 처리 시 throw하지 않는다', () => {
+    function H(): React.JSX.Element {
+      const ref = useFocusTrap<HTMLDivElement>(true);
+      return (
+        <div ref={ref} role="dialog" aria-modal="true">
+          <p>focusable 없음</p>
+        </div>
+      );
+    }
+    render(<H />);
+    expect(() => fireEvent.keyDown(document, { key: 'Tab' })).not.toThrow();
+  });
+
+  it('직전 overflow 값을 보존해 복원한다 (빈 문자열 아님)', () => {
+    document.body.style.overflow = 'scroll';
+    const { rerender } = render(<Harness active />);
+    expect(document.body.style.overflow).toBe('hidden');
+    rerender(<Harness active={false} />);
+    expect(document.body.style.overflow).toBe('scroll');
+  });
+
+  it('복원 대상이 DOM에서 제거돼도 throw하지 않는다 (isConnected 가드)', () => {
+    const { getByTestId, rerender } = render(<Harness active={false} />);
+    getByTestId('outside').focus();
+    rerender(<Harness active />);
+    getByTestId('outside').remove(); // 트리거가 navigate/refresh로 사라진 상황
+    expect(() => rerender(<Harness active={false} />)).not.toThrow();
+  });
 });
