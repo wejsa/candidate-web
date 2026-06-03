@@ -1,13 +1,18 @@
 // CANDID-027 Step 1 — 메트릭 레지스트리 단위 테스트.
 // globalThis 싱글톤 + reset helper(L-002) + 비즈니스 카운터/직렬화 동작을 검증한다.
 
+import { NextRequest, NextResponse } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { setRequestObserver, withErrorHandler } from '@/lib/errors';
 import {
   __resetMetricsRegistryForTesting,
   getMetricsRegistry,
   metricsContentType,
+  normalizeRoute,
   recordBusinessEvent,
+  recordHttpRequest,
   renderMetrics,
+  wireHttpMetrics,
 } from '@/lib/observability/metrics';
 
 beforeEach(() => {
@@ -88,5 +93,62 @@ describe('__resetMetricsRegistryForTesting', () => {
     // 새 레지스트리에서 정상 동작(중복 등록 throw 없음).
     expect(() => recordBusinessEvent('signup')).not.toThrow();
     expect(await renderMetrics()).toContain('candidate_business_event_total');
+  });
+});
+
+describe('normalizeRoute', () => {
+  it.each([
+    ['/', '/'],
+    ['/api/v1/jobs', '/api/v1/jobs'],
+    ['/api/v1/jobs/123', '/api/v1/jobs/:id'],
+    [
+      '/api/v1/applications/me/123e4567-e89b-12d3-a456-426614174000/withdraw',
+      '/api/v1/applications/me/:id/withdraw',
+    ],
+    ['/api/v1/applications/A-202606-00001', '/api/v1/applications/:id'],
+    ['/api/v1/tokens/deadbeefdeadbeef0123', '/api/v1/tokens/:id'],
+  ])('%s → %s (동적 세그먼트 정규화)', (input, expected) => {
+    expect(normalizeRoute(input)).toBe(expected);
+  });
+
+  it('알파벳 세그먼트(me, withdraw 등)는 보존한다', () => {
+    expect(normalizeRoute('/api/v1/users/me/withdraw')).toBe('/api/v1/users/me/withdraw');
+  });
+});
+
+describe('recordHttpRequest', () => {
+  it('정규화 route/대문자 method/상태군 라벨로 히스토그램을 기록한다', async () => {
+    recordHttpRequest('get', '/api/v1/jobs/42', 200, 0.123);
+    const text = await renderMetrics();
+    expect(text).toContain(
+      'http_request_duration_seconds_count{method="GET",route="/api/v1/jobs/:id",status_class="2xx"} 1',
+    );
+  });
+
+  it.each([
+    [204, '2xx'],
+    [301, '3xx'],
+    [422, '4xx'],
+    [503, '5xx'],
+  ])('status %d → status_class %s', async (status, klass) => {
+    recordHttpRequest('POST', '/api/v1/applications', status, 0.5);
+    const text = await renderMetrics();
+    expect(text).toContain(`status_class="${klass}"`);
+  });
+});
+
+describe('wireHttpMetrics', () => {
+  afterEach(() => {
+    setRequestObserver(null);
+  });
+
+  it('withErrorHandler 요청을 정규화 라벨로 히스토그램에 관측한다', async () => {
+    wireHttpMetrics();
+    const handler = withErrorHandler(async () => NextResponse.json({ ok: true }, { status: 200 }));
+    await handler(new NextRequest('http://localhost/api/v1/jobs/7'), undefined);
+    const text = await renderMetrics();
+    expect(text).toContain('route="/api/v1/jobs/:id"');
+    expect(text).toContain('method="GET"');
+    expect(text).toContain('status_class="2xx"');
   });
 });

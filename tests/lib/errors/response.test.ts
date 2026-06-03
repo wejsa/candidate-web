@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { AppError, errorResponse, handleApiError, withErrorHandler } from '@/lib/errors';
+import {
+  AppError,
+  errorResponse,
+  handleApiError,
+  setRequestObserver,
+  withErrorHandler,
+} from '@/lib/errors';
 import type { ErrorResponseBody } from '@/lib/errors';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -179,5 +185,67 @@ describe('withErrorHandler', () => {
     });
     const body = await bodyOf(await handler(req('/api/v1/me'), undefined));
     expect(body.traceId).toMatch(UUID_RE);
+  });
+});
+
+// CANDID-027 Step 3 — 요청 관측 훅(setRequestObserver). universal 모듈에 prom-client를
+// 끌어들이지 않고 withErrorHandler가 관측 콜백만 호출하는지 검증한다.
+describe('withErrorHandler 요청 관측 (setRequestObserver)', () => {
+  afterEach(() => {
+    setRequestObserver(null);
+  });
+
+  it('성공 응답을 (method, path, status, duration)으로 관측자에 전달한다', async () => {
+    const calls: Array<[string, string, number, number]> = [];
+    setRequestObserver((m, p, s, d) => calls.push([m, p, s, d]));
+    const handler = withErrorHandler(async () => NextResponse.json({}, { status: 201 }));
+    await handler(req('/api/v1/jobs'), undefined);
+    expect(calls).toHaveLength(1);
+    const [method, path, status, duration] = calls[0]!;
+    expect(method).toBe('GET');
+    expect(path).toBe('/api/v1/jobs');
+    expect(status).toBe(201);
+    expect(typeof duration).toBe('number');
+    expect(duration).toBeGreaterThanOrEqual(0);
+  });
+
+  it('handler가 throw해도 변환된 에러 응답 status(500)를 관측한다', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const observed: number[] = [];
+    setRequestObserver((_m, _p, s) => observed.push(s));
+    const handler = withErrorHandler(() => {
+      throw new Error('boom');
+    });
+    const res = await handler(req(), undefined);
+    expect(res.status).toBe(500);
+    expect(observed).toEqual([500]);
+  });
+
+  it('관측자가 throw해도 삼켜져 요청 응답에 영향이 없다', async () => {
+    setRequestObserver(() => {
+      throw new Error('observer failure');
+    });
+    const handler = withErrorHandler(async () => NextResponse.json({ ok: true }, { status: 200 }));
+    const res = await handler(req(), undefined);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+  });
+
+  it('inner 응답 헤더를 보존한다 (L-023 — 관측이 응답을 변형하지 않음)', async () => {
+    setRequestObserver(() => {});
+    const handler = withErrorHandler(async () => {
+      const r = NextResponse.json({ ok: true }, { status: 200 });
+      r.headers.set('x-custom', 'keep');
+      return r;
+    });
+    const res = await handler(req(), undefined);
+    expect(res.headers.get('x-custom')).toBe('keep');
+  });
+
+  it('관측자 미설정 시 no-op으로 정상 응답한다', async () => {
+    setRequestObserver(null);
+    const handler = withErrorHandler(async () => NextResponse.json({ ok: true }, { status: 200 }));
+    const res = await handler(req(), undefined);
+    expect(res.status).toBe(200);
   });
 });
