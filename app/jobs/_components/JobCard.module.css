@@ -1,6 +1,7 @@
 /* CANDID-050 Step 3 — 공고 카드 시각 재구성. 전역 토큰 재사용. */
 
 .card {
+  position: relative; /* stretched-link(.titleLink::after) 기준 */
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -43,6 +44,9 @@
   text-decoration: none;
 }
 
+/* stretched-link: 카드 표면 전체를 제목 링크의 클릭 영역으로 확장.
+   ⚠️ 카드 내부에 인터랙티브 요소(버튼/추가 링크)를 넣으면 ::after가 클릭을 가로챈다 →
+   그 요소에 position:relative + z-index를 주거나 stretched-link 패턴을 재검토할 것. */
 .titleLink::after {
   content: '';
   position: absolute;
@@ -52,10 +56,6 @@
 .titleLink:hover {
   color: var(--color-link);
   text-decoration: underline;
-}
-
-.card {
-  position: relative; /* stretched-link 기준 */
 }
 
 .dday {

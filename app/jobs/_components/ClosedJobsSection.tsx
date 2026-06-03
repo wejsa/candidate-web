@@ -4,7 +4,7 @@
 
 import type { JobListItem } from '@/lib/jobs/types';
 import { JobCard } from './JobCard';
-import grid from '../page.module.css';
+import grid from './ClosedJobsSection.module.css';
 
 export interface ClosedJobsSectionProps {
   items: JobListItem[];
