@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 48,
     "projectPrefix": "CANDID",
-    "version": 434,
+    "version": 435,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T14:58:06+09:00"
+    "updatedAt": "2026-06-03T15:10:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -2512,7 +2512,7 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-141749",
-      "assignedAt": "2026-06-03T14:58:06+09:00",
+      "assignedAt": "2026-06-03T15:10:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "lib/batch/draft-retention.ts",
@@ -2523,15 +2523,15 @@
         "lib/env.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 124,
         "fixLoopCount": 0,
         "lastReviewDecision": null,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-03T14:58:06+09:00"
+        "autoChainArgs": "124 --auto-fix",
+        "updatedAt": "2026-06-03T15:10:00+09:00"
       },
-      "updatedAt": "2026-06-03T14:58:06+09:00",
+      "updatedAt": "2026-06-03T15:10:00+09:00",
       "steps": [
         {
           "number": 1,
@@ -2566,7 +2566,9 @@
           ],
           "estimatedLines": 420,
           "prLineLimit": 500,
-          "status": "pending"
+          "status": "pr_created",
+          "prNumber": 124,
+          "branch": "feature/CANDID-029-step2"
         },
         {
           "number": 3,
