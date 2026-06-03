@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 419,
+    "version": 420,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T03:55:26Z"
+    "updatedAt": "2026-06-03T03:59:03Z"
   },
   "summary": {
     "total": 47,
@@ -2328,11 +2328,9 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-122756",
-      "assignedAt": "2026-06-03T03:55:26Z",
+      "assignedAt": "2026-06-03T03:59:03Z",
       "lockTTL": 10800,
       "lockedFiles": [
-        "app/api/health/route.ts",
-        "app/api/ready/route.ts",
         "lib/errors/response.ts",
         "lib/observability/metrics.ts",
         "app/api/v1/auth/signup/route.ts",
@@ -2360,13 +2358,14 @@
           "number": 2,
           "title": "GET /api/health + GET /api/ready (liveness/readiness)",
           "description": "health=liveness 항상 200{status,uptime,timestamp}. ready=readiness prisma $queryRaw SELECT 1 → 200{db:up}/503{db:down}. 둘 다 runtime nodejs, export 직접 단위 테스트.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "app/api/health/route.ts",
             "app/api/ready/route.ts"
           ],
           "estimatedLines": 280,
-          "prNumber": 119
+          "prNumber": 119,
+          "mergedAt": "2026-06-03T03:59:03Z"
         },
         {
           "number": 3,
@@ -2393,14 +2392,14 @@
           "estimatedLines": 320
         }
       ],
-      "currentStep": 2,
+      "currentStep": 3,
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 119,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": null,
-        "autoChainArgs": "119 --auto-fix",
-        "updatedAt": "2026-06-03T03:55:26Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T03:59:03Z"
       }
     },
     "CANDID-028": {
