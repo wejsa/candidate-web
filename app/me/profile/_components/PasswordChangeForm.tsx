@@ -95,12 +95,16 @@ export function PasswordChangeForm({ hasPassword }: PasswordChangeFormProps) {
           value={confirm}
           autoComplete="new-password"
           onChange={(e) => setConfirm(e.target.value)}
+          aria-invalid={state.status === 'error' && state.message === L.errorMismatch}
+          aria-describedby={state.status === 'error' ? 'password-change-msg' : undefined}
           required
         />
       </label>
 
       {state.message !== null && (
-        <p role={state.status === 'error' ? 'alert' : 'status'}>{state.message}</p>
+        <p id="password-change-msg" role={state.status === 'error' ? 'alert' : 'status'}>
+          {state.message}
+        </p>
       )}
 
       <button type="submit" disabled={state.status === 'pending'}>

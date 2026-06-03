@@ -99,6 +99,8 @@ export function WithdrawForm({ isSocialOnly }: Props): React.JSX.Element {
             onChange={(e) => setPasswordConfirmation(e.target.value)}
             placeholder={WITHDRAW_LABELS.passwordFieldPlaceholder}
             autoComplete="current-password"
+            aria-invalid={state.status === 'error'}
+            aria-describedby={state.status === 'error' ? 'withdraw-form-error' : undefined}
             required
             disabled={state.status === 'pending'}
           />
@@ -114,7 +116,7 @@ export function WithdrawForm({ isSocialOnly }: Props): React.JSX.Element {
           />
         </label>
         {state.error !== null && (
-          <p role="alert" aria-live="polite">
+          <p id="withdraw-form-error" role="alert" aria-live="polite">
             {state.error}
           </p>
         )}
