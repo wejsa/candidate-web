@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 49,
+    "version": 50,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-03T15:30:33+09:00"
+    "updatedAt": "2026-06-03T06:58:29Z"
   },
   "tasks": {
     "CANDID-022": {
@@ -1458,6 +1458,30 @@
       "stepCount": 3,
       "reviewSummary": "3 steps self-PR. Step1/2 subagent review (CRITICAL 0, test MAJOR 보강). Step3 subagent 불가(credit)→직접 리뷰, 도메인 MAJOR(INFECTED row 보존) 발견·수정.",
       "carry": []
+    },
+    "CANDID-048": {
+      "id": "CANDID-048",
+      "title": "Playwright E2E 도입 + 핵심 사용자 여정 스모크",
+      "phase": 4,
+      "priority": "medium",
+      "type": "test",
+      "completedAt": "2026-06-03T06:58:29Z",
+      "assignee": "wejsa-u",
+      "prs": [
+        {
+          "number": 123,
+          "title": "feat: CANDID-048 Step 1 - Playwright E2E 스캐폴딩 + 인프라/페이지 스모크",
+          "mergedAt": "2026-06-03T06:33:20Z",
+          "note": "@playwright/test + config(webServer /api/ready 게이트, video on) + smoke 5(health/ready/metrics+홈/jobs). E2E가 /jobs 크래시(CANDID-049) 발견. CRITICAL 0."
+        },
+        {
+          "number": 127,
+          "title": "feat: CANDID-048 Step 2 - 핵심 사용자 여정 E2E (인증/가드/탐색)",
+          "mergedAt": "2026-06-03T06:58:29Z",
+          "note": "signup API 인증 픽스처 + 여정 4(인증 라운드트립/보호 API 401 가드/공고 탐색). 인증 가드 API화로 결정성 확보(2x 9/9). CRITICAL 0."
+        }
+      ],
+      "note": "Playwright E2E 도입(MCP 미연결→프로젝트 직접). 9 E2E(smoke 5 + journeys 4). 비디오/trace 녹화(브라우저 가시화) + test:e2e:headed. 부수효과로 공개 /jobs 크래시(CANDID-049) 발견·수정. 실행 전제: docker db/minio + 컨테이너 매칭 DATABASE_URL."
     }
   }
 }
