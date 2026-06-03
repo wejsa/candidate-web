@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 48,
     "projectPrefix": "CANDID",
-    "version": 434,
+    "version": 435,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T14:58:06+09:00"
+    "updatedAt": "2026-06-03T06:02:05Z"
   },
   "summary": {
     "total": 47,
@@ -3635,7 +3635,7 @@
       "phase": 4,
       "type": "test",
       "assignee": "wejsa-u@hoji-20260603-143929",
-      "assignedAt": "2026-06-03T05:49:58Z",
+      "assignedAt": "2026-06-03T06:02:05Z",
       "lockedFiles": [
         "playwright.config.ts",
         "package.json",
@@ -3651,7 +3651,7 @@
           "number": 1,
           "title": "Playwright 스캐폴딩 + 인프라/페이지 스모크",
           "description": "@playwright/test 도입(playwright.config webServer=pnpm dev + /api/health 헬스체크). e2e/smoke.spec.ts: /api/health·/api/ready·/api/metrics + / · /jobs 렌더. package.json devDep/scripts, .gitignore.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "playwright.config.ts",
             "package.json",
@@ -3659,7 +3659,8 @@
             "e2e/smoke.spec.ts"
           ],
           "estimatedLines": 450,
-          "prLineLimit": 600
+          "prLineLimit": 600,
+          "prNumber": 123
         },
         {
           "number": 2,
@@ -3677,12 +3678,12 @@
       ],
       "currentStep": 1,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 123,
         "fixLoopCount": null,
-        "autoChainArgs": "--all",
-        "updatedAt": "2026-06-03T05:49:58Z"
+        "autoChainArgs": "123 --auto-fix",
+        "updatedAt": "2026-06-03T06:02:05Z"
       },
       "createdAt": "2026-06-03T05:38:55Z",
       "updatedAt": "2026-06-03T05:38:55Z",
