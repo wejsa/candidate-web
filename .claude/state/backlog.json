@@ -2,7 +2,7 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 428,
+    "version": 429,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-06-03T14:17:49+09:00"
   },
@@ -2527,12 +2527,12 @@
         "package.json"
       ],
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
-        "fixLoopCount": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 122,
+        "fixLoopCount": 0,
         "lastReviewDecision": null,
-        "autoChainArgs": "--next chain",
+        "autoChainArgs": "122 --auto-fix",
         "updatedAt": "2026-06-03T14:17:49+09:00"
       },
       "updatedAt": "2026-06-03T14:17:49+09:00",
@@ -2553,7 +2553,9 @@
           ],
           "estimatedLines": 430,
           "prLineLimit": 500,
-          "status": "pending"
+          "status": "pr_created",
+          "prNumber": 122,
+          "branch": "feature/CANDID-029-step1"
         },
         {
           "number": 2,
