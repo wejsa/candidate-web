@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 47,
     "projectPrefix": "CANDID",
-    "version": 407,
+    "version": 408,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T11:15:15+09:00"
+    "updatedAt": "2026-06-03T11:16:02+09:00"
   },
   "summary": {
     "total": 47,
@@ -2236,29 +2236,25 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-094036",
-      "assignedAt": "2026-06-03T11:15:15+09:00",
+      "assignedAt": "2026-06-03T11:16:02+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
         "app/api/v1/auth/oauth/[provider]/callback/route.ts",
         "app/api/v1/users/me/route.ts",
         "lib/applications/submit.ts",
-        "lib/applications/withdraw.ts",
-        "lib/audit/record.ts",
         "lib/auth/email-verification.ts",
         "lib/auth/login.ts",
         "lib/auth/oauth/unlink.ts",
-        "lib/users/password-change.ts",
-        "lib/users/withdraw.ts",
         "prisma/schema.prisma"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 114,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": null,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "114",
-        "updatedAt": "2026-06-03T11:15:15+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-03T11:16:02+09:00"
       },
       "steps": [
         {
@@ -2280,7 +2276,7 @@
           "number": 2,
           "title": "감사 emit SSOT 헬퍼 + 기존 3 호출부 통일",
           "description": "lib/audit/record.ts recordAuditEvent(tx 지원, traceId 자동주입, metadata PII-free allowlist 가드). withdraw×2/password-change 인라인 create를 헬퍼로 통일(trace_id 채움). PII-free 회귀 가드 테스트 동반. [리뷰 FU#111] rate-limit.ts 429 경로 traceId 통일 + audit emit은 getTraceId()(정규화 경유)만 사용.",
-          "status": "pr_created",
+          "status": "merged",
           "files": [
             "lib/audit/record.ts",
             "lib/users/withdraw.ts",
@@ -2288,7 +2284,8 @@
             "lib/users/password-change.ts"
           ],
           "estimatedLines": 450,
-          "prNumber": 114
+          "prNumber": 114,
+          "mergedAt": "2026-06-03T11:16:02+09:00"
         },
         {
           "number": 3,
@@ -2316,7 +2313,7 @@
           "estimatedLines": 360
         }
       ],
-      "currentStep": 2
+      "currentStep": 3
     },
     "CANDID-027": {
       "id": "CANDID-027",
