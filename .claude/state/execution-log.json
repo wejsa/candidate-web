@@ -3055,5 +3055,47 @@
     "stepNumber": 2,
     "prNumber": 114,
     "at": "2026-06-03T11:16:02+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-028",
+    "stepNumber": 4,
+    "prNumber": 115,
+    "branch": "feature/CANDID-028-step4",
+    "at": "2026-06-03T11:19:35+09:00"
+  },
+  {
+    "action": "approved",
+    "taskId": "CANDID-028",
+    "stepNumber": 4,
+    "prNumber": 115,
+    "decision": "APPROVED (self-PR COMMENT)",
+    "at": "2026-06-03T11:30:15+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-028",
+    "stepNumber": 4,
+    "prNumber": 115,
+    "at": "2026-06-03T11:30:15+09:00"
+  },
+  {
+    "action": "task_completed",
+    "taskId": "CANDID-028",
+    "prs": [
+      110,
+      112,
+      113,
+      115
+    ],
+    "totalMergedLines": 1126,
+    "at": "2026-06-03T11:30:15+09:00"
+  },
+  {
+    "action": "pr_created",
+    "taskId": "CANDID-026",
+    "stepNumber": 3,
+    "prNumber": 116,
+    "at": "2026-06-03T11:35:46+09:00"
   }
 ]

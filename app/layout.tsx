@@ -31,7 +31,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        {/* CANDID-028 Step 4 — 본문 바로가기(WCAG 2.4.1). 모든 페이지 <main id="main-content">로 이동. */}
+        <a href="#main-content" className="skip-link">
+          본문 바로가기
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

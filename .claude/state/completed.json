@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 43,
+    "version": 44,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-02T23:34:12+09:00"
+    "updatedAt": "2026-06-03T11:30:15+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1339,6 +1339,25 @@
       "stepCount": 3,
       "reviewSummary": "Step1 T2(domain+sec) C0/M0/MINOR1 → COMMENT. Step2 T2 C0/M0/M0 IDOR 검증 → COMMENT. Step3 full 3관점 C0/MAJOR2→반영/MINOR1→반영 → COMMENT. (Step1 리뷰는 1M 크레딧 소진으로 메인 폴백 직접 리뷰)",
       "note": "CANDID-016 carry 9건: (a)draftId 의미 정합 latent 버그 해소 (b)동시 업로드 race 가드 (c)dev 전이 warn (d)HMR S3 싱글톤 (e)prod HTTPS presign 가드 (f)orphan 설계노트(CANDID-029 위임) (g)T-MAJOR 테스트+partial UNIQUE 통합테스트 (h)STORED_PATH_RE 확장자 SSOT. 부수: 통합 harness SMTP env 복구."
+    },
+    "CANDID-028": {
+      "id": "CANDID-028",
+      "title": "접근성 WCAG 2.1 AA + 320~1920px 반응형",
+      "phase": 4,
+      "priority": "low",
+      "type": "feature",
+      "completedAt": "2026-06-03T11:30:15+09:00",
+      "assignee": "jaese@hoji-20260603-094035",
+      "prs": [
+        110,
+        112,
+        113,
+        115
+      ],
+      "totalMergedLines": 1126,
+      "stepCount": 4,
+      "reviewSummary": "4스텝 전부 CRITICAL 0 (자기 PR COMMENT). 각 스텝 in-task 보강(L-019): S1 대비가드/CSS가드강화, S2 isConnected 포커스복원/trap edge, S3 필드연관 입력기인 한정/negative, S4 skip-link 상호일치/StepNav 경계. 보안 결함 0.",
+      "note": "a11y WCAG 2.1 AA + 반응형 파운데이션. vitest-axe 도입. 가입/로그인 UI 부재로 가입 키보드여정 범위 외. JobCard/Pagination/Timeline은 전역 CSS 커버로 코드변경 불요. 동시 진행 CANDID-026와 파일 무충돌."
     }
   }
 }

@@ -50,7 +50,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
   const data = await listJobs(query);
 
   return (
-    <main>
+    <main id="main-content">
       <h1>채용 공고</h1>
       {/* JobCategory 목록 prefetch는 F-6 follow-up — 본 step에선 빈 배열 */}
       <JobFilters categories={[]} />

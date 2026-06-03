@@ -31,7 +31,7 @@ export default async function MyPage() {
   const { drafts, inProgress, closed } = await getMyApplicationsList(auth.userId);
 
   return (
-    <main>
+    <main id="main-content">
       <h1>마이페이지</h1>
 
       <section aria-labelledby="drafts-title">
