@@ -1,6 +1,8 @@
 import 'server-only';
+import { AuditEventType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
+import { recordAuditEvent } from '@/lib/audit/record';
 import { issueAccessToken } from '@/lib/auth/jwt';
 import { issueRefreshSession } from '@/lib/auth/session';
 import { verifyPassword } from '@/lib/auth/password';
@@ -31,8 +33,7 @@ import type { LoginInput } from '@/lib/auth/validation';
  * - 코드 노출되어도 보안 영향 없음 — 평문이 아니라 해시 자체이고, 정상 사용자의 비밀번호와 매칭될 수 없음.
  * - 생성 시점: `await hashPassword('CANDID-011-dummy-timing-equalizer-not-real-password')`.
  */
-const DUMMY_BCRYPT_HASH =
-  '$2a$12$abcdefghijklmnopqrstuOH3UYqYqyD0t4FvFqZsi8RXcZQH3IF8u';
+const DUMMY_BCRYPT_HASH = '$2a$12$abcdefghijklmnopqrstuOH3UYqYqyD0t4FvFqZsi8RXcZQH3IF8u';
 
 /** 잠금 유효시간 15분 (BR-AUTH-03). */
 const LOCK_DURATION_MS = 15 * 60 * 1000;
@@ -62,6 +63,27 @@ export interface SigninResult {
     refreshToken: string;
     refreshExpiresAt: Date;
   };
+}
+
+/**
+ * 로그인 감사 이벤트 emit (CANDID-026 Step 3) — metadata는 PII-free reason 코드만.
+ * traceId는 ALS 컨텍스트(라우트의 withTraceContext)에서 자동 첨부, email 평문은 절대 미기록.
+ */
+async function emitLoginAudit(
+  eventType: AuditEventType,
+  userId: number | null,
+  options: SigninOptions,
+  reason?: string,
+): Promise<void> {
+  await recordAuditEvent({
+    eventType,
+    actorUserId: userId,
+    resourceType: 'user',
+    resourceId: userId !== null ? String(userId) : null,
+    ipAddress: options.ipAddress ?? null,
+    userAgent: options.userAgent ?? null,
+    metadata: reason !== undefined ? { reason } : undefined,
+  });
 }
 
 /**
@@ -96,6 +118,7 @@ export async function signin(
   // 2) 잠금 검사 — 사용자가 존재하고 lockedUntil이 미래인 경우만 차단.
   //    이메일 부재 케이스에서는 잠금 노출 불가 (enumeration 방지).
   if (user !== null && user.lockedUntil !== null && user.lockedUntil > now) {
+    await emitLoginAudit(AuditEventType.LOGIN_FAILURE, user.id, options, 'account_locked');
     throw new AppError('AUTH_ACCOUNT_LOCKED');
   }
 
@@ -114,6 +137,12 @@ export async function signin(
     if (user !== null && isActive) {
       await recordFailedLogin(user.id, user.failedLoginCount, user.lockedUntil, now);
     }
+    await emitLoginAudit(
+      AuditEventType.LOGIN_FAILURE,
+      user?.id ?? null,
+      options,
+      'invalid_credentials',
+    );
     throw new AppError('AUTH_INVALID_CREDENTIALS');
   }
 
@@ -132,6 +161,8 @@ export async function signin(
     userAgent: options.userAgent ?? null,
     ipAddress: options.ipAddress ?? null,
   });
+
+  await emitLoginAudit(AuditEventType.LOGIN_SUCCESS, user.id, options);
 
   return {
     user: {

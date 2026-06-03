@@ -56,6 +56,26 @@ export function rateLimitKeyByIp(request: NextRequest): string {
 }
 
 /**
+ * 클라이언트 IP 원값 추출(감사 로그 ip_address용) — rateLimitKeyByIp와 동일 TRUST_PROXY 게이트.
+ * 신뢰 헤더(X-Forwarded-For/X-Real-IP)는 TRUST_PROXY=true에서만, 그 외에는 NextRequest.ip.
+ * 부재 시 null. CANDID-026 감사 이벤트(LOGIN 등)에서 IP 기록에 사용한다.
+ */
+export function clientIpFromRequest(request: NextRequest): string | null {
+  const env = getEnv();
+  if (env.TRUST_PROXY) {
+    const forwarded = request.headers.get('x-forwarded-for');
+    if (forwarded !== null && forwarded !== '') {
+      const first = forwarded.split(',')[0]?.trim() ?? '';
+      if (first !== '') return first;
+    }
+    const real = request.headers.get('x-real-ip');
+    if (real !== null && real !== '') return real;
+  }
+  const directIp = (request as { ip?: string }).ip ?? '';
+  return directIp !== '' ? directIp : null;
+}
+
+/**
  * BR-SEC-04 정책 카탈로그 — 변경 시점이 곧 SSOT. 호출측은 import해서 사용.
  *
  * CANDID-036에서 IP-기반 외에 **userId-bucket** 정책을 위한 별도 인터페이스
