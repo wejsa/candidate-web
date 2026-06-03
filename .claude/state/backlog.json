@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "lastTaskNumber": 48,
+    "lastTaskNumber": 49,
     "projectPrefix": "CANDID",
-    "version": 433,
+    "version": 442,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T14:17:49+09:00"
+    "updatedAt": "2026-06-03T06:28:26Z"
   },
   "summary": {
     "total": 47,
@@ -2512,30 +2512,25 @@
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
       "assignee": "wejsa-u@hoji-20260603-141749",
-      "assignedAt": "2026-06-03T14:17:49+09:00",
+      "assignedAt": "2026-06-03T15:24:00+09:00",
       "lockTTL": 10800,
       "lockedFiles": [
-        "lib/batch/types.ts",
-        "lib/batch/runner.ts",
-        "lib/batch/expired-rows.ts",
-        "lib/batch/draft-retention.ts",
-        "lib/batch/virus-scan.ts",
-        "scripts/batch/nightly-cleanup.ts",
         "lib/files/scanner.ts",
+        "lib/batch/virus-scan.ts",
         "lib/email/templates/infected-file.ts",
-        "lib/env.ts",
-        "package.json"
+        "lib/batch/runner.ts",
+        "lib/env.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 122,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 126,
         "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "122",
-        "updatedAt": "2026-06-03T14:17:49+09:00"
+        "lastReviewDecision": null,
+        "autoChainArgs": "126 --auto-fix",
+        "updatedAt": "2026-06-03T15:24:00+09:00"
       },
-      "updatedAt": "2026-06-03T14:17:49+09:00",
+      "updatedAt": "2026-06-03T15:24:00+09:00",
       "steps": [
         {
           "number": 1,
@@ -2553,9 +2548,10 @@
           ],
           "estimatedLines": 430,
           "prLineLimit": 500,
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 122,
-          "branch": "feature/CANDID-029-step1"
+          "branch": "feature/CANDID-029-step1",
+          "mergedAt": "2026-06-03T14:58:06+09:00"
         },
         {
           "number": 2,
@@ -2569,7 +2565,10 @@
           ],
           "estimatedLines": 420,
           "prLineLimit": 500,
-          "status": "pending"
+          "status": "merged",
+          "prNumber": 124,
+          "branch": "feature/CANDID-029-step2",
+          "mergedAt": "2026-06-03T15:15:24+09:00"
         },
         {
           "number": 3,
@@ -2586,10 +2585,12 @@
           ],
           "estimatedLines": 450,
           "prLineLimit": 500,
-          "status": "pending"
+          "status": "pr_created",
+          "prNumber": 126,
+          "branch": "feature/CANDID-029-step3"
         }
       ],
-      "currentStep": 1,
+      "currentStep": 3,
       "specFile": "docs/sample-requirement.md"
     },
     "CANDID-030": {
@@ -3638,7 +3639,7 @@
       "phase": 4,
       "type": "test",
       "assignee": "wejsa-u@hoji-20260603-143929",
-      "assignedAt": "2026-06-03T05:49:58Z",
+      "assignedAt": "2026-06-03T06:02:05Z",
       "lockedFiles": [
         "playwright.config.ts",
         "package.json",
@@ -3654,7 +3655,7 @@
           "number": 1,
           "title": "Playwright 스캐폴딩 + 인프라/페이지 스모크",
           "description": "@playwright/test 도입(playwright.config webServer=pnpm dev + /api/health 헬스체크). e2e/smoke.spec.ts: /api/health·/api/ready·/api/metrics + / · /jobs 렌더. package.json devDep/scripts, .gitignore.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "playwright.config.ts",
             "package.json",
@@ -3662,7 +3663,8 @@
             "e2e/smoke.spec.ts"
           ],
           "estimatedLines": 450,
-          "prLineLimit": 600
+          "prLineLimit": 600,
+          "prNumber": 123
         },
         {
           "number": 2,
@@ -3680,16 +3682,48 @@
       ],
       "currentStep": 1,
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 123,
         "fixLoopCount": null,
-        "autoChainArgs": "--all",
-        "updatedAt": "2026-06-03T05:49:58Z"
+        "autoChainArgs": "123 --auto-fix",
+        "updatedAt": "2026-06-03T06:02:05Z"
       },
       "createdAt": "2026-06-03T05:38:55Z",
       "updatedAt": "2026-06-03T05:38:55Z",
       "lockTTL": 7200
+    },
+    "CANDID-049": {
+      "id": "CANDID-049",
+      "title": "공고 목록 /jobs 크래시 수정 — unstable_cache Date 직렬화(closesAt rehydrate)",
+      "description": "lib/jobs/list.ts unstable_cache가 결과를 JSON 직렬화하여 closesAt(Date)→string. 이후 toCard→computeDDay(closesAt.getTime()) TypeError로 /jobs가 데이터 존재 시 크래시. CANDID-048 E2E가 발견. toCard에서 closesAt 재수화(new Date) + 회귀 테스트.",
+      "status": "done",
+      "priority": "high",
+      "phase": 2,
+      "type": "bug",
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": 3600,
+      "lockedFiles": [],
+      "dependencies": [],
+      "steps": [
+        {
+          "number": 1,
+          "title": "toCard closesAt rehydrate + 회귀 테스트",
+          "status": "merged",
+          "files": [
+            "lib/jobs/list.ts",
+            "tests/lib/jobs/list.test.ts"
+          ],
+          "prNumber": 125,
+          "mergedAt": "2026-06-03T06:28:26Z"
+        }
+      ],
+      "currentStep": 1,
+      "workflowState": null,
+      "createdAt": "2026-06-03T06:12:11Z",
+      "updatedAt": "2026-06-03T06:12:11Z",
+      "completedAt": "2026-06-03T06:28:26Z"
     }
   }
 }

@@ -4,6 +4,8 @@ import {
   cleanupExpiredIdempotencyKeys,
   cleanupExpiredPasswordResetTokens,
 } from '@/lib/batch/expired-rows';
+import { cleanupStaleDrafts } from '@/lib/batch/draft-retention';
+import { deleteBatchObject } from '@/lib/batch/storage';
 
 // CANDID-029 Step 1 — 야간 정리 배치 러너.
 //
@@ -27,6 +29,10 @@ export function defaultCleanupTasks(): CleanupTask[] {
     {
       name: 'expired-idempotency-keys',
       run: (db, now) => cleanupExpiredIdempotencyKeys(db, now),
+    },
+    {
+      name: 'stale-drafts',
+      run: (db, now) => cleanupStaleDrafts(db, deleteBatchObject, now),
     },
   ];
 }

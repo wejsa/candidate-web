@@ -131,6 +131,8 @@ const envSchema = z
     EMAIL_VERIFICATION_RETENTION_DAYS: z.coerce.number().int().positive().default(7),
     // 대량 삭제 청크 크기 — long-running tx/autovacuum 지연 방지 페이지네이션 단위.
     BATCH_DELETE_CHUNK: z.coerce.number().int().positive().max(10_000).default(1000),
+    // 미제출 Draft + 첨부 파일 보존 일수 — lastSavedAt이 이 일수 경과 시 야간 배치가 삭제(BR-FILE-06).
+    DRAFT_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
   })
   .refine((e) => e.JWT_ACCESS_SECRET !== e.JWT_REFRESH_SECRET, {
     // CANDID-006: Access/Refresh secret 분리 강제 — 동일 값이면 누수 영향 격리 무력화.
