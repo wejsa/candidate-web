@@ -1,21 +1,29 @@
 // CANDID-027 Step 1 — 메트릭 레지스트리 단위 테스트.
 // globalThis 싱글톤 + reset helper(L-002) + 비즈니스 카운터/직렬화 동작을 검증한다.
 
+import { NextRequest, NextResponse } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { setRequestObserver, withErrorHandler } from '@/lib/errors';
 import {
   __resetMetricsRegistryForTesting,
   getMetricsRegistry,
   metricsContentType,
+  normalizeRoute,
   recordBusinessEvent,
+  recordHttpRequest,
   renderMetrics,
+  wireHttpMetrics,
 } from '@/lib/observability/metrics';
 
 beforeEach(() => {
   __resetMetricsRegistryForTesting();
+  // 파일 내 순서 의존 방지 — wireHttpMetrics가 설정한 전역 observer를 매 테스트 전 초기화.
+  setRequestObserver(null);
 });
 
 afterEach(() => {
   __resetMetricsRegistryForTesting();
+  setRequestObserver(null);
 });
 
 describe('metrics registry', () => {
@@ -88,5 +96,83 @@ describe('__resetMetricsRegistryForTesting', () => {
     // 새 레지스트리에서 정상 동작(중복 등록 throw 없음).
     expect(() => recordBusinessEvent('signup')).not.toThrow();
     expect(await renderMetrics()).toContain('candidate_business_event_total');
+  });
+});
+
+describe('normalizeRoute', () => {
+  it.each([
+    ['/', '/'],
+    ['/api/v1/jobs', '/api/v1/jobs'],
+    ['/api/v1/jobs/123', '/api/v1/jobs/:id'],
+    [
+      '/api/v1/applications/me/123e4567-e89b-12d3-a456-426614174000/withdraw',
+      '/api/v1/applications/me/:id/withdraw',
+    ],
+    ['/api/v1/applications/A-202606-00001', '/api/v1/applications/:id'],
+    ['/api/v1/tokens/deadbeefdeadbeef0123', '/api/v1/tokens/:id'],
+  ])('%s → %s (동적 세그먼트 정규화)', (input, expected) => {
+    expect(normalizeRoute(input)).toBe(expected);
+  });
+
+  it('알파벳 세그먼트(me, withdraw 등)는 보존한다', () => {
+    expect(normalizeRoute('/api/v1/users/me/withdraw')).toBe('/api/v1/users/me/withdraw');
+  });
+
+  it('LONG_OPAQUE 16자 경계: 15자는 보존, 16자는 :id로 치환', () => {
+    expect(normalizeRoute('/t/deadbeefdeadbee')).toBe('/t/deadbeefdeadbee'); // 15자 — 미치환
+    expect(normalizeRoute('/t/deadbeefdeadbeef')).toBe('/t/:id'); // 16자 — 치환
+  });
+
+  it('대문자/혼합 hex 16자+도 :id로 치환한다(대소문자 무관)', () => {
+    expect(normalizeRoute('/t/ABCDEF0123456789')).toBe('/t/:id');
+  });
+
+  it('순수 숫자 세그먼트는 의도적으로 :id (연도/버전 포함 트레이드오프)', () => {
+    // 정규화는 PK/식별자 카디널리티 억제가 목적 — 숫자만이면 연도(2024)도 :id로 뭉갠다(의도).
+    expect(normalizeRoute('/posts/2024')).toBe('/posts/:id');
+    // 반면 영숫자 버전 슬러그(v2)는 보존 — false collapse 아님.
+    expect(normalizeRoute('/api/v2/jobs')).toBe('/api/v2/jobs');
+  });
+
+  it('빈 입력/루트/트레일링 슬래시 폴백', () => {
+    expect(normalizeRoute('')).toBe('/');
+    expect(normalizeRoute('/api/v1/jobs/')).toBe('/api/v1/jobs/'); // 트레일링 슬래시 보존
+  });
+});
+
+describe('recordHttpRequest', () => {
+  it('정규화 route/대문자 method/상태군 라벨로 히스토그램을 기록한다', async () => {
+    recordHttpRequest('get', '/api/v1/jobs/42', 200, 0.123);
+    const text = await renderMetrics();
+    expect(text).toContain(
+      'http_request_duration_seconds_count{method="GET",route="/api/v1/jobs/:id",status_class="2xx"} 1',
+    );
+  });
+
+  it.each([
+    [204, '2xx'],
+    [301, '3xx'],
+    [422, '4xx'],
+    [503, '5xx'],
+  ])('status %d → status_class %s', async (status, klass) => {
+    recordHttpRequest('POST', '/api/v1/applications', status, 0.5);
+    const text = await renderMetrics();
+    expect(text).toContain(`status_class="${klass}"`);
+  });
+});
+
+describe('wireHttpMetrics', () => {
+  afterEach(() => {
+    setRequestObserver(null);
+  });
+
+  it('withErrorHandler 요청을 정규화 라벨로 히스토그램에 관측한다', async () => {
+    wireHttpMetrics();
+    const handler = withErrorHandler(async () => NextResponse.json({ ok: true }, { status: 200 }));
+    await handler(new NextRequest('http://localhost/api/v1/jobs/7'), undefined);
+    const text = await renderMetrics();
+    expect(text).toContain('route="/api/v1/jobs/:id"');
+    expect(text).toContain('method="GET"');
+    expect(text).toContain('status_class="2xx"');
   });
 });

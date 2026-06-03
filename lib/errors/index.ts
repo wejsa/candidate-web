@@ -5,5 +5,10 @@ export { ERROR_CATALOG, errorMessage, errorStatus } from '@/lib/errors/codes';
 export type { ErrorCode, ErrorCodeSpec } from '@/lib/errors/codes';
 export { AppError, isAppError } from '@/lib/errors/app-error';
 export type { AppErrorOptions, ErrorDetail } from '@/lib/errors/app-error';
-export { errorResponse, handleApiError, withErrorHandler } from '@/lib/errors/response';
+export {
+  errorResponse,
+  handleApiError,
+  withErrorHandler,
+  setRequestObserver,
+} from '@/lib/errors/response';
 export type { ErrorResponseBody, ErrorResponseOptions } from '@/lib/errors/response';

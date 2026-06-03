@@ -1,4 +1,5 @@
 import { Registry, Counter, Histogram, collectDefaultMetrics } from 'prom-client';
+import { setRequestObserver } from '@/lib/errors/response';
 
 // CANDID-027 Step 1 — Prometheus 메트릭 레지스트리 (관측 SSOT).
 //
@@ -84,6 +85,68 @@ export function getMetricsRegistry(): Registry {
  */
 export function recordBusinessEvent(event: BusinessEvent, result: EventResult = 'success'): void {
   getMetricsBundle().businessEvents.inc({ event, result });
+}
+
+// CANDID-027 Step 3 — HTTP 요청 메트릭 기록.
+// route 라벨은 동적 세그먼트(id/uuid/지원번호 등)를 :id로 정규화해 시계열 카디널리티 폭발을 막는다.
+
+const UUID_SEGMENT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NUMERIC_SEGMENT = /^\d+$/;
+const APP_NUMBER_SEGMENT = /^A-\d{6}-\d{5}$/; // BR-APP-05 지원번호 A-YYYYMM-NNNNN
+const LONG_OPAQUE_SEGMENT = /^[0-9a-fA-F]{16,}$/; // 토큰/해시류 불투명 식별자
+
+/** 경로의 동적 세그먼트를 `:id`로 치환한다(쿼리스트링 제외 pathname 입력 가정). */
+export function normalizeRoute(pathname: string): string {
+  if (!pathname || pathname === '/') return '/';
+  const normalized = pathname
+    .split('/')
+    .map((seg) => {
+      if (seg === '') return seg;
+      if (
+        UUID_SEGMENT.test(seg) ||
+        NUMERIC_SEGMENT.test(seg) ||
+        APP_NUMBER_SEGMENT.test(seg) ||
+        LONG_OPAQUE_SEGMENT.test(seg)
+      ) {
+        return ':id';
+      }
+      return seg;
+    })
+    .join('/');
+  return normalized || '/';
+}
+
+function statusClass(status: number): StatusClass {
+  if (status >= 500) return '5xx';
+  if (status >= 400) return '4xx';
+  if (status >= 300) return '3xx';
+  return '2xx';
+}
+
+/** HTTP 요청 1건의 처리 시간을 히스토그램에 기록한다(라우트는 정규화). */
+export function recordHttpRequest(
+  method: string,
+  pathname: string,
+  status: number,
+  durationSeconds: number,
+): void {
+  getMetricsBundle().httpRequestDuration.observe(
+    {
+      method: method.toUpperCase(),
+      route: normalizeRoute(pathname),
+      status_class: statusClass(status),
+    },
+    durationSeconds,
+  );
+}
+
+/**
+ * withErrorHandler의 요청 관측자로 recordHttpRequest를 주입한다.
+ * instrumentation.ts(register)가 Node 런타임 부팅 시 1회 호출 — Edge/universal 그래프에는
+ * prom-client가 유입되지 않는다(lib/errors/response는 콜백만 보유).
+ */
+export function wireHttpMetrics(): void {
+  setRequestObserver(recordHttpRequest);
 }
 
 /** 직렬화된 Prometheus 텍스트(exposition format)를 반환한다. */
