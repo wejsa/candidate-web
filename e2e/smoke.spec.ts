@@ -22,8 +22,13 @@ test.describe('관측 엔드포인트 (CANDID-027)', () => {
     if (res.status() === 200) expect(body.status).toBe('ready');
   });
 
-  test('GET /api/metrics → 200 Prometheus exposition (비운영 무토큰)', async ({ request }) => {
-    const res = await request.get('/api/metrics');
+  test('GET /api/metrics → 200 Prometheus exposition', async ({ request }) => {
+    // 토큰이 설정된 환경이면 Bearer 주입(운영 fail-closed/토큰 가드와 정합), 미설정이면 무토큰.
+    const token = process.env.METRICS_AUTH_TOKEN?.trim();
+    const res = await request.get(
+      '/api/metrics',
+      token ? { headers: { authorization: `Bearer ${token}` } } : {},
+    );
     expect(res.status()).toBe(200);
     expect(res.headers()['content-type']).toContain('text/plain');
     const text = await res.text();

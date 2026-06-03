@@ -1,8 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // CANDID-048 Step 1 — Playwright E2E 설정.
-// webServer가 `pnpm dev`로 앱을 띄우고 /api/health(CANDID-027, 의존성 無 → DB 없이도 200)로 준비를 판단한다.
-// E2E 실행 전제: PostgreSQL/MinIO 기동(docker compose up -d db minio) — DB 의존 시나리오용.
+// webServer가 `pnpm dev`로 앱을 띄우고 /api/ready(CANDID-027 — DB 연결까지 확인)로 준비를 판단한다.
+//   → DB 미기동 시 health(200)만 보고 시작해 /jobs SSR이 깨지는 플레이키를 방지(PR #123 리뷰 반영).
+// E2E 실행 전제: PostgreSQL/MinIO 기동(docker compose up -d db minio) + 컨테이너 매칭 DATABASE_URL.
 //   브라우저 바이너리: `pnpm exec playwright install chromium` (최초 1회).
 // vitest(tests/**)와 분리: 본 스위트는 e2e/ 디렉토리.
 
@@ -30,7 +31,8 @@ export default defineConfig({
   // 이미 떠 있는 서버가 있으면 재사용(로컬). CI에서는 항상 새로 띄운다.
   webServer: {
     command: 'pnpm dev',
-    url: `${BASE_URL}/api/health`,
+    // /api/ready는 DB 연결 성공 시에만 200 → 앱+DB가 모두 준비된 뒤 테스트 시작(결정성).
+    url: `${BASE_URL}/api/ready`,
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,
     stdout: 'pipe',
