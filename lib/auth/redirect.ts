@@ -27,6 +27,9 @@ export function safeInternalPath(
   if (!raw.startsWith('/')) return fallback;
   if (raw.startsWith('//')) return fallback; // protocol-relative
   if (raw.startsWith('/\\')) return fallback; // backslash 우회
+  // 인코딩된 슬래시/백슬래시 거부(방어 심화) — 내부 redirect 경로는 인코딩 슬래시가 필요 없다.
+  // Next searchParams가 보통 사전 디코딩하지만, 이중 인코딩(%252F→%2F) 잔재까지 차단.
+  if (/%2f|%5c/i.test(raw)) return fallback;
   if (raw.length > MAX_REDIRECT_LENGTH) return fallback;
   return raw;
 }

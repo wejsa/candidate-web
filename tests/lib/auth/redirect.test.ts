@@ -41,6 +41,13 @@ describe('safeInternalPath', () => {
     expect(safeInternalPath('javascript:alert(1)')).toBe('/me');
   });
 
+  it('인코딩된 슬래시/백슬래시(%2F·%5C, 이중 인코딩 잔재) → fallback', () => {
+    expect(safeInternalPath('/%2Fevil.com')).toBe('/me');
+    expect(safeInternalPath('/%5Cevil.com')).toBe('/me');
+    expect(safeInternalPath('/%2f%2fevil.com')).toBe('/me');
+    expect(safeInternalPath('/jobs/%2F%2Fevil.com')).toBe('/me');
+  });
+
   it('과도 길이(>2048) → fallback', () => {
     expect(safeInternalPath('/' + 'a'.repeat(3000))).toBe('/me');
   });

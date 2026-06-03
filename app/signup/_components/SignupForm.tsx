@@ -18,6 +18,13 @@ interface FormState {
   email: string | null; // done 화면 안내용
 }
 
+// 가입 완료 안내의 이메일 부분 마스킹(공용 PC/화면 공유 노출 최소화). a***@domain 형식.
+function maskEmail(email: string): string {
+  const at = email.indexOf('@');
+  if (at <= 1) return email;
+  return `${email[0]}${'*'.repeat(at - 1)}${email.slice(at)}`;
+}
+
 function messageForSignup(httpStatus: number, code: unknown): string {
   if (code === 'USER_EMAIL_DUPLICATED') return '이미 가입된 이메일입니다. 로그인해 주세요.';
   if (httpStatus === 429) return '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.';
@@ -78,7 +85,7 @@ export function SignupForm({ redirectTo }: Props): React.JSX.Element {
           가입이 완료되었습니다
         </h2>
         <p role="status" aria-live="polite">
-          {state.email !== null ? `${state.email} 주소로 ` : ''}인증 메일을 보냈습니다. 메일의 링크를
+          {state.email !== null ? `${maskEmail(state.email)} 주소로 ` : ''}인증 메일을 보냈습니다. 메일의 링크를
           눌러 이메일 인증을 완료해 주세요. (인증 전에도 공고 조회는 가능하며, 지원서 제출 시 인증이
           필요합니다.)
         </p>
@@ -123,15 +130,15 @@ export function SignupForm({ redirectTo }: Props): React.JSX.Element {
       >
         <label>
           이메일
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required disabled={isPending} />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required disabled={isPending} aria-invalid={state.status === 'error' || undefined} />
         </label>
         <label>
           이름
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required disabled={isPending} />
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required disabled={isPending} aria-invalid={state.status === 'error' || undefined} />
         </label>
         <label>
           비밀번호
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required disabled={isPending} />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required disabled={isPending} aria-invalid={state.status === 'error' || undefined} />
         </label>
         <label>
           비밀번호 확인
@@ -142,6 +149,7 @@ export function SignupForm({ redirectTo }: Props): React.JSX.Element {
             autoComplete="new-password"
             required
             disabled={isPending}
+            aria-invalid={state.status === 'error' || undefined}
             aria-describedby={state.status === 'error' ? 'signup-error' : undefined}
           />
         </label>

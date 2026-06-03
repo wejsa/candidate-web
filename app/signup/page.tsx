@@ -11,7 +11,7 @@ import { SignupForm } from '@/app/signup/_components/SignupForm';
 export const metadata: Metadata = {
   title: '회원가입',
   description: '자사 채용 사이트 회원가입',
-  robots: { index: false, follow: false },
+  robots: { index: false, follow: true }, // 인증 페이지는 noindex, 단 내부 링크 크롤은 허용
 };
 
 interface PageProps {

@@ -34,12 +34,24 @@ afterEach(() => {
 });
 
 describe('LoginForm', () => {
-  it('성공(200) → redirectTo로 replace + refresh', async () => {
+  it('성공(200) → redirectTo로 replace 먼저, refresh 나중(순서 보장)', async () => {
+    const order: string[] = [];
+    replace.mockImplementation(() => void order.push('replace'));
+    refresh.mockImplementation(() => void order.push('refresh'));
     mockFetch(200, { user: { id: 1 } });
     render(<LoginForm redirectTo="/jobs/6/apply" />);
     await fill();
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/jobs/6/apply'));
-    expect(refresh).toHaveBeenCalled();
+    // replace가 refresh보다 먼저 — 역순이면 목적지에서 헤더 인증 상태가 갱신 안 됨.
+    expect(order).toEqual(['replace', 'refresh']);
+  });
+
+  it('403 AUTH_EMAIL_NOT_VERIFIED → 이메일 인증 안내 메시지', async () => {
+    mockFetch(403, { code: 'AUTH_EMAIL_NOT_VERIFIED' });
+    render(<LoginForm redirectTo="/me" />);
+    await fill();
+    expect(await screen.findByRole('alert')).toHaveTextContent('이메일 인증이 필요합니다');
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it('401 AUTH_INVALID_CREDENTIALS → 자격 불일치 메시지', async () => {
@@ -63,6 +75,10 @@ describe('LoginForm', () => {
     expect(screen.getByRole('link', { name: 'Google로 계속하기' })).toHaveAttribute(
       'href',
       `/api/v1/auth/oauth/google?redirect=${enc}`,
+    );
+    expect(screen.getByRole('link', { name: 'GitHub로 계속하기' })).toHaveAttribute(
+      'href',
+      `/api/v1/auth/oauth/github?redirect=${enc}`,
     );
     expect(screen.getByRole('link', { name: '회원가입' })).toHaveAttribute(
       'href',

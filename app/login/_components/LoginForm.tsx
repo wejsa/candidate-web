@@ -2,7 +2,9 @@
 
 // CANDID-050 Step 2 — 로그인 폼 (Client, US-AUTH-002).
 // POST /api/v1/auth/login → 200 시 redirectTo로 이동(서버에서 sanitize된 안전 경로).
-// 에러 코드 매핑(SSOT는 서버 ERROR_CATALOG): 401 자격 불일치 / 423·429 잠금 / 429 과다요청 / 400 검증.
+// 에러 코드 매핑(SSOT는 서버 ERROR_CATALOG): 401 AUTH_INVALID_CREDENTIALS /
+//   429 AUTH_ACCOUNT_LOCKED / 403 AUTH_EMAIL_NOT_VERIFIED / 429 SYS_RATE_LIMITED / 400 검증.
+//   분기는 HTTP status가 아닌 code 기반(서버 status 변경에 견고).
 // 비밀번호는 상태에만 보관하고 로깅/URL 노출 없음.
 
 import { useState } from 'react';

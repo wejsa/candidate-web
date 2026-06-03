@@ -10,6 +10,8 @@ import styles from '@/app/_components/SiteHeader.module.css';
 
 export async function SiteHeader(): Promise<React.JSX.Element> {
   const auth = await getOptionalAuthFromCookies();
+  // UI 표시 전용 — 보호 리소스 접근 제어(인가)는 미들웨어/페이지 가드가 담당.
+  // 이 값을 라우트 보호 판단에 재사용하지 말 것.
   const isAuthed = auth !== null;
 
   return (
