@@ -3229,5 +3229,14 @@
     "stepNumber": 2,
     "prNumber": 124,
     "at": "2026-06-03T15:10:00+09:00"
+  },
+  {
+    "action": "reviewed",
+    "decision": "COMMENT",
+    "taskId": "CANDID-029",
+    "stepNumber": 2,
+    "prNumber": 124,
+    "at": "2026-06-03T15:14:00+09:00",
+    "note": "subagents unavailable - direct review"
   }
 ]

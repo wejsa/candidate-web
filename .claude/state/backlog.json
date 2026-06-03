@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 48,
     "projectPrefix": "CANDID",
-    "version": 435,
+    "version": 436,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T15:10:00+09:00"
+    "updatedAt": "2026-06-03T15:14:00+09:00"
   },
   "summary": {
     "total": 47,
@@ -2523,15 +2523,15 @@
         "lib/env.ts"
       ],
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 124,
         "fixLoopCount": 0,
-        "lastReviewDecision": null,
-        "autoChainArgs": "124 --auto-fix",
-        "updatedAt": "2026-06-03T15:10:00+09:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "124",
+        "updatedAt": "2026-06-03T15:14:00+09:00"
       },
-      "updatedAt": "2026-06-03T15:10:00+09:00",
+      "updatedAt": "2026-06-03T15:14:00+09:00",
       "steps": [
         {
           "number": 1,
