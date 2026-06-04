@@ -61,3 +61,6 @@ uploads/
 /playwright-report/
 /blob-report/
 /e2e/.auth/
+# CANDID-051 — prod E2E(soft-404) 산출물
+/test-results-prod/
+/playwright-report-prod/
