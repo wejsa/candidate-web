@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 483,
+    "version": 484,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T14:40:11Z"
+    "updatedAt": "2026-06-04T14:56:02Z"
   },
   "summary": {
     "total": 53,
@@ -3898,7 +3898,7 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260604-143953",
-      "assignedAt": "2026-06-04T14:40:11Z",
+      "assignedAt": "2026-06-04T14:56:02Z",
       "lockTTL": 7200,
       "lockedFiles": [
         "app/api/admin/v1/job-postings/[id]/applications",
@@ -3912,12 +3912,12 @@
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 141,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-04T14:40:11Z"
+        "autoChainArgs": "CANDID-053",
+        "updatedAt": "2026-06-04T14:56:02Z"
       },
       "steps": [
         {
@@ -3990,7 +3990,7 @@
         {
           "number": 5,
           "title": "지원자 목록/상세 + idx_applications_posting_stage + 운영자 PII 통제",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 700,
           "estimatedLines": 620,
           "files": [
@@ -4001,7 +4001,9 @@
           ],
           "dependencies": [
             2
-          ]
+          ],
+          "prNumber": 141,
+          "branch": "feature/CANDID-053-step5"
         },
         {
           "number": 6,
