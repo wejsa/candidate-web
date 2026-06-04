@@ -3340,5 +3340,19 @@
     "stepNumber": 2,
     "action": "pr_created",
     "prNumber": 136
+  },
+  {
+    "timestamp": "2026-06-04T11:59:35Z",
+    "taskId": "CANDID-053",
+    "stepNumber": 2,
+    "action": "approved",
+    "prNumber": 136,
+    "decision": "APPROVED (self-PR, MAJOR fixed inline)",
+    "review": {
+      "critical": 0,
+      "major": 1,
+      "majorFixed": 1,
+      "minor": 6
+    }
   }
 ]
