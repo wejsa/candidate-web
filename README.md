@@ -85,6 +85,13 @@ pnpm test            # vitest 단위 테스트 (CANDID-008 도입)
 pnpm test:coverage   # v8 커버리지 리포트 (lines/funcs/stmts 80% / branches 75% 임계)
 pnpm test:integration # 실제 PostgreSQL DB + Prisma + piiExtension 통합 테스트 (CANDID-035, 아래 참조)
 
+# E2E (Playwright)
+pnpm exec playwright install chromium  # 최초 1회 브라우저 바이너리
+pnpm test:e2e          # dev 서버(pnpm dev, :3000) 기반 E2E (CANDID-048)
+pnpm test:e2e:headed   # 브라우저 가시화(WSLg/X11 디스플레이 필요)
+pnpm test:e2e:prod          # production 빌드(pnpm build && pnpm start, :3100) 기반 — soft-404 실측 (CANDID-051)
+pnpm test:e2e:prod:headed   # 동일, headed
+
 # 정리
 pnpm db:down       # docker compose down (볼륨 보존)
 # 완전 초기화: docker compose down -v
@@ -127,6 +134,13 @@ pnpm test:integration
 | `prisma-extends-application-roundtrip.test.ts` | 5쌍 round-trip + null + needs satisfies (V2 + V4) |
 | `prisma-extends-application-nested-write.test.ts` | L-007 nested write 우회 SSOT 증거 (V3, fail = wiring 강화 신호) |
 | `migrations-applications-schema.test.ts` | 5쌍 BYTEA + 5쌍 SMALLINT 컬럼명 정확 매칭 (V5, schema rename 회귀) |
+
+### E2E (Playwright) 메모
+
+- **dev vs prod E2E**: `test:e2e`는 `pnpm dev`(:3000), `test:e2e:prod`는 `pnpm build && pnpm start`(:3100, `E2E_PROD_PORT`로 변경). Next.js의 `notFound()` status는 dev/prod 런타임이 다를 수 있어, soft-404 같은 status 이슈는 **prod 빌드로만** 정확히 측정된다.
+- **prod E2E 전제**: 핵심 repro(`/jobs/{비숫자id}`)는 DB 없이 재현(readiness `/robots.txt`). DB 의존 케이스(미존재 공고 상세/지원)는 `docker compose up -d db minio` + `DATABASE_URL` 후 실행되며, 미연결 시 spec이 런타임 probe로 자동 skip한다.
+- **soft-404 한계 (CANDID-051)**: 공고 페이지 `notFound()`는 Next 14.2 SSR에서 HTTP 200(soft-404)을 반환한다 — 코드로 404 강제 불가(프레임워크 한계). 죽은 URL 색인은 `robots: noindex`로 차단하며, `e2e/prod/soft-404.spec.ts`가 이 미티게이션을 회귀 가드한다. 상세는 [`docs/requirements/CANDID-051-spec.md`](docs/requirements/CANDID-051-spec.md).
+- 산출물: prod E2E는 `test-results-prod/`, `playwright-report-prod/`에 분리 저장(`.gitignore` 처리).
 
 ### PII 처리 (CANDID-008)
 

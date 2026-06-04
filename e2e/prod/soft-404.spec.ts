@@ -1,31 +1,29 @@
 import { test, expect, request as apiRequest } from '@playwright/test';
 import { signupViaApi } from '../fixtures/auth';
 
-// CANDID-051 Step 1 — production-build soft-404 회귀 가드(실측).
+// CANDID-051 — production soft-404 특성 고정 + SEO 미티게이션 회귀 가드.
 //
-// 측정 결과(2026-06-04, next start v14.2.35, NODE_ENV=production):
-//   /jobs/abc(비숫자 id → notFound())      -> HTTP 200  ⚠️ soft-404 (확정된 prod 결함)
-//   /totally-bogus-route(미정의 라우트)     -> HTTP 404  ✅ (root not-found는 정상)
-//   → "dev에서만 200" 가설은 **반증**됐다. 페이지 RSC의 notFound()가 production에서도 200을 반환한다
-//     (force-dynamic + streaming 상호작용). dev 전용 아티팩트가 아니라 실제 SEO 결함.
+// 조사 결론(2026-06-04, next start v14.2.35, prod 실측):
+//   페이지 RSC의 notFound()는 동적 렌더(SSR) 매칭 라우트에서 HTTP **200**(soft-404)을 반환한다.
+//   force-dynamic 제거 / loading.tsx 제거 / middleware 완전 제거 모두 무효 → **Next 14 코어 한계**로
+//   격리 확인(미정의 라우트만 404). 코드로 404를 강제할 수 없음(docs/requirements/CANDID-051-spec.md §근본원인).
 //
-// 본 스위트의 역할:
-//   - notFound() 경로가 404를 반환해야 함을 *고정*한다(회귀 가드).
-//   - 결함이 살아있는 현재(Step 1)는 page-notFound 케이스를 test.fail()로 마킹 → 스위트는 green,
-//     동시에 "아직 200"임을 문서화한다. Step 2가 결함을 고치면 test.fail()을 제거해 진짜 가드로 전환한다.
+// 따라서 본 스위트는 (1) "여전히 200"임을 *특성 테스트*로 고정(상위 Next에서 404로 바뀌면 알림 = 문서 갱신 트리거)
+//   하고, (2) 죽은 URL 색인을 막는 *유일한 SEO 방어선*인 robots:noindex가 응답에 존재함을 **회귀 가드**한다.
 //
-// 측정 규약(memory): 진짜 status를 읽으려면 redirect 미추적(maxRedirects:0). apply는 비로그인 시
-//   /login redirect가 notFound()보다 선행 → 반드시 인증 컨텍스트로 측정.
+// 측정 규약(memory): 진짜 status는 maxRedirects:0. apply는 비로그인 시 /login redirect 선행 → 인증 컨텍스트.
 
 const MISSING_JOB_ID = 999999; // dev 시드 범위를 넘는 미존재 공고 id (DB 필요)
+// Next가 robots:{index:false,follow:false}를 렌더한 <meta name="robots" content="noindex, ...">를 매칭.
+const NOINDEX_META = /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i;
 
-// DB 의존 케이스 게이트 — API 대조군이 404를 주면 DB 연결됨. 500/예외면 DB 부재로 보고 skip.
+// DB 의존 케이스 게이트 — API가 status로 응답(404 또는 200)하면 DB 연결됨, 500/예외면 미연결.
 let dbReady = false;
 test.beforeAll(async ({ baseURL }) => {
   const ctx = await apiRequest.newContext({ baseURL });
   try {
     const res = await ctx.get(`/api/v1/job-postings/${MISSING_JOB_ID}`, { maxRedirects: 0 });
-    dbReady = res.status() === 404;
+    dbReady = res.status() === 404 || res.status() === 200;
   } catch {
     dbReady = false;
   } finally {
@@ -33,7 +31,7 @@ test.beforeAll(async ({ baseURL }) => {
   }
 });
 
-test.describe('CANDID-051 — production soft-404 실측', () => {
+test.describe('CANDID-051 — production soft-404 특성 + noindex 가드', () => {
   test('대조군(DB 불요): 미정의 라우트는 404', async ({ baseURL }) => {
     const ctx = await apiRequest.newContext({ baseURL });
     try {
@@ -44,16 +42,31 @@ test.describe('CANDID-051 — production soft-404 실측', () => {
     }
   });
 
-  test('결함 repro(DB 불요): 비숫자 id /jobs/abc → notFound() 는 404여야 한다', async ({
+  test('특성 고정(DB 불요): /jobs/{비숫자id} notFound() → 200 (Next 14 한계)', async ({
     baseURL,
   }) => {
-    // ⚠️ 현재 production은 200(soft-404)을 반환한다 → 결함이 고쳐지기 전까지 expected-fail.
-    // Step 2에서 결함 수정 후 이 마킹을 제거하면 진짜 회귀 가드가 된다.
-    test.fail();
+    // ⚠️ 이 200은 "결함"이 아니라 *문서화된 프레임워크 한계*다. 상위 Next에서 404로 바뀌면 본 단언이
+    //    실패하여 CANDID-051-spec 갱신을 유도한다(limitation tripwire). 회귀 방어는 아래 noindex 가드가 담당.
     const ctx = await apiRequest.newContext({ baseURL });
     try {
       const res = await ctx.get('/jobs/abc', { maxRedirects: 0 });
-      expect(res.status(), 'page notFound()는 404를 반환해야 한다(soft-404 회귀)').toBe(404);
+      expect(res.status(), 'Next 14 SSR notFound()는 200을 반환한다(문서화된 한계)').toBe(200);
+    } finally {
+      await ctx.dispose();
+    }
+  });
+
+  test('🛡️ 미티게이션 가드(DB 불요): /jobs/{비숫자id} not-found 응답에 robots noindex 존재', async ({
+    baseURL,
+  }) => {
+    // soft-404의 죽은 URL 색인을 막는 *유일한* 방어선. 이 가드가 깨지면 검색엔진이 404 페이지를 색인한다.
+    const ctx = await apiRequest.newContext({ baseURL });
+    try {
+      const res = await ctx.get('/jobs/abc', { maxRedirects: 0 });
+      const html = await res.text();
+      expect(html, 'not-found 응답 <head>에 robots noindex 메타가 있어야 한다').toMatch(
+        NOINDEX_META,
+      );
     } finally {
       await ctx.dispose();
     }
@@ -71,26 +84,26 @@ test.describe('CANDID-051 — production soft-404 실측', () => {
     }
   });
 
-  test('결함 repro(DB 필요): 미존재 공고 상세 /jobs/{id} → 404여야 한다', async ({ baseURL }) => {
+  test('🛡️ 미티게이션 가드(DB 필요): 미존재 공고 상세 not-found에 robots noindex', async ({
+    baseURL,
+  }) => {
     test.skip(!dbReady, 'DB 미연결');
-    test.fail(); // 현재 soft-404(200) — Step 2 수정 후 마킹 제거.
     const ctx = await apiRequest.newContext({ baseURL });
     try {
       const res = await ctx.get(`/jobs/${MISSING_JOB_ID}`, { maxRedirects: 0 });
-      expect(res.status()).toBe(404);
+      expect(await res.text()).toMatch(NOINDEX_META);
     } finally {
       await ctx.dispose();
     }
   });
 
-  test('결함 repro(DB 필요): 인증 사용자 + 미존재 공고 /jobs/{id}/apply → 404여야 한다', async ({
+  test('🛡️ 미티게이션 가드(DB 필요): 인증 사용자 지원 페이지에 robots noindex', async ({
     page,
   }) => {
     test.skip(!dbReady, 'DB 미연결');
-    test.fail(); // 현재 soft-404(200) — Step 2 수정 후 마킹 제거.
-    // 인증 후에야 apply가 notFound() 경로에 도달한다(비로그인은 /login redirect).
+    // 지원 페이지는 정적 metadata로 *항상* noindex(인증 게이트 폼). 미존재 공고 soft-404 경로도 동일 보장.
     await signupViaApi(page);
     const res = await page.request.get(`/jobs/${MISSING_JOB_ID}/apply`, { maxRedirects: 0 });
-    expect(res.status()).toBe(404);
+    expect(await res.text()).toMatch(NOINDEX_META);
   });
 });

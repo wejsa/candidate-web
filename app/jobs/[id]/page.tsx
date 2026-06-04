@@ -37,6 +37,11 @@ async function resolveParams(raw: PageProps['params']): Promise<number | null> {
   return result.success ? result.data.id : null;
 }
 
+// CANDID-051: 미존재/비숫자 공고에서 page가 notFound()를 호출하면 Next 14.2 SSR(동적 렌더)은
+// HTTP 200(soft-404)을 반환한다 — force-dynamic·loading.tsx·middleware 어느 것도 원인이 아닌
+// 프레임워크 코어 한계로 prod 실측·격리 확인됨(docs/requirements/CANDID-051-spec.md).
+// status로 죽은 URL 색인을 막을 수 없으므로, not-found 케이스에 robots:noindex를 반환하는 본 분기가
+// 유일하고 신뢰 가능한 SEO 방어선이다. *이 noindex 분기를 제거/약화하면 soft-404 색인 위험이 재발한다.*
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const id = await resolveParams(params);
   if (id === null) {
