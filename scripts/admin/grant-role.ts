@@ -48,8 +48,10 @@ async function main(): Promise<void> {
     }
 
     const previousRole = user.role;
-    // CANDIDATE로 내리면 REVOKE, 그 외(RECRUITER/ADMIN 부여)는 GRANT.
-    const eventType = targetRole === 'CANDIDATE' ? 'ROLE_REVOKED' : 'ROLE_GRANTED';
+    // 권한 서열로 승격/강등을 판정해 감사 eventType 분류(리뷰 MAJOR — 강등을 GRANTED로 오기록 방지).
+    // ordinal enum 비교가 아닌 명시적 RANK 맵(M001 정신과 일관) — enum 중간 삽입에도 안전.
+    const ROLE_RANK: Record<UserRole, number> = { CANDIDATE: 0, RECRUITER: 1, ADMIN: 2 };
+    const eventType = ROLE_RANK[targetRole] > ROLE_RANK[previousRole] ? 'ROLE_GRANTED' : 'ROLE_REVOKED';
 
     await prisma.$transaction(async (tx) => {
       await tx.user.update({ where: { id: user.id }, data: { role: targetRole } });

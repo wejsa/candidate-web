@@ -62,6 +62,16 @@ describe('requireRole', () => {
     await expectForbidden(requireRole(req(), 'ADMIN'));
   });
 
+  it('탈퇴 상태(WITHDRAWN) → AUTH_FORBIDDEN (회귀 가드)', async () => {
+    basePrisma.user.findUnique.mockResolvedValue({ role: 'ADMIN', status: 'WITHDRAWN' });
+    await expectForbidden(requireRole(req(), 'ADMIN'));
+  });
+
+  it('role 조회 중 DB 오류 → 전파(fail-closed, 통과 안 함)', async () => {
+    basePrisma.user.findUnique.mockRejectedValue(new Error('db down'));
+    await expect(requireRole(req(), 'ADMIN')).rejects.toThrow('db down');
+  });
+
   it('인증 실패는 그대로 전파 (requireAuth가 throw → role 조회 안 함)', async () => {
     requireAuth.mockRejectedValue(new AppError('AUTH_TOKEN_INVALID'));
     await expect(requireRole(req(), 'ADMIN')).rejects.toMatchObject({ code: 'AUTH_TOKEN_INVALID' });
