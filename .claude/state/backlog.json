@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "lastTaskNumber": 50,
+    "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 459,
+    "version": 467,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-03T10:16:08Z"
+    "updatedAt": "2026-06-04T11:44:15Z"
   },
   "summary": {
-    "total": 50,
-    "done": 50,
-    "inProgress": 0,
+    "total": 53,
+    "done": 51,
+    "inProgress": 1,
     "review": 0,
-    "todo": 0
+    "todo": 1
   },
   "phases": {
     "1": {
@@ -3804,6 +3804,206 @@
       "createdAt": "2026-06-03T08:12:34Z",
       "updatedAt": "2026-06-03T10:15:25Z",
       "completedAt": "2026-06-03T10:15:25Z"
+    },
+    "CANDID-051": {
+      "id": "CANDID-051",
+      "title": "공고 상세/지원 페이지 notFound() soft-404 — HTTP 200 반환 (SEO)",
+      "description": "전체 기능 E2E QA(e2e/full-coverage.spec.ts) 중 발견. /jobs/[id] 및 /jobs/[id]/apply가 미존재 공고에 대해 notFound()를 호출할 때 not-found 콘텐츠는 정상 렌더되지만 HTTP 상태가 404가 아닌 200(soft-404)으로 응답한다. 동일 dev 서버에서 미정의 라우트(/totally-bogus-route)는 정상적으로 404를, API(/api/v1/job-postings/{id})도 404 JOB_NOT_FOUND를 반환 → 오직 페이지 RSC의 notFound() 경로만 200. SEO NFR(공고 페이지 검색 색인) 관점에서 soft-404는 죽은 URL의 색인을 유발할 수 있다(현재 generateMetadata가 robots:noindex로 부분 완화 중). ⚠️ 검증 필요: Next.js dev 모드는 notFound()에 200을 반환하고 production 빌드에서는 404를 반환할 수 있음 — `next build && next start`로 /jobs/999999 HTTP 상태를 재확인한 뒤 실제 결함 여부 확정(QA 중 prod 빌드 검증을 시도했으나 sandbox 리소스 제한으로 미완료). 관련 파일: app/jobs/[id]/page.tsx, app/jobs/[id]/apply/page.tsx, app/jobs/[id]/not-found.tsx.",
+      "status": "todo",
+      "type": "bug",
+      "priority": "medium",
+      "phase": 3,
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": 7200,
+      "lockedFiles": [],
+      "dependencies": [
+        "CANDID-014"
+      ],
+      "createdAt": "2026-06-03T14:34:38Z",
+      "specFile": null,
+      "source": "전체 기능 Playwright QA 패스 (사용자 요청). 미확정(dev 관측) — prod 빌드 검증 선행 필요.",
+      "workflowState": null,
+      "steps": []
+    },
+    "CANDID-052": {
+      "id": "CANDID-052",
+      "title": "E2E journeys.spec 회귀 — /me h1 단언이 구 문구('마이페이지') 사용으로 항상 실패",
+      "description": "전체 기능 E2E QA 베이스라인 실행 중 발견(10 passed / 1 failed). 기존 E2E e2e/journeys.spec.ts:40 이 /me 페이지의 h1을 '마이페이지'로 단언하나, CANDID-019 마이페이지 대시보드 재구성(A안) 이후 실제 렌더 h1은 '내 지원 현황'이다('마이페이지'는 metadata title 로만 잔존). 보호 API(/api/v1/users/me)는 200으로 인증이 정상 동작하므로 제품 결함이 아니라 테스트가 stale — 해당 단언만 실패하여 E2E 스위트가 RED 상태가 된다. 수정: 단언을 '내 지원 현황'으로 갱신하거나 page.title()/metadata 기준으로 검증. 관련 파일: e2e/journeys.spec.ts:40 (app/me/page.tsx 의 실제 h1 참조).",
+      "status": "done",
+      "type": "bug",
+      "priority": "medium",
+      "phase": 4,
+      "assignee": null,
+      "assignedAt": null,
+      "lockTTL": 3600,
+      "lockedFiles": [],
+      "dependencies": [
+        "CANDID-048",
+        "CANDID-019"
+      ],
+      "createdAt": "2026-06-03T14:34:38Z",
+      "specFile": null,
+      "source": "전체 기능 Playwright QA 패스 (사용자 요청). 재현 확실 — 기존 journeys.spec 실행 시 항상 실패. | 수정 완료: journeys.spec.ts:40 단언을 \"내 지원 현황\"으로 갱신, headed 재실행 6/6 통과.",
+      "workflowState": null,
+      "steps": [],
+      "completedAt": "2026-06-03T14:46:11Z"
+    },
+    "CANDID-053": {
+      "id": "CANDID-053",
+      "title": "관리자/리크루터 인증·권한(RBAC) + 백오피스 (A안: 내부 흡수)",
+      "description": "[배경] 현재 candidate-web에는 관리자/리크루터 개념이 전혀 없다. User에 role 필드·역할 enum 없음, requireRole/requireAdmin 등 권한 미들웨어 없음, admin/recruiter 페이지·API 없음. AUTH_FORBIDDEN(403)은 리소스 소유권(draft 접근)과 /api/metrics의 METRICS_AUTH_TOKEN(공유 시크릿) 게이트에만 쓰임. 결과적으로 ATS의 '운영자 측' 흐름이 코드 경로상 부재하다: (1)공고는 read-only — 쓰기 엔드포인트 없고 seed/직접 DB로만 생성. (2)전형 단계 전이(DOC_REVIEW→INTERVIEW_1/2→OFFER→HIRED/REJECTED)와 ApplicationResult(PASSED/FAILED) 변경 경로 없음 — 지원자는 SUBMITTED/WITHDRAWN만 발생시킴. (3)InterviewSchedule 모델은 있으나 생성하는 코드가 0건(.ics 발급/마이페이지 타임라인은 표시만). 즉 스키마(StageType·ApplicationStatusHistory.changedBy·InterviewSchedule·AuditEventType)는 운영자 워크플로를 예견해 두었으나 기능이 비어 있다. [선결정 — 아키텍처] 관리자 기능을 (A)candidate-web 내부 RBAC로 흡수할지, (B)별도 백오피스/ATS 서비스로 분리할지 의사결정 필요(CLAUDE.md상 본 리포는 '지원자 프론트엔드', PRD §8 '면접관 이름 노출' 미결 정책과 연계). [제안 범위 — A안 가정] (1)인증·권한: User.role(또는 별도 Staff 테이블) + UserRole enum(CANDIDATE/RECRUITER/ADMIN) 도입, requireRole 미들웨어로 /api/admin/* 가드(AUTH_FORBIDDEN 재사용). (2)관리자 계정 부트스트랩: self-signup 금지 — 최초 ADMIN은 seed/CLI 스크립트 또는 env 화이트리스트로 생성, 이후 ADMIN이 RECRUITER 초대/승격(감사 로그 필수). (3)공고 CRUD(생성/수정/마감/비공개) + 권한 가드. (4)전형 진행: ApplicationStatusHistory write 경로(changedByUserId=운영자) + 단계 전이 검증(허용 전이 그래프) + ApplicationResult 결정. (5)면접 일정 생성/변경(InterviewSchedule writer 신설, icsUid 멱등). (6)보안·컴플라이언스: 운영자 PII 접근은 지원자보다 광범위 → 별도 마스킹/감사 정책(AuditEventType.PII_VIEW 확장), 최소권한·접근 로깅. [관련 코드] prisma/schema.prisma(User/StageType/ApplicationResult/InterviewSchedule/ApplicationStatusHistory), lib/auth/middleware.ts(requireAuth), lib/errors/codes.ts(AUTH_FORBIDDEN), prisma/seed.ts. 규모상 epic — /skill-plan에서 단계 분리 필요.",
+      "status": "in_progress",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 4,
+      "assignee": "wejsa-u@hoji-20260604-002216",
+      "assignedAt": "2026-06-04T11:36:30Z",
+      "lockTTL": 3600,
+      "lockedFiles": [
+        "prisma/schema.prisma"
+      ],
+      "dependencies": [],
+      "createdAt": "2026-06-03T14:54:51Z",
+      "specFile": "docs/requirements/CANDID-053-spec.md",
+      "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
+      "workflowState": {
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
+        "prNumber": 135,
+        "fixLoopCount": 0,
+        "autoChainArgs": "CANDID-053",
+        "updatedAt": "2026-06-04T11:44:15Z"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "역할 스키마 + 마이그레이션 2파일(M-A role / M-B audit enum)",
+          "status": "pr_created",
+          "prLineLimit": 200,
+          "estimatedLines": 180,
+          "files": [
+            "prisma/schema.prisma",
+            "prisma/migrations/*"
+          ],
+          "dependencies": [],
+          "prNumber": 135
+        },
+        {
+          "number": 2,
+          "title": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트",
+          "status": "pending",
+          "prLineLimit": 500,
+          "estimatedLines": 450,
+          "files": [
+            "lib/auth/middleware.ts",
+            "scripts/admin/grant-role.ts",
+            "tests/lib/auth/*"
+          ],
+          "dependencies": [
+            1
+          ],
+          "description": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트 | [리뷰 M001] requireRole은 enum ordinal 비교 금지 — 명시적 allow-list(allowed.includes(role)) 방식."
+        },
+        {
+          "number": 3,
+          "title": "역할 관리 API(승격/강등, 최후 ADMIN 가드 tx+FOR UPDATE, 감사) + 에러코드",
+          "status": "pending",
+          "prLineLimit": 500,
+          "estimatedLines": 420,
+          "files": [
+            "app/api/admin/v1/users/[id]/role/route.ts",
+            "lib/admin/roles.ts",
+            "lib/errors/codes.ts",
+            "tests/*"
+          ],
+          "dependencies": [
+            2
+          ]
+        },
+        {
+          "number": 4,
+          "title": "공고 관리 CRUD API(생성/수정/상태전환, 감사)",
+          "status": "pending",
+          "prLineLimit": 700,
+          "estimatedLines": 600,
+          "files": [
+            "app/api/admin/v1/job-postings/**",
+            "lib/admin/job-postings.ts",
+            "tests/*"
+          ],
+          "dependencies": [
+            2
+          ]
+        },
+        {
+          "number": 5,
+          "title": "지원자 목록/상세 + idx_applications_posting_stage + 운영자 PII 통제",
+          "status": "pending",
+          "prLineLimit": 700,
+          "estimatedLines": 620,
+          "files": [
+            "app/api/admin/v1/job-postings/[id]/applications/**",
+            "lib/admin/applicants.ts",
+            "prisma/migrations/*",
+            "tests/*"
+          ],
+          "dependencies": [
+            2
+          ]
+        },
+        {
+          "number": 6,
+          "title": "전형 단계 전이 그래프 + 이력 write + 결과 결정",
+          "status": "pending",
+          "prLineLimit": 700,
+          "estimatedLines": 600,
+          "files": [
+            "app/api/admin/v1/applications/[id]/stage/route.ts",
+            "lib/admin/stage-transition.ts",
+            "tests/*"
+          ],
+          "dependencies": [
+            2,
+            5
+          ]
+        },
+        {
+          "number": 7,
+          "title": "면접 일정 writer(icsUid 멱등, 지원자 반영)",
+          "status": "pending",
+          "prLineLimit": 500,
+          "estimatedLines": 450,
+          "files": [
+            "app/api/admin/v1/applications/[id]/interviews/**",
+            "lib/admin/interviews.ts",
+            "tests/*"
+          ],
+          "dependencies": [
+            2,
+            6
+          ]
+        },
+        {
+          "number": 8,
+          "title": "백오피스 UI /admin/** + E2E",
+          "status": "pending",
+          "prLineLimit": 1000,
+          "estimatedLines": 900,
+          "files": [
+            "app/admin/**",
+            "e2e/admin.spec.ts"
+          ],
+          "dependencies": [
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      ],
+      "currentStep": 1
     }
   }
 }

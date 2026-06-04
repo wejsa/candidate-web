@@ -33,6 +33,14 @@ enum UserStatus {
   WITHDRAWN
 }
 
+// CANDID-053: RBAC 역할 (A안 — 내부 흡수). CANDIDATE=기본 지원자, RECRUITER/ADMIN=운영자.
+// 권한 SSOT는 DB — requireRole이 토큰 클레임이 아닌 본 컬럼을 재조회한다(escalation 차단).
+enum UserRole {
+  CANDIDATE
+  RECRUITER
+  ADMIN
+}
+
 enum AuthProviderType {
   GOOGLE
   GITHUB
@@ -50,6 +58,8 @@ model User {
   birthDateKeyVersion Int?       @default(1) @map("birth_date_key_version") @db.SmallInt
   emailVerifiedAt     DateTime?  @map("email_verified_at")
   status              UserStatus @default(ACTIVE)
+  // CANDID-053: RBAC 역할. 기존 행은 마이그레이션 DEFAULT로 전부 CANDIDATE 자동 백필.
+  role                UserRole   @default(CANDIDATE)
   failedLoginCount    Int        @default(0) @map("failed_login_count")
   lockedUntil         DateTime?  @map("locked_until")
   withdrawnAt         DateTime?  @map("withdrawn_at")
@@ -327,6 +337,15 @@ enum AuditEventType {
   OAUTH_UNLINKED
   // CANDID — 지원서 작성 중 Draft 폐기(작성 취소). PII 첨부 삭제 추적성.
   DRAFT_DISCARD
+  // CANDID-053: 운영자(RBAC) 백오피스 감사 이벤트. 값 emit은 Step 3~7에서 추가(본 단계는 enum만).
+  ROLE_GRANTED
+  ROLE_REVOKED
+  JOB_POSTING_CREATED
+  JOB_POSTING_UPDATED
+  JOB_POSTING_STATUS_CHANGED
+  APPLICATION_STAGE_CHANGED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_UPDATED
 }
 
 model Application {
