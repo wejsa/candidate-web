@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 475,
+    "version": 476,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T12:45:29Z"
+    "updatedAt": "2026-06-04T12:56:10Z"
   },
   "summary": {
     "total": 53,
@@ -3814,17 +3814,65 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260604-124529",
-      "assignedAt": "2026-06-04T12:45:29Z",
-      "lockTTL": 1800,
-      "lockedFiles": [],
+      "assignedAt": "2026-06-04T12:56:10Z",
+      "lockTTL": 7200,
+      "lockedFiles": [
+        "tests/app/jobs/[id]/not-found-status.test.tsx",
+        "playwright.prod.config.ts",
+        "e2e/prod/soft-404.spec.ts",
+        "package.json",
+        "app/jobs/[id]/page.tsx",
+        "app/jobs/[id]/apply/page.tsx",
+        "docs/requirements/CANDID-051-spec.md"
+      ],
       "dependencies": [
         "CANDID-014"
       ],
       "createdAt": "2026-06-03T14:34:38Z",
-      "specFile": null,
+      "specFile": "docs/requirements/CANDID-051-spec.md",
       "source": "전체 기능 Playwright QA 패스 (사용자 요청). 미확정(dev 관측) — prod 빌드 검증 선행 필요.",
-      "workflowState": null,
-      "steps": []
+      "workflowState": {
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": "CANDID-051",
+        "updatedAt": "2026-06-04T12:56:10Z"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "회귀 가드(단위) + prod HTTP-404 검증 하네스(E2E)",
+          "description": "route export 직접 호출로 bogus id→notFound() 코드패스 단위 가드 + pnpm build/start 기반 prod Playwright config로 /jobs/{bogus} 실제 404 assertion. dev=200 관측의 prod 실결함 여부 확정(decision gate). sandbox build kill(exit 144) 시 하네스 커밋+CI 위임.",
+          "status": "pending",
+          "prLineLimit": 700,
+          "estimatedLines": 270,
+          "files": [
+            "tests/app/jobs/[id]/not-found-status.test.tsx",
+            "playwright.prod.config.ts",
+            "e2e/prod/soft-404.spec.ts",
+            "package.json"
+          ],
+          "dependencies": []
+        },
+        {
+          "number": 2,
+          "title": "검증 결과 반영 + 문서화 (분기 A: 문서화/완화 · B: 에스컬레이션)",
+          "description": "Step1 실측 분기. prod=404(예상): page.tsx/apply 주석 + CANDID-051-spec.md(관측/검증/결론/회귀가드) + apply 색인위험 평가 → 종결. prod=200(실결함): 프레임워크 이슈 에스컬레이션 + 미들웨어 선검사 우회 설계 기록.",
+          "status": "pending",
+          "prLineLimit": 200,
+          "estimatedLines": 150,
+          "files": [
+            "app/jobs/[id]/page.tsx",
+            "app/jobs/[id]/apply/page.tsx",
+            "docs/requirements/CANDID-051-spec.md"
+          ],
+          "dependencies": [
+            1
+          ]
+        }
+      ],
+      "currentStep": 1
     },
     "CANDID-052": {
       "id": "CANDID-052",
