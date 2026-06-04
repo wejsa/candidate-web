@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 474,
+    "version": 475,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T12:23:36Z"
+    "updatedAt": "2026-06-04T12:45:29Z"
   },
   "summary": {
     "total": 53,
@@ -3809,13 +3809,13 @@
       "id": "CANDID-051",
       "title": "공고 상세/지원 페이지 notFound() soft-404 — HTTP 200 반환 (SEO)",
       "description": "전체 기능 E2E QA(e2e/full-coverage.spec.ts) 중 발견. /jobs/[id] 및 /jobs/[id]/apply가 미존재 공고에 대해 notFound()를 호출할 때 not-found 콘텐츠는 정상 렌더되지만 HTTP 상태가 404가 아닌 200(soft-404)으로 응답한다. 동일 dev 서버에서 미정의 라우트(/totally-bogus-route)는 정상적으로 404를, API(/api/v1/job-postings/{id})도 404 JOB_NOT_FOUND를 반환 → 오직 페이지 RSC의 notFound() 경로만 200. SEO NFR(공고 페이지 검색 색인) 관점에서 soft-404는 죽은 URL의 색인을 유발할 수 있다(현재 generateMetadata가 robots:noindex로 부분 완화 중). ⚠️ 검증 필요: Next.js dev 모드는 notFound()에 200을 반환하고 production 빌드에서는 404를 반환할 수 있음 — `next build && next start`로 /jobs/999999 HTTP 상태를 재확인한 뒤 실제 결함 여부 확정(QA 중 prod 빌드 검증을 시도했으나 sandbox 리소스 제한으로 미완료). 관련 파일: app/jobs/[id]/page.tsx, app/jobs/[id]/apply/page.tsx, app/jobs/[id]/not-found.tsx.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "bug",
       "priority": "medium",
       "phase": 3,
-      "assignee": null,
-      "assignedAt": null,
-      "lockTTL": 7200,
+      "assignee": "wejsa-u@hoji-20260604-124529",
+      "assignedAt": "2026-06-04T12:45:29Z",
+      "lockTTL": 1800,
       "lockedFiles": [],
       "dependencies": [
         "CANDID-014"
