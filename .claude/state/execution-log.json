@@ -3354,5 +3354,19 @@
       "majorFixed": 1,
       "minor": 6
     }
+  },
+  {
+    "timestamp": "2026-06-04T12:00:11Z",
+    "taskId": "CANDID-053",
+    "stepNumber": 2,
+    "action": "merged",
+    "prNumber": 136
+  },
+  {
+    "timestamp": "2026-06-04T12:07:47Z",
+    "taskId": "CANDID-053",
+    "stepNumber": 3,
+    "action": "pr_created",
+    "prNumber": 137
   }
 ]
