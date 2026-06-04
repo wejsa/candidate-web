@@ -3412,5 +3412,13 @@
     "action": "pr_created",
     "prNumber": 140,
     "timestamp": "2026-06-04T14:22:02Z"
+  },
+  {
+    "taskId": "CANDID-051",
+    "stepNumber": 2,
+    "action": "approved",
+    "prNumber": 140,
+    "decision": "APPROVED (self-PR comment, CRITICAL 0)",
+    "timestamp": "2026-06-04T14:27:35Z"
   }
 ]

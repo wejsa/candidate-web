@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 480,
+    "version": 481,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T14:22:02Z"
+    "updatedAt": "2026-06-04T14:27:35Z"
   },
   "summary": {
     "total": 53,
@@ -3814,7 +3814,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260604-124529",
-      "assignedAt": "2026-06-04T14:22:02Z",
+      "assignedAt": "2026-06-04T14:27:35Z",
       "lockTTL": 7200,
       "lockedFiles": [
         "app/jobs/[id]/page.tsx",
@@ -3832,12 +3832,12 @@
       "specFile": "docs/requirements/CANDID-051-spec.md",
       "source": "전체 기능 Playwright QA 패스 (사용자 요청). 미확정(dev 관측) — prod 빌드 검증 선행 필요.",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 140,
         "fixLoopCount": 0,
         "autoChainArgs": "CANDID-051",
-        "updatedAt": "2026-06-04T14:22:02Z"
+        "updatedAt": "2026-06-04T14:27:35Z"
       },
       "steps": [
         {
