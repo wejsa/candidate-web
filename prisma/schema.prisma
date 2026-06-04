@@ -385,6 +385,8 @@ model Application {
   // BR-APP-01 활성 지원서 UNIQUE 제약은 partial(`WHERE result <> 'WITHDRAWN'`)이라 Prisma schema에서 직접 표현 불가 — migration.sql에서 정의.
   @@index([userId, submittedAt(sort: Desc)], map: "idx_applications_user_submitted")
   @@index([jobPostingId, result], map: "idx_applications_posting_result")
+  // CANDID-053 Step 5 — 운영자 지원자 목록 stage 필터/정렬 (FR-006).
+  @@index([jobPostingId, currentStage], map: "idx_applications_posting_stage")
   @@map("applications")
 }
 
