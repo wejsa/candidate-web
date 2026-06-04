@@ -128,6 +128,11 @@ export const ERROR_CATALOG = {
   JOB_NOT_FOUND: { status: 404, message: '채용 공고를 찾을 수 없습니다.' },
   JOB_NOT_OPEN: { status: 422, message: '아직 지원할 수 없는 공고입니다.' },
   JOB_CLOSED: { status: 422, message: '지원이 마감된 공고입니다.' },
+  // CANDID-053 Step 4 — 운영자 공고 상태 전이 위반(후보자 지원 게이트 JOB_NOT_OPEN과 분리).
+  JOB_INVALID_STATUS_TRANSITION: {
+    status: 409,
+    message: '허용되지 않는 공고 상태 전이입니다.',
+  },
 
   // 지원 — APP_
   APP_ALREADY_SUBMITTED: { status: 409, message: '이미 지원한 공고입니다.' },

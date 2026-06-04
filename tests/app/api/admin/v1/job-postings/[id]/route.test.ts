@@ -41,11 +41,11 @@ describe('PATCH /api/admin/v1/job-postings/[id]', () => {
     expect(updateJobPosting).not.toHaveBeenCalled();
   });
 
-  it('잘못된 전이 → 422 JOB_NOT_OPEN (도메인 에러 변환)', async () => {
-    updateJobPosting.mockRejectedValue(new AppError('JOB_NOT_OPEN'));
-    const res = await PATCH(patch('10', { status: 'DRAFT' }), ctx('10'));
-    expect(res.status).toBe(422);
-    expect((await res.json()).code).toBe('JOB_NOT_OPEN');
+  it('잘못된 전이 → 409 JOB_INVALID_STATUS_TRANSITION (도메인 에러 변환)', async () => {
+    updateJobPosting.mockRejectedValue(new AppError('JOB_INVALID_STATUS_TRANSITION'));
+    const res = await PATCH(patch('10', { status: 'OPEN' }), ctx('10'));
+    expect(res.status).toBe(409);
+    expect((await res.json()).code).toBe('JOB_INVALID_STATUS_TRANSITION');
   });
 
   it('권한 부족 → 403', async () => {

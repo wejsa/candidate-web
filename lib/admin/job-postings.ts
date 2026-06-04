@@ -14,12 +14,22 @@ import type { JobPostingCreateInput, JobPostingUpdateInput } from '@/lib/admin/j
 //   - 상태 전이는 명시 그래프로 강제(아래) — 임의 전이 차단.
 //   - 변경 + 감사(JOB_POSTING_CREATED/UPDATED/STATUS_CHANGED)는 단일 트랜잭션(BR-TX-01).
 
-/** 허용 상태 전이 그래프. CLOSED는 종단. */
+/** 허용 상태 전이 그래프 (FR-005 `DRAFT↔OPEN→CLOSED`). DRAFT↔OPEN 양방향(잘못 공개 회수), CLOSED는 종단. */
 const ALLOWED_STATUS_TRANSITIONS: Record<JobStatus, readonly JobStatus[]> = {
   DRAFT: [JobStatus.OPEN, JobStatus.CLOSED],
-  OPEN: [JobStatus.CLOSED],
+  OPEN: [JobStatus.DRAFT, JobStatus.CLOSED],
   CLOSED: [],
 };
+
+/** opensAt < closesAt 불변식 — 즉시-마감(유령) 공고 차단. closesAt null(상시)은 통과. */
+function assertOpenCloseOrder(opensAt: Date, closesAt: Date | null): void {
+  if (closesAt !== null && closesAt.getTime() <= opensAt.getTime()) {
+    throw new AppError('SYS_VALIDATION_FAILED', {
+      message: '마감일시는 시작일시보다 이후여야 합니다.',
+      details: [{ field: 'closesAt', reason: 'closesAt must be after opensAt' }],
+    });
+  }
+}
 
 export interface JobPostingSummary {
   id: number;
@@ -52,6 +62,10 @@ export async function createJobPosting(args: CreateJobPostingArgs): Promise<JobP
   const { actorUserId, input } = args;
   await assertCategoryExists(prisma, input.jobCategoryId);
 
+  const opensAt = new Date(input.opensAt);
+  const closesAt = typeof input.closesAt === 'string' ? new Date(input.closesAt) : null;
+  assertOpenCloseOrder(opensAt, closesAt);
+
   const contentHtml = sanitizeHtml(input.contentHtml, 'job-posting');
 
   return prisma.$transaction(async (tx) => {
@@ -62,8 +76,8 @@ export async function createJobPosting(args: CreateJobPostingArgs): Promise<JobP
         employmentType: input.employmentType,
         careerLevel: input.careerLevel,
         contentHtml,
-        opensAt: new Date(input.opensAt),
-        closesAt: typeof input.closesAt === 'string' ? new Date(input.closesAt) : null,
+        opensAt,
+        closesAt,
         status: JobStatus.DRAFT,
       },
       select: { id: true, title: true, status: true },
@@ -101,11 +115,13 @@ export async function updateJobPosting(args: UpdateJobPostingArgs): Promise<JobP
   }
 
   return prisma.$transaction(async (tx) => {
-    const existing = await tx.jobPosting.findUnique({
-      where: { id: jobPostingId },
-      select: { status: true },
-    });
-    if (existing === null) {
+    // 행 잠금 후 현재 상태/일정 조회 — 동시 PATCH read-then-update race 직렬화(Step 3 선례 정합).
+    // eslint-disable-next-line no-restricted-syntax -- FOR UPDATE 잠금 전용, PII 컬럼 미선택 (db-designer CRITICAL 가드)
+    const rows = await tx.$queryRaw<{ status: JobStatus; opens_at: Date; closes_at: Date | null }[]>`
+      SELECT status, opens_at, closes_at FROM job_postings WHERE id = ${jobPostingId} FOR UPDATE
+    `;
+    const existing = rows[0];
+    if (existing === undefined) {
       throw new AppError('JOB_NOT_FOUND');
     }
 
@@ -119,18 +135,25 @@ export async function updateJobPosting(args: UpdateJobPostingArgs): Promise<JobP
     if (patch.contentHtml !== undefined) {
       data.contentHtml = sanitizeHtml(patch.contentHtml, 'job-posting');
     }
-    if (patch.opensAt !== undefined) data.opensAt = new Date(patch.opensAt);
+    const effectiveOpensAt = patch.opensAt !== undefined ? new Date(patch.opensAt) : existing.opens_at;
+    let effectiveClosesAt = existing.closes_at;
+    if (patch.opensAt !== undefined) data.opensAt = effectiveOpensAt;
     if (patch.closesAt !== undefined) {
       // 외부 if로 undefined는 이미 제외 — null(상시 모집) 또는 string.
-      data.closesAt = patch.closesAt === null ? null : new Date(patch.closesAt);
+      effectiveClosesAt = patch.closesAt === null ? null : new Date(patch.closesAt);
+      data.closesAt = effectiveClosesAt;
+    }
+    // 병합된 일정의 불변식 검증(즉시-마감 공고 차단).
+    if (patch.opensAt !== undefined || patch.closesAt !== undefined) {
+      assertOpenCloseOrder(effectiveOpensAt, effectiveClosesAt);
     }
 
-    // 상태 전이 — 전이 그래프 강제.
+    // 상태 전이 — 전이 그래프 강제(잠금 후 읽은 현재 상태 기준).
     let statusChanged = false;
     if (patch.status !== undefined && patch.status !== existing.status) {
       const allowed = ALLOWED_STATUS_TRANSITIONS[existing.status];
       if (!allowed.includes(patch.status)) {
-        throw new AppError('JOB_NOT_OPEN', {
+        throw new AppError('JOB_INVALID_STATUS_TRANSITION', {
           message: `허용되지 않는 상태 전이입니다: ${existing.status} → ${patch.status}`,
           details: [{ field: 'status', reason: `from ${existing.status} to ${patch.status}` }],
         });

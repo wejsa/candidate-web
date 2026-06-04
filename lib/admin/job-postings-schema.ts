@@ -18,7 +18,11 @@ export const JobPostingCreateSchema = z
     opensAt: z.string().datetime(),
     closesAt: CLOSES_AT.optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (o) => typeof o.closesAt !== 'string' || new Date(o.closesAt) > new Date(o.opensAt),
+    { message: '마감일시는 시작일시보다 이후여야 합니다.', path: ['closesAt'] },
+  );
 export type JobPostingCreateInput = z.infer<typeof JobPostingCreateSchema>;
 
 export const JobPostingUpdateSchema = z
