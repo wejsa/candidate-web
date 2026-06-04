@@ -3436,5 +3436,19 @@
       140
     ],
     "timestamp": "2026-06-04T14:29:27Z"
+  },
+  {
+    "taskId": "CANDID-053",
+    "stepNumber": 4,
+    "action": "merged",
+    "prNumber": 138,
+    "timestamp": "2026-06-04T14:40:11Z",
+    "note": "orphan session takeover reconcile"
+  },
+  {
+    "taskId": "CANDID-053",
+    "action": "reclaimed",
+    "by": "wejsa-u@hoji-20260604-143953",
+    "timestamp": "2026-06-04T14:40:11Z"
   }
 ]
