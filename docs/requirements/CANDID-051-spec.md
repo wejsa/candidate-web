@@ -77,6 +77,9 @@ status 정확 측정을 위해 `maxRedirects:0`. apply는 비로그인 시 `/log
 - **HTTP 404 status 자체**는 미해결(프레임워크 한계). 향후 Next.js 상위 버전에서 동적 `notFound()` status가
   개선되면(특성 테스트가 실패로 알림) `robots` 의존을 줄이고 status 기반 가드로 전환 가능.
 - 미들웨어 기반 형식-검증 404(`/jobs/abc` 등)는 SEO 가치가 낮아(검색엔진이 생성하지 않는 URL) 도입하지 않음.
+- **(선택) 운영 모니터링**: 코드 회귀 가드(e2e)는 robots 메타 *존재*만 보장한다. 검색엔진의 실제 색인 동작은
+  코드 테스트 밖이므로, Google Search Console "색인 생성 범위"에서 `/jobs/{id}` soft-404 URL이 색인되지
+  않는지 주기 점검하면 noindex 회귀를 실측으로도 감시할 수 있다.
 
 ## 참고
 

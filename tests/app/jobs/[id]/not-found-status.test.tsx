@@ -104,7 +104,10 @@ describe('CANDID-051 — /jobs/[id] notFound() 코드패스 가드', () => {
 
   it('JOB_NOT_FOUND 외 에러 → notFound()가 아닌 원본 throw (error.tsx 발화)', async () => {
     getJobDetail.mockRejectedValue(new AppError('SYS_INTERNAL_ERROR'));
-    await expect(JobDetailPage({ params: { id: '5' } })).rejects.not.toThrow('NEXT_NOT_FOUND');
+    // 원본 에러가 *그대로* 재전파돼야 한다(notFound로 삼키면 5xx가 404로 마스킹). 코드까지 단언.
+    await expect(JobDetailPage({ params: { id: '5' } })).rejects.toMatchObject({
+      code: 'SYS_INTERNAL_ERROR',
+    });
     expect(navigation.notFound).not.toHaveBeenCalled();
   });
 });
@@ -144,7 +147,10 @@ describe('CANDID-051 — /jobs/[id]/apply notFound() 코드패스 가드', () =>
     getOptionalAuthFromCookies.mockResolvedValue({ userId: 42 });
     loadUserPrefill.mockResolvedValue({});
     getOrInitDraft.mockRejectedValue(new AppError('SYS_INTERNAL_ERROR'));
-    await expect(ApplyPage({ params: { id: '7' } })).rejects.not.toThrow('NEXT_NOT_FOUND');
+    // 원본 SYS 에러 코드가 그대로 재전파됨을 직접 단언(resolve/다른에러로 회귀해도 잡히도록).
+    await expect(ApplyPage({ params: { id: '7' } })).rejects.toMatchObject({
+      code: 'SYS_INTERNAL_ERROR',
+    });
     expect(navigation.notFound).not.toHaveBeenCalled();
   });
 });
@@ -171,6 +177,15 @@ describe('CANDID-051 — robots:noindex 미티게이션 가드 (SEO 방어선)',
     const meta = await generateMetadata({ params: { id: '7' } });
     // not-found 분기의 강제 noindex와 구분됨(과잉수정 방지).
     expect(meta.robots).toBeUndefined();
+  });
+
+  it('상세 generateMetadata: JOB_NOT_FOUND 외 에러 → noindex 아닌 기본 메타 폴백', async () => {
+    // page.tsx 폴백 분기: not-found가 아닌 일반 에러는 noindex를 *강제하지 않고* 기본 메타로 떨어진다
+    // (페이지 본문은 throw → error.tsx). noindex가 이 경로로 새지 않음을 음성 가드로 고정.
+    getJobDetail.mockRejectedValue(new AppError('SYS_INTERNAL_ERROR'));
+    const meta = await generateMetadata({ params: { id: '5' } });
+    expect(meta.robots).toBeUndefined();
+    expect(meta.title).toBe('채용 공고');
   });
 
   it('지원 페이지 정적 metadata: 항상 robots noindex (인증 게이트 폼 — 비색인)', () => {
