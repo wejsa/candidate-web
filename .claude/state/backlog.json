@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 466,
+    "version": 467,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T11:36:30Z"
+    "updatedAt": "2026-06-04T11:44:15Z"
   },
   "summary": {
     "total": 53,
@@ -3868,12 +3868,12 @@
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
+        "currentSkill": "skill-merge-pr",
+        "lastCompletedSkill": "skill-review-pr",
         "prNumber": 135,
         "fixLoopCount": 0,
         "autoChainArgs": "CANDID-053",
-        "updatedAt": "2026-06-04T11:36:30Z"
+        "updatedAt": "2026-06-04T11:44:15Z"
       },
       "steps": [
         {
@@ -3902,7 +3902,8 @@
           ],
           "dependencies": [
             1
-          ]
+          ],
+          "description": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트 | [리뷰 M001] requireRole은 enum ordinal 비교 금지 — 명시적 allow-list(allowed.includes(role)) 방식."
         },
         {
           "number": 3,
