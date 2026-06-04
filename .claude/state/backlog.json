@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 467,
+    "version": 470,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T11:44:15Z"
+    "updatedAt": "2026-06-04T11:59:35Z"
   },
   "summary": {
     "total": 53,
@@ -3858,10 +3858,10 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260604-002216",
-      "assignedAt": "2026-06-04T11:36:30Z",
+      "assignedAt": "2026-06-04T11:54:56Z",
       "lockTTL": 3600,
       "lockedFiles": [
-        "prisma/schema.prisma"
+        "lib/auth/middleware.ts"
       ],
       "dependencies": [],
       "createdAt": "2026-06-03T14:54:51Z",
@@ -3870,16 +3870,16 @@
       "workflowState": {
         "currentSkill": "skill-merge-pr",
         "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 135,
+        "prNumber": 136,
         "fixLoopCount": 0,
         "autoChainArgs": "CANDID-053",
-        "updatedAt": "2026-06-04T11:44:15Z"
+        "updatedAt": "2026-06-04T11:59:35Z"
       },
       "steps": [
         {
           "number": 1,
           "title": "역할 스키마 + 마이그레이션 2파일(M-A role / M-B audit enum)",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 200,
           "estimatedLines": 180,
           "files": [
@@ -3887,12 +3887,13 @@
             "prisma/migrations/*"
           ],
           "dependencies": [],
-          "prNumber": 135
+          "prNumber": 135,
+          "mergedAt": "2026-06-04T11:46:34Z"
         },
         {
           "number": 2,
           "title": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 500,
           "estimatedLines": 450,
           "files": [
@@ -3903,7 +3904,8 @@
           "dependencies": [
             1
           ],
-          "description": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트 | [리뷰 M001] requireRole은 enum ordinal 비교 금지 — 명시적 allow-list(allowed.includes(role)) 방식."
+          "description": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트 | [리뷰 M001] requireRole은 enum ordinal 비교 금지 — 명시적 allow-list(allowed.includes(role)) 방식.",
+          "prNumber": 136
         },
         {
           "number": 3,
@@ -4003,7 +4005,7 @@
           ]
         }
       ],
-      "currentStep": 1
+      "currentStep": 2
     }
   }
 }
