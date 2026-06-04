@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 51,
+    "version": 52,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-03T10:15:25Z"
+    "updatedAt": "2026-06-04T14:29:27Z"
   },
   "tasks": {
     "CANDID-022": {
@@ -1498,6 +1498,20 @@
         131
       ],
       "note": "공고 탐색/지원 여정 UI 재구성 + 인증 UI 보강. Step1 결함수정 / Step2 로그인·회원가입·헤더 / Step3 /jobs 목록 CSS Modules / Step4 /jobs/[id] 상세. coupang.jobs 참고."
+    },
+    "CANDID-051": {
+      "id": "CANDID-051",
+      "title": "공고 상세/지원 페이지 notFound() soft-404 — HTTP 200 반환 (SEO)",
+      "phase": 3,
+      "priority": "medium",
+      "type": "bug",
+      "completedAt": "2026-06-04T14:29:27Z",
+      "assignee": "wejsa-u@hoji-20260604-124529",
+      "prs": [
+        139,
+        140
+      ],
+      "note": "공고 페이지 notFound() soft-404(HTTP 200)는 Next 14.2 SSR 코어 한계로 확정(force-dynamic/loading/middleware 격리 실측, 코드 404 불가). Step1 검증 하네스+회귀가드, Step2 robots:noindex 미티게이션 강화+문서화로 종결. spec: docs/requirements/CANDID-051-spec.md"
     }
   }
 }

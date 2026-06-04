@@ -3420,5 +3420,21 @@
     "prNumber": 140,
     "decision": "APPROVED (self-PR comment, CRITICAL 0)",
     "timestamp": "2026-06-04T14:27:35Z"
+  },
+  {
+    "taskId": "CANDID-051",
+    "stepNumber": 2,
+    "action": "merged",
+    "prNumber": 140,
+    "timestamp": "2026-06-04T14:29:27Z"
+  },
+  {
+    "taskId": "CANDID-051",
+    "action": "task_completed",
+    "prs": [
+      139,
+      140
+    ],
+    "timestamp": "2026-06-04T14:29:27Z"
   }
 ]
