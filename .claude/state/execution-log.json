@@ -3405,5 +3405,12 @@
     "action": "merged",
     "prNumber": 139,
     "timestamp": "2026-06-04T13:23:54Z"
+  },
+  {
+    "taskId": "CANDID-051",
+    "stepNumber": 2,
+    "action": "pr_created",
+    "prNumber": 140,
+    "timestamp": "2026-06-04T14:22:02Z"
   }
 ]
