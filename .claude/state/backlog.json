@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 472,
+    "version": 474,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T12:07:47Z"
+    "updatedAt": "2026-06-04T12:23:36Z"
   },
   "summary": {
     "total": 53,
@@ -3858,12 +3858,11 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260604-002216",
-      "assignedAt": "2026-06-04T12:07:47Z",
+      "assignedAt": "2026-06-04T12:23:36Z",
       "lockTTL": 3600,
       "lockedFiles": [
-        "app/api/admin/v1/users/[id]/role/route.ts",
-        "lib/admin/roles.ts",
-        "lib/errors/codes.ts"
+        "app/api/admin/v1/job-postings",
+        "lib/admin/job-postings.ts"
       ],
       "dependencies": [],
       "createdAt": "2026-06-03T14:54:51Z",
@@ -3872,10 +3871,10 @@
       "workflowState": {
         "currentSkill": "skill-review-pr",
         "lastCompletedSkill": "skill-impl",
-        "prNumber": 137,
+        "prNumber": 138,
         "fixLoopCount": 0,
         "autoChainArgs": "CANDID-053",
-        "updatedAt": "2026-06-04T12:07:47Z"
+        "updatedAt": "2026-06-04T12:23:36Z"
       },
       "steps": [
         {
@@ -3913,7 +3912,7 @@
         {
           "number": 3,
           "title": "역할 관리 API(승격/강등, 최후 ADMIN 가드 tx+FOR UPDATE, 감사) + 에러코드",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 500,
           "estimatedLines": 420,
           "files": [
@@ -3925,12 +3924,13 @@
           "dependencies": [
             2
           ],
-          "prNumber": 137
+          "prNumber": 137,
+          "mergedAt": "2026-06-04T12:15:33Z"
         },
         {
           "number": 4,
           "title": "공고 관리 CRUD API(생성/수정/상태전환, 감사)",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 700,
           "estimatedLines": 600,
           "files": [
@@ -3940,7 +3940,8 @@
           ],
           "dependencies": [
             2
-          ]
+          ],
+          "prNumber": 138
         },
         {
           "number": 5,
@@ -4009,7 +4010,7 @@
           ]
         }
       ],
-      "currentStep": 3
+      "currentStep": 4
     }
   }
 }

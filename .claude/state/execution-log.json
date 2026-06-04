@@ -3368,5 +3368,19 @@
     "stepNumber": 3,
     "action": "pr_created",
     "prNumber": 137
+  },
+  {
+    "timestamp": "2026-06-04T12:15:33Z",
+    "taskId": "CANDID-053",
+    "stepNumber": 3,
+    "action": "merged",
+    "prNumber": 137
+  },
+  {
+    "timestamp": "2026-06-04T12:23:36Z",
+    "taskId": "CANDID-053",
+    "stepNumber": 4,
+    "action": "pr_created",
+    "prNumber": 138
   }
 ]
