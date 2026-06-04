@@ -62,4 +62,18 @@ describe('PATCH /api/admin/v1/users/[id]/role', () => {
     const res = await PATCH(patch('0', { role: 'RECRUITER' }), ctx('0'));
     expect(res.status).toBe(400);
   });
+
+  it('도메인 에러(USER_LAST_ADMIN) → 409 표준 응답 변환', async () => {
+    changeUserRole.mockRejectedValue(new AppError('USER_LAST_ADMIN'));
+    const res = await PATCH(patch('9', { role: 'CANDIDATE' }), ctx('9'));
+    expect(res.status).toBe(409);
+    expect((await res.json()).code).toBe('USER_LAST_ADMIN');
+  });
+
+  it('본인 역할 변경(USER_CANNOT_CHANGE_OWN_ROLE) → 403 표준 응답 변환', async () => {
+    changeUserRole.mockRejectedValue(new AppError('USER_CANNOT_CHANGE_OWN_ROLE'));
+    const res = await PATCH(patch('1', { role: 'RECRUITER' }), ctx('1'));
+    expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe('USER_CANNOT_CHANGE_OWN_ROLE');
+  });
 });

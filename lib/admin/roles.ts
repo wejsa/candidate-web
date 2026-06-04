@@ -42,31 +42,53 @@ export async function changeUserRole(input: ChangeRoleInput): Promise<ChangeRole
 
   return prisma.$transaction(
     async (tx) => {
-      // 대상 행 잠금 — 동일 대상 동시 변경 직렬화. id만 SELECT(PII 미접근).
-      // eslint-disable-next-line no-restricted-syntax -- FOR UPDATE 잠금 전용, PII 컬럼 미선택 (db-designer CRITICAL 가드)
-      await tx.$queryRaw`SELECT id FROM users WHERE id = ${targetUserId} FOR UPDATE`;
-
-      const target = await tx.user.findUnique({
+      // 1차 조회(잠금 전) — role에 따라 잠금 종류를 달리 잡기 위한 분기 결정용.
+      const pre = await tx.user.findUnique({
         where: { id: targetUserId },
         select: { role: true, status: true },
       });
-      if (target === null || target.status === UserStatus.WITHDRAWN) {
+      if (pre === null || pre.status === UserStatus.WITHDRAWN) {
         throw new AppError('USER_NOT_FOUND');
       }
+      if (pre.role === newRole) {
+        // 멱등 — 잠금/변경/감사 없음.
+        return { userId: targetUserId, previousRole: pre.role, role: newRole, changed: false };
+      }
 
-      const previousRole = target.role;
+      // 잠금 (데드락 회피 — domain/security MAJOR):
+      //   - ADMIN 강등 경로: 활성 ADMIN 집합을 **id 오름차순으로만** FOR UPDATE(대상 포함, 결정적 순서).
+      //     동시 두 ADMIN 강등이 항상 같은 순서로 같은 자원을 획득 → 순환 대기 없음 + 직렬화로 TOCTOU 차단.
+      //   - 그 외: 대상 단건만 잠금(현재 비-ADMIN 행이라 ADMIN 집합과 겹치지 않음 → 경로 간 교착도 없음).
+      // 두 경로 모두 id만 SELECT(PII 미접근).
+      const isAdminDemotion = pre.role === UserRole.ADMIN && newRole !== UserRole.ADMIN;
+      let lockedActiveAdminIds: number[] = [];
+      if (isAdminDemotion) {
+        // eslint-disable-next-line no-restricted-syntax -- FOR UPDATE 잠금 전용, PII 컬럼 미선택 (db-designer CRITICAL 가드)
+        const rows = await tx.$queryRaw<{ id: number }[]>`
+          SELECT id FROM users WHERE role = 'ADMIN' AND status = 'ACTIVE' ORDER BY id FOR UPDATE
+        `;
+        lockedActiveAdminIds = rows.map((r) => Number(r.id));
+      } else {
+        // eslint-disable-next-line no-restricted-syntax -- FOR UPDATE 잠금 전용, PII 컬럼 미선택 (db-designer CRITICAL 가드)
+        await tx.$queryRaw`SELECT id FROM users WHERE id = ${targetUserId} FOR UPDATE`;
+      }
+
+      // 잠금 후 재조회 — 1차 조회와 잠금 사이의 동시 변경(TOCTOU) 반영.
+      const cur = await tx.user.findUnique({
+        where: { id: targetUserId },
+        select: { role: true, status: true },
+      });
+      if (cur === null || cur.status === UserStatus.WITHDRAWN) {
+        throw new AppError('USER_NOT_FOUND');
+      }
+      const previousRole = cur.role;
       if (previousRole === newRole) {
-        // 멱등 — 변경/감사 없음.
         return { userId: targetUserId, previousRole, role: newRole, changed: false };
       }
 
-      // 마지막 ADMIN 강등 차단: 활성 ADMIN 전체를 잠그고(동시 강등 직렬화) 대상 외 ADMIN 수를 센다.
+      // 최후 ADMIN 강등 차단 — 잠금된 활성 ADMIN 집합 기준(대상이 잠금 후에도 여전히 ADMIN일 때만).
       if (previousRole === UserRole.ADMIN && newRole !== UserRole.ADMIN) {
-        // eslint-disable-next-line no-restricted-syntax -- FOR UPDATE 잠금 전용, PII 컬럼 미선택
-        const admins = await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM users WHERE role = 'ADMIN' AND status = 'ACTIVE' FOR UPDATE
-        `;
-        const otherActiveAdmins = admins.filter((a) => Number(a.id) !== targetUserId).length;
+        const otherActiveAdmins = lockedActiveAdminIds.filter((id) => id !== targetUserId).length;
         if (otherActiveAdmins < 1) {
           throw new AppError('USER_LAST_ADMIN');
         }

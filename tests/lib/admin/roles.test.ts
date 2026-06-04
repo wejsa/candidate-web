@@ -50,6 +50,23 @@ describe('changeUserRole', () => {
     ).rejects.toMatchObject({ code: 'USER_NOT_FOUND' });
   });
 
+  it('대상이 WITHDRAWN → USER_NOT_FOUND (정보 노출 차단)', async () => {
+    tx.user.findUnique.mockResolvedValue({ role: 'RECRUITER', status: 'WITHDRAWN' });
+    await expect(
+      changeUserRole({ actorUserId: 1, targetUserId: 9, newRole: 'ADMIN' }),
+    ).rejects.toMatchObject({ code: 'USER_NOT_FOUND' });
+  });
+
+  it('RECRUITER→ADMIN 승격 → ROLE_GRANTED (강등 아님, last-ADMIN 가드 미진입)', async () => {
+    tx.user.findUnique.mockResolvedValue({ role: 'RECRUITER', status: 'ACTIVE' });
+    const r = await changeUserRole({ actorUserId: 1, targetUserId: 9, newRole: 'ADMIN' });
+    expect(r).toMatchObject({ role: 'ADMIN', previousRole: 'RECRUITER', changed: true });
+    expect(recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'ROLE_GRANTED' }),
+      expect.anything(),
+    );
+  });
+
   it('승격(CANDIDATE→RECRUITER) → update + ROLE_GRANTED 감사', async () => {
     tx.user.findUnique.mockResolvedValue({ role: 'CANDIDATE', status: 'ACTIVE' });
     const r = await changeUserRole({ actorUserId: 1, targetUserId: 9, newRole: 'RECRUITER' });
@@ -71,8 +88,8 @@ describe('changeUserRole', () => {
 
   it('마지막 ADMIN 강등 → USER_LAST_ADMIN (대상 외 활성 ADMIN 0)', async () => {
     tx.user.findUnique.mockResolvedValue({ role: 'ADMIN', status: 'ACTIVE' });
-    // 1st $queryRaw=대상 행 잠금(미사용), 2nd=활성 ADMIN 잠금 → 대상 본인만.
-    tx.$queryRaw.mockResolvedValueOnce([]).mockResolvedValueOnce([{ id: 9 }]);
+    // 강등 경로 $queryRaw=활성 ADMIN 집합(id ASC FOR UPDATE) → 대상 본인만 = 다른 ADMIN 0.
+    tx.$queryRaw.mockResolvedValue([{ id: 9 }]);
     await expect(
       changeUserRole({ actorUserId: 1, targetUserId: 9, newRole: 'CANDIDATE' }),
     ).rejects.toMatchObject({ code: 'USER_LAST_ADMIN' });
@@ -81,7 +98,7 @@ describe('changeUserRole', () => {
 
   it('ADMIN 강등 허용(다른 활성 ADMIN 존재) → ROLE_REVOKED 감사', async () => {
     tx.user.findUnique.mockResolvedValue({ role: 'ADMIN', status: 'ACTIVE' });
-    tx.$queryRaw.mockResolvedValueOnce([]).mockResolvedValueOnce([{ id: 9 }, { id: 2 }]);
+    tx.$queryRaw.mockResolvedValue([{ id: 9 }, { id: 2 }]);
     const r = await changeUserRole({ actorUserId: 1, targetUserId: 9, newRole: 'RECRUITER' });
     expect(r).toMatchObject({ role: 'RECRUITER', changed: true });
     expect(recordAuditEvent).toHaveBeenCalledWith(
