@@ -22,7 +22,8 @@ describe('ERROR_CATALOG', () => {
     // CANDID-024 Step 4: USER_LAST_AUTH_METHOD, USER_PROVIDER_NOT_LINKED 추가로 43 → 45 (US-MY-004 소셜 해제)
     // CANDID-024 Step 5: USER_PROVIDER_ALREADY_LINKED 추가로 45 → 46 (US-MY-004 소셜 연결 추가)
     // CANDID-023 Step 2: APP_NOT_WITHDRAWABLE 추가로 46 → 47 (US-MY-003 지원 철회)
-    expect(ALL_CODES).toHaveLength(47);
+    // CANDID-053 Step 3: USER_LAST_ADMIN, USER_CANNOT_CHANGE_OWN_ROLE 추가로 47 → 49 (RBAC 역할 관리)
+    expect(ALL_CODES).toHaveLength(49);
   });
 
   it('CANDID-020 신규 코드: AUTH_RESET_TOKEN_INVALID=400, AUTH_RESET_TOKEN_EXPIRED=410', () => {
@@ -148,6 +149,8 @@ describe('ERROR_CATALOG', () => {
       USER_LAST_AUTH_METHOD: 409,
       USER_PROVIDER_NOT_LINKED: 404,
       USER_PROVIDER_ALREADY_LINKED: 409,
+      USER_LAST_ADMIN: 409,
+      USER_CANNOT_CHANGE_OWN_ROLE: 403,
     };
     for (const code of ALL_CODES) {
       expect(ERROR_CATALOG[code].status).toBe(EXPECTED_STATUS[code]);

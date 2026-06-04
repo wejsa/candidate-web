@@ -113,6 +113,16 @@ export const ERROR_CATALOG = {
     status: 409,
     message: '이미 연결된 소셜 계정입니다.',
   },
+  // CANDID-053 Step 3 — 역할 관리(RBAC).
+  // 마지막 ADMIN 강등 차단(운영 권한 공백 방지) + 본인 역할 변경 차단(자가 권한 조정/락아웃 방지).
+  USER_LAST_ADMIN: {
+    status: 409,
+    message: '마지막 관리자는 강등할 수 없습니다. 다른 관리자를 먼저 지정하세요.',
+  },
+  USER_CANNOT_CHANGE_OWN_ROLE: {
+    status: 403,
+    message: '본인의 역할은 변경할 수 없습니다.',
+  },
 
   // 공고 — JOB_
   JOB_NOT_FOUND: { status: 404, message: '채용 공고를 찾을 수 없습니다.' },
