@@ -2,6 +2,7 @@
 // 인증 필수 — 비로그인 시 /login?redirect=/jobs/{id}/apply로 redirect.
 // 공고 게이트 + Draft 진입 + User PII prefill을 RSC에서 처리.
 
+import type { Metadata } from 'next';
 import { redirect, notFound } from 'next/navigation';
 import { z } from 'zod';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
@@ -15,6 +16,14 @@ import { ApplicationFormShell } from '@/app/jobs/[id]/apply/_components/Applicat
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+// CANDID-051: 지원서 작성 페이지는 인증 게이트 뒤의 개인화 폼 — 검색 색인 대상이 아니다.
+// 더해, 미존재/마감 공고 진입 시 notFound()가 Next 14 SSR에서 HTTP 200(soft-404)을 반환하는
+// 프레임워크 한계가 있어(상세는 docs/requirements/CANDID-051-spec.md), 색인 차단을 status에 의존하지 않고
+// 정적 메타데이터로 *항상* noindex를 보장한다. 이로써 soft-404 경로의 죽은 URL 색인 위험을 제거한다.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 const ParamsSchema = z.object({
   id: z.coerce.number().int().positive(),
