@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 476,
+    "version": 477,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T12:56:10Z"
+    "updatedAt": "2026-06-04T13:15:44Z"
   },
   "summary": {
     "total": 53,
@@ -3814,7 +3814,7 @@
       "priority": "medium",
       "phase": 3,
       "assignee": "wejsa-u@hoji-20260604-124529",
-      "assignedAt": "2026-06-04T12:56:10Z",
+      "assignedAt": "2026-06-04T13:15:44Z",
       "lockTTL": 7200,
       "lockedFiles": [
         "tests/app/jobs/[id]/not-found-status.test.tsx",
@@ -3832,19 +3832,19 @@
       "specFile": "docs/requirements/CANDID-051-spec.md",
       "source": "전체 기능 Playwright QA 패스 (사용자 요청). 미확정(dev 관측) — prod 빌드 검증 선행 필요.",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-plan",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 139,
         "fixLoopCount": 0,
         "autoChainArgs": "CANDID-051",
-        "updatedAt": "2026-06-04T12:56:10Z"
+        "updatedAt": "2026-06-04T13:15:44Z"
       },
       "steps": [
         {
           "number": 1,
           "title": "회귀 가드(단위) + prod HTTP-404 검증 하네스(E2E)",
           "description": "route export 직접 호출로 bogus id→notFound() 코드패스 단위 가드 + pnpm build/start 기반 prod Playwright config로 /jobs/{bogus} 실제 404 assertion. dev=200 관측의 prod 실결함 여부 확정(decision gate). sandbox build kill(exit 144) 시 하네스 커밋+CI 위임.",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 700,
           "estimatedLines": 270,
           "files": [
@@ -3853,7 +3853,9 @@
             "e2e/prod/soft-404.spec.ts",
             "package.json"
           ],
-          "dependencies": []
+          "dependencies": [],
+          "prNumber": 139,
+          "branch": "feature/CANDID-051-step1"
         },
         {
           "number": 2,
