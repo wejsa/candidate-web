@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 470,
+    "version": 472,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-04T11:59:35Z"
+    "updatedAt": "2026-06-04T12:07:47Z"
   },
   "summary": {
     "total": 53,
@@ -3858,22 +3858,24 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260604-002216",
-      "assignedAt": "2026-06-04T11:54:56Z",
+      "assignedAt": "2026-06-04T12:07:47Z",
       "lockTTL": 3600,
       "lockedFiles": [
-        "lib/auth/middleware.ts"
+        "app/api/admin/v1/users/[id]/role/route.ts",
+        "lib/admin/roles.ts",
+        "lib/errors/codes.ts"
       ],
       "dependencies": [],
       "createdAt": "2026-06-03T14:54:51Z",
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 136,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 137,
         "fixLoopCount": 0,
         "autoChainArgs": "CANDID-053",
-        "updatedAt": "2026-06-04T11:59:35Z"
+        "updatedAt": "2026-06-04T12:07:47Z"
       },
       "steps": [
         {
@@ -3893,7 +3895,7 @@
         {
           "number": 2,
           "title": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 500,
           "estimatedLines": 450,
           "files": [
@@ -3905,12 +3907,13 @@
             1
           ],
           "description": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트 | [리뷰 M001] requireRole은 enum ordinal 비교 금지 — 명시적 allow-list(allowed.includes(role)) 방식.",
-          "prNumber": 136
+          "prNumber": 136,
+          "mergedAt": "2026-06-04T12:00:11Z"
         },
         {
           "number": 3,
           "title": "역할 관리 API(승격/강등, 최후 ADMIN 가드 tx+FOR UPDATE, 감사) + 에러코드",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 500,
           "estimatedLines": 420,
           "files": [
@@ -3921,7 +3924,8 @@
           ],
           "dependencies": [
             2
-          ]
+          ],
+          "prNumber": 137
         },
         {
           "number": 4,
@@ -4005,7 +4009,7 @@
           ]
         }
       ],
-      "currentStep": 2
+      "currentStep": 3
     }
   }
 }
