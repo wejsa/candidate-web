@@ -16,6 +16,8 @@ vi.mock('next/navigation', () => ({
   notFound: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND');
   }),
+  // Step 12: 상세 페이지가 전형/면접 컨트롤(client, useRouter)을 렌더 → 스텁 제공.
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }),
 }));
 
 const { requireOperatorPage } = (await import('@/lib/auth/require-role-page')) as unknown as {

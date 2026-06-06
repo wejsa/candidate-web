@@ -5,10 +5,12 @@ import { isAppError } from '@/lib/errors';
 import { requireOperatorPage } from '@/lib/auth/require-role-page';
 import { getApplicantDetailForOperator } from '@/lib/admin/applicants';
 import { resultLabel, stageLabel } from '@/lib/my-page/stage-labels';
+import { StageTransitionControl } from '@/app/admin/applications/_components/StageTransitionControl';
+import { InterviewScheduleForm } from '@/app/admin/applications/_components/InterviewScheduleForm';
 import styles from '../applications.module.css';
 
-// CANDID-053 Step 11 — 지원서 상세(운영자). 동결 PII snapshot **복호화 + PII_VIEW 감사**(명시 열람).
-//   전형 전이/면접 등록 컨트롤은 Step 12에서 본 페이지에 추가된다(본 PR은 읽기 전용).
+// CANDID-053 Step 11/12 — 지원서 상세(운영자). 동결 PII snapshot **복호화 + PII_VIEW 감사**(명시 열람).
+//   Step 12: 전형 전이/면접 등록 컨트롤(쓰기) 추가. 철회 지원서는 컨트롤 비노출.
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -122,6 +124,33 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           </ul>
         )}
       </section>
+
+      {/* 전형 관리(쓰기) — 철회 지원서는 전이/면접 컨트롤 비노출(서버도 거부). 종단 단계는 컨트롤이 안내. */}
+      {detail.result === 'WITHDRAWN' ? (
+        <section aria-label="전형 관리">
+          <h2 className={styles.sectionTitle}>전형 관리</h2>
+          <p className={styles.empty}>철회된 지원서는 전형/면접을 변경할 수 없습니다.</p>
+        </section>
+      ) : (
+        <>
+          <section aria-labelledby="stage-title">
+            <h2 id="stage-title" className={styles.sectionTitle}>
+              전형 단계 변경
+            </h2>
+            <StageTransitionControl
+              applicationId={detail.applicationId}
+              currentStage={detail.currentStage}
+            />
+          </section>
+
+          <section aria-labelledby="interview-title" className={styles.piiCard}>
+            <h2 id="interview-title" className={styles.sectionTitle}>
+              면접 일정 등록
+            </h2>
+            <InterviewScheduleForm applicationId={detail.applicationId} />
+          </section>
+        </>
+      )}
     </main>
   );
 }

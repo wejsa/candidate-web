@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { StageType } from '@prisma/client';
+// CANDID-053 Step 12 — 면접 단계 SSOT를 공용 모듈로 분리(클라 InterviewScheduleForm와 드리프트 차단).
+import { INTERVIEW_STAGES } from '@/lib/admin/interview-stages';
 
 // CANDID-053 Step 7 — 면접 일정 생성/변경 요청 바디.
 // 면접은 면접 단계(INTERVIEW_1/INTERVIEW_2)에 대해서만 등록. .strict로 추가 필드 거부.
-const INTERVIEW_STAGES = [StageType.INTERVIEW_1, StageType.INTERVIEW_2] as const;
 
 export const InterviewUpsertSchema = z
   .object({
