@@ -1,6 +1,11 @@
 import 'server-only';
-import { AuditEventType, InterviewScheduleStatus, type StageType } from '@prisma/client';
-import { prisma, basePrisma } from '@/lib/prisma';
+import {
+  ApplicationResult,
+  AuditEventType,
+  InterviewScheduleStatus,
+  type StageType,
+} from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { recordAuditEvent } from '@/lib/audit/record';
 
@@ -43,19 +48,26 @@ export async function upsertInterviewSchedule(
   args: UpsertInterviewArgs,
 ): Promise<InterviewScheduleResult> {
   const { actorUserId, applicationId, stage, scheduledAt, locationOrUrl } = args;
-
-  // 지원서 존재 검증(FK 위반 500 방지 + 명확한 404).
-  const app = await basePrisma.application.findUnique({
-    where: { id: applicationId },
-    select: { id: true },
-  });
-  if (app === null) {
-    throw new AppError('APP_NOT_FOUND');
-  }
-
   const icsUid = icsUidFor(applicationId, stage);
 
   return prisma.$transaction(async (tx) => {
+    // 존재 + 상태 검증을 트랜잭션 내부로(TOCTOU 제거 + FK 위반 500 대신 명확한 404).
+    const appRow = await tx.application.findUnique({
+      where: { id: applicationId },
+      select: { id: true, result: true },
+    });
+    if (appRow === null) {
+      throw new AppError('APP_NOT_FOUND');
+    }
+    // 철회 지원서에는 면접 등록 불가 — Step 6 전이 가드(WITHDRAWN 종단)와 정합.
+    // (철회 후보 마이페이지에 면접/.ics가 노출되는 데이터 정합성 비대칭 차단)
+    if (appRow.result === ApplicationResult.WITHDRAWN) {
+      throw new AppError('APP_INVALID_STAGE_TRANSITION', {
+        message: '철회된 지원서에는 면접 일정을 등록할 수 없습니다.',
+        details: [{ field: 'applicationId', reason: 'application withdrawn' }],
+      });
+    }
+
     const existing = await tx.interviewSchedule.findUnique({
       where: { icsUid },
       select: { id: true },

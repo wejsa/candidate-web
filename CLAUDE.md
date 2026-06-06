@@ -678,6 +678,7 @@ docs/
 - **BR-PII-01**: PII 컬럼 AES-256-GCM. 응답 마스킹
 - **BR-PII-03**: 회원 탈퇴 — 진행 중 지원 있으면 익명화·보존, 없으면 즉시 삭제. 채용 종료 후 1년 자동 파기
 - **BR-APP-07**: 전형 단계 전이는 허용 그래프로만 진행(점프/역행 금지). `HIRED`/`REJECTED` 종단, `WITHDRAWN`은 전이 불가. 상태+이력+감사 단일 트랜잭션 + `FOR UPDATE` 직렬화. 결과 파생: `HIRED→PASSED`, `REJECTED→FAILED` (CANDID-053)
+- **BR-APP-08**: 면접 일정 `icsUid`는 (지원서, 면접단계)당 결정적 키 `iv-{appId}-{stage}` — 동일 단계 재등록은 중복 생성이 아닌 **멱등 갱신**(`UNIQUE(ics_uid)` + upsert, `.ics` UID 안정성). 면접 단계는 `INTERVIEW_1`/`INTERVIEW_2`만. 철회(`WITHDRAWN`) 지원서 면접 등록 불가. 신규/갱신 감사(`INTERVIEW_SCHEDULED`/`INTERVIEW_UPDATED`) 단일 트랜잭션 (CANDID-053)
 - **BR-TX-01**: 지원서 제출 = Application 생성 + Draft 삭제 + 이력 생성 단일 트랜잭션
 - **BR-TX-02**: 외부 호출(이메일/Slack)은 트랜잭션 *외부*에서 이벤트 발행 후 비동기 처리
 
