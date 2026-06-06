@@ -114,24 +114,21 @@ export function collectIncompleteReasons(
   if (!isCompletedPersonalInfo(personal)) {
     reasons.push({
       field: 'step1_personal',
-      reason: '이름·연락처·생년월일 등 인적사항 필수 항목을 입력해 주세요.',
+      reason: '이름을 입력해 주세요.',
     });
   }
   return reasons;
 }
 
 /**
- * step1_personal 필수 필드 충족 검사 — name/phone/birthDate/careerLevel.
- * address/careerMonths/education은 선택.
+ * step1_personal 필수 필드 충족 검사 — 개인정보 최소수집(US 요청)으로 이름만 필수.
+ * phone/birthDate/address/careerMonths/education은 선택. careerLevel은 폼이 기본값을 채운다.
  */
 function isCompletedPersonalInfo(
   personal: PersonalInfoPayload | undefined,
 ): personal is PersonalInfoPayload {
   if (personal === undefined) return false;
   if (!isNonEmptyString(personal.name)) return false;
-  if (!isNonEmptyString(personal.phone)) return false;
-  if (!isNonEmptyString(personal.birthDate)) return false;
-  if (personal.careerLevel !== 'NEW' && personal.careerLevel !== 'EXPERIENCED') return false;
   return true;
 }
 

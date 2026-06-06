@@ -36,6 +36,14 @@
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.35;
+  /* 제목을 항상 2줄 높이로 고정 → 1줄/2줄 제목이 섞여도 카드 높이가 균일.
+     2줄을 넘는 긴 제목은 말줄임(…) 처리. */
+  min-width: 0;
+  min-height: calc(1.05rem * 1.35 * 2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 제목 링크 — 카드 표면 전체를 클릭 영역으로 확장(stretched link). 색은 본문색 유지. */

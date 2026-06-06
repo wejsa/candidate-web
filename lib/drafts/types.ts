@@ -20,8 +20,9 @@ export type ApplicationStep = 1 | 2 | 3;
  */
 export interface PersonalInfoPayload {
   name: string;
-  phone: string;
-  birthDate: string; // YYYY-MM-DD
+  // 개인정보 최소수집(US 요청): 지원에는 이름만 필수. 연락처·생년월일은 선택.
+  phone?: string;
+  birthDate?: string; // YYYY-MM-DD
   address?: string;
   careerLevel: CareerLevel;
   careerMonths?: number;
