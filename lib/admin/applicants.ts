@@ -176,6 +176,9 @@ export async function getApplicantDetailForOperator(
   }
 
   // 명시 PII 열람 감사 — 평문 PII는 metadata에 절대 미기록(BR-PII-01). 식별은 resourceId(applicationId)만.
+  // ⚠️ fail-closed 의도: fail-open 래퍼(recordAuditEventSafe)가 아닌 recordAuditEvent를 쓴다.
+  //   감사 INSERT 실패 시 throw → 호출측 500. 감사 없는 PII 열람은 개인정보보호법상 추적 불가
+  //   열람이므로 "감사 우선"으로 차단하는 것이 의도된 동작이다(CANDID-053 Step 11 리뷰). fail-open 전환 금지.
   await recordAuditEvent({
     eventType: AuditEventType.PII_VIEW,
     actorUserId: args.actorUserId,
