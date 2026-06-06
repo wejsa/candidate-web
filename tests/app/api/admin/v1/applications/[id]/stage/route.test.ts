@@ -72,4 +72,16 @@ describe('PATCH /api/admin/v1/applications/[id]/stage', () => {
     const res = await PATCH(patch('999', { toStage: 'DOC_REVIEW' }), ctx('999'));
     expect(res.status).toBe(404);
   });
+
+  it('추가 필드 주입(.strict 위반) → 400, 서비스 미호출', async () => {
+    const res = await PATCH(patch('10', { toStage: 'DOC_REVIEW', result: 'PASSED' }), ctx('10'));
+    expect(res.status).toBe(400);
+    expect(transitionApplicationStage).not.toHaveBeenCalled();
+  });
+
+  it('무효 id(0) → 400, 서비스 미호출', async () => {
+    const res = await PATCH(patch('0', { toStage: 'DOC_REVIEW' }), ctx('0'));
+    expect(res.status).toBe(400);
+    expect(transitionApplicationStage).not.toHaveBeenCalled();
+  });
 });

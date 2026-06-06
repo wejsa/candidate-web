@@ -626,7 +626,7 @@ CANDID-{번호}
 | 인증 | `AUTH_` | `AUTH_INVALID_CREDENTIALS`, `AUTH_ACCOUNT_LOCKED`, `AUTH_EMAIL_NOT_VERIFIED`, `AUTH_TOKEN_INVALID`, `AUTH_TOKEN_EXPIRED`, `AUTH_REFRESH_INVALID`, `AUTH_REFRESH_EXPIRED`, `AUTH_FORBIDDEN` |
 | 사용자 | `USER_` | `USER_EMAIL_DUPLICATED`, `USER_NOT_FOUND` |
 | 공고 | `JOB_` | `JOB_NOT_FOUND`, `JOB_NOT_OPEN`, `JOB_CLOSED` |
-| 지원 | `APP_` | `APP_NOT_FOUND`, `APP_ALREADY_SUBMITTED`, `APP_DEADLINE_PASSED`, `APP_DRAFT_CONFLICT` |
+| 지원 | `APP_` | `APP_NOT_FOUND`, `APP_INVALID_STAGE_TRANSITION`, `APP_ALREADY_SUBMITTED`, `APP_DEADLINE_PASSED`, `APP_DRAFT_CONFLICT` |
 | 파일 | `FILE_` | `FILE_SIZE_EXCEEDED`, `FILE_TYPE_NOT_ALLOWED`, `FILE_UPLOAD_FAILED` |
 | 시스템 | `SYS_` | `SYS_INTERNAL_ERROR`, `SYS_DEPENDENCY_UNAVAILABLE`, `SYS_VALIDATION_FAILED` |
 
@@ -677,6 +677,7 @@ docs/
 - **BR-FILE-01**: 확장자 + MIME 이중 검증. UUID 재명명
 - **BR-PII-01**: PII 컬럼 AES-256-GCM. 응답 마스킹
 - **BR-PII-03**: 회원 탈퇴 — 진행 중 지원 있으면 익명화·보존, 없으면 즉시 삭제. 채용 종료 후 1년 자동 파기
+- **BR-APP-07**: 전형 단계 전이는 허용 그래프로만 진행(점프/역행 금지). `HIRED`/`REJECTED` 종단, `WITHDRAWN`은 전이 불가. 상태+이력+감사 단일 트랜잭션 + `FOR UPDATE` 직렬화. 결과 파생: `HIRED→PASSED`, `REJECTED→FAILED` (CANDID-053)
 - **BR-TX-01**: 지원서 제출 = Application 생성 + Draft 삭제 + 이력 생성 단일 트랜잭션
 - **BR-TX-02**: 외부 호출(이메일/Slack)은 트랜잭션 *외부*에서 이벤트 발행 후 비동기 처리
 

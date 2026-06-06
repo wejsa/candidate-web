@@ -69,28 +69,56 @@ describe('transitionApplicationStage', () => {
     });
   });
 
-  it('OFFER → HIRED: result=PASSED 파생', async () => {
-    lockReturns('OFFER');
+  // 합법 전이 그래프 전수 검증(11 간선) + 결과 파생 — 그래프 상수 오편집 회귀 차단(it.each table-driven).
+  it.each([
+    ['SUBMITTED', 'DOC_REVIEW', 'IN_PROGRESS'],
+    ['SUBMITTED', 'REJECTED', 'FAILED'],
+    ['DOC_REVIEW', 'INTERVIEW_1', 'IN_PROGRESS'],
+    ['DOC_REVIEW', 'REJECTED', 'FAILED'],
+    ['INTERVIEW_1', 'INTERVIEW_2', 'IN_PROGRESS'],
+    ['INTERVIEW_1', 'OFFER', 'IN_PROGRESS'], // 2차 면접 생략 허용
+    ['INTERVIEW_1', 'REJECTED', 'FAILED'],
+    ['INTERVIEW_2', 'OFFER', 'IN_PROGRESS'],
+    ['INTERVIEW_2', 'REJECTED', 'FAILED'],
+    ['OFFER', 'HIRED', 'PASSED'],
+    ['OFFER', 'REJECTED', 'FAILED'],
+  ])('합법 전이 %s → %s ⇒ result=%s', async (from, to, expected) => {
+    lockReturns(from);
     const res = await transitionApplicationStage({
       actorUserId: 1,
       applicationId: 10,
-      toStage: 'HIRED' as never,
+      toStage: to as never,
     });
-    expect(res.result).toBe('PASSED');
+    expect(res).toMatchObject({ fromStage: from, toStage: to, result: expected });
     expect(tx.application.update).toHaveBeenCalledWith({
       where: { id: 10 },
-      data: { currentStage: 'HIRED', result: 'PASSED' },
+      data: { currentStage: to, result: expected },
     });
   });
 
-  it('INTERVIEW_1 → REJECTED: result=FAILED 파생', async () => {
-    lockReturns('INTERVIEW_1');
-    const res = await transitionApplicationStage({
-      actorUserId: 1,
-      applicationId: 10,
-      toStage: 'REJECTED' as never,
-    });
-    expect(res.result).toBe('FAILED');
+  it('동일 단계 self-transition(DOC_REVIEW→DOC_REVIEW) → 거부(422)', async () => {
+    lockReturns('DOC_REVIEW');
+    await expect(
+      transitionApplicationStage({
+        actorUserId: 1,
+        applicationId: 10,
+        toStage: 'DOC_REVIEW' as never,
+      }),
+    ).rejects.toMatchObject({ code: 'APP_INVALID_STAGE_TRANSITION' });
+    expect(tx.applicationStatusHistory.create).not.toHaveBeenCalled();
+  });
+
+  it('tx 중간 실패(이력 create reject) → 에러 전파 + 감사 미발행(부분 커밋 없음, BR-TX-01)', async () => {
+    lockReturns('SUBMITTED');
+    tx.applicationStatusHistory.create.mockRejectedValue(new Error('db down'));
+    await expect(
+      transitionApplicationStage({
+        actorUserId: 1,
+        applicationId: 10,
+        toStage: 'DOC_REVIEW' as never,
+      }),
+    ).rejects.toThrow('db down');
+    expect(recordAuditEvent).not.toHaveBeenCalled();
   });
 
   it('SUBMITTED → HIRED: 점프 전이 거부(422) — 변경/이력/감사 없음', async () => {

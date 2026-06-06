@@ -22,7 +22,10 @@ const ALLOWED_STAGE_TRANSITIONS: Record<StageType, readonly StageType[]> = {
   [StageType.REJECTED]: [],
 };
 
-/** 단계 → 지원 결과 파생. HIRED=합격, REJECTED=불합격, 그 외 진행 중. */
+// 단계 → 지원 결과 파생. HIRED=합격, REJECTED=불합격, 그 외 진행 중.
+// ⚠️ result 회귀 방지는 *그래프 폐쇄성*에 의존한다: 종단(HIRED/REJECTED) 이후 전이가 그래프상 불가
+//    하고 WITHDRAWN은 별도 가드되므로, IN_PROGRESS가 PASSED/FAILED를 덮어쓸 경로가 없다.
+//    그래프 확장(역행/재심사 도입) 시 종단 결과 단방향 불변식 가드를 추가해야 한다.
 function resultForStage(stage: StageType): ApplicationResult {
   if (stage === StageType.HIRED) return ApplicationResult.PASSED;
   if (stage === StageType.REJECTED) return ApplicationResult.FAILED;
