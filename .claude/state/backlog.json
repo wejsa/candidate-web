@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 485,
+    "version": 486,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T03:57:39Z"
+    "updatedAt": "2026-06-06T03:58:19Z"
   },
   "summary": {
     "total": 53,
@@ -3898,26 +3898,23 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260604-143953",
-      "assignedAt": "2026-06-06T03:57:39Z",
+      "assignedAt": "2026-06-06T03:58:19Z",
       "lockTTL": 7200,
       "lockedFiles": [
-        "app/api/admin/v1/job-postings/[id]/applications",
-        "app/api/admin/v1/applications/[id]",
-        "lib/admin/applicants.ts",
-        "prisma/schema.prisma",
-        "prisma/migrations"
+        "app/api/admin/v1/applications/[id]/stage",
+        "lib/admin/stage-transition.ts"
       ],
       "dependencies": [],
       "createdAt": "2026-06-03T14:54:51Z",
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 141,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "CANDID-053",
-        "updatedAt": "2026-06-06T03:57:39Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-06T03:58:19Z"
       },
       "steps": [
         {
@@ -3990,7 +3987,7 @@
         {
           "number": 5,
           "title": "지원자 목록/상세 + idx_applications_posting_stage + 운영자 PII 통제",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 700,
           "estimatedLines": 620,
           "files": [
@@ -4003,7 +4000,8 @@
             2
           ],
           "prNumber": 141,
-          "branch": "feature/CANDID-053-step5"
+          "branch": "feature/CANDID-053-step5",
+          "mergedAt": "2026-06-06T03:57:59Z"
         },
         {
           "number": 6,
@@ -4056,7 +4054,7 @@
           ]
         }
       ],
-      "currentStep": 5
+      "currentStep": 6
     }
   }
 }
