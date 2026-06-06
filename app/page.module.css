@@ -156,7 +156,7 @@
   margin-bottom: 1rem;
   border-radius: var(--radius);
   background: var(--brand-weak);
-  color: var(--brand-hover);
+  color: var(--color-link);
   font-size: 1.25rem;
   font-weight: 700;
 }
@@ -201,7 +201,7 @@
   height: 2rem;
   margin-bottom: 0.75rem;
   border-radius: 999px;
-  background: var(--color-text);
+  background: var(--brand);
   color: #ffffff;
   font-size: var(--fs-sm);
   font-weight: 700;
@@ -224,7 +224,7 @@
   margin: clamp(2.75rem, 6vw, 4.5rem) auto;
   padding: clamp(2.5rem, 5vw, 3.5rem) 1.5rem;
   text-align: center;
-  background: var(--color-text);
+  background: var(--gray-900);
   border-radius: var(--radius-lg);
 }
 

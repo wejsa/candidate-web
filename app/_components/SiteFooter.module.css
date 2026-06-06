@@ -1,0 +1,82 @@
+/* P1-5 — 전역 푸터. 전역 토큰 재사용, 다크 모드 자동 대응. */
+
+.footer {
+  margin-top: 4rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-surface-2);
+}
+
+.inner {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 3rem 1.25rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+  justify-content: space-between;
+}
+
+.brandCol {
+  flex: 1 1 220px;
+  min-width: 220px;
+}
+
+.tagline {
+  margin: 0.85rem 0 0;
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  max-width: 32ch;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 2rem;
+  flex: 2 1 420px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.colTitle {
+  margin: 0 0 0.2rem;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.link {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--color-link);
+}
+
+.muted {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+.bottom {
+  border-top: 1px solid var(--color-surface-2);
+}
+
+.bottomInner {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  justify-content: space-between;
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+}

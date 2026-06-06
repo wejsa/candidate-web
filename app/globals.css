@@ -33,6 +33,7 @@
   --gray-900: #0f172a;
 
   /* ── 시맨틱 토큰 (이름 유지, 값만 브랜드화 — 컴포넌트 비파괴) ── */
+  color-scheme: light;
   --color-bg: #ffffff;
   --color-surface: var(--gray-50);
   --color-text: var(--gray-900); /* #0f172a, 흰 배경 ≈ 17:1 */
@@ -72,6 +73,31 @@
 @media (min-width: 1280px) {
   :root {
     --content-max: 880px;
+  }
+}
+
+/*
+ * 다크 모드 (P1-2). prefers-color-scheme 기반 — 시맨틱 토큰만 재정의(컴포넌트 비파괴).
+ * 핵심 분리: --brand(액션 배경, 흰 글자 유지 → 양 모드 통과)와 --color-link(텍스트 링크,
+ * 다크에서 밝은 인디고로). 버튼/CTA는 --brand, 텍스트 링크는 --color-link를 쓰도록 정리됨.
+ * 대비비(다크 bg #0b1120 기준): text #f1f5f9 ≈ 16:1 · muted #94a3b8 ≈ 7:1 · link #a5b4fc ≈ 9:1.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-bg: #0b1120;
+    --color-surface: #0f172a;
+    --color-surface-2: #1e293b;
+    --color-text: #f1f5f9;
+    --color-text-muted: #94a3b8;
+    --color-link: #a5b4fc;
+    --color-link-hover: #c7d2fe;
+    --color-border: #475569;
+    --color-focus: #a5b4fc;
+    --brand-weak: #312e81;
+    --color-accent-weak: #312e81;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -221,8 +247,8 @@ button {
   min-width: var(--touch-min);
   padding: 0.5rem 1.1rem;
   color: #ffffff;
-  background: var(--color-link);
-  border: 1px solid var(--color-link);
+  background: var(--brand);
+  border: 1px solid var(--brand);
   border-radius: var(--radius);
   cursor: pointer;
   transition:
@@ -231,7 +257,8 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background: var(--color-link-hover);
+  background: var(--brand-hover);
+  border-color: var(--brand-hover);
 }
 
 button:disabled,

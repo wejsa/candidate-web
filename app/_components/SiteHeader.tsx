@@ -6,6 +6,7 @@
 import Link from 'next/link';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
 import { LogoutButton } from '@/app/_components/LogoutButton';
+import { HojiLogo } from '@/app/_components/HojiLogo';
 import styles from '@/app/_components/SiteHeader.module.css';
 
 export async function SiteHeader(): Promise<React.JSX.Element> {
@@ -17,8 +18,8 @@ export async function SiteHeader(): Promise<React.JSX.Element> {
   return (
     <header className={styles.header}>
       <nav className={styles.nav} aria-label="주요">
-        <Link href="/" className={styles.brand}>
-          candidate-web
+        <Link href="/" className={styles.brand} aria-label="Hoji Careers 홈">
+          <HojiLogo />
         </Link>
         <Link href="/jobs" className={styles.navLink}>
           채용 공고

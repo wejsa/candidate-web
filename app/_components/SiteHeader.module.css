@@ -10,15 +10,14 @@
   align-items: center;
   gap: 1rem;
   width: 100%;
-  max-width: var(--content-max);
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.25rem;
 }
 
 .brand {
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
 }
 
@@ -42,14 +41,14 @@
   min-height: 2.25rem;
   padding: 0.35rem 0.85rem;
   border-radius: var(--radius);
-  background: var(--color-link);
+  background: var(--brand);
   color: #ffffff;
   text-decoration: none;
   font-weight: 600;
 }
 
 .navCta:hover {
-  background: var(--color-link-hover);
+  background: var(--brand-hover);
   color: #ffffff;
 }
 

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hoji">
+  <title>Hoji</title>
+  <rect width="64" height="64" rx="16" fill="#4f46e5"/>
+  <text x="33" y="47" text-anchor="middle" font-family="Pretendard, Inter, -apple-system, 'Segoe UI', sans-serif" font-size="42" font-weight="700" letter-spacing="-1" fill="#ffffff">h</text>
+  <circle cx="45" cy="21" r="4.5" fill="#a5b4fc"/>
+</svg>

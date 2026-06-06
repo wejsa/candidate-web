@@ -36,7 +36,7 @@
   padding: 0.5rem 1rem;
   border: 1px solid transparent;
   border-radius: var(--radius);
-  background: var(--color-link);
+  background: var(--brand);
   color: #ffffff;
   font-weight: 600;
   text-decoration: none;
@@ -44,7 +44,7 @@
 }
 
 .primary:hover {
-  background: var(--color-link-hover);
+  background: var(--brand-hover);
   color: #ffffff;
 }
 

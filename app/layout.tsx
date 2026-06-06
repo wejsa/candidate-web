@@ -4,8 +4,9 @@ import type { ReactNode } from 'react';
 import 'pretendard/dist/web/static/pretendard.css';
 import './globals.css';
 import { SiteHeader } from '@/app/_components/SiteHeader';
+import { SiteFooter } from '@/app/_components/SiteFooter';
 
-const SITE_NAME = 'candidate-web';
+const SITE_NAME = 'Hoji Careers';
 
 // CANDID-028 — 모바일 반응형(320~1920px) 전제. viewport meta가 없으면 모바일 브라우저가
 // 데스크톱 폭으로 렌더해 reflow(WCAG 1.4.10)가 동작하지 않는다. 사용자 확대(접근성)를
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
-  description: '자사 채용 사이트 지원자 프론트엔드',
+  description: 'Hoji 채용 — 무인 환전·결제 플랫폼을 함께 만들 동료를 찾습니다.',
   robots: { index: true, follow: true },
   openGraph: { siteName: SITE_NAME, locale: 'ko_KR', type: 'website' },
   twitter: { card: 'summary' },
@@ -39,4 +40,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main-content" className="skip-link">
           본문 바로가기
         </a>
-        {/* CANDID-05
+        {/* CANDID-050 — 전역 헤더(인증 상태별 네비). skip-link 다음, 페이지 <main> 앞. */}
+        <SiteHeader />
+        {children}
+        {/* P1-5 — 전역 푸터. 페이지 <main> 뒤. */}
+        <SiteFooter />
+      </body>
+    </html>
+  );
+}
