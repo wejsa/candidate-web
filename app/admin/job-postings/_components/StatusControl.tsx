@@ -6,15 +6,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { JobStatus } from '@prisma/client';
+import type { JobStatus } from '@prisma/client';
+import { JOB_STATUS_TRANSITIONS } from '@/lib/admin/job-status-transitions';
 import styles from '../job-postings.module.css';
 
-// 서버 ALLOWED_STATUS_TRANSITIONS(lib/admin/job-postings.ts)와 동일 — UX 힌트용 미러.
-const ALLOWED: Record<JobStatus, readonly JobStatus[]> = {
-  DRAFT: [JobStatus.OPEN, JobStatus.CLOSED],
-  OPEN: [JobStatus.DRAFT, JobStatus.CLOSED],
-  CLOSED: [],
-};
+// 전이 노출은 서버와 동일한 SSOT(JOB_STATUS_TRANSITIONS)를 import — 미러 드리프트 차단.
+// 클라 노출은 UX 힌트일 뿐, 최종 강제는 서버(lib/admin/job-postings.ts)가 수행한다.
 
 const ACTION_LABEL: Record<JobStatus, string> = {
   OPEN: '공개',
@@ -56,7 +53,7 @@ export function StatusControl({
     setError(res.status === 403 ? '권한 없음' : '전이 실패');
   }
 
-  const targets = ALLOWED[current];
+  const targets = JOB_STATUS_TRANSITIONS[current];
   if (targets.length === 0) {
     return <span className={styles.terminal}>—</span>;
   }

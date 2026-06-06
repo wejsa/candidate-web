@@ -27,6 +27,12 @@
   font-size: 0.85rem;
 }
 
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 /* ── 목록 테이블 ───────────────────────────────────── */
 .table {
   width: 100%;

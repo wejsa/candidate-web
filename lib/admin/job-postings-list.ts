@@ -7,6 +7,10 @@ import { AppError } from '@/lib/errors';
 //   공개 목록(lib/jobs/list.ts)은 OPEN만 노출하지만, 운영자는 DRAFT/OPEN/CLOSED 전 상태를 본다.
 //   변경(생성/수정/상태전이)은 감사·전이 그래프가 있는 API 라우트(Step 4)를 통한다 — 본 모듈은 read 전용.
 //   PII 미접촉(공고/카테고리/지원 건수만) → basePrisma 사용.
+//
+//   ⚠️ 인가 미수행(계약): 본 함수들은 **비공개 DRAFT 공고를 포함한 전 상태**를 인가 없이 반환한다.
+//   반드시 운영자 가드(requireOperatorPage) 통과 뒤에서만 호출할 것 — 가드 없는 진입점이 직접 호출하면
+//   미공개 공고/지원 집계가 비운영자에게 노출된다(require-role-page.ts의 "데이터 접근 직전 가드" 원칙과 정합).
 
 const PER_PAGE = 20;
 const MAX_PAGE = 10_000;

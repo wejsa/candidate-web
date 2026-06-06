@@ -77,9 +77,21 @@ export default async function AdminJobPostingsPage({ searchParams }: PageProps) 
         </table>
       )}
 
-      <p className={styles.pageInfo}>
-        {pagination.page} / {pagination.totalPages} 페이지 · 총 {pagination.total}건
-      </p>
+      <footer className={styles.pager}>
+        {pagination.page > 1 && (
+          <Link href={`/admin/job-postings?page=${pagination.page - 1}`} className={styles.link}>
+            ← 이전
+          </Link>
+        )}
+        <span className={styles.pageInfo}>
+          {pagination.page} / {pagination.totalPages} 페이지 · 총 {pagination.total}건
+        </span>
+        {pagination.hasMore && (
+          <Link href={`/admin/job-postings?page=${pagination.page + 1}`} className={styles.link}>
+            다음 →
+          </Link>
+        )}
+      </footer>
     </main>
   );
 }

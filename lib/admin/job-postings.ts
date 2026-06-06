@@ -5,21 +5,16 @@ import { AppError } from '@/lib/errors';
 import { recordAuditEvent } from '@/lib/audit/record';
 import { sanitizeHtml } from '@/lib/security/sanitize';
 import type { JobPostingCreateInput, JobPostingUpdateInput } from '@/lib/admin/job-postings-schema';
+// CANDID-053 Step 9 — 전이 그래프 SSOT를 공용 모듈로 분리(클라 StatusControl와 드리프트 구조적 차단).
+import { JOB_STATUS_TRANSITIONS as ALLOWED_STATUS_TRANSITIONS } from '@/lib/admin/job-status-transitions';
 
 // CANDID-053 Step 4 — 운영자 공고 관리 CRUD (RBAC, A안).
 //
 // 보안/도메인:
 //   - contentHtml은 저장 시점에 sanitizeHtml('job-posting')로 정화(BR: 저장+출력 이중 방어).
 //   - jobCategoryId FK 선검증(미존재 → SYS_VALIDATION_FAILED, RESTRICT 위반 500 방지).
-//   - 상태 전이는 명시 그래프로 강제(아래) — 임의 전이 차단.
+//   - 상태 전이는 명시 그래프(JOB_STATUS_TRANSITIONS SSOT)로 강제 — 임의 전이 차단.
 //   - 변경 + 감사(JOB_POSTING_CREATED/UPDATED/STATUS_CHANGED)는 단일 트랜잭션(BR-TX-01).
-
-/** 허용 상태 전이 그래프 (FR-005 `DRAFT↔OPEN→CLOSED`). DRAFT↔OPEN 양방향(잘못 공개 회수), CLOSED는 종단. */
-const ALLOWED_STATUS_TRANSITIONS: Record<JobStatus, readonly JobStatus[]> = {
-  DRAFT: [JobStatus.OPEN, JobStatus.CLOSED],
-  OPEN: [JobStatus.DRAFT, JobStatus.CLOSED],
-  CLOSED: [],
-};
 
 /** opensAt < closesAt 불변식 — 즉시-마감(유령) 공고 차단. closesAt null(상시)은 통과. */
 function assertOpenCloseOrder(opensAt: Date, closesAt: Date | null): void {

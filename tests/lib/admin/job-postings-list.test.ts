@@ -72,6 +72,36 @@ describe('listJobPostingsForAdmin', () => {
     const res = await listJobPostingsForAdmin(p as number);
     expect(res.pagination.page).toBe(1);
   });
+
+  it('첫 페이지에 다음이 있으면 hasMore=true', async () => {
+    basePrisma.jobPosting.count.mockResolvedValue(45); // 3 페이지
+    basePrisma.jobPosting.findMany.mockResolvedValue([]);
+    const res = await listJobPostingsForAdmin(1);
+    expect(res.pagination).toMatchObject({ totalPages: 3, hasMore: true });
+  });
+
+  it('빈 목록 → totalPages=1, hasMore=false, items=[]', async () => {
+    basePrisma.jobPosting.count.mockResolvedValue(0);
+    basePrisma.jobPosting.findMany.mockResolvedValue([]);
+    const res = await listJobPostingsForAdmin(1);
+    expect(res.pagination).toMatchObject({ total: 0, totalPages: 1, hasMore: false });
+    expect(res.items).toEqual([]);
+  });
+
+  it('page가 MAX_PAGE(10000) 초과 → 상한 클램프(skip 폭주 방어)', async () => {
+    basePrisma.jobPosting.count.mockResolvedValue(0);
+    basePrisma.jobPosting.findMany.mockResolvedValue([]);
+    const res = await listJobPostingsForAdmin(99999);
+    expect(res.pagination.page).toBe(10_000);
+    expect(basePrisma.jobPosting.findMany.mock.calls[0]![0].skip).toBe((10_000 - 1) * 20);
+  });
+
+  it.each(['DRAFT', 'OPEN', 'CLOSED'])('상태 %s 매핑(전 상태 노출)', async (status) => {
+    basePrisma.jobPosting.count.mockResolvedValue(1);
+    basePrisma.jobPosting.findMany.mockResolvedValue([row({ status })]);
+    const res = await listJobPostingsForAdmin(1);
+    expect(res.items[0]!.status).toBe(status);
+  });
 });
 
 describe('listJobCategoryOptions', () => {
