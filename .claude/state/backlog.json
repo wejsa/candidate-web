@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 492,
+    "version": 493,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T04:33:52Z"
+    "updatedAt": "2026-06-06T05:00:00Z"
   },
   "summary": {
     "total": 53,
@@ -4043,20 +4043,69 @@
         },
         {
           "number": 8,
-          "title": "백오피스 UI /admin/** + E2E",
+          "title": "백오피스 셸 + 페이지 라우트 가드(보안 경계) + 대시보드 홈",
           "status": "pending",
-          "prLineLimit": 1000,
-          "estimatedLines": 900,
+          "prLineLimit": 500,
+          "estimatedLines": 350,
           "files": [
-            "app/admin/**",
-            "e2e/admin.spec.ts"
+            "app/admin/layout.tsx",
+            "app/admin/page.tsx",
+            "app/admin/admin.module.css",
+            "lib/auth/require-role-page.ts"
           ],
           "dependencies": [
+            2,
             3,
             4,
             5,
             6,
             7
+          ]
+        },
+        {
+          "number": 9,
+          "title": "공고 관리 화면(목록/생성/수정/상태전환)",
+          "status": "pending",
+          "prLineLimit": 600,
+          "estimatedLines": 420,
+          "files": [
+            "app/admin/job-postings"
+          ],
+          "dependencies": [
+            4,
+            8
+          ]
+        },
+        {
+          "number": 10,
+          "title": "지원자 진행 화면(목록/상세 + 전형 전이 + 면접 일정)",
+          "status": "pending",
+          "prLineLimit": 700,
+          "estimatedLines": 520,
+          "files": [
+            "app/admin/job-postings/[id]/applicants",
+            "app/admin/applications"
+          ],
+          "dependencies": [
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        {
+          "number": 11,
+          "title": "백오피스 E2E(권한 차단 + 운영자 흐름)",
+          "status": "pending",
+          "prLineLimit": 400,
+          "estimatedLines": 260,
+          "files": [
+            "e2e/admin.spec.ts"
+          ],
+          "dependencies": [
+            8,
+            9,
+            10
           ]
         }
       ],
