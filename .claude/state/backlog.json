@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 494,
+    "version": 495,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T04:51:16Z"
+    "updatedAt": "2026-06-06T04:56:42Z"
   },
   "summary": {
     "total": 53,
@@ -3909,12 +3909,12 @@
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 144,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "144 --auto-fix",
-        "updatedAt": "2026-06-06T04:51:16Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-06T04:56:42Z"
       },
       "steps": [
         {
@@ -4044,7 +4044,7 @@
         {
           "number": 8,
           "title": "백오피스 셸 + 페이지 라우트 가드(보안 경계) + 대시보드 홈",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 500,
           "estimatedLines": 350,
           "files": [
@@ -4061,7 +4061,8 @@
             6,
             7
           ],
-          "prNumber": 144
+          "prNumber": 144,
+          "mergedAt": "2026-06-06T04:56:42Z"
         },
         {
           "number": 9,
@@ -4110,7 +4111,7 @@
           ]
         }
       ],
-      "currentStep": 8
+      "currentStep": 9
     }
   }
 }
