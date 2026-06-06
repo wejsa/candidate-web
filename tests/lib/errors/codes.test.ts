@@ -24,7 +24,7 @@ describe('ERROR_CATALOG', () => {
     // CANDID-023 Step 2: APP_NOT_WITHDRAWABLE 추가로 46 → 47 (US-MY-003 지원 철회)
     // CANDID-053 Step 3: USER_LAST_ADMIN, USER_CANNOT_CHANGE_OWN_ROLE 추가로 47 → 49 (RBAC 역할 관리)
     // CANDID-053 Step 4: JOB_INVALID_STATUS_TRANSITION 추가로 49 → 50 (운영자 공고 상태 전이)
-    expect(ALL_CODES).toHaveLength(50);
+    expect(ALL_CODES).toHaveLength(51);
   });
 
   it('CANDID-020 신규 코드: AUTH_RESET_TOKEN_INVALID=400, AUTH_RESET_TOKEN_EXPIRED=410', () => {
@@ -117,6 +117,7 @@ describe('ERROR_CATALOG', () => {
       JOB_NOT_OPEN: 422,
       JOB_INVALID_STATUS_TRANSITION: 409,
       JOB_CLOSED: 422,
+      APP_NOT_FOUND: 404,
       APP_ALREADY_SUBMITTED: 409,
       APP_DEADLINE_PASSED: 422,
       APP_DRAFT_CONFLICT: 409,
