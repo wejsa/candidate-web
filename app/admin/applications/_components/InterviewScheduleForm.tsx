@@ -8,10 +8,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StageType } from '@prisma/client';
+import { INTERVIEW_STAGES } from '@/lib/admin/interview-stages';
 import { stageLabel } from '@/lib/my-page/stage-labels';
 import styles from '../applications.module.css';
-
-const INTERVIEW_STAGES = [StageType.INTERVIEW_1, StageType.INTERVIEW_2] as const;
 
 interface SubmitState {
   status: 'idle' | 'pending' | 'error';

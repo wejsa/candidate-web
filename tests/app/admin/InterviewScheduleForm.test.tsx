@@ -92,4 +92,43 @@ describe('InterviewScheduleForm', () => {
     await user.click(screen.getByRole('button', { name: /면접 일정 저장/ }));
     expect(await screen.findByRole('alert')).toHaveTextContent('네트워크 오류');
   });
+
+  it('저장 중 → 입력/버튼 disabled("저장 중…")', async () => {
+    let resolveFetch!: (v: unknown) => void;
+    vi.stubGlobal('fetch', vi.fn(() => new Promise((r) => { resolveFetch = r; })));
+    const user = userEvent.setup();
+    render(<InterviewScheduleForm applicationId={7} />);
+    await user.type(screen.getByLabelText(/일시/), '2026-07-10T09:00');
+    await user.type(screen.getByLabelText('장소/화상 링크'), '회의실');
+    await user.click(screen.getByRole('button', { name: /면접 일정 저장/ }));
+    expect(screen.getByRole('button', { name: /저장 중…/ })).toBeDisabled();
+    expect(screen.getByLabelText('장소/화상 링크')).toBeDisabled();
+    resolveFetch({ ok: true, status: 201, json: async () => ({}) });
+  });
+
+  it('성공 후 장소/링크 입력 초기화(연속 등록 UX)', async () => {
+    mockFetch(201, { created: true });
+    const user = userEvent.setup();
+    render(<InterviewScheduleForm applicationId={7} />);
+    await user.type(screen.getByLabelText(/일시/), '2026-07-10T09:00');
+    const loc = screen.getByLabelText('장소/화상 링크') as HTMLInputElement;
+    await user.type(loc, '회의실 A');
+    await user.click(screen.getByRole('button', { name: /면접 일정 저장/ }));
+    await waitFor(() => expect(refresh).toHaveBeenCalled());
+    expect(loc.value).toBe('');
+  });
+
+  it.each([
+    [404, 'APP_NOT_FOUND', '지원서를 찾을 수 없습니다'],
+    [400, undefined, '입력값을 다시 확인'],
+    [500, undefined, '잠시 후 다시 시도'],
+  ])('에러 매핑 status=%s', async (status, code, expected) => {
+    mockFetch(status as number, code ? { code } : {});
+    const user = userEvent.setup();
+    render(<InterviewScheduleForm applicationId={5} />);
+    await user.type(screen.getByLabelText(/일시/), '2026-07-10T09:00');
+    await user.type(screen.getByLabelText('장소/화상 링크'), '회의실');
+    await user.click(screen.getByRole('button', { name: /면접 일정 저장/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(expected as string);
+  });
 });

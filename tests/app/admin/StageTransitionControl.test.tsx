@@ -10,6 +10,8 @@ const { refresh } = vi.hoisted(() => ({ refresh: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh, push: vi.fn() }) }));
 
 import { StageTransitionControl } from '@/app/admin/applications/_components/StageTransitionControl';
+import { STAGE_TRANSITIONS } from '@/lib/admin/stage-transitions-graph';
+import { stageLabel } from '@/lib/my-page/stage-labels';
 
 function mockFetch(status: number, body: unknown = {}): Mock {
   const fn = vi.fn(async () => ({
@@ -39,6 +41,49 @@ describe('StageTransitionControl', () => {
     render(<StageTransitionControl applicationId={5} currentStage={stage as never} />);
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.getByText(/종단 단계/)).toBeInTheDocument();
+  });
+
+  it('INTERVIEW_1 → 2차 면접/처우 협의/불합격 3버튼(2차 생략 간선 포함)', () => {
+    render(<StageTransitionControl applicationId={5} currentStage="INTERVIEW_1" />);
+    expect(screen.getByRole('button', { name: /2차 면접/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /처우 협의/ })).toBeInTheDocument(); // OFFER
+    expect(screen.getByRole('button', { name: /불합격/ })).toBeInTheDocument();
+  });
+
+  // 클라 노출 = 서버 SSOT 그래프 전수 일치(드리프트 시 실패) — STAGE_TRANSITIONS 전 단계 검증.
+  it.each(Object.keys(STAGE_TRANSITIONS))('%s: 노출 버튼이 SSOT 전이 수와 일치', (stage) => {
+    render(<StageTransitionControl applicationId={5} currentStage={stage as never} />);
+    const targets = STAGE_TRANSITIONS[stage as keyof typeof STAGE_TRANSITIONS];
+    expect(screen.queryAllByRole('button')).toHaveLength(targets.length);
+    for (const to of targets) {
+      expect(screen.getByRole('button', { name: new RegExp(stageLabel(to)) })).toBeInTheDocument();
+    }
+  });
+
+  it('전이 진행 중 → 클릭 버튼 "처리 중…" + 전 버튼 disabled(이중 제출 차단)', async () => {
+    let resolveFetch!: (v: unknown) => void;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise((r) => { resolveFetch = r; })),
+    );
+    const user = userEvent.setup();
+    render(<StageTransitionControl applicationId={7} currentStage="DOC_REVIEW" />);
+    await user.click(screen.getByRole('button', { name: /1차 면접/ }));
+    expect(screen.getByRole('button', { name: /처리 중…/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /불합격/ })).toBeDisabled();
+    resolveFetch({ ok: true, status: 200, json: async () => ({}) });
+  });
+
+  it.each([
+    [404, 'APP_NOT_FOUND', '지원서를 찾을 수 없습니다'],
+    [400, undefined, '요청을 확인'],
+    [500, undefined, '잠시 후 다시 시도'],
+  ])('에러 매핑 status=%s', async (status, code, expected) => {
+    mockFetch(status as number, code ? { code } : {});
+    const user = userEvent.setup();
+    render(<StageTransitionControl applicationId={5} currentStage="SUBMITTED" />);
+    await user.click(screen.getByRole('button', { name: /서류 검토/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(expected as string);
   });
 
   it('전이 클릭 → PATCH /stage {toStage} 후 refresh', async () => {
