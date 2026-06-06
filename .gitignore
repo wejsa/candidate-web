@@ -64,3 +64,8 @@ uploads/
 # CANDID-051 — prod E2E(soft-404) 산출물
 /test-results-prod/
 /playwright-report-prod/
+# Walkthrough E2E(관람용 스위트) 산출물
+/test-results-walk/
+/playwright-report-walk/
+/e2e-walkthrough/.auth/
+/e2e-walkthrough/.data/
