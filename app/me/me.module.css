@@ -29,6 +29,37 @@
   color: var(--color-text-muted);
 }
 
+/* hero 헤더 행 — 제목/부제는 좌측, '내 정보 수정' 액션은 우측. 좁은 폭에선 줄바꿈. */
+.heroRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.heroAction {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--brand);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.heroAction:hover {
+  background: var(--brand-hover);
+}
+
+.heroAction:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 /* ── 통계 타일 ─────────────────────────────────────── */
 .stats {
   display: grid;

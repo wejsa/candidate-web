@@ -47,10 +47,17 @@ export default async function MyPage() {
   return (
     <main id="main-content" className={styles.page}>
       <header className={styles.hero}>
-        <h1 className={styles.heroTitle}>내 지원 현황</h1>
-        <p className={styles.heroSubtitle}>
-          지원한 공고와 전형 진행 상황을 한눈에 확인하세요.
-        </p>
+        <div className={styles.heroRow}>
+          <div>
+            <h1 className={styles.heroTitle}>내 지원 현황</h1>
+            <p className={styles.heroSubtitle}>
+              지원한 공고와 전형 진행 상황을 한눈에 확인하세요.
+            </p>
+          </div>
+          <Link href="/me/profile" className={styles.heroAction}>
+            내 정보 수정
+          </Link>
+        </div>
       </header>
 
       <section aria-label="지원 요약">
