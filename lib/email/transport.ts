@@ -18,14 +18,17 @@ function getTransporter(): Transporter {
 
   // Step 1 fix(H001 Sec): STARTTLS 강제 — 서버가 STARTTLS 미지원 응답 시 평문 fallback 차단.
   //   MITM이 STARTTLS를 차단해도 인증 토큰의 평문 SMTP 노출 방지. 465(implicit TLS)에는 N/A.
+  //   ※ production에서만 강제 — dev/test는 로컬 메일 캐처(maildev/mailpit, STARTTLS 미지원)를
+  //     쓸 수 있도록 완화. rejectUnauthorized가 prod-only인 것과 동일한 NODE_ENV 게이트.
   // Step 1 fix(H004 Dom): 외부 SMTP 호출 타임아웃 — 호스트 장애 시 promise 누적 방지.
   //   nodemailer 기본값(connection 2분/socket 10분)이 너무 김.
   // 운영은 인증서 검증 강제(rejectUnauthorized: true), dev/test는 self-signed 허용.
+  const isProd = env.NODE_ENV === 'production';
   cachedTransporter = nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
     secure: isImplicitTls,
-    requireTLS: !isImplicitTls,
+    requireTLS: !isImplicitTls && isProd,
     tls: {
       // Step 2 fix(MINOR-SEC-1): NODE_ENV SSOT — env.ts의 zod-validated 값 사용.
       rejectUnauthorized: env.NODE_ENV === 'production',
