@@ -137,6 +137,8 @@ export const ERROR_CATALOG = {
   // 지원 — APP_
   // CANDID-053 Step 5 — 운영자 지원서 상세 조회 대상 부재.
   APP_NOT_FOUND: { status: 404, message: '지원서를 찾을 수 없습니다.' },
+  // CANDID-053 Step 6 — 허용되지 않는 전형 단계 전이(점프/역행/철회 건).
+  APP_INVALID_STAGE_TRANSITION: { status: 422, message: '허용되지 않는 전형 단계 전이입니다.' },
   APP_ALREADY_SUBMITTED: { status: 409, message: '이미 지원한 공고입니다.' },
   APP_DEADLINE_PASSED: { status: 422, message: '지원 마감일이 지난 공고입니다.' },
   APP_DRAFT_CONFLICT: {
