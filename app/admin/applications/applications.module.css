@@ -114,3 +114,81 @@
 .history time {
   color: var(--color-text-muted);
 }
+
+/* ── 전형 관리 컨트롤(Step 12) ─────────────────────── */
+.stageBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.stageBtn {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.stageBtn:hover:not(:disabled) {
+  background: var(--color-accent-weak);
+}
+
+.stageBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  margin: var(--space-2) 0 0;
+  color: #b00020;
+  font-size: 0.85rem;
+}
+
+/* ── 면접 일정 폼 ──────────────────────────────────── */
+.interviewForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 480px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: 0.9rem;
+}
+
+.field input,
+.field select {
+  padding: var(--space-2);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  font: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.hint {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.primaryBtn {
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius);
+  background: var(--color-text);
+  color: var(--color-surface);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

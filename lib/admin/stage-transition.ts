@@ -3,24 +3,15 @@ import { AuditEventType, ApplicationResult, StageType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { recordAuditEvent } from '@/lib/audit/record';
+// CANDID-053 Step 12 — 전이 그래프 SSOT를 공용 모듈로 분리(클라 StageTransitionControl와 드리프트 차단).
+import { STAGE_TRANSITIONS as ALLOWED_STAGE_TRANSITIONS } from '@/lib/admin/stage-transitions-graph';
 
 // CANDID-053 Step 6 — 전형 단계 전이 그래프 + 이력 write + 결과 결정 (FR-007, RBAC A안).
 //
 // 도메인:
-//   - 허용 전이 그래프로 임의/점프 전이 차단(SUBMITTED→HIRED 등 거부).
+//   - 허용 전이 그래프(STAGE_TRANSITIONS SSOT)로 임의/점프 전이 차단(SUBMITTED→HIRED 등 거부).
 //   - HIRED/REJECTED는 종단. 철회(result=WITHDRAWN) 지원서는 전이 불가.
 //   - 상태 변경 + 이력 1건 + 감사는 단일 트랜잭션(BR-TX-01). 행 FOR UPDATE로 동시 전이 직렬화.
-
-/** 허용 전이 그래프. 각 단계 → 진행 단계(들) + REJECTED. HIRED/REJECTED 종단. */
-const ALLOWED_STAGE_TRANSITIONS: Record<StageType, readonly StageType[]> = {
-  [StageType.SUBMITTED]: [StageType.DOC_REVIEW, StageType.REJECTED],
-  [StageType.DOC_REVIEW]: [StageType.INTERVIEW_1, StageType.REJECTED],
-  [StageType.INTERVIEW_1]: [StageType.INTERVIEW_2, StageType.OFFER, StageType.REJECTED], // 2차 생략 허용
-  [StageType.INTERVIEW_2]: [StageType.OFFER, StageType.REJECTED],
-  [StageType.OFFER]: [StageType.HIRED, StageType.REJECTED],
-  [StageType.HIRED]: [],
-  [StageType.REJECTED]: [],
-};
 
 // 단계 → 지원 결과 파생. HIRED=합격, REJECTED=불합격, 그 외 진행 중.
 // ⚠️ result 회귀 방지는 *그래프 폐쇄성*에 의존한다: 종단(HIRED/REJECTED) 이후 전이가 그래프상 불가
