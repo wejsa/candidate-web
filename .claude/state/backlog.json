@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 498,
+    "version": 499,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T05:18:04Z"
+    "updatedAt": "2026-06-06T05:21:41Z"
   },
   "summary": {
     "total": 53,
@@ -3909,12 +3909,12 @@
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 146,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-06T05:18:04Z"
+        "autoChainArgs": "146 --auto-fix",
+        "updatedAt": "2026-06-06T05:21:41Z"
       },
       "steps": [
         {
@@ -4085,7 +4085,7 @@
         {
           "number": 10,
           "title": "공고 관리: 생성/수정 폼",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 600,
           "estimatedLines": 470,
           "files": [
@@ -4096,7 +4096,8 @@
           "dependencies": [
             4,
             9
-          ]
+          ],
+          "prNumber": 146
         },
         {
           "number": 11,
