@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 501,
+    "version": 502,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T05:30:04Z"
+    "updatedAt": "2026-06-06T05:35:11Z"
   },
   "summary": {
     "total": 53,
@@ -3909,12 +3909,12 @@
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 147,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-06T05:28:39Z"
+        "autoChainArgs": "147 --auto-fix",
+        "updatedAt": "2026-06-06T05:35:11Z"
       },
       "steps": [
         {
@@ -4103,7 +4103,7 @@
         {
           "number": 11,
           "title": "지원자 진행: 목록 + 상세(PII 열람/이력) 읽기",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 600,
           "estimatedLines": 420,
           "files": [
@@ -4114,7 +4114,8 @@
             5,
             8,
             9
-          ]
+          ],
+          "prNumber": 147
         },
         {
           "number": 12,
