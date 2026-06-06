@@ -336,6 +336,8 @@
   /* stretched-link 미사용 카드라 일반 링크. globals 버튼/링크 스타일 상속 */
   position: relative;
   z-index: 1;
+  /* '작성 취소'(.draftDiscard)와 동일한 크기로 정렬 */
+  font-size: 0.85rem;
 }
 
 /* 작성 중 카드 액션 행 (이어서 작성 + 작성 취소) */

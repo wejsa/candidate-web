@@ -80,7 +80,7 @@ export function ShareButton({ title }: Props) {
         URL 복사
       </button>
       {status === 'copied' && (
-        <span role="status" aria-live="polite">
+        <span role="status" aria-live="polite" className={styles.srOnly}>
           복사 완료
         </span>
       )}

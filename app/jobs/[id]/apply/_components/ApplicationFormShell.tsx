@@ -3,15 +3,16 @@
 // 재구성: 3-step stepper / 인적사항 입력 UI 제거(US 요청).
 //   - 인적사항(name/phone/birthDate)은 프로필 PII(prefill)에서 자동 채움 → 제출 시 draft payload에 기입.
 //     prefill 미완성이면 제출 차단 + 프로필 완성 안내(게이트).
-//   - careerLevel(신입/경력)은 프로필에 없어 본 페이지에서 1개 선택 유지(EXPERIENCED는 careerMonths 필수).
 //   - 첨부: 이력서 파일 1개(필수) + 포트폴리오/경력 링크(선택).
+//   - 지원 구분(신입/경력) UI는 제거(US 요청 — 포트폴리오/경력 링크로 대체). draft 스키마는
+//     careerLevel을 필수로 요구하므로 제출 시 'NEW'로 고정 기입한다.
 //   - 제출: PUT draft(step1_personal 기입) → POST /api/v1/applications(Idempotency-Key + consent).
 
 'use client';
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import type { CareerLevel, DraftPayloadV1, DraftPrefill } from '@/lib/drafts/types';
+import type { DraftPayloadV1, DraftPrefill } from '@/lib/drafts/types';
 import { ResumeUploadStep } from './ResumeUploadStep';
 import { PortfolioLinksSection } from './PortfolioLinksSection';
 import styles from '@/app/jobs/[id]/apply/apply.module.css';
@@ -51,46 +52,35 @@ export function ApplicationFormShell({
   const versionRef = useRef(initialVersion);
 
   const [resumeAttached, setResumeAttached] = useState(initialResumeAttached);
-  const [careerLevel, setCareerLevel] = useState<CareerLevel | null>(
-    initialPayload.step1_personal?.careerLevel ?? null,
-  );
-  const [careerMonths, setCareerMonths] = useState<string>(
-    initialPayload.step1_personal?.careerMonths?.toString() ?? '',
-  );
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<SubmitStatus>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [appNumber, setAppNumber] = useState<string | null>(null);
 
-  // 프로필에서 가져온 인적사항 완성도 (제출 필수 — name/phone/birthDate).
-  const personalReady =
-    prefill.name !== null &&
-    prefill.name.trim() !== '' &&
-    prefill.phone !== null &&
-    prefill.phone.trim() !== '' &&
-    prefill.birthDate !== null &&
-    prefill.birthDate.trim() !== '';
+  // 개인정보 최소수집(US 요청): 지원에는 이름만 필수. 이름은 가입 시 받으므로 사실상 항상 충족.
+  const personalReady = prefill.name !== null && prefill.name.trim() !== '';
 
-  const careerReady =
-    careerLevel === 'NEW' || (careerLevel === 'EXPERIENCED' && careerMonths.trim() !== '');
-
-  const canSubmit =
-    personalReady && resumeAttached && careerReady && consent && status !== 'submitting';
+  const canSubmit = personalReady && resumeAttached && consent && status !== 'submitting';
 
   async function handleSubmit() {
     if (!canSubmit) return;
     setStatus('submitting');
     setErrorMsg(null);
 
-    // 1) 프로필 PII + careerLevel을 draft payload(step1_personal)에 기입 후 저장.
+    // 1) 인적사항을 draft payload(step1_personal)에 기입 후 저장.
+    //    개인정보 최소수집: 이름만 필수. 연락처·생년월일은 프로필에 있을 때만 포함.
+    const phone =
+      prefill.phone !== null && prefill.phone.trim() !== ''
+        ? normalizePhone(prefill.phone)
+        : undefined;
+    const birthDate =
+      prefill.birthDate !== null && prefill.birthDate.trim() !== '' ? prefill.birthDate : undefined;
     const step1 = {
       name: prefill.name as string,
-      phone: normalizePhone(prefill.phone as string),
-      birthDate: prefill.birthDate as string,
-      careerLevel: careerLevel as CareerLevel,
-      ...(careerLevel === 'EXPERIENCED'
-        ? { careerMonths: Number.parseInt(careerMonths, 10) }
-        : {}),
+      ...(phone !== undefined ? { phone } : {}),
+      ...(birthDate !== undefined ? { birthDate } : {}),
+      // 지원 구분 UI 제거(US 요청) — 스키마 필수 필드라 'NEW'로 고정.
+      careerLevel: 'NEW' as const,
     };
     const nextPayload: DraftPayloadV1 = {
       ...initialPayload,
@@ -177,8 +167,8 @@ export function ApplicationFormShell({
         <div className={styles.gate} role="alert">
           <p className={styles.gateTitle}>프로필을 먼저 완성해 주세요</p>
           <p>
-            지원서 제출에는 프로필의 이름·연락처·생년월일이 필요합니다. 프로필에서 정보를 채운 뒤
-            다시 지원해 주세요.
+            지원서 제출에는 프로필에 이름이 필요합니다. 프로필에서 이름을 입력한 뒤 다시 지원해
+            주세요.
           </p>
           <p>
             <Link href="/me/profile">프로필 수정하러 가기</Link>
@@ -195,63 +185,13 @@ export function ApplicationFormShell({
 
       <PortfolioLinksSection jobId={jobId} initialLinks={initialPortfolioLinks} />
 
-      <fieldset className={styles.card}>
-        <legend>지원 구분</legend>
-        <p className={styles.cardHint}>신입/경력을 선택해 주세요.</p>
-        <div className={styles.choiceRow}>
-          <label className={styles.choice}>
-            <input
-              type="radio"
-              name="careerLevel"
-              checked={careerLevel === 'NEW'}
-              onChange={() => setCareerLevel('NEW')}
-            />
-            신입
-          </label>
-          <label className={styles.choice}>
-            <input
-              type="radio"
-              name="careerLevel"
-              checked={careerLevel === 'EXPERIENCED'}
-              onChange={() => setCareerLevel('EXPERIENCED')}
-            />
-            경력
-          </label>
-        </div>
-        {careerLevel === 'EXPERIENCED' && (
-          <label>
-            총 경력 (개월)
-            <input
-              type="number"
-              min={0}
-              max={720}
-              value={careerMonths}
-              onChange={(e) => setCareerMonths(e.target.value)}
-              placeholder="예: 36"
-            />
-          </label>
-        )}
-      </fieldset>
-
       <div className={styles.submitBar}>
         <ul className={styles.checklist}>
-          <li className={`${styles.checkItem} ${personalReady ? styles.ok : ''}`}>
-            <span className={styles.checkMark} aria-hidden="true">
-              {personalReady ? '✓' : ''}
-            </span>
-            인적사항 (프로필에서 자동 적용)
-          </li>
           <li className={`${styles.checkItem} ${resumeAttached ? styles.ok : ''}`}>
             <span className={styles.checkMark} aria-hidden="true">
               {resumeAttached ? '✓' : ''}
             </span>
             이력서 첨부
-          </li>
-          <li className={`${styles.checkItem} ${careerReady ? styles.ok : ''}`}>
-            <span className={styles.checkMark} aria-hidden="true">
-              {careerReady ? '✓' : ''}
-            </span>
-            지원 구분 선택
           </li>
         </ul>
 

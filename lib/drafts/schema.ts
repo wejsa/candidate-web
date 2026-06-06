@@ -21,14 +21,19 @@ export const APPLICATION_STEPS = [1, 2, 3] as const;
 export const PersonalInfoSchema = z
   .object({
     name: z.string().regex(NAME_REGEX, '이름은 한글/영문 2~50자여야 합니다.'),
-    phone: z.string().regex(PHONE_REGEX, '연락처 형식이 올바르지 않습니다 (010-XXXX-XXXX).'),
+    // 개인정보 최소수집(US 요청): 연락처·생년월일은 선택. 입력된 경우에만 형식/연령 검증.
+    phone: z
+      .string()
+      .regex(PHONE_REGEX, '연락처 형식이 올바르지 않습니다 (010-XXXX-XXXX).')
+      .optional(),
     birthDate: z
       .string()
       .regex(BIRTH_DATE_REGEX, '생년월일은 YYYY-MM-DD 형식이어야 합니다.')
       .refine(
         (v) => validateMinAge(v, MIN_AGE_FOR_APPLICATION),
         `만 ${MIN_AGE_FOR_APPLICATION}세 미만은 지원할 수 없습니다.`,
-      ),
+      )
+      .optional(),
     address: z.string().max(200).optional(),
     careerLevel: z.enum(CAREER_LEVELS),
     careerMonths: z.number().int().nonnegative().max(720).optional(),
