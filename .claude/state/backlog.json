@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 491,
+    "version": 492,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T04:32:58Z"
+    "updatedAt": "2026-06-06T04:33:52Z"
   },
   "summary": {
     "total": 53,
@@ -3898,23 +3898,23 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260604-143953",
-      "assignedAt": "2026-06-06T04:32:58Z",
+      "assignedAt": "2026-06-06T04:33:52Z",
       "lockTTL": 7200,
       "lockedFiles": [
-        "app/api/admin/v1/applications/[id]/interviews",
-        "lib/admin/interviews.ts"
+        "app/admin",
+        "e2e/admin.spec.ts"
       ],
       "dependencies": [],
       "createdAt": "2026-06-03T14:54:51Z",
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-merge-pr",
-        "lastCompletedSkill": "skill-review-pr",
-        "prNumber": 143,
+        "currentSkill": "skill-impl",
+        "lastCompletedSkill": "skill-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "CANDID-053",
-        "updatedAt": "2026-06-06T04:32:58Z"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-06T04:33:52Z"
       },
       "steps": [
         {
@@ -4025,7 +4025,7 @@
         {
           "number": 7,
           "title": "면접 일정 writer(icsUid 멱등, 지원자 반영)",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 500,
           "estimatedLines": 450,
           "files": [
@@ -4038,7 +4038,8 @@
             6
           ],
           "prNumber": 143,
-          "branch": "feature/CANDID-053-step7"
+          "branch": "feature/CANDID-053-step7",
+          "mergedAt": "2026-06-06T04:33:13Z"
         },
         {
           "number": 8,
@@ -4059,7 +4060,7 @@
           ]
         }
       ],
-      "currentStep": 7
+      "currentStep": 8
     }
   }
 }
