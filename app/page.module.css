@@ -1,0 +1,262 @@
+/* P1-1 — 홈 랜딩. 전역 토큰(globals.css) 재사용. 풀블리드 섹션 + 중앙 정렬 inner.
+   .home은 전역 main(max-width/padding)을 의도적으로 덮어써 섹션이 화면 폭을 채우게 한다. */
+
+.home {
+  max-width: none;
+  padding: 0;
+}
+
+.inner {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ── 히어로 ── */
+.hero {
+  background:
+    radial-gradient(120% 120% at 85% -10%, var(--brand-weak) 0%, transparent 55%),
+    var(--color-bg);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.heroInner {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 6rem) 1.25rem clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--brand);
+  margin: 0 0 1rem;
+}
+
+.title {
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  margin: 0 0 1.25rem;
+  max-width: 18ch;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  margin: 0 0 2rem;
+  max-width: 56ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* 링크형 CTA — 전역 button 룩과 일치(폼 버튼이 아닌 a 요소이므로 클래스로 재현) */
+.btnPrimary,
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-min);
+  padding: 0.6rem 1.4rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btnPrimary {
+  background: var(--brand);
+  color: #ffffff;
+  border: 1px solid var(--brand);
+}
+
+.btnPrimary:hover {
+  background: var(--brand-hover);
+  border-color: var(--brand-hover);
+  color: #ffffff;
+}
+
+.btnSecondary {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btnSecondary:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* ── 공통 섹션 ── */
+.section {
+  padding: clamp(2.75rem, 6vw, 4.5rem) 0;
+}
+
+.sectionAlt {
+  background: var(--color-surface);
+  border-top: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.sectionHead {
+  margin: 0 0 2rem;
+}
+
+.sectionTitle {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
+}
+
+.sectionLead {
+  font-size: var(--fs-body);
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 60ch;
+}
+
+/* ── 가치 카드 ── */
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.card {
+  padding: 1.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius);
+  background: var(--brand-weak);
+  color: var(--brand-hover);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.cardTitle {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.cardDesc {
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── 채용 절차 ── */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  counter-reset: step;
+}
+
+.step {
+  position: relative;
+  padding: 1.25rem;
+  background: var(--color-bg);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.stepNum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0.75rem;
+  border-radius: 999px;
+  background: var(--color-text);
+  color: #ffffff;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.stepLabel {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.stepDesc {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── 마무리 CTA ── */
+.cta {
+  margin: clamp(2.75rem, 6vw, 4.5rem) auto;
+  padding: clamp(2.5rem, 5vw, 3.5rem) 1.5rem;
+  text-align: center;
+  background: var(--color-text);
+  border-radius: var(--radius-lg);
+}
+
+.ctaTitle {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  margin: 0 0 0.75rem;
+}
+
+.ctaLead {
+  font-size: var(--fs-body);
+  color: var(--gray-300);
+  margin: 0 0 1.75rem;
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-min);
+  padding: 0.7rem 1.75rem;
+  border-radius: var(--radius);
+  background: var(--brand);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.ctaBtn:hover {
+  background: var(--brand-hover);
+  color: #ffffff;
+}

@@ -1,12 +1,10 @@
-export default function HomePage() {
-  return (
-    <main id="main-content">
-      <h1>candidate-web</h1>
-      <p>자사 채용 사이트 지원자 프론트엔드. 본 페이지는 CANDID-001 셋업 검증용 임시 랜딩입니다.</p>
-      <p>
-        후속 task에서 공고 목록(<code>/jobs</code>), 로그인(<code>/login</code>), 마이페이지(
-        <code>/me</code>)가 추가됩니다.
-      </p>
-    </main>
-  );
-}
+// P1-1 — 홈 랜딩 (RSC). 기존 셋업 검증용 플레이스홀더를 교체.
+// 정적 콘텐츠만 사용(DB 비의존) → 기본 SSG. 카피/직군은 예시값으로, 운영 시 교체 대상.
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import styles from './page.module.css';
+
+export const metadata: Metadata = {
+  title: '엔지니어 채용',
+  description:
+    'Hoji는 무인 환전·결제 플랫폼을 설
