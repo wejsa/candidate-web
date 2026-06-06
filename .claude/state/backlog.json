@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 495,
+    "version": 496,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T04:56:42Z"
+    "updatedAt": "2026-06-06T05:07:15Z"
   },
   "summary": {
     "total": 53,
@@ -4066,12 +4066,14 @@
         },
         {
           "number": 9,
-          "title": "공고 관리 화면(목록/생성/수정/상태전환)",
+          "title": "공고 관리: 목록 + 상태 전환 화면",
           "status": "pending",
-          "prLineLimit": 600,
-          "estimatedLines": 420,
+          "prLineLimit": 700,
+          "estimatedLines": 560,
           "files": [
-            "app/admin/job-postings"
+            "app/admin/job-postings/page.tsx",
+            "app/admin/job-postings/_components/StatusControl.tsx",
+            "lib/admin/job-postings-list.ts"
           ],
           "dependencies": [
             4,
@@ -4080,6 +4082,22 @@
         },
         {
           "number": 10,
+          "title": "공고 관리: 생성/수정 폼",
+          "status": "pending",
+          "prLineLimit": 600,
+          "estimatedLines": 470,
+          "files": [
+            "app/admin/job-postings/new",
+            "app/admin/job-postings/[id]/edit",
+            "app/admin/job-postings/_components/JobPostingForm.tsx"
+          ],
+          "dependencies": [
+            4,
+            9
+          ]
+        },
+        {
+          "number": 11,
           "title": "지원자 진행 화면(목록/상세 + 전형 전이 + 면접 일정)",
           "status": "pending",
           "prLineLimit": 700,
@@ -4096,7 +4114,7 @@
           ]
         },
         {
-          "number": 11,
+          "number": 12,
           "title": "백오피스 E2E(권한 차단 + 운영자 흐름)",
           "status": "pending",
           "prLineLimit": 400,
@@ -4107,7 +4125,8 @@
           "dependencies": [
             8,
             9,
-            10
+            10,
+            11
           ]
         }
       ],
