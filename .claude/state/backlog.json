@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 500,
+    "version": 501,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T05:28:39Z"
+    "updatedAt": "2026-06-06T05:30:04Z"
   },
   "summary": {
     "total": 53,
@@ -4102,23 +4102,38 @@
         },
         {
           "number": 11,
-          "title": "지원자 진행 화면(목록/상세 + 전형 전이 + 면접 일정)",
+          "title": "지원자 진행: 목록 + 상세(PII 열람/이력) 읽기",
           "status": "pending",
-          "prLineLimit": 700,
-          "estimatedLines": 520,
+          "prLineLimit": 600,
+          "estimatedLines": 420,
           "files": [
             "app/admin/job-postings/[id]/applicants",
-            "app/admin/applications"
+            "app/admin/applications/[id]/page.tsx"
           ],
           "dependencies": [
             5,
-            6,
-            7,
-            8
+            8,
+            9
           ]
         },
         {
           "number": 12,
+          "title": "지원자 진행: 전형 전이 + 면접 일정 컨트롤(쓰기)",
+          "status": "pending",
+          "prLineLimit": 600,
+          "estimatedLines": 470,
+          "files": [
+            "app/admin/applications/_components",
+            "lib/admin/stage-transitions-graph.ts"
+          ],
+          "dependencies": [
+            6,
+            7,
+            11
+          ]
+        },
+        {
+          "number": 13,
           "title": "백오피스 E2E(권한 차단 + 운영자 흐름)",
           "status": "pending",
           "prLineLimit": 400,
@@ -4130,7 +4145,8 @@
             8,
             9,
             10,
-            11
+            11,
+            12
           ]
         }
       ],
