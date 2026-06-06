@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 486,
+    "version": 487,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T03:58:19Z"
+    "updatedAt": "2026-06-06T04:07:38Z"
   },
   "summary": {
     "total": 53,
@@ -3898,7 +3898,7 @@
       "priority": "medium",
       "phase": 4,
       "assignee": "wejsa-u@hoji-20260604-143953",
-      "assignedAt": "2026-06-06T03:58:19Z",
+      "assignedAt": "2026-06-06T04:07:38Z",
       "lockTTL": 7200,
       "lockedFiles": [
         "app/api/admin/v1/applications/[id]/stage",
@@ -3909,12 +3909,12 @@
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": {
-        "currentSkill": "skill-impl",
-        "lastCompletedSkill": "skill-merge-pr",
-        "prNumber": null,
+        "currentSkill": "skill-review-pr",
+        "lastCompletedSkill": "skill-impl",
+        "prNumber": 142,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-06T03:58:19Z"
+        "autoChainArgs": "CANDID-053",
+        "updatedAt": "2026-06-06T04:07:38Z"
       },
       "steps": [
         {
@@ -4006,7 +4006,7 @@
         {
           "number": 6,
           "title": "전형 단계 전이 그래프 + 이력 write + 결과 결정",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 700,
           "estimatedLines": 600,
           "files": [
@@ -4017,7 +4017,9 @@
           "dependencies": [
             2,
             5
-          ]
+          ],
+          "prNumber": 142,
+          "branch": "feature/CANDID-053-step6"
         },
         {
           "number": 7,
