@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 52,
+    "version": 54,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-04T14:29:27Z"
+    "updatedAt": "2026-06-06T06:10:00.000Z"
   },
   "tasks": {
     "CANDID-022": {
@@ -1512,6 +1512,107 @@
         140
       ],
       "note": "공고 페이지 notFound() soft-404(HTTP 200)는 Next 14.2 SSR 코어 한계로 확정(force-dynamic/loading/middleware 격리 실측, 코드 404 불가). Step1 검증 하네스+회귀가드, Step2 robots:noindex 미티게이션 강화+문서화로 종결. spec: docs/requirements/CANDID-051-spec.md"
+    },
+    "CANDID-053": {
+      "id": "CANDID-053",
+      "title": "관리자/리크루터 인증·권한(RBAC) + 백오피스 (A안: 내부 흡수)",
+      "phase": 4,
+      "priority": "medium",
+      "type": "feature",
+      "completedAt": "2026-06-06T06:10:00.000Z",
+      "assignee": "wejsa-u@hoji-20260604-143953",
+      "prs": [
+        {
+          "number": 135,
+          "title": "CANDID-053 Step 1 - 역할 스키마 + 마이그레이션 2파일(M-A role / M-B audit enum)",
+          "mergedAt": "2026-06-04T11:46:34Z"
+        },
+        {
+          "number": 136,
+          "title": "CANDID-053 Step 2 - requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트",
+          "mergedAt": "2026-06-04T12:00:11Z"
+        },
+        {
+          "number": 137,
+          "title": "CANDID-053 Step 3 - 역할 관리 API(승격/강등, 최후 ADMIN 가드 tx+FOR UPDATE, 감사) + 에러코드",
+          "mergedAt": "2026-06-04T12:15:33Z"
+        },
+        {
+          "number": 138,
+          "title": "CANDID-053 Step 4 - 공고 관리 CRUD API(생성/수정/상태전환, 감사)",
+          "mergedAt": "2026-06-04T12:31:53Z"
+        },
+        {
+          "number": 141,
+          "title": "CANDID-053 Step 5 - 지원자 목록/상세 + idx_applications_posting_stage + 운영자 PII 통제",
+          "mergedAt": "2026-06-06T03:57:59Z"
+        },
+        {
+          "number": 142,
+          "title": "CANDID-053 Step 6 - 전형 단계 전이 그래프 + 이력 write + 결과 결정",
+          "mergedAt": "2026-06-06T04:16:34Z"
+        },
+        {
+          "number": 143,
+          "title": "CANDID-053 Step 7 - 면접 일정 writer(icsUid 멱등, 지원자 반영)",
+          "mergedAt": "2026-06-06T04:33:13Z"
+        },
+        {
+          "number": 144,
+          "title": "CANDID-053 Step 8 - 백오피스 셸 + 페이지 라우트 가드(보안 경계) + 대시보드 홈",
+          "mergedAt": "2026-06-06T04:56:42Z"
+        },
+        {
+          "number": 145,
+          "title": "CANDID-053 Step 9 - 공고 관리: 목록 + 상태 전환 화면",
+          "mergedAt": "2026-06-06T05:18:04Z"
+        },
+        {
+          "number": 146,
+          "title": "CANDID-053 Step 10 - 공고 관리: 생성/수정 폼",
+          "mergedAt": "2026-06-06T05:28:39Z"
+        },
+        {
+          "number": 147,
+          "title": "CANDID-053 Step 11 - 지원자 진행: 목록 + 상세(PII 열람/이력) 읽기",
+          "mergedAt": "2026-06-06T05:43:04Z"
+        },
+        {
+          "number": 148,
+          "title": "CANDID-053 Step 12 - 지원자 진행: 전형 전이 + 면접 일정 컨트롤(쓰기)",
+          "mergedAt": "2026-06-06T05:57:46Z"
+        },
+        {
+          "number": 149,
+          "title": "CANDID-053 Step 13 - 백오피스 E2E(권한 차단 + 운영자 흐름)",
+          "mergedAt": "2026-06-06T06:09:44Z"
+        }
+      ],
+      "stepCount": 13,
+      "reviewSummary": {
+        "critical": 0,
+        "major": 26,
+        "majorInPRFix": 26,
+        "minor": "다수(대부분 in-PR 또는 후속)",
+        "info": "다수",
+        "note": "전 스텝 CRITICAL 0. 백오피스 UI(8~13)는 화면 단위로 재분리(8 셸/가드, 9 공고목록/상태, 10 공고폼, 11 지원자읽기, 12 전형/면접쓰기, 13 E2E). 리뷰 합의 MAJOR는 각 PR에서 in-PR 수정. 전이/면접 단계 그래프는 서버/클라 공용 SSOT로 드리프트 차단. self-PR COMMENT."
+      },
+      "note": "RBAC A안(내부 흡수) — 인가 SSOT=DB role 재조회. 운영자 부트스트랩 CLI + 백오피스(공고 CRUD/지원자 PII 열람·감사/전형 전이/면접 일정). E2E(권한 4분면 + 즉시 강등 반영)."
+    },
+    "CANDID-052": {
+      "id": "CANDID-052",
+      "title": "E2E journeys.spec 회귀 — /me h1 단언이 구 문구('마이페이지') 사용으로 항상 실패",
+      "phase": 4,
+      "priority": "medium",
+      "type": "bug",
+      "completedAt": "2026-06-03T14:46:11Z",
+      "assignee": null,
+      "prs": [],
+      "stepCount": 0,
+      "reviewSummary": {
+        "critical": 0
+      },
+      "note": "완료 이력 복구(§5.3 교차검증) — 이전 세션 완료. backlog에 step/PR 데이터 미기록(micro bug)이라 PR 상세 없이 알려진 필드만 기록."
     }
   }
 }

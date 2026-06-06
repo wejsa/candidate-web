@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 53,
     "projectPrefix": "CANDID",
-    "version": 506,
+    "version": 507,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T06:04:01Z"
+    "updatedAt": "2026-06-06T06:10:00.000Z"
   },
   "summary": {
     "total": 53,
@@ -32,7 +32,7 @@
     "4": {
       "name": "운영/품질",
       "description": "감사 로그 AOP, 분산 추적, Prometheus 메트릭, 접근성 WCAG 2.1 AA, 야간 정리 배치",
-      "status": "todo"
+      "status": "done"
     }
   },
   "tasks": {
@@ -3893,29 +3893,18 @@
       "id": "CANDID-053",
       "title": "관리자/리크루터 인증·권한(RBAC) + 백오피스 (A안: 내부 흡수)",
       "description": "[배경] 현재 candidate-web에는 관리자/리크루터 개념이 전혀 없다. User에 role 필드·역할 enum 없음, requireRole/requireAdmin 등 권한 미들웨어 없음, admin/recruiter 페이지·API 없음. AUTH_FORBIDDEN(403)은 리소스 소유권(draft 접근)과 /api/metrics의 METRICS_AUTH_TOKEN(공유 시크릿) 게이트에만 쓰임. 결과적으로 ATS의 '운영자 측' 흐름이 코드 경로상 부재하다: (1)공고는 read-only — 쓰기 엔드포인트 없고 seed/직접 DB로만 생성. (2)전형 단계 전이(DOC_REVIEW→INTERVIEW_1/2→OFFER→HIRED/REJECTED)와 ApplicationResult(PASSED/FAILED) 변경 경로 없음 — 지원자는 SUBMITTED/WITHDRAWN만 발생시킴. (3)InterviewSchedule 모델은 있으나 생성하는 코드가 0건(.ics 발급/마이페이지 타임라인은 표시만). 즉 스키마(StageType·ApplicationStatusHistory.changedBy·InterviewSchedule·AuditEventType)는 운영자 워크플로를 예견해 두었으나 기능이 비어 있다. [선결정 — 아키텍처] 관리자 기능을 (A)candidate-web 내부 RBAC로 흡수할지, (B)별도 백오피스/ATS 서비스로 분리할지 의사결정 필요(CLAUDE.md상 본 리포는 '지원자 프론트엔드', PRD §8 '면접관 이름 노출' 미결 정책과 연계). [제안 범위 — A안 가정] (1)인증·권한: User.role(또는 별도 Staff 테이블) + UserRole enum(CANDIDATE/RECRUITER/ADMIN) 도입, requireRole 미들웨어로 /api/admin/* 가드(AUTH_FORBIDDEN 재사용). (2)관리자 계정 부트스트랩: self-signup 금지 — 최초 ADMIN은 seed/CLI 스크립트 또는 env 화이트리스트로 생성, 이후 ADMIN이 RECRUITER 초대/승격(감사 로그 필수). (3)공고 CRUD(생성/수정/마감/비공개) + 권한 가드. (4)전형 진행: ApplicationStatusHistory write 경로(changedByUserId=운영자) + 단계 전이 검증(허용 전이 그래프) + ApplicationResult 결정. (5)면접 일정 생성/변경(InterviewSchedule writer 신설, icsUid 멱등). (6)보안·컴플라이언스: 운영자 PII 접근은 지원자보다 광범위 → 별도 마스킹/감사 정책(AuditEventType.PII_VIEW 확장), 최소권한·접근 로깅. [관련 코드] prisma/schema.prisma(User/StageType/ApplicationResult/InterviewSchedule/ApplicationStatusHistory), lib/auth/middleware.ts(requireAuth), lib/errors/codes.ts(AUTH_FORBIDDEN), prisma/seed.ts. 규모상 epic — /skill-plan에서 단계 분리 필요.",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "medium",
       "phase": 4,
-      "assignee": "wejsa-u@hoji-20260604-143953",
-      "assignedAt": "2026-06-06T04:33:52Z",
-      "lockTTL": 7200,
-      "lockedFiles": [
-        "app/admin",
-        "e2e/admin.spec.ts"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-03T14:54:51Z",
       "specFile": "docs/requirements/CANDID-053-spec.md",
       "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
-      "workflowState": {
-        "currentSkill": "skill-review-pr",
-        "lastCompletedSkill": "skill-impl",
-        "prNumber": 149,
-        "fixLoopCount": 0,
-        "autoChainArgs": "149 --auto-fix",
-        "updatedAt": "2026-06-06T06:04:01Z"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
@@ -4139,7 +4128,7 @@
         {
           "number": 13,
           "title": "백오피스 E2E(권한 차단 + 운영자 흐름)",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 400,
           "estimatedLines": 260,
           "files": [
@@ -4152,10 +4141,12 @@
             11,
             12
           ],
-          "prNumber": 149
+          "prNumber": 149,
+          "mergedAt": "2026-06-06T06:09:44Z"
         }
       ],
-      "currentStep": 13
+      "currentStep": 13,
+      "completedAt": "2026-06-06T06:10:00.000Z"
     }
   }
 }
