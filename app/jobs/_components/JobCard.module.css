@@ -5,6 +5,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  width: 100%; /* 그리드 셀(.gridItem flex)을 가로로 꽉 채워 카드 폭 균일화 */
   height: 100%;
   padding: var(--space-4);
   border: 1px solid var(--color-surface-2);
