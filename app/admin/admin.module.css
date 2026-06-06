@@ -1,0 +1,120 @@
+/* CANDID-053 Step 8 — 백오피스 셸/대시보드 스타일.
+   전역 토큰(globals.css의 --color-*, --space-*, --radius, --shadow-*) 재사용. */
+
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── 사이드바 ──────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.brand {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.sideNav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sideLink {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.sideLink:hover {
+  background: var(--color-accent-weak);
+}
+
+.roleBadge {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius);
+  background: var(--color-accent-weak);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+/* ── 콘텐츠 ────────────────────────────────────────── */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.pageHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.pageSubtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* ── 진입 카드 그리드 ──────────────────────────────── */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entryCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.entryCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.entryTitle {
+  font-weight: 600;
+}
+
+.entryDesc {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
