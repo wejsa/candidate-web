@@ -1,6 +1,6 @@
 'use client';
 
-// CANDID-053 Step 9 — 공고 생성/수정 공용 폼(Client).
+// CANDID-053 Step 10 — 공고 생성/수정 공용 폼(Client).
 //   create: POST /api/admin/v1/job-postings (항상 DRAFT 생성) / edit: PATCH /{id}.
 //   contentHtml은 서버에서 sanitizeHtml로 정화(저장+출력 이중 방어) — 클라이언트는 원문 전송.
 //   상태 전이는 본 폼이 아니라 목록의 StatusControl이 담당(관심사 분리).
@@ -34,6 +34,9 @@ interface SubmitState {
   status: 'idle' | 'pending' | 'error';
   message: string | null;
 }
+
+// 서버 contentHtml 검증과 정합되는 클라 상한(거대 payload 선차단 — 보안/UX).
+const CONTENT_MAX = 20_000;
 
 function messageForCode(httpStatus: number, code: unknown): string {
   if (code === 'AUTH_FORBIDDEN') return '권한이 없습니다.';
@@ -71,6 +74,12 @@ export function JobPostingForm({ mode, categories, initial }: Props): React.JSX.
       setState({ status: 'error', message: '시작일시를 입력해 주세요.' });
       return;
     }
+    const closesIso = toIso(closesAt); // null = 상시 모집
+    // 서버 refine(closesAt>opensAt)와 동일 규칙을 클라에서도 선검증 — 어느 필드 문제인지 즉시 안내.
+    if (closesIso !== null && new Date(closesIso).getTime() <= new Date(opensIso).getTime()) {
+      setState({ status: 'error', message: '마감일시는 시작일시보다 이후여야 합니다.' });
+      return;
+    }
     const body = {
       title: title.trim(),
       jobCategoryId,
@@ -78,7 +87,7 @@ export function JobPostingForm({ mode, categories, initial }: Props): React.JSX.
       careerLevel,
       contentHtml,
       opensAt: opensIso,
-      closesAt: toIso(closesAt), // null = 상시 모집
+      closesAt: closesIso,
     };
     const url =
       mode === 'create'
@@ -209,6 +218,7 @@ export function JobPostingForm({ mode, categories, initial }: Props): React.JSX.
           value={contentHtml}
           onChange={(e) => setContentHtml(e.target.value)}
           rows={10}
+          maxLength={CONTENT_MAX}
           required
           disabled={isPending}
         />

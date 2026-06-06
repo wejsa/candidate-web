@@ -74,6 +74,51 @@ describe('JobPostingForm — create', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('마감일시 입력 시 closesAt도 UTC ISO로 전송(상시 아님)', async () => {
+    const fetchMock = mockFetch(201, { id: 10 });
+    const user = userEvent.setup();
+    render(<JobPostingForm mode="create" categories={CATEGORIES} />);
+    await user.type(screen.getByLabelText('제목'), 'T');
+    await user.type(screen.getByLabelText('본문(HTML)'), '<p>x</p>');
+    await user.type(screen.getByLabelText(/시작일시/), '2026-07-01T05:00');
+    await user.type(screen.getByLabelText(/마감일시/), '2026-07-31T14:30');
+    await user.click(screen.getByRole('button', { name: /공고 생성/ }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(JSON.parse(fetchMock.mock.calls[0]![1].body).closesAt).toBe('2026-07-31T14:30:00.000Z');
+  });
+
+  it('마감 ≤ 시작 → 클라 선검증 차단(서버 refine과 동일), fetch 미호출', async () => {
+    const fetchMock = mockFetch(201);
+    const user = userEvent.setup();
+    render(<JobPostingForm mode="create" categories={CATEGORIES} />);
+    await user.type(screen.getByLabelText('제목'), 'T');
+    await user.type(screen.getByLabelText('본문(HTML)'), '<p>x</p>');
+    await user.type(screen.getByLabelText(/시작일시/), '2026-07-31T14:30');
+    await user.type(screen.getByLabelText(/마감일시/), '2026-07-01T05:00'); // 시작보다 앞
+    await user.click(screen.getByRole('button', { name: /공고 생성/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('마감일시는 시작일시보다 이후');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('select 변경(직군/고용형태/경력)이 제출 body에 반영', async () => {
+    const fetchMock = mockFetch(201, { id: 10 });
+    const user = userEvent.setup();
+    render(<JobPostingForm mode="create" categories={CATEGORIES} />);
+    await user.type(screen.getByLabelText('제목'), 'T');
+    await user.type(screen.getByLabelText('본문(HTML)'), '<p>x</p>');
+    await user.type(screen.getByLabelText(/시작일시/), '2026-07-01T05:00');
+    await user.selectOptions(screen.getByLabelText('직군'), '2');
+    await user.selectOptions(screen.getByLabelText('고용형태'), 'CONTRACT');
+    await user.selectOptions(screen.getByLabelText('경력'), 'NEW');
+    await user.click(screen.getByRole('button', { name: /공고 생성/ }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(JSON.parse(fetchMock.mock.calls[0]![1].body)).toMatchObject({
+      jobCategoryId: 2,
+      employmentType: 'CONTRACT',
+      careerLevel: 'NEW',
+    });
+  });
+
   it('403 AUTH_FORBIDDEN → 권한 없음 메시지, push 미호출', async () => {
     mockFetch(403, { code: 'AUTH_FORBIDDEN' });
     const user = userEvent.setup();
@@ -83,6 +128,37 @@ describe('JobPostingForm — create', () => {
     await user.type(screen.getByLabelText(/시작일시/), '2026-07-01T05:00');
     await user.click(screen.getByRole('button', { name: /공고 생성/ }));
     expect(await screen.findByRole('alert')).toHaveTextContent('권한이 없습니다');
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [400, { code: 'SYS_VALIDATION_FAILED' }, '입력값을 다시 확인'],
+    [500, {}, '잠시 후 다시 시도'],
+  ])('에러 매핑 status=%s → 메시지', async (status, respBody, expected) => {
+    mockFetch(status as number, respBody);
+    const user = userEvent.setup();
+    render(<JobPostingForm mode="create" categories={CATEGORIES} />);
+    await user.type(screen.getByLabelText('제목'), 'T');
+    await user.type(screen.getByLabelText('본문(HTML)'), '<p>x</p>');
+    await user.type(screen.getByLabelText(/시작일시/), '2026-07-01T05:00');
+    await user.click(screen.getByRole('button', { name: /공고 생성/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(expected as string);
+  });
+
+  it('네트워크 오류(fetch reject) → 네트워크 오류 메시지, push 미호출', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('network');
+      }),
+    );
+    const user = userEvent.setup();
+    render(<JobPostingForm mode="create" categories={CATEGORIES} />);
+    await user.type(screen.getByLabelText('제목'), 'T');
+    await user.type(screen.getByLabelText('본문(HTML)'), '<p>x</p>');
+    await user.type(screen.getByLabelText(/시작일시/), '2026-07-01T05:00');
+    await user.click(screen.getByRole('button', { name: /공고 생성/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('네트워크 오류');
     expect(push).not.toHaveBeenCalled();
   });
 });
@@ -99,15 +175,29 @@ describe('JobPostingForm — edit', () => {
     closesAtLocal: '',
   };
 
-  it('프리필 + 제출 → PATCH /job-postings/{id}', async () => {
+  it('모든 필드 프리필 + 제출 → PATCH /{id} body 라운드트립(프리필값 손실 없음)', async () => {
     const fetchMock = mockFetch(200, { id: 42 });
     const user = userEvent.setup();
     render(<JobPostingForm mode="edit" categories={CATEGORIES} initial={initial} />);
+    // 프리필 정확성 — select 3종/본문까지(일부 필드만 검증 시 덮어쓰기 회귀 누락).
     expect((screen.getByLabelText('제목') as HTMLInputElement).value).toBe('기존 공고');
+    expect((screen.getByLabelText('직군') as HTMLSelectElement).value).toBe('2');
+    expect((screen.getByLabelText('고용형태') as HTMLSelectElement).value).toBe('CONTRACT');
+    expect((screen.getByLabelText('경력') as HTMLSelectElement).value).toBe('NEW');
+    expect((screen.getByLabelText('본문(HTML)') as HTMLTextAreaElement).value).toBe('<p>old</p>');
     await user.click(screen.getByRole('button', { name: /변경 저장/ }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     const [url, opts] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/admin/v1/job-postings/42');
     expect(opts.method).toBe('PATCH');
+    expect(JSON.parse(opts.body)).toMatchObject({
+      title: '기존 공고',
+      jobCategoryId: 2,
+      employmentType: 'CONTRACT',
+      careerLevel: 'NEW',
+      contentHtml: '<p>old</p>',
+      opensAt: '2026-07-01T05:00:00.000Z',
+      closesAt: null,
+    });
   });
 });

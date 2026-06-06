@@ -9,7 +9,7 @@ import {
 import { JobPostingForm } from '../../_components/JobPostingForm';
 import styles from '../../job-postings.module.css';
 
-// CANDID-053 Step 9 — 공고 수정. 내용 편집(상태 전이는 목록 StatusControl).
+// CANDID-053 Step 10 — 공고 수정. 내용 편집(상태 전이는 목록 StatusControl).
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 

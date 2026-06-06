@@ -4,7 +4,7 @@ import { listJobCategoryOptions } from '@/lib/admin/job-postings-list';
 import { JobPostingForm } from '../_components/JobPostingForm';
 import styles from '../job-postings.module.css';
 
-// CANDID-053 Step 9 — 새 공고 작성. 생성은 항상 DRAFT(노출은 목록의 상태 전환).
+// CANDID-053 Step 10 — 새 공고 작성. 생성은 항상 DRAFT(노출은 목록의 상태 전환).
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
