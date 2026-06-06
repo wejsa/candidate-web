@@ -6,38 +6,67 @@
  * + 반응형 컨테이너(1.4.10) + 터치 타깃(2.5.5/2.5.8) + reduced-motion + a11y 유틸을 정의한다.
  *
  * 대비비(흰 배경 #ffffff 기준, AA 텍스트 ≥4.5:1 / 비텍스트·UI ≥3:1):
- *   --color-text #1a1a1a ≈ 16:1 · --color-text-muted #595959 ≈ 7:1 · --color-link #0066cc ≈ 5.6:1
- *   --color-error #b3261e ≈ 5.9:1 · --color-focus #0b57d0 ≈ 5.3:1
- *   --color-border #767676 ≈ 4.5:1 — **비텍스트 UI(폼 경계) 전용**, WCAG 1.4.11 3:1 기준 적용.
- *     경계값(4.54)이라 본문/보조 텍스트 색으로 전용 금지(텍스트는 4.5:1 임계에 붙음).
- *   버튼: 흰 글자 on #0066cc ≈ 5.6:1.
+ *   --color-text #0f172a ≈ 17:1 · --color-text-muted #475569 ≈ 7.5:1 · --color-link #4f46e5 ≈ 6.3:1
+ *   --color-error #b3261e ≈ 5.9:1 · --color-focus #4f46e5 ≈ 6.3:1
+ *   --color-border #64748b ≈ 4.7:1 — **비텍스트 UI(폼 경계) 전용**, WCAG 1.4.11 3:1 기준 적용.
+ *   버튼: 흰 글자 on #4f46e5(--brand) ≈ 6.3:1.
+ *   브랜드 컬러 SSOT: --brand(indigo-600). public/brand 로고와 동일. 값 변경 시 본 대비비 재검증 필수.
  */
 
 :root {
+  /* ── 브랜드 (Hoji) — indigo. public/brand 로고 컬러와 동일 SSOT. ── */
+  --brand: #4f46e5; /* indigo-600 — 흰 배경 흰글씨 대비 ≈ 6.3:1 (AA 통과) */
+  --brand-hover: #4338ca; /* indigo-700 */
+  --brand-weak: #eef2ff; /* indigo-50 — 약강조 배경 */
+  --brand-on-dark: #a5b4fc; /* indigo-300 — 다크 배경 액센트 */
+
+  /* ── 뉴트럴 스케일 (slate) — 기존 2단계 → 9단계 확장 ── */
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+
+  /* ── 시맨틱 토큰 (이름 유지, 값만 브랜드화 — 컴포넌트 비파괴) ── */
   --color-bg: #ffffff;
-  --color-surface: #f5f5f5;
-  --color-text: #1a1a1a;
-  --color-text-muted: #595959;
-  --color-link: #0066cc;
-  --color-link-hover: #004a99;
-  --color-border: #767676;
+  --color-surface: var(--gray-50);
+  --color-text: var(--gray-900); /* #0f172a, 흰 배경 ≈ 17:1 */
+  --color-text-muted: var(--gray-600); /* #475569, 흰 배경 ≈ 7.5:1 */
+  --color-link: var(--brand); /* ≈ 6.3:1 */
+  --color-link-hover: var(--brand-hover);
+  --color-border: var(--gray-500); /* #64748b, 비텍스트 UI 경계 ≈ 4.7:1 (≥3:1) */
   --color-error: #b3261e;
-  --color-focus: #0b57d0;
+  --color-focus: var(--brand);
 
-  --radius: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
   --touch-min: 44px; /* WCAG 2.5.5/2.5.8 최소 터치 타깃 */
-  --content-max: 720px;
+  --content-max: 760px; /* 본문 가독 measure */
+  --container: 1200px; /* 넓은 페이지(목록/대시보드) 통일 폭 */
 
-  /* CANDID-050 Step 3 — 카드/칩/그리드 재구성용 토큰 확장(기존 토큰 비파괴 additive). */
-  --color-surface-2: #eef1f5; /* 칩 배경 (surface보다 약간 진함, 흰 배경 대비 유지) */
-  --color-accent-weak: #e7f0fb; /* 강조 약배경 (D-Day 뱃지 등) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --color-surface-2: var(--gray-100); /* 칩 배경 */
+  --color-accent-weak: var(--brand-weak); /* 강조 약배경 (D-Day 뱃지 등) */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.1);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.1);
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
   --space-6: 1.5rem;
+
+  /* ── 타입 스케일 ── */
+  --fs-display: clamp(2.25rem, 5vw, 3.25rem);
+  --fs-h1: clamp(1.75rem, 3.5vw, 2.25rem);
+  --fs-h2: clamp(1.35rem, 2.5vw, 1.6rem);
+  --fs-h3: 1.2rem;
+  --fs-body: 1rem;
+  --fs-sm: 0.9rem;
+  --fs-xs: 0.8125rem;
 }
 
 @media (min-width: 1280px) {
@@ -57,18 +86,23 @@ body {
   padding: 0;
   margin: 0;
   font-family:
+    'Pretendard',
+    'Pretendard Variable',
+    Inter,
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
     Roboto,
-    'Helvetica Neue',
-    Arial,
     'Apple SD Gothic Neo',
     'Malgun Gothic',
     sans-serif;
+  font-size: var(--fs-body);
   color: var(--color-text);
   background: var(--color-bg);
-  line-height: 1.5;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* 반응형 컨테이너: 320px에서도 가로 오버플로 없이 fluid. 고정 폭 제거. */
@@ -86,14 +120,24 @@ main {
 }
 
 h1 {
-  font-size: clamp(1.5rem, 4vw, 1.75rem);
-  line-height: 1.25;
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   margin: 0 0 1rem;
 }
 
 h2 {
-  font-size: clamp(1.25rem, 3vw, 1.4rem);
+  font-size: var(--fs-h2);
+  font-weight: 700;
   line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 a {
@@ -172,14 +216,18 @@ textarea:disabled {
 
 button {
   font: inherit;
+  font-weight: 600;
   min-height: var(--touch-min);
   min-width: var(--touch-min);
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.1rem;
   color: #ffffff;
   background: var(--color-link);
   border: 1px solid var(--color-link);
   border-radius: var(--radius);
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 button:hover:not(:disabled) {
@@ -222,71 +270,4 @@ button[aria-disabled='true'] {
 }
 
 /*
- * 모달 (CANDID-028 Step 2). useFocusTrap(Tab 격리·ESC·포커스 복원·body 스크롤락)과 함께 도입.
- * 백드롭은 ::before로 그려 별도 DOM 없이 배경을 시각적으로 가린다(z-index:-1 → 다이얼로그
- * 스택 컨텍스트 내부에서 본문 뒤, 페이지 위). 완전한 background inert는 portal 도입 시 후속.
- */
-[role='dialog'][aria-modal='true'] {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  width: calc(100% - 2rem);
-  max-width: 480px;
-  max-height: 90vh;
-  margin: auto;
-  overflow: auto;
-  padding: 1.5rem;
-  background: var(--color-bg);
-  border-radius: var(--radius);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-}
-
-[role='dialog'][aria-modal='true']::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-/* 모션 민감 사용자 배려 (WCAG 2.3.3) */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* a11y 유틸 (Step 2~4에서 사용). 스크린리더 전용 텍스트 + skip-link. */
-.visually-hidden {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-
-.skip-link {
-  position: absolute;
-  left: 0;
-  top: -100%;
-  z-index: 1000;
-  padding: 0.75rem 1rem;
-  color: var(--color-link);
-  background: var(--color-bg);
-  border: 2px solid var(--color-focus);
-  border-radius: 0 0 var(--radius) 0;
-}
-
-.skip-link:focus {
-  top: 0;
-}
+ * 모달 (CANDID-028 Step 2). useFocusTrap(Tab 격리·ESC·포커스 복원·body

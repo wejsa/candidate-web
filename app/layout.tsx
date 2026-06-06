@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+// P0-1 — Pretendard 자체 호스팅(오프라인/내부망 안전). globals.css의 font-family 1순위와 매칭.
+import 'pretendard/dist/web/static/pretendard.css';
 import './globals.css';
 import { SiteHeader } from '@/app/_components/SiteHeader';
 
@@ -37,10 +39,4 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main-content" className="skip-link">
           본문 바로가기
         </a>
-        {/* CANDID-050 — 전역 헤더(인증 상태별 네비). skip-link 다음, 페이지 <main> 앞. */}
-        <SiteHeader />
-        {children}
-      </body>
-    </html>
-  );
-}
+        {/* CANDID-05
