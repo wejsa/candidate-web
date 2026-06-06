@@ -5,7 +5,8 @@ import { StageType } from '@prisma/client';
 // page는 1-base, stage는 선택 필터(StageType). 그 외 파라미터는 무시.
 
 export const ApplicantListQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
+  // 상한 10000 — deep-offset 비효율 스캔 방지(운영자 전용이라 악용 표면은 좁지만 방어).
+  page: z.coerce.number().int().positive().max(10_000).default(1),
   stage: z.nativeEnum(StageType).optional(),
 });
 

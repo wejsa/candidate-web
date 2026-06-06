@@ -4,7 +4,13 @@ import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { recordAuditEvent } from '@/lib/audit/record';
 import { maskName, maskEmail } from '@/lib/pii/mask';
-import { decryptUserPiiField } from '@/lib/prisma/extends';
+import {
+  computeDecryptedApplicantName,
+  computeDecryptedApplicantEmail,
+  computeDecryptedPhoneSnapshot,
+  computeDecryptedBirthDateSnapshot,
+  computeDecryptedAddressSnapshot,
+} from '@/lib/prisma/extends';
 
 // CANDID-053 Step 5 — 운영자 지원자 목록/상세 (RBAC, A안. FR-006).
 //
@@ -148,11 +154,17 @@ export async function getApplicantDetailForOperator(
       submittedAt: true,
       withdrawnAt: true,
       jobPosting: { select: { id: true, title: true } },
+      // snapshot + keyVersion 쌍 — 키 회전(v2) 대비 keyVersion-aware compute 함수에 그대로 전달.
       applicantNameSnapshot: true,
+      applicantNameSnapshotKeyVersion: true,
       applicantEmailSnapshot: true,
+      applicantEmailSnapshotKeyVersion: true,
       phoneSnapshot: true,
+      phoneSnapshotKeyVersion: true,
       birthDateSnapshot: true,
+      birthDateSnapshotKeyVersion: true,
       addressSnapshot: true,
+      addressSnapshotKeyVersion: true,
       statusHistories: {
         orderBy: { changedAt: 'desc' },
         select: { fromStage: true, toStage: true, changedAt: true, changedByUserId: true },
@@ -182,12 +194,13 @@ export async function getApplicantDetailForOperator(
     result: app.result,
     submittedAt: app.submittedAt,
     withdrawnAt: app.withdrawnAt,
+    // 동결 snapshot 복호화 — keyVersion-aware compute 함수(SSOT) 재사용으로 키 회전 시 회귀 방지.
     applicant: {
-      name: decryptUserPiiField(app.applicantNameSnapshot),
-      email: decryptUserPiiField(app.applicantEmailSnapshot),
-      phone: decryptUserPiiField(app.phoneSnapshot),
-      birthDate: decryptUserPiiField(app.birthDateSnapshot),
-      address: decryptUserPiiField(app.addressSnapshot),
+      name: computeDecryptedApplicantName(app),
+      email: computeDecryptedApplicantEmail(app),
+      phone: computeDecryptedPhoneSnapshot(app),
+      birthDate: computeDecryptedBirthDateSnapshot(app),
+      address: computeDecryptedAddressSnapshot(app),
     },
     statusHistory: app.statusHistories.map((h) => ({
       fromStage: h.fromStage,

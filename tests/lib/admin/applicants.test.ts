@@ -12,12 +12,21 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn() }));
-// 복호화는 결정적 스텁 — Bytes 입력을 `dec:<n>`로 환원해 평문 매핑을 검증.
-vi.mock('@/lib/prisma/extends', () => ({
-  decryptUserPiiField: vi.fn((v: Uint8Array | null) =>
-    v === null ? null : `dec:${(v as Uint8Array)[0]}`,
-  ),
-}));
+// keyVersion-aware compute 함수 결정적 스텁 — 각 snapshot 첫 바이트를 `dec:<n>`로 환원.
+// (factory 내부에서 헬퍼 정의 — vi.mock 호이스팅으로 외부 변수 참조 불가)
+vi.mock('@/lib/prisma/extends', () => {
+  const decSnap = (field: string) =>
+    vi.fn((a: Record<string, Uint8Array | null>) =>
+      a[field] == null ? null : `dec:${(a[field] as Uint8Array)[0]}`,
+    );
+  return {
+    computeDecryptedApplicantName: decSnap('applicantNameSnapshot'),
+    computeDecryptedApplicantEmail: decSnap('applicantEmailSnapshot'),
+    computeDecryptedPhoneSnapshot: decSnap('phoneSnapshot'),
+    computeDecryptedBirthDateSnapshot: decSnap('birthDateSnapshot'),
+    computeDecryptedAddressSnapshot: decSnap('addressSnapshot'),
+  };
+});
 
 const { basePrisma } = (await import('@/lib/prisma')) as unknown as {
   basePrisma: {
@@ -97,6 +106,15 @@ describe('listApplicantsByPosting', () => {
     expect(callArg.select.phoneSnapshot).toBeUndefined();
     expect(callArg.select.applicantNameSnapshot).toBeUndefined();
   });
+
+  it('빈 목록(total=0) → totalPages=1, hasMore=false', async () => {
+    basePrisma.jobPosting.findUnique.mockResolvedValue({ id: 1 });
+    basePrisma.application.count.mockResolvedValue(0);
+    basePrisma.application.findMany.mockResolvedValue([]);
+    const res = await listApplicantsByPosting({ jobPostingId: 1, page: 1 });
+    expect(res.items).toEqual([]);
+    expect(res.pagination).toMatchObject({ total: 0, totalPages: 1, hasMore: false });
+  });
 });
 
 describe('getApplicantDetailForOperator', () => {
@@ -111,10 +129,15 @@ describe('getApplicantDetailForOperator', () => {
       withdrawnAt: null,
       jobPosting: { id: 7, title: '백엔드 엔지니어' },
       applicantNameSnapshot: Uint8Array.of(11),
+      applicantNameSnapshotKeyVersion: 1,
       applicantEmailSnapshot: Uint8Array.of(22),
+      applicantEmailSnapshotKeyVersion: 1,
       phoneSnapshot: Uint8Array.of(33),
+      phoneSnapshotKeyVersion: 1,
       birthDateSnapshot: Uint8Array.of(44),
+      birthDateSnapshotKeyVersion: 1,
       addressSnapshot: null,
+      addressSnapshotKeyVersion: 1,
       statusHistories: [
         {
           fromStage: 'SUBMITTED',
@@ -159,5 +182,22 @@ describe('getApplicantDetailForOperator', () => {
     // metadata에 평문 PII가 새지 않음 — 식별은 jobPostingId만.
     expect(audited.metadata).toEqual({ jobPostingId: 7 });
     expect(JSON.stringify(audited.metadata)).not.toMatch(/dec:|@example|홍길동/);
+  });
+
+  it('철회(WITHDRAWN) 지원서도 동결 snapshot 복호화 + PII_VIEW 감사', async () => {
+    // BR-PII-03 정합 — 철회 건도 운영 추적 목적상 노출(동결 snapshot 복호화), 열람은 감사됨.
+    basePrisma.application.findUnique.mockResolvedValue({
+      ...appRow(),
+      result: 'WITHDRAWN',
+      withdrawnAt: new Date('2026-06-02T00:00:00Z'),
+    });
+    const detail = await getApplicantDetailForOperator({ actorUserId: 1, applicationId: 10 });
+    expect(detail.result).toBe('WITHDRAWN');
+    expect(detail.withdrawnAt).toEqual(new Date('2026-06-02T00:00:00Z'));
+    expect(detail.applicant.name).toBe('dec:11');
+    expect(recordAuditEvent).toHaveBeenCalledTimes(1);
+    // ip/ua 미전달 → null 정규화.
+    expect(recordAuditEvent.mock.calls[0]![0].ipAddress).toBeNull();
+    expect(recordAuditEvent.mock.calls[0]![0].userAgent).toBeNull();
   });
 });
