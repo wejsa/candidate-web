@@ -10,8 +10,8 @@ vi.mock('@/lib/admin/applicants', () => ({
   listApplicantsByPosting: vi.fn(),
   getApplicantDetailForOperator: vi.fn(),
 }));
-// 실제 headers().get()은 미존재 시 null 반환(Map은 undefined) — null 반환 mock으로 정합.
-vi.mock('next/headers', () => ({ headers: vi.fn(async () => ({ get: () => null })) }));
+// 실제 headers().get()은 미존재 시 null 반환(Map은 undefined) — 제어 가능한 mock(테스트별 헤더 주입).
+vi.mock('next/headers', () => ({ headers: vi.fn() }));
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND');
@@ -25,12 +25,14 @@ const applicants = (await import('@/lib/admin/applicants')) as unknown as {
   listApplicantsByPosting: Mock;
   getApplicantDetailForOperator: Mock;
 };
+const { headers } = (await import('next/headers')) as unknown as { headers: Mock };
 const { AppError } = await import('@/lib/errors');
 const ApplicantsPage = (await import('@/app/admin/job-postings/[id]/applicants/page')).default;
 const DetailPage = (await import('@/app/admin/applications/[id]/page')).default;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  headers.mockResolvedValue({ get: () => null }); // 기본: 헤더 없음(ip/ua null)
   requireOperatorPage.mockResolvedValue({ userId: 42, role: 'RECRUITER' });
   applicants.listApplicantsByPosting.mockResolvedValue({
     items: [],
@@ -74,6 +76,39 @@ describe('지원자 목록 페이지', () => {
     expect(applicants.listApplicantsByPosting.mock.calls[0]![0].stage).toBeUndefined();
   });
 
+  it('행 렌더: 마스킹 값 + 상세 링크 표시(평문 미노출 — 마스킹→평문 회귀 차단)', async () => {
+    applicants.listApplicantsByPosting.mockResolvedValue({
+      items: [
+        {
+          applicationId: 5,
+          applicationNumber: 'A-202607-00001',
+          currentStage: 'DOC_REVIEW',
+          result: 'IN_PROGRESS',
+          submittedAt: new Date('2026-07-01T05:00:00Z'),
+          applicantNameMasked: '홍*동',
+          applicantEmailMasked: 'a***@b.com',
+        },
+      ],
+      pagination: { page: 2, perPage: 20, total: 45, totalPages: 3, hasMore: true },
+    });
+    render(await ApplicantsPage({ params: { id: '9' }, searchParams: { page: '2', stage: 'DOC_REVIEW' } }));
+    expect(screen.getByText('홍*동')).toBeInTheDocument();
+    expect(screen.getByText('a***@b.com')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '상세' })).toHaveAttribute(
+      'href',
+      '/admin/applications/5',
+    );
+    // 페이징 링크가 stage 필터를 보존하는지(필터+페이징 동시 적용 회귀 차단).
+    expect(screen.getByRole('link', { name: /이전/ })).toHaveAttribute(
+      'href',
+      '/admin/job-postings/9/applicants?page=1&stage=DOC_REVIEW',
+    );
+    expect(screen.getByRole('link', { name: /다음/ })).toHaveAttribute(
+      'href',
+      '/admin/job-postings/9/applicants?page=3&stage=DOC_REVIEW',
+    );
+  });
+
   it('잘못된 id → notFound(조회 안 함)', async () => {
     await expect(ApplicantsPage({ params: { id: 'x' }, searchParams: {} })).rejects.toThrow(
       'NEXT_NOT_FOUND',
@@ -98,6 +133,45 @@ describe('지원서 상세 페이지', () => {
     );
     expect(screen.getByText('홍길동')).toBeInTheDocument();
     expect(screen.getByText(/감사 로그\(PII_VIEW\)/)).toBeInTheDocument();
+  });
+
+  it('x-forwarded-for/user-agent를 감사 컨텍스트로 전달(첫 IP)', async () => {
+    headers.mockResolvedValue({
+      get: (n: string) =>
+        n === 'x-forwarded-for' ? '1.2.3.4, 5.6.7.8' : n === 'user-agent' ? 'TestUA/1' : null,
+    });
+    render(await DetailPage({ params: { id: '5' } }));
+    expect(applicants.getApplicantDetailForOperator).toHaveBeenCalledWith(
+      expect.objectContaining({ ipAddress: '1.2.3.4', userAgent: 'TestUA/1' }),
+    );
+  });
+
+  it('헤더 없음 → ipAddress/userAgent null로 전달', async () => {
+    render(await DetailPage({ params: { id: '5' } }));
+    expect(applicants.getApplicantDetailForOperator).toHaveBeenCalledWith(
+      expect.objectContaining({ ipAddress: null, userAgent: null }),
+    );
+  });
+
+  it('전형 이력(채워진) + 철회 분기 렌더', async () => {
+    applicants.getApplicantDetailForOperator.mockResolvedValue({
+      applicationId: 5,
+      applicationNumber: 'A-202607-00001',
+      jobPosting: { id: 9, title: '백엔드' },
+      currentStage: 'REJECTED',
+      result: 'WITHDRAWN',
+      submittedAt: new Date('2026-07-01T05:00:00Z'),
+      withdrawnAt: new Date('2026-07-10T00:00:00Z'),
+      applicant: { name: '홍길동', email: 'a@b.com', phone: '010', birthDate: '1990-01-01', address: '서울' },
+      statusHistory: [
+        { fromStage: null, toStage: 'DOC_REVIEW', changedAt: new Date('2026-07-01T05:00:00Z'), changedByUserId: 1 },
+        { fromStage: 'DOC_REVIEW', toStage: 'INTERVIEW_1', changedAt: new Date('2026-07-05T05:00:00Z'), changedByUserId: 1 },
+      ],
+    });
+    render(await DetailPage({ params: { id: '5' } }));
+    expect(screen.getByText(/철회:/)).toBeInTheDocument();
+    expect(screen.getByText(/제출 →/)).toBeInTheDocument(); // fromStage === null 분기("제출 → …")
+    expect(screen.getByText(/1차 면접/)).toBeInTheDocument();
   });
 
   it('잘못된 id → notFound(PII 열람 안 함 — 불필요 감사 방지)', async () => {

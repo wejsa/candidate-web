@@ -12,7 +12,9 @@ import styles from '../applications.module.css';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/** 감사용 IP/UA — RSC에는 NextRequest가 없어 next/headers로 best-effort 추출(없으면 null). */
+/** 감사용 IP/UA — RSC에는 NextRequest가 없어 next/headers로 best-effort 추출(없으면 null).
+ *  ⚠️ x-forwarded-for 첫 값은 클라이언트가 주입 가능(스푸핑) — 감사 IP는 참고용. 신뢰 IP가 필요하면
+ *  인프라(LB/프록시)가 세팅하는 신뢰 헤더를 별도 도입한다(향후 강화). */
 async function auditContextFromHeaders(): Promise<{ ipAddress: string | null; userAgent: string | null }> {
   const h = await headers();
   const fwd = h.get('x-forwarded-for');

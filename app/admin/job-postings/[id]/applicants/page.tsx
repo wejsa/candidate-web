@@ -53,11 +53,16 @@ export default async function PostingApplicantsPage({ params, searchParams }: Pa
       </header>
 
       <nav className={styles.pager} aria-label="전형 단계 필터">
-        <Link href={base} className={styles.link}>
+        <Link href={base} className={styles.link} aria-current={stage === undefined ? 'page' : undefined}>
           전체
         </Link>
         {STAGE_FILTERS.map((s) => (
-          <Link key={s} href={`${base}?stage=${s}`} className={styles.link}>
+          <Link
+            key={s}
+            href={`${base}?stage=${s}`}
+            className={styles.link}
+            aria-current={stage === s ? 'page' : undefined}
+          >
             {stageLabel(s)}
           </Link>
         ))}
@@ -74,7 +79,7 @@ export default async function PostingApplicantsPage({ params, searchParams }: Pa
               <th>이메일</th>
               <th>전형 단계</th>
               <th>결과</th>
-              <th></th>
+              <th>상세</th>
             </tr>
           </thead>
           <tbody>
