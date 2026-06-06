@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 234 56" role="img" aria-label="Hoji Careers">
+  <title>Hoji Careers</title>
+  <text x="2" y="40" font-family="Pretendard, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="38" font-weight="700" letter-spacing="-1" fill="#0f172a">hoj<tspan fill="#4f46e5">i</tspan></text>
+  <line x1="92" y1="14" x2="92" y2="42" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="104" y="37" font-family="Pretendard, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="500" letter-spacing="0.5" fill="#64748b">Careers</text>
+</svg>
