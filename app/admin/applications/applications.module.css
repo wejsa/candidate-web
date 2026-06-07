@@ -197,3 +197,87 @@
   opacity: 0.6;
   cursor: default;
 }
+
+/* CANDID-066 — 첨부 이력서 / 포트폴리오 섹션 */
+.fileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.fileMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fileName {
+  font-weight: 600;
+}
+
+.fileSub {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.scanWarn {
+  font-size: 0.8125rem;
+  color: var(--color-error);
+}
+
+.scanInfected {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-error);
+}
+
+.downloadWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.downloadBtn {
+  padding: var(--space-2) var(--space-4);
+  background: var(--brand);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.downloadBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.portfolioList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.portfolioItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.linkType {
+  display: inline-block;
+  min-width: 4rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.linkMemo {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}

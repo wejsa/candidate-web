@@ -36,6 +36,8 @@ function detail(over: Record<string, unknown> = {}) {
     withdrawnAt: null,
     applicant: { name: '홍', email: 'a@b.com', phone: '010', birthDate: '1990', address: '서울' },
     statusHistory: [],
+    resumeFile: null,
+    portfolioLinks: [],
     ...over,
   };
 }
