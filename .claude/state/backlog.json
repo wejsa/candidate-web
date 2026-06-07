@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 569,
+    "version": 570,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:25:10.617+00:00"
+    "updatedAt": "2026-06-07T13:25:46.545+00:00"
   },
   "summary": {
     "total": 64,
@@ -4558,22 +4558,22 @@
         "lastCompletedSkill": "crew-review-pr",
         "prNumber": 163,
         "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "163",
-        "updatedAt": "2026-06-07T13:25:10.617+00:00"
+        "phase": "064b-pending-confirmation",
+        "updatedAt": "2026-06-07T13:25:46.545+00:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "PRISMA_LOG_QUERY env 정합화",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 150,
           "files": [
             "lib/env.ts",
             "lib/prisma.ts",
             ".env.example"
           ],
-          "prNumber": 163
+          "prNumber": 163,
+          "mergedAt": "2026-06-07T13:25:46.545+00:00"
         }
       ],
       "currentStep": 1,
