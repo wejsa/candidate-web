@@ -8,14 +8,20 @@ const root = process.cwd();
 const pageSrc = readFileSync(resolve(root, 'app/page.tsx'), 'utf8');
 const layoutSrc = readFileSync(resolve(root, 'app/layout.tsx'), 'utf8');
 
-describe('홈/메타 카피 포괄화 (CANDID-058)', () => {
+describe('홈/메타 카피 "세상을 움직인다" 테마 (CANDID-058 → CANDID-059)', () => {
   it('"무인 환전" 표현이 홈/루트 레이아웃 카피에 존재하지 않음', () => {
     expect(pageSrc).not.toMatch(/무인\s*환전/);
     expect(layoutSrc).not.toMatch(/무인\s*환전/);
   });
 
-  it('"일상을 잇는 금융 플랫폼" 포괄 문구가 메타·히어로에 반영됨', () => {
-    expect(pageSrc).toContain('일상을 잇는 금융 플랫폼');
-    expect(layoutSrc).toContain('일상을 잇는 금융 플랫폼');
+  it('직전 "일상을 잇는 금융 플랫폼" 표현이 더 이상 남아있지 않음', () => {
+    expect(pageSrc).not.toContain('일상을 잇는 금융 플랫폼');
+    expect(layoutSrc).not.toContain('일상을 잇는 금융 플랫폼');
+  });
+
+  it('"세상을 움직" 테마 문구가 H1·메타·히어로에 반영됨', () => {
+    expect(pageSrc).toContain('함께 세상을 움직일 엔지니어를 찾습니다');
+    expect(pageSrc).toContain('세상을 움직이는 플랫폼');
+    expect(layoutSrc).toContain('세상을 움직이는 플랫폼');
   });
 });
