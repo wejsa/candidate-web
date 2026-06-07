@@ -181,13 +181,17 @@ export async function resendVerificationEmail(
   let newVerificationId: number;
   try {
     newVerificationId = await prisma.$transaction(async (tx) => {
-      // 기존 활성 토큰 invalidate (보안 — 이전 토큰 즉시 무효)
-      if (active !== null) {
-        await tx.emailVerification.update({
-          where: { id: active.id },
-          data: { consumedAt: now },
-        });
-      }
+      // 기존 미소진 토큰 전부 invalidate (보안 — 이전 토큰 즉시 무효).
+      // ⚠️ 만료 토큰까지 포함해 consume해야 한다: 부분 유니크 인덱스
+      //   uk_email_verifications_active_per_user (user_id) WHERE consumed_at IS NULL 는
+      //   만료 여부와 무관하게 미소진 row를 1건으로 제한한다. cooldown 기준 `active`는
+      //   만료 토큰을 제외(expiresAt > now)하므로, 만료된 미소진 토큰이 남아 있으면
+      //   여기서 consume되지 않아 신규 create가 P2002로 실패한다(만료 토큰 영구 차단 버그).
+      //   따라서 active.id 단건이 아니라 userId의 미소진 토큰 전부를 updateMany로 소진한다.
+      await tx.emailVerification.updateMany({
+        where: { userId, consumedAt: null },
+        data: { consumedAt: now },
+      });
       const created = await tx.emailVerification.create({
         data: { userId, tokenHash, expiresAt, lastSentAt: now },
         select: { id: true },
