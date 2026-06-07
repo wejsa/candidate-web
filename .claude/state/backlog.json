@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 59,
     "projectPrefix": "CANDID",
-    "version": 541,
+    "version": 542,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T18:18:00+09:00"
+    "updatedAt": "2026-06-07T18:21:00+09:00"
   },
   "summary": {
     "total": 59,
@@ -4368,7 +4368,7 @@
       "micro": true,
       "specFile": "docs/requirements/CANDID-059-spec.md",
       "assignee": "wejsa-u@hoji-20260607-181800",
-      "assignedAt": "2026-06-07T18:18:00+09:00",
+      "assignedAt": "2026-06-07T18:21:00+09:00",
       "lockedFiles": [
         "app/page.tsx",
         "app/layout.tsx",
@@ -4378,24 +4378,25 @@
       "createdAt": "2026-06-07T18:15:00+09:00",
       "source": "사용자 요청 — \"금융을 움직일\"이 어색, \"세상을 움직일\"로. 전반적으로 세상을 움직인다는 느낌으로 워딩 변경.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-plan",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 158,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-07T18:18:00+09:00"
+        "autoChainArgs": "158 --auto-fix",
+        "updatedAt": "2026-06-07T18:21:00+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "세상을 움직인다 테마 카피 전환 + 회귀 가드 갱신",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 120,
           "files": [
             "app/page.tsx",
             "app/layout.tsx",
             "tests/app/home-copy.test.ts"
-          ]
+          ],
+          "prNumber": 158
         }
       ],
       "currentStep": 1,
