@@ -209,7 +209,8 @@
 
 .consent {
   display: flex;
-  align-items: flex-start;
+  /* CANDID-056 — 단일 라인 동의 라벨에서 체크박스를 텍스트 세로 중앙에 정렬(상단 붙음 해소). */
+  align-items: center;
   gap: var(--space-2);
   font-weight: 400;
   margin: 0;
