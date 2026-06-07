@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
-  description: 'Hoji 채용 — 일상을 잇는 금융 플랫폼을 함께 만들 동료를 찾습니다.',
+  description: 'Hoji 채용 — 세상을 움직이는 플랫폼을 함께 만들 동료를 찾습니다.',
   robots: { index: true, follow: true },
   openGraph: { siteName: SITE_NAME, locale: 'ko_KR', type: 'website' },
   twitter: { card: 'summary' },
