@@ -3699,5 +3699,26 @@
       "decision": "COMMENT",
       "note": "1M-subagent-fallback T3, 0 critical, suite 2276/2276"
     }
+  },
+  {
+    "timestamp": "2026-06-07T12:35:10.325+00:00",
+    "action": "merged",
+    "details": {
+      "taskId": "CANDID-061",
+      "stepNumber": 2,
+      "prNumber": 161
+    }
+  },
+  {
+    "timestamp": "2026-06-07T12:35:10.325+00:00",
+    "action": "task_completed",
+    "details": {
+      "taskId": "CANDID-061",
+      "prs": [
+        160,
+        161
+      ],
+      "stepCount": 2
+    }
   }
 ]

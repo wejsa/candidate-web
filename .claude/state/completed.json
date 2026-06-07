@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 61,
+    "version": 62,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T18:35:00+09:00"
+    "updatedAt": "2026-06-07T12:35:10.325+00:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1732,6 +1732,25 @@
       "stepCount": 1,
       "reviewSummary": "T0 직접 리뷰(순수 카피). 차단 이슈 0건. 회귀 가드 갱신.",
       "carry": []
+    },
+    "CANDID-061": {
+      "id": "CANDID-061",
+      "title": "테스트 스위트 회귀 복구 — 21건 실패(7파일)",
+      "phase": 4,
+      "priority": "critical",
+      "type": "bug",
+      "completedAt": "2026-06-07T12:35:10.325+00:00",
+      "assignee": "jaese@hoji-20260607120020.",
+      "prs": [
+        160,
+        161
+      ],
+      "totalMergedLines": 129,
+      "stepCount": 2,
+      "reviewSummary": "메인 직접 리뷰 폴백(1M-subagent-fallback). PR#160(소스 회귀: globals.css a11y 규칙 복원 + careerLevel SSOT 검증) + PR#161(stale 회귀가드 18건 정합화). 양 PR 0 CRITICAL. 전체 스위트 2276/2276 green — DS-02 CRITICAL 완전 해소.",
+      "carry": [
+        "phase4가 done이었으나 헬스체크가 추가한 CANDID-062/063/064(todo)로 재오픈 상태 — 후속 정리 필요"
+      ]
     }
   }
 }
