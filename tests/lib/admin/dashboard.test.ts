@@ -79,8 +79,62 @@ describe('getAdminDashboardSummary', () => {
     const recentCall = basePrisma.application.findMany.mock.calls[0]![0];
     expect(recentCall.orderBy).toEqual({ submittedAt: 'desc' });
     expect(recentCall.take).toBe(8);
-    // 이메일 등 추가 PII 미선택(이름만).
+    // 이메일 등 추가 PII 미선택(이름만). PII snapshot Bytes 컬럼도 최상위 select에서 제외.
     expect(recentCall.select.user.select).toEqual({ name: true });
+    expect(recentCall.select.applicantNameSnapshot).toBeUndefined();
+    expect(recentCall.select.applicantEmailSnapshot).toBeUndefined();
+  });
+
+  it('최근 지원은 RECENT_LIMIT(8)건까지 매핑 + take 8', async () => {
+    basePrisma.jobPosting.groupBy.mockResolvedValue([]);
+    basePrisma.application.groupBy.mockResolvedValue([]);
+    // DB가 take를 적용해 8건 반환했다고 가정.
+    basePrisma.application.findMany.mockResolvedValue(
+      Array.from({ length: 8 }, (_, i) => ({
+        id: i + 1,
+        applicationNumber: `A-202606-0000${i}`,
+        jobPostingId: 1,
+        currentStage: 'SUBMITTED',
+        submittedAt: new Date('2026-06-05T00:00:00Z'),
+        user: { name: '지원자' },
+        jobPosting: { title: '백엔드' },
+      })),
+    );
+    const s = await getAdminDashboardSummary();
+    expect(s.recent).toHaveLength(8);
+    expect(basePrisma.application.findMany.mock.calls[0]![0].take).toBe(8);
+  });
+
+  it('이름이 null인 지원자 → applicantNameMasked null (UI 폴백 계약)', async () => {
+    basePrisma.jobPosting.groupBy.mockResolvedValue([]);
+    basePrisma.application.groupBy.mockResolvedValue([]);
+    basePrisma.application.findMany.mockResolvedValue([
+      {
+        id: 1,
+        applicationNumber: 'A-202606-00001',
+        jobPostingId: 1,
+        currentStage: 'SUBMITTED',
+        submittedAt: new Date('2026-06-05T00:00:00Z'),
+        user: { name: null },
+        jobPosting: { title: '백엔드' },
+      },
+    ]);
+    const s = await getAdminDashboardSummary();
+    expect(s.recent[0]!.applicantNameMasked).toBeNull();
+  });
+
+  it('pendingQueue는 SUBMITTED+DOC_REVIEW만 — 비대상 단계(INTERVIEW_1/OFFER) 제외', async () => {
+    basePrisma.jobPosting.groupBy.mockResolvedValue([]);
+    basePrisma.application.groupBy.mockResolvedValue([
+      { currentStage: 'SUBMITTED', _count: { _all: 2 } },
+      { currentStage: 'INTERVIEW_1', _count: { _all: 5 } }, // 제외 대상
+      { currentStage: 'OFFER', _count: { _all: 3 } }, // 제외 대상
+    ]);
+    basePrisma.application.findMany.mockResolvedValue([]);
+    const s = await getAdminDashboardSummary();
+    // SUBMITTED 2 + DOC_REVIEW 0 → 2. INTERVIEW_1/OFFER 미포함.
+    expect(s.pendingQueue).toBe(2);
+    expect(s.applications.total).toBe(10);
   });
 
   it('데이터 0건 → 전 카운트 0, recent 빈 배열', async () => {

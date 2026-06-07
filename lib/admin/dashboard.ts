@@ -65,6 +65,8 @@ export async function getAdminDashboardSummary(): Promise<AdminDashboardSummary>
     byStage[g.currentStage] = g._count._all;
   }
 
+  // 세 쿼리(groupBy×2 + findMany)는 비-트랜잭션 병렬 실행이라 동시 제출/전이 시 total·큐·recent 간
+  // 순간적 불일치가 가능하다(읽기 전용 대시보드 KPI — 허용).
   const postingsTotal = Object.values(byStatus).reduce((sum, n) => sum + n, 0);
   const applicationsTotal = Object.values(byStage).reduce((sum, n) => sum + n, 0);
   const pendingQueue = PENDING_STAGES.reduce((sum, s) => sum + byStage[s], 0);
