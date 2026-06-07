@@ -130,6 +130,47 @@
         "session-start git pull 2회 실패(2026-06-07T08:00Z) — 계속 진행됨",
         "원격 stale 병합 브랜치 61개 미정리(feature/bugfix/CANDID-*)"
       ]
+    },
+    {
+      "timestamp": "2026-06-07T19:20:00+09:00",
+      "mode": "full",
+      "score": 86,
+      "grade": "NEEDS_ATTENTION",
+      "criticalCount": 0,
+      "majorCount": 1,
+      "minorCount": 1,
+      "note": "ai-crew-kit 플러그인 전환 후 첫 검진. 로컬 .claude/{hooks,skills,agents,domains} 삭제 → hook-safety/agent-config 전체 SKIP(가중치 재분배). HI-01 false-positive 캡 해소 → CRITICAL 0.",
+      "categories": {
+        "doc-sync": { "score": 80, "pass": 4, "fail": 1, "skip": 2 },
+        "state-integrity": { "score": 80, "pass": 4, "fail": 1, "skip": 0 },
+        "security": { "score": 100, "pass": 6, "fail": 0, "skip": 0 },
+        "agent-config": { "score": null, "skipped": true, "note": "로컬 .claude/skills 부재 → AC-02 SKIP → 카테고리 전체 SKIP(가중 평균 제외)" },
+        "hook-safety": { "score": null, "skipped": true, "note": "로컬 settings hooks 필드·.claude/hooks 부재 → 카테고리 전체 SKIP. 훅은 플러그인이 plugin.json으로 제공" }
+      },
+      "fails": [
+        {
+          "id": "SI-04",
+          "severity": "MAJOR",
+          "note": "task.type enum 외 값 5건 — CANDID-036/037=enhancement, CANDID-039/048=test, CANDID-040=refactor (스키마 허용: feature|bug|chore|spike). 모두 완료(done) Task로 영향 경미 (직전 검진과 동일)"
+        },
+        {
+          "id": "DS-07",
+          "severity": "MINOR",
+          "note": "docs/requirements/ 스펙 6건(CANDID-050/051/053/054/058/059) — feature Task 35건 대비 대응 문서 부족"
+        }
+      ],
+      "skips": [
+        { "id": "DS-02", "note": "CLAUDE.md에 테스트 명령 코드블록 부재 — 추출 대상 없음 (vitest는 별도 12+ 테스트 통과)" },
+        { "id": "DS-05", "note": "src/ 디렉토리 부재(app/·lib/ 구조) → 패키지 구조 검사 사전조건 미충족" }
+      ],
+      "passNotes": [
+        { "id": "SI-05", "note": "로컬 .claude/agents 삭제됐으나 플러그인이 enabled 8개(pm/backend/frontend/code-reviewer/planner/db-designer/qa/docs) 전부 제공 → 해소 가능, PASS. (검사 정의는 로컬 경로 기준이라 향후 플러그인 인지 보강 여지)" },
+        { "id": "SEC-01", "note": "1건 매칭은 PII-safe 로그(emailDomain+summarizeError, 주석 명시) — false positive, PASS" }
+      ],
+      "advisories": [
+        "hook-disabled.flag 존재 — 다음 crew-impl 재개 전 rm 권장(플러그인 post-tool-use 훅 heartbeat 정상화)",
+        "원격 stale 병합 브랜치 65개 미정리"
+      ]
     }
   ]
 }
