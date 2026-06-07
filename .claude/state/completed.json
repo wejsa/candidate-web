@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 64,
+    "version": 65,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T13:07:54.357+00:00"
+    "updatedAt": "2026-06-07T13:31:23.641+00:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1783,6 +1783,22 @@
       "carry": [
         "DS-07 부분 충족: 핵심 도메인 9건만 per-task spec. 기술/FU Task는 PRD/코드 SSOT 정책(README 명문화)."
       ]
+    },
+    "CANDID-064": {
+      "id": "CANDID-064",
+      "title": "운영 위생 정리 — env 문서화 + stale 브랜치 (DS-04/advisory)",
+      "phase": 4,
+      "priority": "low",
+      "type": "chore",
+      "completedAt": "2026-06-07T13:31:23.641+00:00",
+      "assignee": "jaese@hoji-20260607131238.",
+      "prs": [
+        163
+      ],
+      "totalMergedLines": 14,
+      "stepCount": 1,
+      "reviewSummary": "064a: PRISMA_LOG_QUERY zod env 정합화(DS-04 해소, PR #163, 메인 폴백 0 critical). 064b: 원격 stale 병합 브랜치 59개 삭제(gh MERGED PR 기준 + 사용자 확인, squash 머지라 --merged 무용 회피). 코드 14줄 + git 정리.",
+      "carry": []
     }
   }
 }
