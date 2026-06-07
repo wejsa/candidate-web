@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 60,
     "projectPrefix": "CANDID",
-    "version": 545,
+    "version": 546,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T18:28:00+09:00"
+    "updatedAt": "2026-06-07T18:31:00+09:00"
   },
   "summary": {
     "total": 60,
@@ -4414,24 +4414,25 @@
       "createdAt": "2026-06-07T18:28:00+09:00",
       "source": "사용자 요청 — 금융 아니어도 됨, 살기 편한 세상·삶을 윤택하게 하는 솔루션 느낌. AskUserQuestion에서 '일상을 편리하게' 톤 선택.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-plan",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 159,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-07T18:28:00+09:00"
+        "autoChainArgs": "159 --auto-fix",
+        "updatedAt": "2026-06-07T18:31:00+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "일상을 편리하게 톤 카피 전환 + 회귀 가드 갱신",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 120,
           "files": [
             "app/page.tsx",
             "app/layout.tsx",
             "tests/app/home-copy.test.ts"
-          ]
+          ],
+          "prNumber": 159
         }
       ],
       "currentStep": 1
