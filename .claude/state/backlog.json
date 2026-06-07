@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 66,
     "projectPrefix": "CANDID",
-    "version": 584,
+    "version": 585,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T14:28:43.872+00:00"
+    "updatedAt": "2026-06-07T14:29:52.246+00:00"
   },
   "summary": {
     "total": 66,
@@ -4642,12 +4642,13 @@
       "createdAt": "2026-06-07T14:06:56.377+00:00",
       "source": "사용자 요청 — admin 상세에서 지원자 첨부 파일/포트폴리오 미표시 → 운영자 열람 기능 추가.",
       "workflowState": {
-        "currentSkill": "crew-review-pr",
-        "lastCompletedSkill": "crew-impl",
+        "currentSkill": "crew-merge-pr",
+        "lastCompletedSkill": "crew-review-pr",
         "prNumber": 166,
         "fixLoopCount": 0,
-        "autoChainArgs": "166 --auto-fix",
-        "updatedAt": "2026-06-07T14:28:43.872+00:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "166",
+        "updatedAt": "2026-06-07T14:29:52.246+00:00"
       },
       "steps": [
         {
