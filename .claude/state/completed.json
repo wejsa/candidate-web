@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 56,
+    "version": 57,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T15:55:00+09:00"
+    "updatedAt": "2026-06-07T16:12:00+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1650,6 +1650,24 @@
         "critical": 0
       },
       "note": "백오피스 딥링크 로그인 복귀 경로 보존(middleware x-pathname + layout returnTo). T0 직접 리뷰 CRITICAL 0, 오픈리다이렉트 검토 통과(/admin 접두 제한)."
+    },
+    "CANDID-056": {
+      "id": "CANDID-056",
+      "title": "체크박스+라벨 세로 중앙 정렬",
+      "phase": 4,
+      "priority": "low",
+      "type": "bug",
+      "completedAt": "2026-06-07T16:12:00+09:00",
+      "assignee": null,
+      "prs": [
+        155
+      ],
+      "stepCount": 1,
+      "micro": true,
+      "reviewSummary": {
+        "critical": 0
+      },
+      "note": "약관/동의 체크박스 세로 중앙 정렬(.check/.consent flex-start→center). 프로젝트 전체 체크박스 4개소 점검, 2개소 수정."
     }
   }
 }
