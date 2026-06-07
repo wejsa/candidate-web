@@ -2,6 +2,7 @@ import 'server-only';
 import { randomUUID } from 'node:crypto';
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
   S3ServiceException,
@@ -159,6 +160,49 @@ export async function presignResumeUpload(
     // S-MAJOR-2 fix: cause 정제 후 전달 — SDK 원본 메시지 leak 차단.
     throw new AppError('FILE_UPLOAD_FAILED', {
       message: 'presigned URL 발급에 실패했습니다.',
+      cause: safeS3Cause(cause),
+    });
+  }
+}
+
+// CANDID-066 — 운영자 이력서 다운로드용 짧은 TTL. 1회성 열람 의도(60초).
+const RESUME_DOWNLOAD_TTL_SEC = 60;
+
+export interface PresignedGetResult {
+  url: string;
+  expiresAt: Date;
+}
+
+/** CANDID-066 — 운영자 이력서 다운로드 presigned GET URL.
+ *  - storedPath 형식 가드(외부 키 주입 차단, presignResumeUpload와 동일 정신).
+ *  - ResponseContentDisposition으로 원본 파일명 다운로드 유도(RFC 5987 — 한글 파일명 안전 인코딩).
+ *  - 짧은 TTL(60s). presign 자체는 네트워크 호출 없음(로컬 서명). */
+export async function presignResumeDownload(
+  storedPath: string,
+  originalFilename: string,
+): Promise<PresignedGetResult> {
+  if (!isValidResumeStoredPath(storedPath)) {
+    throw new AppError('SYS_VALIDATION_FAILED', { message: '잘못된 storedPath 형식입니다.' });
+  }
+  const { client, bucket } = getClient();
+  const disposition = `attachment; filename*=UTF-8''${encodeURIComponent(originalFilename)}`;
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: storedPath,
+    ResponseContentDisposition: disposition,
+  });
+  const signedAt = new Date();
+  try {
+    const url = await getSignedUrl(client, command, { expiresIn: RESUME_DOWNLOAD_TTL_SEC });
+    return {
+      url,
+      expiresAt: new Date(
+        signedAt.getTime() + RESUME_DOWNLOAD_TTL_SEC * 1000 - PRESIGN_SAFETY_MARGIN_MS,
+      ),
+    };
+  } catch (cause) {
+    throw new AppError('FILE_UPLOAD_FAILED', {
+      message: 'presigned 다운로드 URL 발급에 실패했습니다.',
       cause: safeS3Cause(cause),
     });
   }

@@ -346,6 +346,8 @@ enum AuditEventType {
   APPLICATION_STAGE_CHANGED
   INTERVIEW_SCHEDULED
   INTERVIEW_UPDATED
+  // CANDID-066 — 운영자 이력서 파일 다운로드(PII 문서 명시 열람) 감사.
+  RESUME_DOWNLOAD
 }
 
 model Application {

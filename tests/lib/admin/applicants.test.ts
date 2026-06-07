@@ -9,9 +9,17 @@ vi.mock('@/lib/prisma', () => ({
   basePrisma: {
     jobPosting: { findUnique: vi.fn() },
     application: { count: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), groupBy: vi.fn() },
+    resumeFile: { findFirst: vi.fn() },
   },
 }));
 vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn() }));
+// CANDID-066 — presign 다운로드는 S3 의존이므로 스텁(결정적 URL 반환).
+vi.mock('@/lib/files/storage', () => ({
+  presignResumeDownload: vi.fn(async () => ({
+    url: 'https://s3.example/presigned-get',
+    expiresAt: new Date('2026-06-07T00:01:00Z'),
+  })),
+}));
 // keyVersion-aware compute 함수 결정적 스텁 — 각 snapshot 첫 바이트를 `dec:<n>`로 환원.
 // (factory 내부에서 헬퍼 정의 — vi.mock 호이스팅으로 외부 변수 참조 불가)
 vi.mock('@/lib/prisma/extends', () => {
@@ -32,13 +40,21 @@ const { basePrisma } = (await import('@/lib/prisma')) as unknown as {
   basePrisma: {
     jobPosting: { findUnique: Mock };
     application: { count: Mock; findMany: Mock; findUnique: Mock; groupBy: Mock };
+    resumeFile: { findFirst: Mock };
   };
 };
 const { recordAuditEvent } = (await import('@/lib/audit/record')) as unknown as {
   recordAuditEvent: Mock;
 };
-const { listApplicantsByPosting, getApplicantDetailForOperator, getApplicantStatsByPosting } =
-  await import('@/lib/admin/applicants');
+const { presignResumeDownload } = (await import('@/lib/files/storage')) as unknown as {
+  presignResumeDownload: Mock;
+};
+const {
+  listApplicantsByPosting,
+  getApplicantDetailForOperator,
+  getApplicantStatsByPosting,
+  getResumeDownloadForOperator,
+} = await import('@/lib/admin/applicants');
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -325,5 +341,70 @@ describe('getApplicantDetailForOperator', () => {
     const sel = basePrisma.application.findUnique.mock.calls.at(-1)![0].select.resumeFiles.select;
     expect(sel.storedPath).toBeUndefined();
     expect(sel.checksumSha256).toBeUndefined();
+  });
+});
+
+describe('getResumeDownloadForOperator (CANDID-066 FR-002)', () => {
+  function fileRow(overrides: Record<string, unknown> = {}) {
+    return {
+      id: 88,
+      originalFilename: '이력서.pdf',
+      storedPath: 'resumes/2026/06/uuid.pdf',
+      virusScanStatus: 'CLEAN',
+      ...overrides,
+    };
+  }
+
+  it('첨부 없음 → FILE_NOT_FOUND (감사·presign 미발생)', async () => {
+    basePrisma.resumeFile.findFirst.mockResolvedValue(null);
+    await expect(
+      getResumeDownloadForOperator({ actorUserId: 1, applicationId: 10 }),
+    ).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+    expect(recordAuditEvent).not.toHaveBeenCalled();
+    expect(presignResumeDownload).not.toHaveBeenCalled();
+  });
+
+  it('INFECTED → FILE_INFECTED 차단 (감사·presign 미발생)', async () => {
+    basePrisma.resumeFile.findFirst.mockResolvedValue(fileRow({ virusScanStatus: 'INFECTED' }));
+    await expect(
+      getResumeDownloadForOperator({ actorUserId: 1, applicationId: 10 }),
+    ).rejects.toMatchObject({ code: 'FILE_INFECTED' });
+    expect(recordAuditEvent).not.toHaveBeenCalled();
+    expect(presignResumeDownload).not.toHaveBeenCalled();
+  });
+
+  it('PENDING(스캔 미완)도 허용 → 감사(RESUME_DOWNLOAD, PII-free) + presigned URL 반환', async () => {
+    basePrisma.resumeFile.findFirst.mockResolvedValue(fileRow({ virusScanStatus: 'PENDING' }));
+    const res = await getResumeDownloadForOperator({
+      actorUserId: 42,
+      applicationId: 10,
+      ipAddress: '10.0.0.9',
+      userAgent: 'op',
+    });
+    expect(res).toEqual({
+      url: 'https://s3.example/presigned-get',
+      filename: '이력서.pdf',
+      expiresAt: new Date('2026-06-07T00:01:00Z'),
+    });
+    // 감사: RESUME_DOWNLOAD, 식별은 applicationId + 스캔상태만(파일명/경로 미기록).
+    expect(recordAuditEvent).toHaveBeenCalledTimes(1);
+    const audited = recordAuditEvent.mock.calls[0]![0];
+    expect(audited.eventType).toBe('RESUME_DOWNLOAD');
+    expect(audited.actorUserId).toBe(42);
+    expect(audited.resourceType).toBe('resume_file');
+    expect(audited.resourceId).toBe('88');
+    expect(audited.metadata).toEqual({ applicationId: 10, virusScanStatus: 'PENDING' });
+    expect(JSON.stringify(audited.metadata)).not.toMatch(/이력서|storedPath|resumes\//);
+    // presign은 storedPath + 원본 파일명으로 호출(URL에 storedPath 직접 노출 안 함).
+    expect(presignResumeDownload).toHaveBeenCalledWith('resumes/2026/06/uuid.pdf', '이력서.pdf');
+  });
+
+  it('감사 실패 → fail-closed: presign 미발급(다운로드 거부)', async () => {
+    basePrisma.resumeFile.findFirst.mockResolvedValue(fileRow());
+    recordAuditEvent.mockRejectedValueOnce(new Error('audit insert failed'));
+    await expect(
+      getResumeDownloadForOperator({ actorUserId: 1, applicationId: 10 }),
+    ).rejects.toThrow('audit insert failed');
+    expect(presignResumeDownload).not.toHaveBeenCalled();
   });
 });
