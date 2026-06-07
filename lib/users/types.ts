@@ -55,6 +55,8 @@ export interface ProfileDto {
   birthDateMasked: string | null;
   /** 비밀번호 설정 여부 — 소셜 전용 계정 식별 + 비번 변경 폼 분기용. 해시는 노출하지 않는다. */
   hasPassword: boolean;
+  /** 이메일 인증 완료 여부 — 미인증 시 프로필에서 인증 메일 재발송 UI 노출용. */
+  emailVerified: boolean;
   /** 연결된 소셜 계정 목록 (연결일 오름차순). */
   providers: ProfileProvider[];
 }

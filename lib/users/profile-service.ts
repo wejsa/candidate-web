@@ -42,6 +42,7 @@ export async function getProfile(userId: number): Promise<ProfileDto> {
     phoneMasked: maskPhone(user.phone),
     birthDateMasked: maskBirthDate(user.birthDate),
     hasPassword: user.passwordHash !== null,
+    emailVerified: user.emailVerifiedAt !== null,
     providers: user.authProviders.map((p) => ({
       provider: toProviderName(p.provider),
       linkedAt: p.linkedAt.toISOString(),

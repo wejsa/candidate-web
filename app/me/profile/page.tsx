@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
 import { getProfile } from '@/lib/users/profile-service';
 import { ProfileView } from '@/app/me/profile/_components/ProfileView';
+import { EmailVerificationSection } from '@/app/me/profile/_components/EmailVerificationSection';
 import { ProfileEditForm } from '@/app/me/profile/_components/ProfileEditForm';
 import { PasswordChangeForm } from '@/app/me/profile/_components/PasswordChangeForm';
 import { SocialAccountsSection } from '@/app/me/profile/_components/SocialAccountsSection';
@@ -49,6 +50,7 @@ export default async function ProfilePage() {
         <p className={styles.heroSubtitle}>계정 정보를 확인하고 수정합니다.</p>
       </header>
       <ProfileView profile={profile} />
+      <EmailVerificationSection emailVerified={profile.emailVerified} email={profile.email} />
       <ProfileEditForm
         initialName={profile.name}
         phoneMasked={profile.phoneMasked}
