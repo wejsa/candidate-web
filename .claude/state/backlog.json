@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 560,
+    "version": 561,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T12:52:10.566+00:00"
+    "updatedAt": "2026-06-07T12:58:16.787+00:00"
   },
   "summary": {
     "total": 64,
@@ -4502,20 +4502,50 @@
     "CANDID-063": {
       "specFile": null,
       "assignee": "jaese@hoji-20260607125210.",
-      "assignedAt": "2026-06-07T12:52:10.566+00:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-06-07T12:58:16.787+00:00",
+      "lockedFiles": [
+        "docs/requirements/CANDID-010-spec.md",
+        "docs/requirements/CANDID-011-spec.md",
+        "docs/requirements/CANDID-013-spec.md",
+        "docs/requirements/CANDID-017-spec.md",
+        "docs/requirements/CANDID-018-spec.md",
+        "docs/requirements/CANDID-019-spec.md",
+        "docs/requirements/CANDID-020-spec.md",
+        "docs/requirements/CANDID-023-spec.md",
+        "docs/requirements/CANDID-024-spec.md",
+        "docs/requirements/README.md"
+      ],
       "dependencies": [],
       "createdAt": "2026-06-07T11:47:53.256+00:00",
       "workflowState": {
-        "currentSkill": "crew-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-06-07T12:52:10.566+00:00"
+        "updatedAt": "2026-06-07T12:58:16.787+00:00"
       },
-      "steps": [],
-      "currentStep": 0,
+      "steps": [
+        {
+          "number": 1,
+          "title": "핵심 도메인 spec 9건 + 인덱스",
+          "status": "pending",
+          "prLineLimit": 600,
+          "files": [
+            "docs/requirements/CANDID-010-spec.md",
+            "docs/requirements/CANDID-011-spec.md",
+            "docs/requirements/CANDID-013-spec.md",
+            "docs/requirements/CANDID-017-spec.md",
+            "docs/requirements/CANDID-018-spec.md",
+            "docs/requirements/CANDID-019-spec.md",
+            "docs/requirements/CANDID-020-spec.md",
+            "docs/requirements/CANDID-023-spec.md",
+            "docs/requirements/CANDID-024-spec.md",
+            "docs/requirements/README.md"
+          ]
+        }
+      ],
+      "currentStep": 1,
       "completedAt": null,
       "micro": false,
       "id": "CANDID-063",
@@ -4526,7 +4556,7 @@
       "priority": "low",
       "phase": 4,
       "source": "crew-health-check DS-07 (MINOR, 3회 연속)",
-      "lockTTL": 1800
+      "lockTTL": 10800
     },
     "CANDID-064": {
       "specFile": null,
