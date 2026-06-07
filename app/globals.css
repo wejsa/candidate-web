@@ -321,8 +321,46 @@ button[aria-disabled='true'] {
 }
 
 /*
- * 모달 (CANDID-028 Step 2). useFocusTrap(Tab 격리·ESC·포커스 복원·body
- * 스크롤 잠금)과 함께 동작.
- * ⚠️ 원본이 저장소(HEAD)에서 이 지점부터 잘려 유실됨 — 미닫힘 주석만 닫아 CSS 컴파일을 복구함.
- *    모달 전용 스타일이 있었다면 백업/다른 브랜치에서 복원 필요.
+ * 모달 (CANDID-028 Step 2). useFocusTrap(Tab 격리·ESC·포커스 복원·body 스크롤 잠금)과 함께 동작.
+ * 잘림 사고로 유실됐던 스타일 복원 — 두 모달(WithdrawButton/ConfirmModal)은 className 없이
+ * role="dialog" aria-modal="true" 속성에만 의존하므로 전역 속성 선택자로 스타일링한다.
+ * 미복원 시: 모달이 인라인으로 렌더 + useFocusTrap의 body 스크롤락 → '페이지 멈춤' 회귀.
+ * 배경 딤은 별도 backdrop 요소(portal) 없이 box-shadow 100vmax 트릭으로 처리(박스는 가리지 않음).
  */
+[role='dialog'][aria-modal='true'] {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(480px, calc(100% - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: var(--space-6);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 100vmax rgba(15, 23, 42, 0.55);
+}
+
+/* 모달 내부 타이포 — 제목/본문 기본 마진 정리(인라인 시절 흔적 제거). */
+[role='dialog'][aria-modal='true'] > :first-child {
+  margin-top: 0;
+}
+
+[role='dialog'][aria-modal='true'] textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: var(--space-2);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  resize: vertical;
+}
