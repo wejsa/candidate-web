@@ -3567,5 +3567,15 @@
     "action": "task_completed",
     "taskId": "CANDID-058",
     "at": "2026-06-07T18:02:00+09:00"
+  },
+  {
+    "action": "retro_completed",
+    "taskIds": [
+      "CANDID-057",
+      "CANDID-058"
+    ],
+    "report": "docs/retro/CANDID-057-058-retro.md",
+    "lesson": "L-043",
+    "at": "2026-06-07T18:05:00+09:00"
   }
 ]

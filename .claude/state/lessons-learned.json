@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 12,
-    "updatedAt": "2026-05-25T23:33:08+09:00",
+    "version": 13,
+    "updatedAt": "2026-06-07T18:05:00+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -758,6 +758,24 @@
       "appliedCount": 1,
       "createdAt": "2026-05-25T23:33:08+09:00",
       "updatedAt": "2026-05-25T23:33:08+09:00"
+    },
+    {
+      "id": "L-043",
+      "taskId": "CANDID-057",
+      "category": "architecture",
+      "title": "공유 export 서비스 함수 반환 형상 변경 전 전체 소비자 스캔",
+      "description": "export된 공유 서비스 함수의 반환 형상(또는 시그니처)을 바꿀 때, 변경 전 grep으로 전체 소비자를 스캔한다. 특히 공개 API 라우트가 함수 반환을 통째로 직렬화(NextResponse.json(result))하면 새 필드가 응답 계약에 누수된다. 이 코드베이스는 DEFAULT_PER_PAGE/perPage 분리로 'v1 API 계약 보존' 규율을 확립해 두었으므로, 대시보드 전용 필드는 라우트 경계에서 제외하거나 opt-in 인자로 분리한다. CANDID-057에서 listApplicantsByPosting에 posting 필드 추가가 v1 응답으로 누수될 뻔했고 리뷰가 포착했다.",
+      "impact": "medium",
+      "tags": [
+        "shared-function",
+        "api-contract",
+        "v1",
+        "consumer-scan",
+        "review-catch"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-06-07T18:05:00+09:00",
+      "updatedAt": "2026-06-07T18:05:00+09:00"
     }
   ]
 }
