@@ -1,16 +1,17 @@
 import 'server-only';
 import { PrismaClient } from '@prisma/client';
 import { piiExtension } from '@/lib/prisma/extends';
+import { getEnv } from '@/lib/env';
 
 declare global {
   // eslint-disable-next-line no-var
   var __prisma: PrismaClient | undefined;
 }
 
-// Query log은 명시적 opt-in (PRISMA_LOG_QUERY=1)으로만 활성화.
+// Query log은 명시적 opt-in (PRISMA_LOG_QUERY=1)으로만 활성화. (CANDID-064: zod env 단일 진입점 경유)
 // CANDID-008 이후 phone/birth_date는 BYTEA(ciphertext)로만 저장되므로 query log에 평문 PII 노출 없음.
 // 단, 다른 컬럼(email/name)은 평문이므로 운영에서 query log는 여전히 비권장.
-const enableQueryLog = process.env.PRISMA_LOG_QUERY === '1';
+const enableQueryLog = getEnv().PRISMA_LOG_QUERY;
 
 const basePrisma: PrismaClient =
   globalThis.__prisma ??
