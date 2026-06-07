@@ -2,13 +2,13 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 563,
+    "version": 564,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:07:19.251+00:00"
+    "updatedAt": "2026-06-07T13:07:54.357+00:00"
   },
   "summary": {
     "total": 64,
-    "done": 62,
+    "done": 63,
     "inProgress": 1,
     "review": 0,
     "todo": 1
@@ -4501,36 +4501,17 @@
     },
     "CANDID-063": {
       "specFile": null,
-      "assignee": "jaese@hoji-20260607125210.",
-      "assignedAt": "2026-06-07T13:05:15.751+00:00",
-      "lockedFiles": [
-        "docs/requirements/CANDID-010-spec.md",
-        "docs/requirements/CANDID-011-spec.md",
-        "docs/requirements/CANDID-013-spec.md",
-        "docs/requirements/CANDID-017-spec.md",
-        "docs/requirements/CANDID-018-spec.md",
-        "docs/requirements/CANDID-019-spec.md",
-        "docs/requirements/CANDID-020-spec.md",
-        "docs/requirements/CANDID-023-spec.md",
-        "docs/requirements/CANDID-024-spec.md",
-        "docs/requirements/README.md"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T11:47:53.256+00:00",
-      "workflowState": {
-        "currentSkill": "crew-merge-pr",
-        "lastCompletedSkill": "crew-review-pr",
-        "prNumber": 162,
-        "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "162",
-        "updatedAt": "2026-06-07T13:07:19.251+00:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
           "title": "핵심 도메인 spec 9건 + 인덱스",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 600,
           "files": [
             "docs/requirements/CANDID-010-spec.md",
@@ -4544,16 +4525,17 @@
             "docs/requirements/CANDID-024-spec.md",
             "docs/requirements/README.md"
           ],
-          "prNumber": 162
+          "prNumber": 162,
+          "mergedAt": "2026-06-07T13:07:54.357+00:00"
         }
       ],
       "currentStep": 1,
-      "completedAt": null,
+      "completedAt": "2026-06-07T13:07:54.357+00:00",
       "micro": false,
       "id": "CANDID-063",
       "title": "요구사항 문서 소급 보강 (DS-07)",
       "description": "crew-health-check DS-07 3회 연속 MINOR FAIL. docs/requirements/ 스펙 6건(CANDID-050/051/053/054/058/059)뿐 — feature Task 다수 대비 대응 문서 부족. P0 핵심 도메인(인증/공고/지원서/마이페이지) Task부터 소급 스펙 작성.",
-      "status": "in_progress",
+      "status": "done",
       "type": "chore",
       "priority": "low",
       "phase": 4,

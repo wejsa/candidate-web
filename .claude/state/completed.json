@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 63,
+    "version": 64,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T12:44:40.206+00:00"
+    "updatedAt": "2026-06-07T13:07:54.357+00:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1765,6 +1765,24 @@
       "stepCount": 0,
       "reviewSummary": "상태파일 메타데이터 정규화(SI-04). backlog/completed의 task.type enum 외 5건(036/037 enhancement→feature, 039/048/040 test·refactor→chore) 보정. 코드 변경 없음 — develop 직접 커밋(상태 SSOT 프로토콜).",
       "carry": []
+    },
+    "CANDID-063": {
+      "id": "CANDID-063",
+      "title": "요구사항 문서 소급 보강 (DS-07)",
+      "phase": 4,
+      "priority": "low",
+      "type": "chore",
+      "completedAt": "2026-06-07T13:07:54.357+00:00",
+      "assignee": "jaese@hoji-20260607125210.",
+      "prs": [
+        162
+      ],
+      "totalMergedLines": 321,
+      "stepCount": 1,
+      "reviewSummary": "메인 직접 리뷰 폴백(1M-subagent-fallback, T3 docs). 0 CRITICAL. 핵심 도메인 spec 9건 + 인덱스. 사용자 피드백 반영 — 010/018/020/023 이메일·외부알림 전달 한계 정확성 보정(운영 SMTP/Slack 미구성 시 미전달).",
+      "carry": [
+        "DS-07 부분 충족: 핵심 도메인 9건만 per-task spec. 기술/FU Task는 PRD/코드 SSOT 정책(README 명문화)."
+      ]
     }
   }
 }
