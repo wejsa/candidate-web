@@ -5,12 +5,12 @@ import Link from 'next/link';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: '엔지니어 채용',
+  title: '인재 채용',
   description:
-    'Hoji는 일상을 더 편리하게 만드는 솔루션을 설계하고 운영합니다. 미션 크리티컬한 시스템을 함께 만들 엔지니어를 찾습니다.',
+    'Hoji는 일상을 더 편리하게 만드는 솔루션을 설계하고 운영합니다. 미션 크리티컬한 시스템을 함께 만들 인재를 찾습니다.',
   openGraph: {
-    title: 'Hoji 엔지니어 채용',
-    description: '일상을 더 편리하게 만드는 솔루션을 함께 만들 엔지니어를 찾습니다.',
+    title: 'Hoji 인재 채용',
+    description: '일상을 더 편리하게 만드는 솔루션을 함께 만들 인재를 찾습니다.',
     type: 'website',
   },
 };
@@ -63,7 +63,7 @@ export default function HomePage() {
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <p className={styles.eyebrow}>HOJI ENGINEERING</p>
-          <h1 className={styles.title}>함께 일상을 바꿀 엔지니어를 찾습니다</h1>
+          <h1 className={styles.title}>함께 일상을 바꿀 인재를 찾습니다</h1>
           <p className={styles.subtitle}>
             일상을 더 편리하게 만드는 솔루션을 직접 설계하고 운영하세요. Spring Boot부터 Next.js까지, 미션 크리티컬한
             시스템을 함께 만들 동료를 기다립니다.

@@ -22,7 +22,7 @@ describe('홈/메타 카피 "일상을 편리하게" 톤 (CANDID-058 → 059 →
   });
 
   it('"일상을 편리하게" 톤 문구가 H1·메타·히어로에 반영됨', () => {
-    expect(pageSrc).toContain('함께 일상을 바꿀 엔지니어를 찾습니다');
+    expect(pageSrc).toContain('함께 일상을 바꿀 인재를 찾습니다');
     expect(pageSrc).toContain('일상을 더 편리하게 만드는 솔루션');
     expect(layoutSrc).toContain('일상을 더 편리하게 만드는 솔루션');
   });
