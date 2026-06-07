@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 554,
+    "version": 555,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T12:19:04.317+00:00"
+    "updatedAt": "2026-06-07T12:20:12.359+00:00"
   },
   "summary": {
     "total": 64,
@@ -4438,10 +4438,8 @@
       "micro": false,
       "specFile": null,
       "assignee": "jaese@hoji-20260607120020.",
-      "assignedAt": "2026-06-07T12:16:22.140+00:00",
+      "assignedAt": "2026-06-07T12:20:12.359+00:00",
       "lockedFiles": [
-        "app/globals.css",
-        "lib/applications/validate.ts",
         "tests/a11y/foundation.test.tsx",
         "tests/app/admin/admin-guard-wiring.test.tsx",
         "tests/app/admin/applicant-pages-guard-wiring.test.tsx",
@@ -4453,25 +4451,25 @@
       "createdAt": "2026-06-07T11:03:41.765+00:00",
       "source": "crew-health-check 자동 등록 (DS-02 CRITICAL FAIL, 2026-06-07)",
       "workflowState": {
-        "currentSkill": "crew-merge-pr",
-        "lastCompletedSkill": "crew-review-pr",
-        "prNumber": 160,
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "160",
-        "updatedAt": "2026-06-07T12:19:04.317+00:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-07T12:20:12.359+00:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "프로덕션 소스 회귀 수정 (globals.css a11y 규칙 복원 + validate careerLevel)",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 150,
           "files": [
             "app/globals.css",
             "lib/applications/validate.ts"
           ],
-          "prNumber": 160
+          "prNumber": 160,
+          "mergedAt": "2026-06-07T12:20:12.359+00:00"
         },
         {
           "number": 2,
@@ -4488,7 +4486,7 @@
           ]
         }
       ],
-      "currentStep": 1,
+      "currentStep": 2,
       "completedAt": null,
       "lockTTL": 7200
     },
