@@ -78,6 +78,13 @@ const envSchema = z
       .optional()
       .transform((v) => v === 'true' || v === '1'),
 
+    // CANDID-064: Prisma 쿼리 로그 opt-in. dev 디버깅 전용 — 운영 비권장(email/name 평문 노출).
+    // 빈 값/누락 시 false (boolean opt-in 패턴, FORCE_HTTPS_REDIRECT와 동일).
+    PRISMA_LOG_QUERY: z
+      .string()
+      .optional()
+      .transform((v) => v === 'true' || v === '1'),
+
     GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
     GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
     GITHUB_OAUTH_CLIENT_ID: z.string().optional(),
