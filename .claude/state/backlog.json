@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 60,
     "projectPrefix": "CANDID",
-    "version": 546,
+    "version": 547,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T18:31:00+09:00"
+    "updatedAt": "2026-06-07T18:33:00+09:00"
   },
   "summary": {
     "total": 60,
@@ -4414,12 +4414,13 @@
       "createdAt": "2026-06-07T18:28:00+09:00",
       "source": "사용자 요청 — 금융 아니어도 됨, 살기 편한 세상·삶을 윤택하게 하는 솔루션 느낌. AskUserQuestion에서 '일상을 편리하게' 톤 선택.",
       "workflowState": {
-        "currentSkill": "crew-review-pr",
-        "lastCompletedSkill": "crew-impl",
+        "currentSkill": "crew-merge-pr",
+        "lastCompletedSkill": "crew-review-pr",
         "prNumber": 159,
         "fixLoopCount": 0,
-        "autoChainArgs": "159 --auto-fix",
-        "updatedAt": "2026-06-07T18:31:00+09:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "159",
+        "updatedAt": "2026-06-07T18:33:00+09:00"
       },
       "steps": [
         {
