@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 66,
     "projectPrefix": "CANDID",
-    "version": 582,
+    "version": 583,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T14:18:33.843+00:00"
+    "updatedAt": "2026-06-07T14:19:04.516+00:00"
   },
   "summary": {
     "total": 66,
@@ -4628,10 +4628,8 @@
       "assignee": "jaese@hoji-20260607140726.",
       "assignedAt": "2026-06-07T14:07:26.137+00:00",
       "lockedBy": null,
-      "lockedAt": "2026-06-07T14:17:39.084+00:00",
+      "lockedAt": "2026-06-07T14:19:04.516+00:00",
       "lockedFiles": [
-        "lib/admin/applicants.ts",
-        "tests/lib/admin/applicants.test.ts",
         "prisma/schema.prisma",
         "lib/errors/codes.ts",
         "lib/files/storage.ts",
@@ -4644,25 +4642,25 @@
       "createdAt": "2026-06-07T14:06:56.377+00:00",
       "source": "사용자 요청 — admin 상세에서 지원자 첨부 파일/포트폴리오 미표시 → 운영자 열람 기능 추가.",
       "workflowState": {
-        "currentSkill": "crew-merge-pr",
-        "lastCompletedSkill": "crew-review-pr",
-        "prNumber": 165,
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "165",
-        "updatedAt": "2026-06-07T14:18:33.843+00:00"
+        "autoChainArgs": "--next",
+        "updatedAt": "2026-06-07T14:19:04.516+00:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "데이터 레이어 — 상세에 이력서/포트폴리오 포함",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 500,
           "files": [
             "lib/admin/applicants.ts",
             "tests/lib/admin/applicants.test.ts"
           ],
-          "prNumber": 165
+          "prNumber": 165,
+          "mergedAt": "2026-06-07T14:19:04.516+00:00"
         },
         {
           "number": 2,
@@ -4690,7 +4688,7 @@
       ],
       "completedAt": null,
       "lockTTL": 10800,
-      "currentStep": 1
+      "currentStep": 2
     }
   }
 }

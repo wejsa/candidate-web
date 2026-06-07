@@ -3869,5 +3869,14 @@
       "decision": "COMMENT",
       "tier": "T2"
     }
+  },
+  {
+    "timestamp": "2026-06-07T14:19:04.516+00:00",
+    "action": "merged",
+    "details": {
+      "taskId": "CANDID-066",
+      "stepNumber": 1,
+      "prNumber": 165
+    }
   }
 ]
