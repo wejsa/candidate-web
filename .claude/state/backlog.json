@@ -2,7 +2,7 @@
   "metadata": {
     "lastTaskNumber": 54,
     "projectPrefix": "CANDID",
-    "version": 512,
+    "version": 513,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-06-07T00:00:00.000Z"
   },
@@ -4179,20 +4179,21 @@
       "planPath": ".claude/temp/CANDID-054-plan.md",
       "source": "사용자 요청('어드민 기능 강화, 공고관리 페이지 전체 너비 화면 맞춤, 지원자 목록을 대시보드처럼 한번에') — crew-feature 요구사항 정의 승인(2026-06-07). 너비 1200px 캡 + 전체 4 FR 확정.",
       "workflowState": {
-        "currentSkill": "crew-merge-pr",
-        "lastCompletedSkill": "crew-review-pr",
-        "prNumber": 151,
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-merge-pr",
+        "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": "151",
-        "lastReviewDecision": "COMMENT",
-        "updatedAt": "2026-06-07T14:35:00+09:00"
+        "autoChainArgs": "--next",
+        "lastReviewDecision": null,
+        "updatedAt": "2026-06-07T14:40:00+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "어드민 전체 너비 레이아웃 (FR-001)",
-          "status": "pr_created",
+          "status": "merged",
           "prNumber": 151,
+          "mergedAt": "2026-06-07T05:27:54Z",
           "prLineLimit": 150,
           "estimatedLines": 70,
           "files": [
@@ -4235,7 +4236,7 @@
           ]
         }
       ],
-      "currentStep": 1
+      "currentStep": 2
     }
   }
 }
