@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 552,
+    "version": 553,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T12:13:02.563+00:00"
+    "updatedAt": "2026-06-07T12:16:22.140+00:00"
   },
   "summary": {
     "total": 64,
@@ -4438,7 +4438,7 @@
       "micro": false,
       "specFile": null,
       "assignee": "jaese@hoji-20260607120020.",
-      "assignedAt": "2026-06-07T12:13:02.563+00:00",
+      "assignedAt": "2026-06-07T12:16:22.140+00:00",
       "lockedFiles": [
         "app/globals.css",
         "lib/applications/validate.ts",
@@ -4453,23 +4453,24 @@
       "createdAt": "2026-06-07T11:03:41.765+00:00",
       "source": "crew-health-check 자동 등록 (DS-02 CRITICAL FAIL, 2026-06-07)",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-plan",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 160,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-07T12:13:02.563+00:00"
+        "autoChainArgs": "160 --auto-fix",
+        "updatedAt": "2026-06-07T12:16:22.140+00:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "프로덕션 소스 회귀 수정 (globals.css a11y 규칙 복원 + validate careerLevel)",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 150,
           "files": [
             "app/globals.css",
             "lib/applications/validate.ts"
-          ]
+          ],
+          "prNumber": 160
         },
         {
           "number": 2,
