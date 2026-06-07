@@ -53,6 +53,9 @@ export function middleware(request: NextRequest): NextResponse {
   // 4) 일반 요청: traceId를 요청 헤더에 주입해 다음 핸들러로 패스 + 응답 가공.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(TRACE_HEADER, traceId);
+  // CANDID-055 — RSC(레이아웃/페이지)는 현재 경로를 직접 알 수 없으므로 요청 경로를 헤더로 전달한다.
+  //   백오피스 레이아웃 가드가 이 값을 로그인 복귀 경로(returnTo)로 사용해 딥링크 진입을 보존한다.
+  requestHeaders.set('x-pathname', request.nextUrl.pathname + request.nextUrl.search);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   applySecurityHeaders(response);
   applyCorsHeaders(response, request.headers.get('origin'));
