@@ -3629,5 +3629,28 @@
     "action": "task_completed",
     "taskId": "CANDID-060",
     "at": "2026-06-07T18:35:00+09:00"
+  },
+  {
+    "timestamp": "2026-06-07T11:04:30.671+00:00",
+    "action": "health_check_started",
+    "details": {
+      "mode": "full"
+    }
+  },
+  {
+    "timestamp": "2026-06-07T11:04:30.671+00:00",
+    "action": "health_check_completed",
+    "details": {
+      "mode": "full",
+      "score": 74,
+      "grade": "NEEDS_ATTENTION",
+      "criticalCount": 1,
+      "majorCount": 1,
+      "minorCount": 1,
+      "fixCount": 0,
+      "registered": [
+        "CANDID-061"
+      ]
+    }
   }
 ]
