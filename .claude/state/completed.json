@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 54,
+    "version": 55,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-06T06:10:00.000Z"
+    "updatedAt": "2026-06-07T15:30:00+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1613,6 +1613,25 @@
         "critical": 0
       },
       "note": "완료 이력 복구(§5.3 교차검증) — 이전 세션 완료. backlog에 step/PR 데이터 미기록(micro bug)이라 PR 상세 없이 알려진 필드만 기록."
+    },
+    "CANDID-054": {
+      "id": "CANDID-054",
+      "title": "백오피스(어드민) UX 강화: 전체 너비 레이아웃 + 지원자 대시보드",
+      "phase": 4,
+      "priority": "medium",
+      "type": "feature",
+      "completedAt": "2026-06-07T15:30:00+09:00",
+      "assignee": null,
+      "prs": [
+        151,
+        152,
+        153
+      ],
+      "stepCount": 3,
+      "reviewSummary": {
+        "critical": 0
+      },
+      "note": "백오피스 UX 강화 3스텝(전체 너비 1200px + 지원자 대시보드 + 운영 홈/공고목록). 전 PR CRITICAL 0, MAJOR는 in-task 보강(L-019). DB/외부 API 무변경."
     }
   }
 }
