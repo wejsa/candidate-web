@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 65,
     "projectPrefix": "CANDID",
-    "version": 576,
+    "version": 577,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:51:00.990+00:00"
+    "updatedAt": "2026-06-07T13:51:43.536+00:00"
   },
   "summary": {
     "total": 65,
-    "done": 64,
-    "inProgress": 1,
+    "done": 65,
+    "inProgress": 0,
     "review": 0,
     "todo": 0
   },
@@ -4582,48 +4582,38 @@
       "id": "CANDID-065",
       "title": "홈/메타 카피 \"엔지니어\"→\"인재\" 포괄 전환",
       "description": "엔지니어 외 직군도 채용하므로 홈/메타 카피의 \"엔지니어\"를 \"인재\"(포괄 표현)로 전환. 대상: app/page.tsx 5곳 — metadata.title(\"엔지니어 채용\"), metadata.description, openGraph.title(\"Hoji 엔지니어 채용\")/description, H1(\"함께 일상을 바꿀 엔지니어를 찾습니다\"→\"함께 일상을 바꿀 인재를 찾습니다\"). 회귀 가드 tests/app/home-copy.test.ts 동반 갱신. 주의: 다른 테스트의 \"백엔드 엔지니어\" 등은 실제 공고 직무명 샘플이므로 변경 제외(브랜드 카피만). 순수 카피 변경.",
-      "status": "in_progress",
+      "status": "done",
       "type": "chore",
       "priority": "medium",
       "phase": 3,
       "micro": true,
       "specFile": null,
-      "assignee": "jaese@hoji-20260607134228.",
-      "assignedAt": "2026-06-07T13:42:28.029+00:00",
-      "lockedFiles": [
-        "app/page.tsx",
-        "tests/app/home-copy.test.ts"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T13:41:01.515+00:00",
       "source": "사용자 요청 — 엔지니어만 채용하는 게 아니므로 \"인재\"로 포괄 전환.",
-      "workflowState": {
-        "currentSkill": "crew-merge-pr",
-        "lastCompletedSkill": "crew-review-pr",
-        "prNumber": 164,
-        "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "164",
-        "updatedAt": "2026-06-07T13:51:00.990+00:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
           "title": "엔지니어→인재 카피 전환 + 회귀 가드",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 120,
           "files": [
             "app/page.tsx",
             "tests/app/home-copy.test.ts"
           ],
-          "prNumber": 164
+          "prNumber": 164,
+          "mergedAt": "2026-06-07T13:51:43.536+00:00"
         }
       ],
       "currentStep": 1,
-      "completedAt": null,
+      "completedAt": "2026-06-07T13:51:43.536+00:00",
       "lockTTL": 3600,
-      "lockedAt": "2026-06-07T13:50:07.929+00:00",
-      "lockedBy": "jaese@hoji-20260607134228."
+      "lockedAt": null,
+      "lockedBy": null
     }
   }
 }

@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 65,
+    "version": 66,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T13:31:23.641+00:00"
+    "updatedAt": "2026-06-07T13:51:43.536+00:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1799,6 +1799,24 @@
       "stepCount": 1,
       "reviewSummary": "064a: PRISMA_LOG_QUERY zod env 정합화(DS-04 해소, PR #163, 메인 폴백 0 critical). 064b: 원격 stale 병합 브랜치 59개 삭제(gh MERGED PR 기준 + 사용자 확인, squash 머지라 --merged 무용 회피). 코드 14줄 + git 정리.",
       "carry": []
+    },
+    "CANDID-065": {
+      "id": "CANDID-065",
+      "title": "홈/메타 카피 \"엔지니어\"→\"인재\" 포괄 전환",
+      "phase": 3,
+      "priority": "medium",
+      "type": "chore",
+      "completedAt": "2026-06-07T13:51:43.536+00:00",
+      "assignee": "jaese@hoji-20260607134228.",
+      "prs": [
+        164
+      ],
+      "totalMergedLines": 6,
+      "stepCount": 1,
+      "reviewSummary": "T0 직접 리뷰(순수 카피). 홈/메타 엔지니어→인재 포괄 전환 5곳 + 회귀 가드. CRITICAL 0. typecheck/lint/home-copy green.",
+      "carry": [
+        "히어로 eyebrow(HOJI ENGINEERING)·부제(Spring Boot…) 엔지니어 색채 잔존 — 직군 완전 포괄 원하면 후속 카피 Task로 확장 가능"
+      ]
     }
   }
 }
