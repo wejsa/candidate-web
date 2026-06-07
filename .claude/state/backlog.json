@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 551,
+    "version": 552,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T12:00:20.988+00:00"
+    "updatedAt": "2026-06-07T12:13:02.563+00:00"
   },
   "summary": {
     "total": 64,
@@ -4438,23 +4438,57 @@
       "micro": false,
       "specFile": null,
       "assignee": "jaese@hoji-20260607120020.",
-      "assignedAt": "2026-06-07T12:00:20.988+00:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-06-07T12:13:02.563+00:00",
+      "lockedFiles": [
+        "app/globals.css",
+        "lib/applications/validate.ts",
+        "tests/a11y/foundation.test.tsx",
+        "tests/app/admin/admin-guard-wiring.test.tsx",
+        "tests/app/admin/applicant-pages-guard-wiring.test.tsx",
+        "tests/app/admin/StatusControl.test.tsx",
+        "tests/lib/auth/email-verification.test.ts",
+        "tests/lib/email/transport.test.ts"
+      ],
       "dependencies": [],
       "createdAt": "2026-06-07T11:03:41.765+00:00",
       "source": "crew-health-check 자동 등록 (DS-02 CRITICAL FAIL, 2026-06-07)",
       "workflowState": {
-        "currentSkill": "crew-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-06-07T12:00:20.988+00:00"
+        "updatedAt": "2026-06-07T12:13:02.563+00:00"
       },
-      "steps": [],
-      "currentStep": 0,
+      "steps": [
+        {
+          "number": 1,
+          "title": "프로덕션 소스 회귀 수정 (globals.css a11y 규칙 복원 + validate careerLevel)",
+          "status": "pending",
+          "prLineLimit": 150,
+          "files": [
+            "app/globals.css",
+            "lib/applications/validate.ts"
+          ]
+        },
+        {
+          "number": 2,
+          "title": "Stale 회귀가드 테스트 정합화 (6 테스트 파일)",
+          "status": "pending",
+          "prLineLimit": 350,
+          "files": [
+            "tests/a11y/foundation.test.tsx",
+            "tests/app/admin/admin-guard-wiring.test.tsx",
+            "tests/app/admin/applicant-pages-guard-wiring.test.tsx",
+            "tests/app/admin/StatusControl.test.tsx",
+            "tests/lib/auth/email-verification.test.ts",
+            "tests/lib/email/transport.test.ts"
+          ]
+        }
+      ],
+      "currentStep": 1,
       "completedAt": null,
-      "lockTTL": 1800
+      "lockTTL": 7200
     },
     "CANDID-062": {
       "specFile": null,
