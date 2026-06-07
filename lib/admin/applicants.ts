@@ -1,5 +1,5 @@
 import 'server-only';
-import { AuditEventType, type StageType, type ApplicationResult } from '@prisma/client';
+import { AuditEventType, StageType, ApplicationResult } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { recordAuditEvent } from '@/lib/audit/record';
@@ -21,7 +21,8 @@ import {
 //     평문 PII는 감사 metadata에 절대 기록하지 않는다(BR-PII-01, recordAuditEvent PII-free 가드).
 //   - 조회는 basePrisma(extension 우회) — User.phone/birthDate 자동 복호화를 트리거하지 않는다.
 
-const PER_PAGE = 20;
+// CANDID-054 FR-002 — 운영 대시보드는 한 화면에 더 많은 지원자를 노출(밀도↑). 공개 목록(20)과 분리된 운영 전용 페이지 크기.
+const PER_PAGE = 50;
 
 export interface ApplicantListItem {
   applicationId: number;
@@ -104,6 +105,53 @@ export async function listApplicantsByPosting(
     })),
     pagination: { page, perPage: PER_PAGE, total, totalPages, hasMore: page < totalPages },
   };
+}
+
+// ── CANDID-054 FR-002 — 공고별 지원자 대시보드 집계 ────────────────────────────
+//   KPI/분포는 **카운트만** 산출한다(평문 PII 미접촉, basePrisma). PII 컬럼을 일절 select하지 않으므로
+//   운영자에게 식별 정보가 노출되지 않는다(목록 마스킹·상세 PII_VIEW 감사와 동일한 통제 정신).
+//   idx_applications_posting_stage 인덱스를 활용한 단일 groupBy ×2(단계/결과) 병렬.
+
+/** 공고별 지원 분포(전형 단계별·결과별 카운트). enum 전 키를 0으로 채워 정합(total=Σstage=Σresult). */
+export interface ApplicantStageStats {
+  total: number;
+  byStage: Record<StageType, number>;
+  byResult: Record<ApplicationResult, number>;
+}
+
+function zeroFilled<T extends string>(keys: readonly T[]): Record<T, number> {
+  return Object.fromEntries(keys.map((k) => [k, 0])) as Record<T, number>;
+}
+
+/** 공고별 지원자 KPI 집계 — 단계/결과 groupBy(카운트만). 공고 존재 검증은 호출측 목록 조회가 담당. */
+export async function getApplicantStatsByPosting(
+  jobPostingId: number,
+): Promise<ApplicantStageStats> {
+  const [stageGroups, resultGroups] = await Promise.all([
+    basePrisma.application.groupBy({
+      by: ['currentStage'],
+      where: { jobPostingId },
+      _count: { _all: true },
+    }),
+    basePrisma.application.groupBy({
+      by: ['result'],
+      where: { jobPostingId },
+      _count: { _all: true },
+    }),
+  ]);
+
+  const byStage = zeroFilled(Object.values(StageType));
+  for (const g of stageGroups) {
+    byStage[g.currentStage] = g._count._all;
+  }
+  const byResult = zeroFilled(Object.values(ApplicationResult));
+  for (const g of resultGroups) {
+    byResult[g.result] = g._count._all;
+  }
+  // total은 단계 합으로 산출(=결과 합). 두 groupBy는 동일 모집단이므로 정합.
+  const total = Object.values(byStage).reduce((sum, n) => sum + n, 0);
+
+  return { total, byStage, byResult };
 }
 
 export interface ApplicantStatusHistoryEntry {

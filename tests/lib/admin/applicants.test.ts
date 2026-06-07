@@ -8,7 +8,7 @@ import { maskName, maskEmail } from '@/lib/pii/mask';
 vi.mock('@/lib/prisma', () => ({
   basePrisma: {
     jobPosting: { findUnique: vi.fn() },
-    application: { count: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
+    application: { count: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), groupBy: vi.fn() },
   },
 }));
 vi.mock('@/lib/audit/record', () => ({ recordAuditEvent: vi.fn() }));
@@ -31,13 +31,13 @@ vi.mock('@/lib/prisma/extends', () => {
 const { basePrisma } = (await import('@/lib/prisma')) as unknown as {
   basePrisma: {
     jobPosting: { findUnique: Mock };
-    application: { count: Mock; findMany: Mock; findUnique: Mock };
+    application: { count: Mock; findMany: Mock; findUnique: Mock; groupBy: Mock };
   };
 };
 const { recordAuditEvent } = (await import('@/lib/audit/record')) as unknown as {
   recordAuditEvent: Mock;
 };
-const { listApplicantsByPosting, getApplicantDetailForOperator } =
+const { listApplicantsByPosting, getApplicantDetailForOperator, getApplicantStatsByPosting } =
   await import('@/lib/admin/applicants');
 
 beforeEach(() => {
@@ -87,21 +87,21 @@ describe('listApplicantsByPosting', () => {
     expect(callArg.where).toMatchObject({ jobPostingId: 1, currentStage: 'INTERVIEW_1' });
   });
 
-  it('페이지네이션 계산 + skip/take', async () => {
+  it('페이지네이션 계산 + skip/take (운영 PER_PAGE=50)', async () => {
     basePrisma.jobPosting.findUnique.mockResolvedValue({ id: 1 });
-    basePrisma.application.count.mockResolvedValue(45);
+    basePrisma.application.count.mockResolvedValue(120);
     basePrisma.application.findMany.mockResolvedValue([]);
     const res = await listApplicantsByPosting({ jobPostingId: 1, page: 2 });
     expect(res.pagination).toMatchObject({
       page: 2,
-      perPage: 20,
-      total: 45,
+      perPage: 50,
+      total: 120,
       totalPages: 3,
       hasMore: true,
     });
     const callArg = basePrisma.application.findMany.mock.calls[0]![0];
-    expect(callArg.skip).toBe(20);
-    expect(callArg.take).toBe(20);
+    expect(callArg.skip).toBe(50);
+    expect(callArg.take).toBe(50);
     // PII snapshot Bytes 컬럼을 select하지 않음(평문/암호문 노출 회피).
     expect(callArg.select.phoneSnapshot).toBeUndefined();
     expect(callArg.select.applicantNameSnapshot).toBeUndefined();
@@ -114,6 +114,54 @@ describe('listApplicantsByPosting', () => {
     const res = await listApplicantsByPosting({ jobPostingId: 1, page: 1 });
     expect(res.items).toEqual([]);
     expect(res.pagination).toMatchObject({ total: 0, totalPages: 1, hasMore: false });
+  });
+});
+
+describe('getApplicantStatsByPosting (CANDID-054 FR-002)', () => {
+  it('단계/결과 groupBy를 0-fill 레코드로 매핑 + total 정합(=Σstage=Σresult)', async () => {
+    basePrisma.application.groupBy
+      .mockResolvedValueOnce([
+        { currentStage: 'DOC_REVIEW', _count: { _all: 3 } },
+        { currentStage: 'INTERVIEW_1', _count: { _all: 2 } },
+        { currentStage: 'HIRED', _count: { _all: 1 } },
+      ])
+      .mockResolvedValueOnce([
+        { result: 'IN_PROGRESS', _count: { _all: 5 } },
+        { result: 'PASSED', _count: { _all: 1 } },
+      ]);
+
+    const stats = await getApplicantStatsByPosting(7);
+
+    // 전체 enum 키가 존재(미보고 단계는 0).
+    expect(stats.byStage.SUBMITTED).toBe(0);
+    expect(stats.byStage.DOC_REVIEW).toBe(3);
+    expect(stats.byStage.INTERVIEW_1).toBe(2);
+    expect(stats.byStage.HIRED).toBe(1);
+    expect(stats.byStage.REJECTED).toBe(0);
+    expect(stats.byResult.IN_PROGRESS).toBe(5);
+    expect(stats.byResult.PASSED).toBe(1);
+    expect(stats.byResult.FAILED).toBe(0);
+    expect(stats.byResult.WITHDRAWN).toBe(0);
+
+    // total = Σstage(6). 결과 합도 동일 모집단(6).
+    expect(stats.total).toBe(6);
+    const sumStage = Object.values(stats.byStage).reduce((a, b) => a + b, 0);
+    const sumResult = Object.values(stats.byResult).reduce((a, b) => a + b, 0);
+    expect(sumStage).toBe(6);
+    expect(sumResult).toBe(6);
+
+    // where 절에 jobPostingId 반영, 카운트만(_all) 산출.
+    const stageCall = basePrisma.application.groupBy.mock.calls[0]![0];
+    expect(stageCall.where).toEqual({ jobPostingId: 7 });
+    expect(stageCall.by).toEqual(['currentStage']);
+  });
+
+  it('지원 0건 공고 → 전 키 0, total 0', async () => {
+    basePrisma.application.groupBy.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const stats = await getApplicantStatsByPosting(99);
+    expect(stats.total).toBe(0);
+    expect(Object.values(stats.byStage).every((n) => n === 0)).toBe(true);
+    expect(Object.values(stats.byResult).every((n) => n === 0)).toBe(true);
   });
 });
 
