@@ -1,5 +1,6 @@
 import 'server-only';
 import { AuditEventType, StageType, ApplicationResult } from '@prisma/client';
+import type { PortfolioLinkType, VirusScanStatus } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { recordAuditEvent } from '@/lib/audit/record';
@@ -171,6 +172,27 @@ export interface ApplicantStatusHistoryEntry {
   changedByUserId: number | null;
 }
 
+/** 첨부 이력서 메타 (CANDID-066) — app당 최대 1건(BR-FILE).
+ *  ⚠️ storedPath(S3 키)·checksum 등 내부 메타는 의도적으로 비노출 — 경로 추측/직접접근 차단. */
+export interface ApplicantResumeFileMeta {
+  id: number;
+  originalFilename: string;
+  contentType: string;
+  /** bytes. Prisma BigInt → number 변환(JSON 직렬화 + UI 표기용). */
+  fileSize: number;
+  virusScanStatus: VirusScanStatus;
+  uploadedAt: Date;
+}
+
+/** 포트폴리오 링크 (CANDID-066) — 표시 전용(서버 fetch 없음). */
+export interface ApplicantPortfolioLinkView {
+  id: number;
+  linkType: PortfolioLinkType;
+  url: string;
+  memo: string | null;
+  sortOrder: number;
+}
+
 export interface ApplicantDetail {
   applicationId: number;
   applicationNumber: string;
@@ -188,6 +210,10 @@ export interface ApplicantDetail {
     address: string | null;
   };
   statusHistory: ApplicantStatusHistoryEntry[];
+  /** 첨부 이력서 메타 (없으면 null). 실제 파일 다운로드는 별도 보안 엔드포인트(presigned). */
+  resumeFile: ApplicantResumeFileMeta | null;
+  /** 포트폴리오 링크 (sortOrder asc). */
+  portfolioLinks: ApplicantPortfolioLinkView[];
 }
 
 export interface GetApplicantDetailArgs {
@@ -226,6 +252,21 @@ export async function getApplicantDetailForOperator(
       statusHistories: {
         orderBy: { changedAt: 'desc' },
         select: { fromStage: true, toStage: true, changedAt: true, changedByUserId: true },
+      },
+      // CANDID-066 — 첨부/포트폴리오. resumeFiles는 storedPath·checksum 미선택(내부 경로 비노출).
+      resumeFiles: {
+        select: {
+          id: true,
+          originalFilename: true,
+          contentType: true,
+          fileSize: true,
+          virusScanStatus: true,
+          uploadedAt: true,
+        },
+      },
+      portfolioLinks: {
+        orderBy: { sortOrder: 'asc' },
+        select: { id: true, linkType: true, url: true, memo: true, sortOrder: true },
       },
     },
   });
@@ -268,6 +309,25 @@ export async function getApplicantDetailForOperator(
       toStage: h.toStage,
       changedAt: h.changedAt,
       changedByUserId: h.changedByUserId,
+    })),
+    // app당 최대 1건(부분 UNIQUE) — 첫 건만 노출. BigInt fileSize → number.
+    resumeFile:
+      app.resumeFiles.length > 0
+        ? {
+            id: app.resumeFiles[0]!.id,
+            originalFilename: app.resumeFiles[0]!.originalFilename,
+            contentType: app.resumeFiles[0]!.contentType,
+            fileSize: Number(app.resumeFiles[0]!.fileSize),
+            virusScanStatus: app.resumeFiles[0]!.virusScanStatus,
+            uploadedAt: app.resumeFiles[0]!.uploadedAt,
+          }
+        : null,
+    portfolioLinks: app.portfolioLinks.map((l) => ({
+      id: l.id,
+      linkType: l.linkType,
+      url: l.url,
+      memo: l.memo,
+      sortOrder: l.sortOrder,
     })),
   };
 }
