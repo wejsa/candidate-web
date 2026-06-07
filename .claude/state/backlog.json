@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 562,
+    "version": 563,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:05:15.751+00:00"
+    "updatedAt": "2026-06-07T13:07:19.251+00:00"
   },
   "summary": {
     "total": 64,
@@ -4518,12 +4518,13 @@
       "dependencies": [],
       "createdAt": "2026-06-07T11:47:53.256+00:00",
       "workflowState": {
-        "currentSkill": "crew-review-pr",
-        "lastCompletedSkill": "crew-impl",
+        "currentSkill": "crew-merge-pr",
+        "lastCompletedSkill": "crew-review-pr",
         "prNumber": 162,
         "fixLoopCount": 0,
-        "autoChainArgs": "162 --auto-fix",
-        "updatedAt": "2026-06-07T13:05:15.751+00:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "162",
+        "updatedAt": "2026-06-07T13:07:19.251+00:00"
       },
       "steps": [
         {
