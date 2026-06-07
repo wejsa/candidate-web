@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 66,
+    "version": 67,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T13:51:43.536+00:00"
+    "updatedAt": "2026-06-07T14:41:28.662+00:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1816,6 +1816,27 @@
       "reviewSummary": "T0 직접 리뷰(순수 카피). 홈/메타 엔지니어→인재 포괄 전환 5곳 + 회귀 가드. CRITICAL 0. typecheck/lint/home-copy green.",
       "carry": [
         "히어로 eyebrow(HOJI ENGINEERING)·부제(Spring Boot…) 엔지니어 색채 잔존 — 직군 완전 포괄 원하면 후속 카피 Task로 확장 가능"
+      ]
+    },
+    "CANDID-066": {
+      "id": "CANDID-066",
+      "title": "백오피스 지원서 상세: 이력서 파일 + 포트폴리오 링크 열람",
+      "phase": 4,
+      "priority": "high",
+      "type": "feature",
+      "completedAt": "2026-06-07T14:41:28.662+00:00",
+      "assignee": "jaese@hoji-20260607140726.",
+      "prs": [
+        165,
+        166,
+        167
+      ],
+      "totalMergedLines": 757,
+      "stepCount": 3,
+      "reviewSummary": "3스텝(데이터/보안 다운로드 API/UI). 메인 직접 리뷰 폴백(1M-subagent-fallback) 전부 0 CRITICAL. 이력서=PII 문서 → 역할가드+fail-closed 감사(RESUME_DOWNLOAD)+INFECTED 차단+presigned GET(TTL60s)+storedPath 비노출. 포트폴리오 표시(noopener). test 2294/2294.",
+      "carry": [
+        "운영 전제: 실제 다운로드는 S3/MinIO 인프라 + prisma migrate deploy(RESUME_DOWNLOAD enum) 필요",
+        "바이러스 스캔 게이팅 PENDING/FAILED 허용은 ClamAV 골격(CANDID-029) 현실 반영 — 스캔 인프라 도입 후 강화 여지"
       ]
     }
   }
