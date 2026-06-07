@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 550,
+    "version": 551,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T11:47:53.256+00:00"
+    "updatedAt": "2026-06-07T12:00:20.988+00:00"
   },
   "summary": {
     "total": 64,
     "done": 60,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 4
+    "todo": 3
   },
   "phases": {
     "1": {
@@ -4431,22 +4431,30 @@
       "id": "CANDID-061",
       "title": "테스트 스위트 회귀 복구 — 21건 실패(7파일)",
       "description": "crew-health-check(DS-02) 탐지: vitest 21건 실패/2276. (1) tests/a11y/foundation.test.tsx 8건 — globals.css에서 prefers-reduced-motion·visually-hidden·링크 색 토큰 규칙 누락 → 색 대비 NaN(WCAG 1.4.3/1.4.11). 4d6a0c7 \"모달 CSS 복원\" 커밋에서 a11y 파운데이션 primitive 유실 의심. (2) admin 가드 와이어링 7건 — StatusControl.test.tsx(1)/admin-guard-wiring.test.tsx(2)/applicant-pages-guard-wiring.test.tsx(4): requireOperatorPage defense-in-depth 호출 회귀. (3) email-verification.test.ts 4건 — resendVerificationEmail 토큰 invalidate/재발행·tx 롤백(H011 회귀가드). (4) transport.test.ts 1건 — STARTTLS requireTLS/TLS1.2 운영 게이트(H001). (5) validate.test.ts 1건 — careerLevel 검증 step1_personal.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "bug",
       "priority": "critical",
       "phase": 4,
       "micro": false,
       "specFile": null,
-      "assignee": null,
-      "assignedAt": null,
+      "assignee": "jaese@hoji-20260607120020.",
+      "assignedAt": "2026-06-07T12:00:20.988+00:00",
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T11:03:41.765+00:00",
       "source": "crew-health-check 자동 등록 (DS-02 CRITICAL FAIL, 2026-06-07)",
-      "workflowState": null,
+      "workflowState": {
+        "currentSkill": "crew-plan",
+        "lastCompletedSkill": null,
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-07T12:00:20.988+00:00"
+      },
       "steps": [],
       "currentStep": 0,
-      "completedAt": null
+      "completedAt": null,
+      "lockTTL": 1800
     },
     "CANDID-062": {
       "specFile": null,
