@@ -50,7 +50,11 @@ export default async function ProfilePage() {
         <p className={styles.heroSubtitle}>계정 정보를 확인하고 수정합니다.</p>
       </header>
       <ProfileView profile={profile} />
-      <EmailVerificationSection emailVerified={profile.emailVerified} email={profile.email} />
+      <EmailVerificationSection
+        emailVerified={profile.emailVerified}
+        email={profile.email}
+        devMode={process.env.NODE_ENV !== 'production'}
+      />
       <ProfileEditForm
         initialName={profile.name}
         phoneMasked={profile.phoneMasked}

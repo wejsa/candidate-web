@@ -1,6 +1,7 @@
 import 'server-only';
 import { AuditEventType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { getEnv } from '@/lib/env';
 import { AppError } from '@/lib/errors';
 import { recordAuditEventSafe } from '@/lib/audit/record';
 import { generateTokenHex, sha256Hex } from '@/lib/auth/token-hash';
@@ -221,4 +222,56 @@ export async function resendVerificationEmail(
     verificationToken,
     nextResendAvailableAt: new Date(now.getTime() + RESEND_COOLDOWN_MS),
   };
+}
+
+/**
+ * 개발 전용 — 이메일 인증을 메일 링크 클릭 없이 즉시 완료 처리한다.
+ *
+ * 로컬은 메일 캐처(maildev)를 써 실제 수신함이 없으므로, 프로필에서 버튼 한 번으로
+ * 인증을 끝낼 수 있게 하는 개발 편의 기능. 미소진 토큰을 전부 소진해 부분 유니크 슬롯도 정리한다.
+ *
+ * ⚠️ production에서는 절대 동작 금지 — 이메일 소유 증명 없이 self-verify가 가능해지면
+ *    BR-AUTH-04(이메일 인증 게이트)를 우회한다. 라우트(404 차단) + 본 함수(throw) 이중 가드.
+ */
+export async function devVerifyEmailNow(
+  userId: number,
+): Promise<{ emailVerifiedAt: Date; alreadyVerified: boolean }> {
+  if (getEnv().NODE_ENV === 'production') {
+    // 운영 안전 가드 — 라우트가 먼저 차단하지만, 다른 호출 경로가 추가돼도 막히도록 방어.
+    throw new AppError('AUTH_FORBIDDEN');
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    const now = new Date();
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { emailVerifiedAt: true },
+    });
+    if (user === null) {
+      throw new AppError('USER_NOT_FOUND');
+    }
+    if (user.emailVerifiedAt !== null) {
+      return { emailVerifiedAt: user.emailVerifiedAt, alreadyVerified: true };
+    }
+    // 미소진 토큰 전부 소진(부분 유니크 정리) + 인증 완료.
+    await tx.emailVerification.updateMany({
+      where: { userId, consumedAt: null },
+      data: { consumedAt: now },
+    });
+    await tx.user.update({ where: { id: userId }, data: { emailVerifiedAt: now } });
+    return { emailVerifiedAt: now, alreadyVerified: false };
+  });
+
+  // 신규 인증만 감사 emit. fail-open. dev 경로임을 metadata로 식별(PII-free).
+  if (!result.alreadyVerified) {
+    await recordAuditEventSafe({
+      eventType: AuditEventType.EMAIL_VERIFIED,
+      actorUserId: userId,
+      resourceType: 'user',
+      resourceId: String(userId),
+      metadata: { dev: true },
+    });
+  }
+
+  return result;
 }

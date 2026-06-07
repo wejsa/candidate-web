@@ -169,6 +169,13 @@
   font-weight: 600;
 }
 
+/* 인증 액션 버튼 행 — 재발송 + (dev) 즉시 인증. 좁은 폭에선 줄바꿈. */
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .socialActions {
   display: inline-flex;
   align-items: center;
