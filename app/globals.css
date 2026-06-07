@@ -145,6 +145,21 @@ main {
   }
 }
 
+/* a11y 유틸 (CANDID-028). 스크린리더 전용 텍스트 — 시각적으로만 숨기고 접근성 트리에는 노출.
+   (리브랜드 globals.css 재작성 시 유실됐던 규칙 복원 — CANDID-061.) */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* 본문 바로가기(skip link, WCAG 2.4.1). 평소엔 화면 밖으로 숨기고, 키보드 포커스
    시에만 좌상단에 노출 → 마우스 사용자에겐 안 보이되 키보드/스크린리더는 헤더를 건너뛴다.
    (layout.tsx <a class="skip-link"> 대상. 잘림 사고로 유실됐던 규칙 복원.) */
@@ -215,6 +230,18 @@ code {
 
 :focus:not(:focus-visible) {
   outline: none;
+}
+
+/* 모션 민감 사용자 배려 (WCAG 2.3.3). 리브랜드 재작성 시 유실됐던 규칙 복원 — CANDID-061. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* 폼 컨트롤 전역 스타일 + 터치 타깃. bare label/input/select/textarea에 일괄 적용. */
