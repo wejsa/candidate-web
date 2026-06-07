@@ -72,6 +72,8 @@ beforeEach(() => {
     withdrawnAt: null,
     applicant: { name: '홍길동', email: 'a@b.com', phone: '010', birthDate: '1990-01-01', address: '서울' },
     statusHistory: [],
+    resumeFile: null,
+    portfolioLinks: [],
   });
 });
 afterEach(() => cleanup());
@@ -194,6 +196,8 @@ describe('지원서 상세 페이지', () => {
         { fromStage: null, toStage: 'DOC_REVIEW', changedAt: new Date('2026-07-01T05:00:00Z'), changedByUserId: 1 },
         { fromStage: 'DOC_REVIEW', toStage: 'INTERVIEW_1', changedAt: new Date('2026-07-05T05:00:00Z'), changedByUserId: 1 },
       ],
+      resumeFile: null,
+      portfolioLinks: [],
     });
     render(await DetailPage({ params: { id: '5' } }));
     expect(screen.getByText(/철회:/)).toBeInTheDocument();
@@ -209,5 +213,38 @@ describe('지원서 상세 페이지', () => {
   it('APP_NOT_FOUND → notFound', async () => {
     applicants.getApplicantDetailForOperator.mockRejectedValueOnce(new AppError('APP_NOT_FOUND'));
     await expect(DetailPage({ params: { id: '999' } })).rejects.toThrow('NEXT_NOT_FOUND');
+  });
+
+  it('첨부 이력서 + 포트폴리오 렌더 (CANDID-066: 파일 메타·다운로드 버튼·noopener 링크)', async () => {
+    applicants.getApplicantDetailForOperator.mockResolvedValue({
+      applicationId: 5,
+      applicationNumber: 'A-202607-00001',
+      jobPosting: { id: 9, title: '백엔드' },
+      currentStage: 'DOC_REVIEW',
+      result: 'IN_PROGRESS',
+      submittedAt: new Date('2026-07-01T05:00:00Z'),
+      withdrawnAt: null,
+      applicant: { name: '홍길동', email: 'a@b.com', phone: '010', birthDate: '1990-01-01', address: '서울' },
+      statusHistory: [],
+      resumeFile: {
+        id: 88,
+        originalFilename: '이력서.pdf',
+        contentType: 'application/pdf',
+        fileSize: 2048,
+        virusScanStatus: 'CLEAN',
+        uploadedAt: new Date('2026-07-01T01:00:00Z'),
+      },
+      portfolioLinks: [
+        { id: 1, linkType: 'GITHUB', url: 'https://github.com/u', memo: null, sortOrder: 0 },
+      ],
+    });
+    render(await DetailPage({ params: { id: '5' } }));
+    // 파일 메타 + 다운로드 버튼(client) 노출.
+    expect(screen.getByText('이력서.pdf')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '이력서 다운로드' })).toBeInTheDocument();
+    // 포트폴리오 외부 링크는 noopener/noreferrer + 새 탭(탭재킹 방지).
+    const link = screen.getByRole('link', { name: 'https://github.com/u' });
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   });
 });
