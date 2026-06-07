@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 65,
     "projectPrefix": "CANDID",
-    "version": 574,
+    "version": 575,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:47:45.864+00:00"
+    "updatedAt": "2026-06-07T13:50:07.929+00:00"
   },
   "summary": {
     "total": 65,
@@ -4598,29 +4598,30 @@
       "createdAt": "2026-06-07T13:41:01.515+00:00",
       "source": "사용자 요청 — 엔지니어만 채용하는 게 아니므로 \"인재\"로 포괄 전환.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-plan",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 164,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-07T13:47:45.864+00:00"
+        "autoChainArgs": "164 --auto-fix",
+        "updatedAt": "2026-06-07T13:50:07.929+00:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "엔지니어→인재 카피 전환 + 회귀 가드",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 120,
           "files": [
             "app/page.tsx",
             "tests/app/home-copy.test.ts"
-          ]
+          ],
+          "prNumber": 164
         }
       ],
       "currentStep": 1,
       "completedAt": null,
       "lockTTL": 3600,
-      "lockedAt": "2026-06-07T13:47:45.864+00:00",
+      "lockedAt": "2026-06-07T13:50:07.929+00:00",
       "lockedBy": "jaese@hoji-20260607134228."
     }
   }
