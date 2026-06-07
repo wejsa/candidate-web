@@ -2,7 +2,7 @@
   "metadata": {
     "lastTaskNumber": 54,
     "projectPrefix": "CANDID",
-    "version": 517,
+    "version": 518,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-06-07T00:00:00.000Z"
   },
@@ -4179,13 +4179,13 @@
       "planPath": ".claude/temp/CANDID-054-plan.md",
       "source": "사용자 요청('어드민 기능 강화, 공고관리 페이지 전체 너비 화면 맞춤, 지원자 목록을 대시보드처럼 한번에') — crew-feature 요구사항 정의 승인(2026-06-07). 너비 1200px 캡 + 전체 4 FR 확정.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-merge-pr",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 153,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
+        "autoChainArgs": "153 --auto-fix",
         "lastReviewDecision": null,
-        "updatedAt": "2026-06-07T15:05:00+09:00"
+        "updatedAt": "2026-06-07T15:15:00+09:00"
       },
       "steps": [
         {
@@ -4222,7 +4222,7 @@
         {
           "number": 3,
           "title": "운영 홈 + 공고 목록 강화 (FR-003·FR-004)",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 550,
           "estimatedLines": 440,
           "files": [
@@ -4235,7 +4235,8 @@
           ],
           "dependencies": [
             1
-          ]
+          ],
+          "prNumber": 153
         }
       ],
       "currentStep": 3
