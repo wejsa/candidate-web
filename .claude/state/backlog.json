@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 553,
+    "version": 554,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T12:16:22.140+00:00"
+    "updatedAt": "2026-06-07T12:19:04.317+00:00"
   },
   "summary": {
     "total": 64,
@@ -4453,12 +4453,13 @@
       "createdAt": "2026-06-07T11:03:41.765+00:00",
       "source": "crew-health-check 자동 등록 (DS-02 CRITICAL FAIL, 2026-06-07)",
       "workflowState": {
-        "currentSkill": "crew-review-pr",
-        "lastCompletedSkill": "crew-impl",
+        "currentSkill": "crew-merge-pr",
+        "lastCompletedSkill": "crew-review-pr",
         "prNumber": 160,
         "fixLoopCount": 0,
-        "autoChainArgs": "160 --auto-fix",
-        "updatedAt": "2026-06-07T12:16:22.140+00:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "160",
+        "updatedAt": "2026-06-07T12:19:04.317+00:00"
       },
       "steps": [
         {
