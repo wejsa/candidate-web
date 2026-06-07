@@ -53,8 +53,6 @@ export interface InterviewSummary {
   scheduledAt: string; // ISO
   locationOrUrl: string;
   status: InterviewScheduleStatus;
-  /** .ics 다운로드 endpoint URL (라우터 경유). */
-  icsDownloadUrl: string;
 }
 
 export interface MyApplicationDetailResponse {

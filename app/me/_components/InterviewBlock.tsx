@@ -1,4 +1,4 @@
-// CANDID-019 Step 3 — 면접 일정 블록 + .ics 다운로드.
+// CANDID-019 Step 3 — 면접 일정 블록.
 
 import type { InterviewSummary } from '@/lib/my-page/types';
 import { interviewStatusLabel } from '@/lib/my-page/stage-labels';
@@ -32,13 +32,6 @@ export function InterviewBlock({ interviews }: InterviewBlockProps) {
               <dt>상태</dt>
               <dd>{interviewStatusLabel(iv.status)}</dd>
             </dl>
-            <a
-              href={iv.icsDownloadUrl}
-              download={`interview-${iv.scheduleId}.ics`}
-              aria-label={`${iv.stageLabel} 면접 일정 캘린더 파일 다운로드`}
-            >
-              📅 캘린더에 추가 (.ics)
-            </a>
           </li>
         );
       })}

@@ -26,9 +26,7 @@ const { basePrisma } = (await import('@/lib/prisma')) as unknown as {
     interviewSchedule: { findFirst: Mock };
   };
 };
-const { getMyApplicationDetail, getMyInterviewSchedule } = await import(
-  '@/lib/my-page/detail-service'
-);
+const { getMyApplicationDetail } = await import('@/lib/my-page/detail-service');
 
 const USER_ID = 42;
 const APP_ID = 100;
@@ -110,7 +108,6 @@ describe('getMyApplicationDetail — 정상', () => {
       scheduleId: SCHEDULE_ID,
       stage: StageType.INTERVIEW_1,
       stageLabel: '1차 면접',
-      icsDownloadUrl: `/api/v1/applications/me/${APP_ID}/interview.ics?scheduleId=${SCHEDULE_ID}`,
     });
   });
 
@@ -184,62 +181,5 @@ describe('getMyApplicationDetail — PII select 화이트리스트 + 어드민 �
     const serialized = JSON.stringify(result);
     expect(serialized).not.toContain('@');
     expect(serialized).not.toMatch(/\d{2,3}-\d{3,4}-\d{4}/);
-  });
-});
-
-describe('getMyInterviewSchedule — ownership 강제', () => {
-  it('null 반환 → AppError(APP_INTERVIEW_NOT_FOUND) 404 (review C1 fix)', async () => {
-    basePrisma.interviewSchedule.findFirst.mockResolvedValueOnce(null);
-    let caught: unknown;
-    try {
-      await getMyInterviewSchedule(USER_ID, APP_ID, SCHEDULE_ID);
-    } catch (err) {
-      caught = err;
-    }
-    expect(isAppError(caught)).toBe(true);
-    expect((caught as AppError).code).toBe('APP_INTERVIEW_NOT_FOUND');
-    expect((caught as AppError).status).toBe(404);
-  });
-
-  it('where 절에 ownership + status != CANCELLED 명시', async () => {
-    basePrisma.interviewSchedule.findFirst.mockResolvedValueOnce({
-      id: SCHEDULE_ID,
-      stage: StageType.INTERVIEW_1,
-      scheduledAt: new Date('2026-05-15T05:00:00Z'),
-      locationOrUrl: '서울시 강남구',
-      status: InterviewScheduleStatus.SCHEDULED,
-      icsUid: 'iv-7@cw.example.com',
-      application: {
-        applicationNumber: 'A-202605-00001',
-        jobPosting: { title: '백엔드 엔지니어' },
-      },
-    });
-    await getMyInterviewSchedule(USER_ID, APP_ID, SCHEDULE_ID);
-    const call = basePrisma.interviewSchedule.findFirst.mock.calls[0]?.[0];
-    expect(call.where).toEqual({
-      id: SCHEDULE_ID,
-      applicationId: APP_ID,
-      application: { userId: USER_ID },
-      status: { not: InterviewScheduleStatus.CANCELLED },
-    });
-  });
-
-  it('정상 반환 — applicationNumber/jobTitle 매핑', async () => {
-    basePrisma.interviewSchedule.findFirst.mockResolvedValueOnce({
-      id: SCHEDULE_ID,
-      stage: StageType.INTERVIEW_2,
-      scheduledAt: new Date('2026-05-20T05:00:00Z'),
-      locationOrUrl: 'https://meet.example.com/xyz',
-      status: InterviewScheduleStatus.SCHEDULED,
-      icsUid: 'iv-7@cw.example.com',
-      application: {
-        applicationNumber: 'A-202605-00001',
-        jobPosting: { title: '백엔드 엔지니어' },
-      },
-    });
-    const result = await getMyInterviewSchedule(USER_ID, APP_ID, SCHEDULE_ID);
-    expect(result.applicationNumber).toBe('A-202605-00001');
-    expect(result.jobTitle).toBe('백엔드 엔지니어');
-    expect(result.locationOrUrl).toBe('https://meet.example.com/xyz');
   });
 });

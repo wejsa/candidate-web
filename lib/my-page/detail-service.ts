@@ -135,75 +135,10 @@ export async function getMyApplicationDetail(
     scheduledAt: i.scheduledAt.toISOString(),
     locationOrUrl: i.locationOrUrl,
     status: i.status,
-    icsDownloadUrl: buildIcsDownloadUrl(applicationId, i.id),
   }));
 
   // interviewStatusLabel은 클라이언트에서 사용 (현재 DTO는 미포함). 향후 라벨 노출 시 활용.
   void interviewStatusLabel;
 
   return { summary, timeline, interviews };
-}
-
-/**
- * .ics 다운로드 라우터 URL 생성 (라우터 경유 — 직접 외부 URL 노출 없음).
- */
-function buildIcsDownloadUrl(applicationId: number, scheduleId: number): string {
-  return `/api/v1/applications/me/${applicationId}/interview.ics?scheduleId=${scheduleId}`;
-}
-
-/**
- * 상세 응답에 ownership을 강제하여 interview의 ics 발급 시 재사용할 단일 schedule 조회.
- * Route Handler가 별도 ownership 검증 없이 본 함수만 사용하면 회귀 차단.
- */
-export async function getMyInterviewSchedule(
-  userId: number,
-  applicationId: number,
-  scheduleId: number,
-): Promise<{
-  id: number;
-  stage: StageType;
-  scheduledAt: Date;
-  locationOrUrl: string;
-  status: InterviewScheduleStatus;
-  icsUid: string;
-  applicationNumber: string;
-  jobTitle: string;
-}> {
-  const row = await basePrisma.interviewSchedule.findFirst({
-    where: {
-      id: scheduleId,
-      applicationId,
-      application: { userId },
-      status: { not: InterviewStatus.CANCELLED },
-    },
-    select: {
-      id: true,
-      stage: true,
-      scheduledAt: true,
-      locationOrUrl: true,
-      status: true,
-      icsUid: true,
-      application: {
-        select: {
-          applicationNumber: true,
-          jobPosting: { select: { title: true } },
-        },
-      },
-    },
-  });
-  if (row === null) {
-    // C1 fix (review fix loop 1): 면접 도메인 전용 코드 (FILE_NOT_FOUND 시맨틱 충돌 해소).
-    // 부재 + 권한 없음 + CANCELLED 모두 동일 코드 (정보 누출 회피, CANDID-017 패턴).
-    throw new AppError('APP_INTERVIEW_NOT_FOUND');
-  }
-  return {
-    id: row.id,
-    stage: row.stage,
-    scheduledAt: row.scheduledAt,
-    locationOrUrl: row.locationOrUrl,
-    status: row.status,
-    icsUid: row.icsUid,
-    applicationNumber: row.application.applicationNumber,
-    jobTitle: row.application.jobPosting.title,
-  };
 }
