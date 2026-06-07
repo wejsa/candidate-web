@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 66,
     "projectPrefix": "CANDID",
-    "version": 579,
+    "version": 580,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T14:07:26.137+00:00"
+    "updatedAt": "2026-06-07T14:13:33.734+00:00"
   },
   "summary": {
     "total": 66,
@@ -4627,23 +4627,68 @@
       "specFile": "docs/requirements/CANDID-066-spec.md",
       "assignee": "jaese@hoji-20260607140726.",
       "assignedAt": "2026-06-07T14:07:26.137+00:00",
-      "lockedBy": "jaese@hoji-20260607140726.",
-      "lockedAt": "2026-06-07T14:07:26.137+00:00",
-      "lockedFiles": [],
+      "lockedBy": null,
+      "lockedAt": "2026-06-07T14:13:33.734+00:00",
+      "lockedFiles": [
+        "lib/admin/applicants.ts",
+        "tests/lib/admin/applicants.test.ts",
+        "prisma/schema.prisma",
+        "lib/errors/codes.ts",
+        "lib/files/storage.ts",
+        "app/api/admin/v1/applications/[id]/resume/route.ts",
+        "app/admin/applications/[id]/page.tsx",
+        "app/admin/applications/_components/ResumeDownloadButton.tsx",
+        "app/admin/applications.module.css"
+      ],
       "dependencies": [],
       "createdAt": "2026-06-07T14:06:56.377+00:00",
       "source": "사용자 요청 — admin 상세에서 지원자 첨부 파일/포트폴리오 미표시 → 운영자 열람 기능 추가.",
       "workflowState": {
-        "currentSkill": "crew-plan",
-        "lastCompletedSkill": "crew-feature",
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-06-07T14:07:26.137+00:00"
+        "updatedAt": "2026-06-07T14:13:33.734+00:00"
       },
-      "steps": [],
+      "steps": [
+        {
+          "number": 1,
+          "title": "데이터 레이어 — 상세에 이력서/포트폴리오 포함",
+          "status": "pending",
+          "prLineLimit": 500,
+          "files": [
+            "lib/admin/applicants.ts",
+            "tests/lib/admin/applicants.test.ts"
+          ]
+        },
+        {
+          "number": 2,
+          "title": "보안 다운로드 API (presign+가드+감사+virus 게이팅)",
+          "status": "pending",
+          "prLineLimit": 700,
+          "files": [
+            "prisma/schema.prisma",
+            "lib/errors/codes.ts",
+            "lib/files/storage.ts",
+            "app/api/admin/v1/applications/[id]/resume/route.ts"
+          ]
+        },
+        {
+          "number": 3,
+          "title": "상세 UI 섹션 (첨부+포트폴리오)",
+          "status": "pending",
+          "prLineLimit": 500,
+          "files": [
+            "app/admin/applications/[id]/page.tsx",
+            "app/admin/applications/_components/ResumeDownloadButton.tsx",
+            "app/admin/applications.module.css"
+          ]
+        }
+      ],
       "completedAt": null,
-      "lockTTL": 3600
+      "lockTTL": 10800,
+      "currentStep": 1
     }
   }
 }
