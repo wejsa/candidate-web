@@ -25,6 +25,10 @@
 - [x] 중복 제출 방지: 멱등성 키 + `UNIQUE(user_id, job_posting_id) WHERE result != WITHDRAWN`.
 - [x] 제출 처리 중 네트워크 단절 시 서버 멱등 처리(재시도 안전).
 
+## ⚠️ 외부 알림 전달 한계 (정확성 노트)
+- 제출 **플로우**(검증·트랜잭션·멱등성·지원번호 발급)는 구현 완료, 실제 동작.
+- 단, **확인 이메일 발송**과 **Slack 알림**은 외부 연동 의존이며 fire-and-forget(BR-TX-02): 운영 SMTP/Slack Webhook 미구성 시 **전달되지 않는다**(제출 자체는 차단되지 않음). 메일 전달 한계 상세는 [CANDID-020-spec.md](./CANDID-020-spec.md) "현재 한계" 참조.
+
 ## 구현 참조
-- 상태: **구현 완료** — PR **#67**(DB 마이그/멱등성 store), **#68**(submit 비즈니스 + validate + 트랜잭션), **#69**(Route Handler POST + 멱등성 미들웨어 + 통합 테스트 25케이스).
+- 상태: 제출 플로우 **구현 완료** — PR **#67**(DB 마이그/멱등성 store), **#68**(submit 비즈니스 + validate + 트랜잭션), **#69**(Route Handler POST + 멱등성 미들웨어 + 통합 테스트 25케이스). (확인 메일/Slack 전달은 위 한계 참조)
 - 주요 영역: `app/api/v1/applications/**`, `lib/applications/{submit,validate,number-generator}.ts`, `lib/idempotency/**`.
