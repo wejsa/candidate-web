@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 66,
     "projectPrefix": "CANDID",
-    "version": 586,
+    "version": 587,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T14:30:23.500+00:00"
+    "updatedAt": "2026-06-07T14:39:53.209+00:00"
   },
   "summary": {
     "total": 66,
@@ -4628,7 +4628,7 @@
       "assignee": "jaese@hoji-20260607140726.",
       "assignedAt": "2026-06-07T14:07:26.137+00:00",
       "lockedBy": null,
-      "lockedAt": "2026-06-07T14:30:23.500+00:00",
+      "lockedAt": "2026-06-07T14:39:53.209+00:00",
       "lockedFiles": [
         "app/admin/applications/[id]/page.tsx",
         "app/admin/applications/_components/ResumeDownloadButton.tsx",
@@ -4638,12 +4638,12 @@
       "createdAt": "2026-06-07T14:06:56.377+00:00",
       "source": "사용자 요청 — admin 상세에서 지원자 첨부 파일/포트폴리오 미표시 → 운영자 열람 기능 추가.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-merge-pr",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 167,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-07T14:30:23.500+00:00"
+        "autoChainArgs": "167 --auto-fix",
+        "updatedAt": "2026-06-07T14:39:53.209+00:00"
       },
       "steps": [
         {
@@ -4675,13 +4675,14 @@
         {
           "number": 3,
           "title": "상세 UI 섹션 (첨부+포트폴리오)",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 500,
           "files": [
             "app/admin/applications/[id]/page.tsx",
             "app/admin/applications/_components/ResumeDownloadButton.tsx",
             "app/admin/applications.module.css"
-          ]
+          ],
+          "prNumber": 167
         }
       ],
       "completedAt": null,
