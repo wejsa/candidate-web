@@ -2,7 +2,7 @@
   "metadata": {
     "lastTaskNumber": 54,
     "projectPrefix": "CANDID",
-    "version": 513,
+    "version": 514,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-06-07T00:00:00.000Z"
   },
@@ -4179,13 +4179,13 @@
       "planPath": ".claude/temp/CANDID-054-plan.md",
       "source": "사용자 요청('어드민 기능 강화, 공고관리 페이지 전체 너비 화면 맞춤, 지원자 목록을 대시보드처럼 한번에') — crew-feature 요구사항 정의 승인(2026-06-07). 너비 1200px 캡 + 전체 4 FR 확정.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-merge-pr",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 152,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
+        "autoChainArgs": "152 --auto-fix",
         "lastReviewDecision": null,
-        "updatedAt": "2026-06-07T14:40:00+09:00"
+        "updatedAt": "2026-06-07T14:50:00+09:00"
       },
       "steps": [
         {
@@ -4204,7 +4204,8 @@
         {
           "number": 2,
           "title": "지원자 대시보드 (FR-002)",
-          "status": "pending",
+          "status": "pr_created",
+          "prNumber": 152,
           "prLineLimit": 550,
           "estimatedLines": 460,
           "files": [
