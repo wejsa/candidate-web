@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 66,
     "projectPrefix": "CANDID",
-    "version": 580,
+    "version": 581,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T14:13:33.734+00:00"
+    "updatedAt": "2026-06-07T14:17:39.084+00:00"
   },
   "summary": {
     "total": 66,
@@ -4628,7 +4628,7 @@
       "assignee": "jaese@hoji-20260607140726.",
       "assignedAt": "2026-06-07T14:07:26.137+00:00",
       "lockedBy": null,
-      "lockedAt": "2026-06-07T14:13:33.734+00:00",
+      "lockedAt": "2026-06-07T14:17:39.084+00:00",
       "lockedFiles": [
         "lib/admin/applicants.ts",
         "tests/lib/admin/applicants.test.ts",
@@ -4644,23 +4644,24 @@
       "createdAt": "2026-06-07T14:06:56.377+00:00",
       "source": "사용자 요청 — admin 상세에서 지원자 첨부 파일/포트폴리오 미표시 → 운영자 열람 기능 추가.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-plan",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 165,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-07T14:13:33.734+00:00"
+        "autoChainArgs": "165 --auto-fix",
+        "updatedAt": "2026-06-07T14:17:39.084+00:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "데이터 레이어 — 상세에 이력서/포트폴리오 포함",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 500,
           "files": [
             "lib/admin/applicants.ts",
             "tests/lib/admin/applicants.test.ts"
-          ]
+          ],
+          "prNumber": 165
         },
         {
           "number": 2,
