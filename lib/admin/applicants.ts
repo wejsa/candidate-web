@@ -39,6 +39,8 @@ export interface ApplicantListItem {
 }
 
 export interface ApplicantListResult {
+  /** 어느 공고의 지원자인지 식별용 — 제목은 PII 아님(마스킹/감사 비대상). */
+  posting: { id: number; title: string };
   items: ApplicantListItem[];
   pagination: {
     page: number;
@@ -64,10 +66,10 @@ export async function listApplicantsByPosting(
   const { jobPostingId, page } = args;
   const perPage = args.perPage ?? DEFAULT_PER_PAGE;
 
-  // 공고 존재 검증 — 미존재 공고로 enumeration/오조회 차단.
+  // 공고 존재 검증 — 미존재 공고로 enumeration/오조회 차단. title은 헤더 식별용으로 함께 조회(추가 쿼리 없음).
   const posting = await basePrisma.jobPosting.findUnique({
     where: { id: jobPostingId },
-    select: { id: true },
+    select: { id: true, title: true },
   });
   if (posting === null) {
     throw new AppError('JOB_NOT_FOUND');
@@ -100,6 +102,7 @@ export async function listApplicantsByPosting(
   const totalPages = total === 0 ? 1 : Math.ceil(total / perPage);
 
   return {
+    posting: { id: posting.id, title: posting.title },
     items: rows.map((r) => ({
       applicationId: r.id,
       applicationNumber: r.applicationNumber,
