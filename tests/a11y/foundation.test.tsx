@@ -73,8 +73,9 @@ describe('globals.css 파운데이션 primitive', () => {
     ['터치 타깃 실제 적용', /min-height:\s*var\(--touch-min\)/], // 선언만이 아니라 적용까지 가드
     ['visually-hidden 유틸', /\.visually-hidden\s*\{/],
     ['skip-link 유틸', /\.skip-link\s*\{/],
-    ['포커스 색 토큰', /--color-focus:\s*#[0-9a-fA-F]{6}/],
-    ['링크 색 토큰', /--color-link:\s*#0066cc/],
+    // 인디고 리브랜드(CANDID-061): 토큰이 var(--brand)로 정의됨. 실제 대비비는 아래 대비 describe가 검증.
+    ['포커스 색 토큰', /--color-focus:\s*var\(--brand\)/],
+    ['링크 색 토큰', /--color-link:\s*var\(--brand\)/],
   ])('%s 규칙을 포함한다', (_label, re) => {
     expect(css).toMatch(re);
   });
@@ -85,10 +86,17 @@ describe('globals.css 파운데이션 primitive', () => {
 describe('globals.css 색 토큰 대비비 (WCAG 1.4.3 / 1.4.11)', () => {
   const css = stripCssComments(readFileSync(path.resolve(process.cwd(), 'app/globals.css'), 'utf8'));
 
-  function token(name: string): string {
-    const value = css.match(new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})`))?.[1];
-    if (value === undefined) throw new Error(`token --${name} 미정의`);
-    return value;
+  // 토큰 값은 직접 hex 또는 var(--other) 간접참조일 수 있다 — 후자는 :root 정의를 재귀 해소한다.
+  // (인디고 리브랜드로 --color-link/--color-focus 등이 var(--brand)로 전환됨 — CANDID-061.)
+  // match(/g 없음)는 파일 첫 정의(:root 라이트모드)를 잡으므로 이후 다크모드 override는 무시된다.
+  function token(name: string, depth = 0): string {
+    if (depth > 5) throw new Error(`token --${name} var 순환 참조`);
+    const raw = css.match(new RegExp(`--${name}:\\s*([^;]+);`))?.[1]?.trim();
+    if (raw === undefined) throw new Error(`token --${name} 미정의`);
+    if (/^#[0-9a-fA-F]{6}$/.test(raw)) return raw;
+    const refName = raw.match(/^var\(\s*--([\w-]+)\s*\)$/)?.[1];
+    if (refName !== undefined) return token(refName, depth + 1);
+    throw new Error(`token --${name} 값 해석 불가: ${raw}`);
   }
   function luminance(hex: string): number {
     const ch = (i: number): number => {

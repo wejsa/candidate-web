@@ -34,12 +34,12 @@ describe('StatusControl', () => {
     render(<StatusControl jobPostingId={1} current="DRAFT" />);
     expect(screen.getByRole('button', { name: '공개' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '마감' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: '비공개로' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '비공개' })).toBeNull();
   });
 
   it('OPEN → 비공개로/마감 버튼(공개 회수 가능)', () => {
     render(<StatusControl jobPostingId={1} current="OPEN" />);
-    expect(screen.getByRole('button', { name: '비공개로' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '비공개' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '마감' })).toBeInTheDocument();
   });
 

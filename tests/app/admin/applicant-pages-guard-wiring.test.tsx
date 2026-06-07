@@ -3,13 +3,34 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
+import { StageType, ApplicationResult } from '@prisma/client';
 import React from 'react';
+
+// 운영 대시보드 페이지 크기(SSOT). 목록 조회 인자 검증에 사용.
+const OPERATOR_DASHBOARD_PER_PAGE = 50;
 
 vi.mock('@/lib/auth/require-role-page', () => ({ requireOperatorPage: vi.fn() }));
 vi.mock('@/lib/admin/applicants', () => ({
   listApplicantsByPosting: vi.fn(),
+  getApplicantStatsByPosting: vi.fn(),
   getApplicantDetailForOperator: vi.fn(),
+  OPERATOR_DASHBOARD_PER_PAGE: 50,
 }));
+
+// 전형 KPI 집계 — 모든 enum 키 0으로 채운 ApplicantStageStats 형태.
+const zeroMap = <T extends string>(vals: readonly T[]): Record<T, number> =>
+  Object.fromEntries(vals.map((v) => [v, 0])) as Record<T, number>;
+const makeStats = () => ({
+  total: 0,
+  byStage: zeroMap(Object.values(StageType)),
+  byResult: zeroMap(Object.values(ApplicationResult)),
+});
+// 목록 조회 결과 — page.tsx는 posting.title(헤더) + items + pagination을 사용.
+const makeList = (items: unknown[], pagination: Record<string, unknown>) => ({
+  posting: { id: 9, title: '백엔드' },
+  items,
+  pagination,
+});
 // 실제 headers().get()은 미존재 시 null 반환(Map은 undefined) — 제어 가능한 mock(테스트별 헤더 주입).
 vi.mock('next/headers', () => ({ headers: vi.fn() }));
 vi.mock('next/navigation', () => ({
@@ -25,6 +46,7 @@ const { requireOperatorPage } = (await import('@/lib/auth/require-role-page')) a
 };
 const applicants = (await import('@/lib/admin/applicants')) as unknown as {
   listApplicantsByPosting: Mock;
+  getApplicantStatsByPosting: Mock;
   getApplicantDetailForOperator: Mock;
 };
 const { headers } = (await import('next/headers')) as unknown as { headers: Mock };
@@ -36,10 +58,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   headers.mockResolvedValue({ get: () => null }); // 기본: 헤더 없음(ip/ua null)
   requireOperatorPage.mockResolvedValue({ userId: 42, role: 'RECRUITER' });
-  applicants.listApplicantsByPosting.mockResolvedValue({
-    items: [],
-    pagination: { page: 1, perPage: 20, total: 0, totalPages: 1, hasMore: false },
-  });
+  applicants.listApplicantsByPosting.mockResolvedValue(
+    makeList([], { page: 1, perPage: OPERATOR_DASHBOARD_PER_PAGE, total: 0, totalPages: 1, hasMore: false }),
+  );
+  applicants.getApplicantStatsByPosting.mockResolvedValue(makeStats());
   applicants.getApplicantDetailForOperator.mockResolvedValue({
     applicationId: 5,
     applicationNumber: 'A-202607-00001',
@@ -62,6 +84,7 @@ describe('지원자 목록 페이지', () => {
       jobPostingId: 9,
       page: 1,
       stage: undefined,
+      perPage: OPERATOR_DASHBOARD_PER_PAGE,
     });
   });
 
@@ -70,29 +93,31 @@ describe('지원자 목록 페이지', () => {
     expect(applicants.listApplicantsByPosting.mock.calls[0]![0].stage).toBe('DOC_REVIEW');
     vi.clearAllMocks();
     requireOperatorPage.mockResolvedValue({ userId: 42, role: 'RECRUITER' });
-    applicants.listApplicantsByPosting.mockResolvedValue({
-      items: [],
-      pagination: { page: 1, perPage: 20, total: 0, totalPages: 1, hasMore: false },
-    });
+    applicants.listApplicantsByPosting.mockResolvedValue(
+      makeList([], { page: 1, perPage: OPERATOR_DASHBOARD_PER_PAGE, total: 0, totalPages: 1, hasMore: false }),
+    );
+    applicants.getApplicantStatsByPosting.mockResolvedValue(makeStats());
     await ApplicantsPage({ params: { id: '9' }, searchParams: { stage: 'BOGUS' } });
     expect(applicants.listApplicantsByPosting.mock.calls[0]![0].stage).toBeUndefined();
   });
 
   it('행 렌더: 마스킹 값 + 상세 링크 표시(평문 미노출 — 마스킹→평문 회귀 차단)', async () => {
-    applicants.listApplicantsByPosting.mockResolvedValue({
-      items: [
-        {
-          applicationId: 5,
-          applicationNumber: 'A-202607-00001',
-          currentStage: 'DOC_REVIEW',
-          result: 'IN_PROGRESS',
-          submittedAt: new Date('2026-07-01T05:00:00Z'),
-          applicantNameMasked: '홍*동',
-          applicantEmailMasked: 'a***@b.com',
-        },
-      ],
-      pagination: { page: 2, perPage: 20, total: 45, totalPages: 3, hasMore: true },
-    });
+    applicants.listApplicantsByPosting.mockResolvedValue(
+      makeList(
+        [
+          {
+            applicationId: 5,
+            applicationNumber: 'A-202607-00001',
+            currentStage: 'DOC_REVIEW',
+            result: 'IN_PROGRESS',
+            submittedAt: new Date('2026-07-01T05:00:00Z'),
+            applicantNameMasked: '홍*동',
+            applicantEmailMasked: 'a***@b.com',
+          },
+        ],
+        { page: 2, perPage: OPERATOR_DASHBOARD_PER_PAGE, total: 45, totalPages: 3, hasMore: true },
+      ),
+    );
     render(await ApplicantsPage({ params: { id: '9' }, searchParams: { page: '2', stage: 'DOC_REVIEW' } }));
     expect(screen.getByText('홍*동')).toBeInTheDocument();
     expect(screen.getByText('a***@b.com')).toBeInTheDocument();

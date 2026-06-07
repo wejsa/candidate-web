@@ -112,6 +112,11 @@ describe('sendMail', () => {
     vi.stubEnv('SMTP_PORT', '587');
     __resetCachedEnvForTesting();
     __resetMailerCacheForTesting();
+    // requireTLS는 production에서만 강제(dev/test는 maildev STARTTLS 미지원 완화 — transport.ts §H001).
+    // reset 헬퍼들은 production 가드가 있으므로 NODE_ENV 스텁은 reset 이후에 둔다.
+    // sendMail이 buildTransport에서 env를 지연 재로딩하므로 production 값으로 평가된다.
+    // (afterEach는 unstubAllEnvs → reset 순서라 누수 없음.)
+    vi.stubEnv('NODE_ENV', 'production');
     await sendMail({ to: 'a@b.test', subject: 's', html: 'h', text: 't' });
     const opts = nm.createTransport.mock.calls.at(-1)?.[0] as {
       requireTLS?: boolean;

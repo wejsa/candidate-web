@@ -303,7 +303,10 @@ describe('resendVerificationEmail — 진입 가드 (CANDID-037)', () => {
     prisma.emailVerification.findFirst.mockResolvedValueOnce(null);
     prisma.$transaction.mockImplementationOnce(async (cb) =>
       cb({
-        emailVerification: { update: vi.fn(), create: vi.fn(async () => ({})) },
+        emailVerification: {
+          updateMany: vi.fn(async () => ({ count: 0 })),
+          create: vi.fn(async () => ({})),
+        },
       }),
     );
 
@@ -327,6 +330,7 @@ describe('resendVerificationEmail', () => {
     const txMocks = {
       emailVerification: {
         update: vi.fn(),
+        updateMany: vi.fn(async () => ({ count: 0 })),
         create: vi.fn(async (args: { data: typeof createdData }) => {
           createdData = args.data;
           return { id: 55 };
@@ -338,6 +342,7 @@ describe('resendVerificationEmail', () => {
     const result = await resendVerificationEmail(42, fixedNow);
     expect(result.verificationToken).toMatch(/^[0-9a-f]{64}$/);
     expect(result.nextResendAvailableAt).toEqual(new Date(fixedNow.getTime() + 60_000));
+    // 활성 토큰 부재라도 updateMany는 항상 실행(미소진 토큰 0건 소진). 단건 update는 미사용.
     expect(txMocks.emailVerification.update).not.toHaveBeenCalled();
     // DB에는 sha256 해시만 저장 (평문 ≠ 해시) + 24h 만료
     if (createdData === undefined) throw new Error('create not called');
@@ -375,15 +380,18 @@ describe('resendVerificationEmail', () => {
       lastSentAt: new Date(fixedNow.getTime() - 90_000), // 90초 전
     });
     const txMocks = {
-      emailVerification: { update: vi.fn(async () => ({})), create: vi.fn(async () => ({ id: 77 })) },
+      emailVerification: {
+        updateMany: vi.fn(async () => ({ count: 1 })),
+        create: vi.fn(async () => ({ id: 77 })),
+      },
     };
     prisma.$transaction.mockImplementation(async (cb) => cb(txMocks));
 
     const result = await resendVerificationEmail(42, fixedNow);
     expect(result.verificationToken).toMatch(/^[0-9a-f]{64}$/);
-    // 기존 토큰 invalidate
-    expect(txMocks.emailVerification.update).toHaveBeenCalledWith({
-      where: { id: 9 },
+    // 기존 미소진 토큰 전부 invalidate (CANDID-036: id 단건 update → userId updateMany 전환)
+    expect(txMocks.emailVerification.updateMany).toHaveBeenCalledWith({
+      where: { userId: 42, consumedAt: null },
       data: { consumedAt: fixedNow },
     });
     // 신규 토큰 생성
@@ -467,16 +475,16 @@ describe('resendVerificationEmail', () => {
       id: 9,
       lastSentAt: new Date(fixedNow.getTime() - 90_000),
     });
-    const update = vi.fn(async () => ({}));
+    const updateMany = vi.fn(async () => ({ count: 1 }));
     const create = vi.fn(async () => {
       throw new Error('create failed');
     });
-    const txMocks = { emailVerification: { update, create } };
+    const txMocks = { emailVerification: { updateMany, create } };
     prisma.$transaction.mockImplementationOnce(async (cb) => cb(txMocks));
 
     await expect(resendVerificationEmail(42, fixedNow)).rejects.toThrow('create failed');
-    // 회귀 가드: invalidate가 tx 객체를 통해 호출됨 → 동일 트랜잭션 → DB가 자동 롤백 보장.
-    expect(update).toHaveBeenCalled();
+    // 회귀 가드: invalidate(updateMany)가 tx 객체를 통해 호출됨 → 동일 트랜잭션 → DB 자동 롤백 보장.
+    expect(updateMany).toHaveBeenCalled();
     expect(create).toHaveBeenCalled();
   });
 });
