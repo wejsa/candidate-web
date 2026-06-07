@@ -52,6 +52,21 @@ describe('GET /api/admin/v1/job-postings/[id]/applications', () => {
     expect(listApplicantsByPosting.mock.calls[0]![0].stage).toBeUndefined();
   });
 
+  it('v1 응답 계약 보존 — posting(대시보드 전용)은 응답 본문에서 제외', async () => {
+    // CANDID-057 회귀 가드: listApplicantsByPosting이 posting을 반환해도 v1 응답엔 누수되면 안 됨.
+    listApplicantsByPosting.mockResolvedValue({
+      posting: { id: 7, title: '백엔드 엔지니어' },
+      items: [],
+      pagination: { page: 1, perPage: 20, total: 0, totalPages: 1, hasMore: false },
+    });
+    const res = await GET(get('7'), ctx('7'));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.posting).toBeUndefined();
+    expect(body).toHaveProperty('items');
+    expect(body).toHaveProperty('pagination');
+  });
+
   it('미존재 공고 → 404 JOB_NOT_FOUND', async () => {
     listApplicantsByPosting.mockRejectedValue(new AppError('JOB_NOT_FOUND'));
     const res = await GET(get('999'), ctx('999'));
