@@ -89,6 +89,47 @@
           "HI-02": "PASS (외부 스크립트 참조 없음)"
         }
       }
+    },
+    {
+      "timestamp": "2026-06-07T17:05:00+09:00",
+      "mode": "full",
+      "score": 84,
+      "grade": "NEEDS_ATTENTION",
+      "criticalCount": 1,
+      "majorCount": 1,
+      "minorCount": 1,
+      "categories": {
+        "doc-sync": { "score": 83, "pass": 5, "fail": 1, "skip": 1 },
+        "state-integrity": { "score": 80, "pass": 4, "fail": 1, "skip": 0 },
+        "security": { "score": 100, "pass": 6, "fail": 0, "skip": 0 },
+        "agent-config": { "score": 100, "pass": 1, "fail": 0, "skip": 0 },
+        "hook-safety": { "score": 40, "pass": 3, "fail": 1, "skip": 0 }
+      },
+      "fails": [
+        {
+          "id": "HI-01",
+          "severity": "CRITICAL",
+          "note": "차단 패턴 `rm -f` 매칭 5건 (post-tool-use.sh:71,159 / stop.sh:131 / lib/atomic-write.sh:40,45) — 모두 단일 임시·락 파일 cleanup(따옴표 변수 + 2>/dev/null + EXIT trap). 재귀(-r) 없음, 실제 위험 없음. 정규식 false positive(v2.1+ excludeContexts 정밀화 대상). hook-safety failCap 40 적용"
+        },
+        {
+          "id": "SI-04",
+          "severity": "MAJOR",
+          "note": "task.type enum 외 값 5건 — CANDID-036/037=enhancement, CANDID-039/048=test, CANDID-040=refactor (스키마 허용: feature|bug|chore|spike). 모두 완료(done) Task로 영향 경미"
+        },
+        {
+          "id": "DS-07",
+          "severity": "MINOR",
+          "note": "docs/requirements/ 스펙 4건(CANDID-050/051/053/054)뿐 — feature Task 34건 대비 대응 문서 부족"
+        }
+      ],
+      "skips": [
+        { "id": "DS-02", "note": "CLAUDE.md에 테스트 명령 코드블록 부재 — 추출 대상 없음. (typecheck tsc --noEmit는 별도 PASS, exit 0)" }
+      ],
+      "advisories": [
+        "hook-disabled.flag 존재 — post-tool-use 훅 자동 비활성화(2026-06-07T05:29Z, count=4). 워크플로우 자동화 일부 중단",
+        "session-start git pull 2회 실패(2026-06-07T08:00Z) — 계속 진행됨",
+        "원격 stale 병합 브랜치 61개 미정리(feature/bugfix/CANDID-*)"
+      ]
     }
   ]
 }

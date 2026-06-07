@@ -20,7 +20,7 @@
 
 ## 프레임워크 역할 경계
 
-이 프로젝트는 **AI Crew Kit** 프레임워크 기반입니다.
+이 프로젝트는 **AI Crew Kit** 프레임워크 기반입니다. 프레임워크(스킬·에이전트·도메인·훅·스키마·템플릿)는 **`ai-crew-kit` 플러그인**으로 제공되며, 명령은 `/crew-*` 형태입니다. 로컬 `.claude/`에는 프로젝트 상태(`state/`)와 설정(`settings.json`)만 둡니다.
 
 | 프레임워크가 하는 것 | Claude가 하는 것 |
 |---------------------|-----------------|
@@ -38,10 +38,10 @@
 
 | 하고 싶은 것 | 명령 |
 |-------------|------|
-| 다음 작업 시작 | "다음 작업 가져와줘" → `/skill-plan` → `/skill-impl` |
-| 소규모 수정 | "OO 고쳐줘" → `/skill-impl --micro "설명"` |
+| 다음 작업 시작 | "다음 작업 가져와줘" → `/crew-plan` → `/crew-impl` |
+| 소규모 수정 | "OO 고쳐줘" → `/crew-impl --micro "설명"` |
 | PR 리뷰 + 머지 | "PR 123 리뷰해줘" → 자동 체이닝 |
-| 상태 확인 | "상태 확인해줘" → `/skill-status` |
+| 상태 확인 | "상태 확인해줘" → `/crew-status` |
 
 ### 3가지 주의사항
 1. **계획 승인 전 코드 작성 금지** — plan → 승인 → impl 순서 필수
@@ -49,13 +49,13 @@
 3. **자동 체이닝 중 멈추지 않음** — impl → review → merge 자동 진행
 
 ### 문제 발생 시
-→ `.claude/docs/troubleshooting.md` 참조
+→ ai-crew-kit 플러그인의 `docs/troubleshooting.md` 참조
 
 ---
 
 ## 세션 시작 시 필수
 
-**SessionStart 훅이 자동 실행합니다. 수동 조작은 불필요합니다.**
+**ai-crew-kit 플러그인이 SessionStart/Stop/PreToolUse/PostToolUse 훅을 자동 등록·실행합니다. 로컬 훅 설정·파일은 불필요합니다(플러그인 제공).**
 
 훅 동작 요약:
 1. `git sync` — 현재 브랜치 기준 최신 동기화 (워크트리/비워크트리 자동 구분)
@@ -65,8 +65,8 @@
 자주 쓰는 명령:
 
 ```bash
-/skill-status   # 현재 상태 요약
-/skill-plan     # 다음 작업 가져오기
+/crew-status   # 현재 상태 요약
+/crew-plan     # 다음 작업 가져오기
 ```
 
 <details>
@@ -75,7 +75,7 @@
 다음 중 하나에 해당하면 아래 수동 절차를 따르세요:
 - Claude Code 구버전으로 hooks 필드 미지원
 - `.claude/state/hook-disabled.flag` 존재 (자동 비활성화 상태)
-- `.claude/hooks/session-start.sh`가 없거나 실행되지 않음
+- ai-crew-kit 플러그인이 비활성화되어 훅이 등록되지 않음
 
 ```bash
 # 1. 최신 상태 동기화
@@ -95,13 +95,13 @@ fi
 #    존재하지 않으면 → 아래 3, 4번 진행
 
 # 3. 상태 요약 보기
-/skill-status
+/crew-status
 
 # 4. 다음 작업 가져오기
-/skill-plan
+/crew-plan
 ```
 
-자동 비활성화를 해제하려면 `rm .claude/state/hook-disabled.flag` 후 원인을 점검하세요. 자세한 내용은 `.claude/hooks/README.md` 참조.
+자동 비활성화를 해제하려면 `rm .claude/state/hook-disabled.flag` 후 원인을 점검하세요. 훅은 ai-crew-kit 플러그인이 제공합니다.
 
 </details>
 
@@ -127,16 +127,16 @@ fi
 
 | 에이전트 | 역할 | 호출 시점 |
 |---------|------|----------|
-| **pm** | 요구사항 정의, 백로그 관리 | `/skill-feature`, `/skill-backlog` |
-| **planner** | 설계 분석, 스텝 분리 (skill-plan 서브에이전트) | `/skill-plan` |
-| **backend** | Next.js Route Handler, API 설계, 비즈니스 로직 | `/skill-impl` |
-| **frontend** | Next.js App Router UI, React 컴포넌트, 폼/상태 관리 | `/skill-impl` |
-| **db-designer** | DB 스키마 분석, ERD 검증 (skill-plan 서브에이전트) | `/skill-plan` |
-| **qa** | 테스트 품질 분석, 시나리오 도출 (skill-impl 서브에이전트) | `/skill-impl` |
-| **code-reviewer** | 5관점(보안/도메인/테스트/문서/일반) 통합 PR 리뷰 | `/skill-review-pr` |
-| **docs** | 문서 영향도 분석, 업데이트 초안 (skill-impl 서브에이전트) | `/skill-impl` |
+| **pm** | 요구사항 정의, 백로그 관리 | `/crew-feature`, `/crew-backlog` |
+| **planner** | 설계 분석, 스텝 분리 (crew-plan 서브에이전트) | `/crew-plan` |
+| **backend** | Next.js Route Handler, API 설계, 비즈니스 로직 | `/crew-impl` |
+| **frontend** | Next.js App Router UI, React 컴포넌트, 폼/상태 관리 | `/crew-impl` |
+| **db-designer** | DB 스키마 분석, ERD 검증 (crew-plan 서브에이전트) | `/crew-plan` |
+| **qa** | 테스트 품질 분석, 시나리오 도출 (crew-impl 서브에이전트) | `/crew-impl` |
+| **code-reviewer** | 5관점(보안/도메인/테스트/문서/일반) 통합 PR 리뷰 | `/crew-review-pr` |
+| **docs** | 문서 영향도 분석, 업데이트 초안 (crew-impl 서브에이전트) | `/crew-impl` |
 
-> **비활성**: `devops` (운영 인프라 자동화 — 도입 시 `/skill-domain customize`로 활성)
+> **비활성**: `devops` (운영 인프라 자동화 — 도입 시 `/crew-domain customize`로 활성)
 
 ---
 
@@ -144,23 +144,23 @@ fi
 
 | 스킬 | 용도 |
 |------|------|
-| `/skill-status` | 프로젝트 상태 / 진행 중 Task 요약 |
-| `/skill-feature` | 신규 기능 요구사항 정의 → 백로그 등록 |
-| `/skill-backlog` | 백로그 조회/추가/수정 |
-| `/skill-plan` | Task 픽업 + 설계 분석 + 스텝 분리 |
-| `/skill-impl` | 스텝별 구현 + PR 생성 |
-| `/skill-review-pr` | PR 5관점 통합 리뷰 (자동 체이닝) |
-| `/skill-fix` | CRITICAL 이슈 자동 수정 |
-| `/skill-merge-pr` | PR Squash 머지 + 상태 갱신 |
-| `/skill-hotfix` | main 긴급 수정 + 패치 릴리스 |
-| `/skill-rollback` | git revert 기반 릴리스 롤백 |
-| `/skill-retro` | 완료 Task 회고 |
-| `/skill-report` | throughput/quality/code/health 4축 리포트 |
-| `/skill-health-check` | 코드베이스 건강 검진 |
-| `/skill-estimate` | 작업 복잡도 추정 |
-| `/skill-docs` | 도메인별 참고자료 조회 |
-| `/skill-create` | 커스텀 스킬 스캐폴딩 |
-| `/skill-domain` | 도메인 조회/전환/커스터마이징 |
+| `/crew-status` | 프로젝트 상태 / 진행 중 Task 요약 |
+| `/crew-feature` | 신규 기능 요구사항 정의 → 백로그 등록 |
+| `/crew-backlog` | 백로그 조회/추가/수정 |
+| `/crew-plan` | Task 픽업 + 설계 분석 + 스텝 분리 |
+| `/crew-impl` | 스텝별 구현 + PR 생성 |
+| `/crew-review-pr` | PR 5관점 통합 리뷰 (자동 체이닝) |
+| `/crew-fix` | CRITICAL 이슈 자동 수정 |
+| `/crew-merge-pr` | PR Squash 머지 + 상태 갱신 |
+| `/crew-hotfix` | main 긴급 수정 + 패치 릴리스 |
+| `/crew-rollback` | git revert 기반 릴리스 롤백 |
+| `/crew-retro` | 완료 Task 회고 |
+| `/crew-report` | throughput/quality/code/health 4축 리포트 |
+| `/crew-health-check` | 코드베이스 건강 검진 |
+| `/crew-estimate` | 작업 복잡도 추정 |
+| `/crew-docs` | 도메인별 참고자료 조회 |
+| `/crew-create` | 커스텀 스킬 스캐폴딩 |
+| `/crew-domain` | 도메인 조회/전환/커스터마이징 |
 
 ---
 
@@ -168,18 +168,18 @@ fi
 
 | 자연어 | 매핑 스킬 |
 |--------|----------|
-| "다음 작업 가져와줘" / "계획 세워줘" | `/skill-plan` |
-| "개발 진행해줘" / "구현해줘" | `/skill-impl` |
-| "다음 스텝 진행해줘" | `/skill-impl --next` |
-| "PR {N} 리뷰해줘" | `/skill-review-pr {N}` |
-| "PR {N} 머지해줘" | `/skill-merge-pr {N}` |
-| "긴급 수정해줘: {설명}" | `/skill-hotfix` |
-| "v{x.y.z} 롤백해줘" | `/skill-rollback` |
-| "상태 확인해줘" | `/skill-status` |
-| "회고 해줘" | `/skill-retro` |
-| "헬스체크 해줘" | `/skill-health-check` |
+| "다음 작업 가져와줘" / "계획 세워줘" | `/crew-plan` |
+| "개발 진행해줘" / "구현해줘" | `/crew-impl` |
+| "다음 스텝 진행해줘" | `/crew-impl --next` |
+| "PR {N} 리뷰해줘" | `/crew-review-pr {N}` |
+| "PR {N} 머지해줘" | `/crew-merge-pr {N}` |
+| "긴급 수정해줘: {설명}" | `/crew-hotfix` |
+| "v{x.y.z} 롤백해줘" | `/crew-rollback` |
+| "상태 확인해줘" | `/crew-status` |
+| "회고 해줘" | `/crew-retro` |
+| "헬스체크 해줘" | `/crew-health-check` |
 
-> 도메인이 `general`이므로 별도 도메인 docs/checklists 자동 매핑은 없습니다. 필요 시 `.claude/domains/general/`에 추가하거나 `/skill-domain switch`로 전환하세요.
+> 도메인이 `general`이므로 별도 도메인 docs/checklists 자동 매핑은 없습니다. 도메인 컨벤션·체크리스트는 ai-crew-kit 플러그인이 제공하며, 전환은 `/crew-domain switch`로 합니다.
 
 ---
 
@@ -191,29 +191,29 @@ fi
 
 | 트리거 | 자동 호출 |
 |--------|----------|
-| skill-feature 승인 완료 | `/skill-plan` |
-| skill-plan 설계 승인 완료 | `/skill-impl` |
-| skill-impl Step 완료 + PR 생성 | `/skill-review-pr {N}` |
-| skill-review-pr APPROVED | `/skill-merge-pr {N}` |
-| skill-review-pr CRITICAL 발견 (≤2회) | `/skill-fix` → `/skill-review-pr` 재실행 |
-| skill-merge-pr 완료 + 다음 스텝 존재 | `/skill-impl --next` |
-| skill-merge-pr 완료 + 마지막 스텝 | Task 완료 처리 + `/skill-retro` 제안 |
+| crew-feature 승인 완료 | `/crew-plan` |
+| crew-plan 설계 승인 완료 | `/crew-impl` |
+| crew-impl Step 완료 + PR 생성 | `/crew-review-pr {N}` |
+| crew-review-pr APPROVED | `/crew-merge-pr {N}` |
+| crew-review-pr CRITICAL 발견 (≤2회) | `/crew-fix` → `/crew-review-pr` 재실행 |
+| crew-merge-pr 완료 + 다음 스텝 존재 | `/crew-impl --next` |
+| crew-merge-pr 완료 + 마지막 스텝 | Task 완료 처리 + `/crew-retro` 제안 |
 
 ### --all 옵션
-`/skill-impl --all` 사용 시 모든 스텝을 사용자 개입 없이 연속 실행.
+`/crew-impl --all` 사용 시 모든 스텝을 사용자 개입 없이 연속 실행.
 
 ### 루프 가드
-- skill-fix → skill-review-pr 루프: **최대 2회**
-  - 1회: skill-review-pr → CRITICAL → skill-fix → skill-review-pr (재리뷰)
-  - 2회: 재리뷰 → CRITICAL → skill-fix → skill-review-pr (최종 리뷰)
+- crew-fix → crew-review-pr 루프: **최대 2회**
+  - 1회: crew-review-pr → CRITICAL → crew-fix → crew-review-pr (재리뷰)
+  - 2회: 재리뷰 → CRITICAL → crew-fix → crew-review-pr (최종 리뷰)
   - 3회째 CRITICAL 발견 시: REQUEST_CHANGES 출력 후 **즉시 중단** (수동 개입 필요)
-- 카운트 기준: 같은 PR에 대한 skill-fix 호출 횟수
+- 카운트 기준: 같은 PR에 대한 crew-fix 호출 횟수
 
 ### 중단 조건 (이 경우에만 멈추고 사용자에게 보고)
 - CRITICAL 이슈 auto-fix 실패
 - 빌드 실패 (3회 재시도 후)
 - 라인 수 제한 초과 (프로필별 상이)
-- skill-fix → skill-review-pr 루프 2회 초과 (루프 가드 발동)
+- crew-fix → crew-review-pr 루프 2회 초과 (루프 가드 발동)
 
 ### 금지 사항
 - 자동 호출 대상인데 "진행할까요?" 질문하며 멈추기 **금지**
@@ -286,9 +286,9 @@ fi
 
 | 중단 사유 | 상태 | 다음 조치 |
 |----------|------|----------|
-| CRITICAL 2회 재발견 | "PR #{N}에 REQUEST_CHANGES" | "수동으로 CRITICAL 이슈 수정 후 /skill-review-pr {N}" |
-| 빌드 3회 실패 | "빌드 실패 (시도 3/3)" | "빌드 오류 해결 후 /skill-impl --next" |
-| 라인 수 700 초과 | "변경 {N}줄 (700줄 제한 초과)" | "스텝 재분리 필요, /skill-plan으로 재설계" |
+| CRITICAL 2회 재발견 | "PR #{N}에 REQUEST_CHANGES" | "수동으로 CRITICAL 이슈 수정 후 /crew-review-pr {N}" |
+| 빌드 3회 실패 | "빌드 실패 (시도 3/3)" | "빌드 오류 해결 후 /crew-impl --next" |
+| 라인 수 700 초과 | "변경 {N}줄 (700줄 제한 초과)" | "스텝 재분리 필요, /crew-plan으로 재설계" |
 
 ---
 
@@ -302,7 +302,7 @@ fi
   "currentSkill": "{현재 스킬명}",
   "lastCompletedSkill": "{이전 스킬명}",
   "prNumber": "{PR 번호 또는 null}",
-  "fixLoopCount": "{N, skill-fix 전용, 루프 가드용}",
+  "fixLoopCount": "{N, crew-fix 전용, 루프 가드용}",
   "autoChainArgs": "{체이닝 인자}",
   "updatedAt": "{현재 ISO 8601}"
 }
@@ -342,12 +342,12 @@ fi
 | Git push 충돌 | `pull --rebase` 시도 | [권장] 자동 rebase 수락 / 충돌 수동 해결 |
 | PR 생성 실패 | 원인별 분기 | [권장] `gh auth status` 확인 / 재시도 |
 | gh auth 만료 | `gh auth refresh` 안내 | [권장] `! gh auth refresh` 실행 |
-| 세션 끊김 | intent 기반 복구 제안 | [권장] `/skill-status` 후 안내 / 수동 상태 초기화 |
+| 세션 끊김 | intent 기반 복구 제안 | [권장] `/crew-status` 후 안내 / 수동 상태 초기화 |
 | lock TTL 만료 | 자동 연장 제안 | [권장] 연장 수락 / `--extend-lock` / [최후수단] `unlock --force` |
-| 컨텍스트 압축 | workflowState 복원 | [권장] `/skill-status` → 맥락 복원 |
+| 컨텍스트 압축 | workflowState 복원 | [권장] `/crew-status` → 맥락 복원 |
 | subagent 타임아웃 | 스킵 후 진행 | [권장] 결과 없이 진행 수락 / 수동 재실행 |
 
-> 📖 **상세 에러 가이드**: `.claude/docs/troubleshooting.md` 참조
+> 📖 **상세 에러 가이드**: ai-crew-kit 플러그인의 `docs/troubleshooting.md` 참조
 
 ---
 
@@ -427,7 +427,7 @@ fi
 
 **동작**:
 1. intent 파일 읽기
-2. 미완료 작업 자동 실행 (skill-merge-pr의 "Intent 기반 복구" 절차)
+2. 미완료 작업 자동 실행 (crew-merge-pr의 "Intent 기반 복구" 절차)
 3. intent 파일 삭제
 4. 복구 결과 알림:
 ```
@@ -442,7 +442,7 @@ fi
 ### 새 기능 (기획부터)
 
 ```
-/skill-feature "기능명"
+/crew-feature "기능명"
   ↓
 요구사항 정의 -> docs/requirements/CANDID-XXX-spec.md
   ↓
@@ -450,29 +450,29 @@ fi
   ↓
 backlog.json에 Task 등록
   ↓
-/skill-plan으로 설계 + 계획 수립
+/crew-plan으로 설계 + 계획 수립
 ```
 
 ### 기존 Task 개발
 
 ```
-/skill-plan
+/crew-plan
   ↓
 Task 선택 -> 요구사항 확인 -> 설계 -> 스텝 분리 계획
   ↓
 (사용자 설계/계획 검토)
   ↓
-/skill-impl 또는 "개발 진행해줘"
+/crew-impl 또는 "개발 진행해줘"
   ↓
 Step 1 개발 -> PR 자동 생성
   ↓
-/skill-review-pr {번호} 또는 "PR {번호} 리뷰해줘"
+/crew-review-pr {번호} 또는 "PR {번호} 리뷰해줘"
   ↓
 (수정 필요 시 수정 -> 커밋 -> 푸시)
   ↓
-/skill-merge-pr {번호} 또는 "PR {번호} 머지해줘"
+/crew-merge-pr {번호} 또는 "PR {번호} 머지해줘"
   ↓
-/skill-impl --next 또는 "다음 스텝 진행해줘"
+/crew-impl --next 또는 "다음 스텝 진행해줘"
   ↓
 (반복)
   ↓
@@ -484,14 +484,14 @@ Step 1 개발 -> PR 자동 생성
 ```
 "긴급 수정해줘: {설명}" 또는 "v1.2.3 롤백해줘"
         │
-        ├── [수정] /skill-hotfix
+        ├── [수정] /crew-hotfix
         │     ├── main에서 hotfix 브랜치 분기
         │     ├── 코드 수정 + 빌드/테스트
         │     ├── PR 생성 (--base main) + 보안 리뷰
         │     ├── 머지 → 패치 버전 범프 → 태그
         │     └── develop 백머지
         │
-        └── [롤백] /skill-rollback
+        └── [롤백] /crew-rollback
               ├── main에서 revert 브랜치 분기
               ├── git revert (히스토리 보존)
               ├── Revert PR 생성 (--base main)
@@ -517,9 +517,9 @@ main (운영)
 - PR은 develop 브랜치로 생성
 - 리뷰 승인 후 Squash 머지
 - **스텝별 PR 생성** (500라인 미만 단위)
-- PR 생성: `/skill-impl` 스텝 완료 시 자동 처리
-- PR 리뷰: `/skill-review-pr {번호}`
-- PR 머지: `/skill-merge-pr {번호}`
+- PR 생성: `/crew-impl` 스텝 완료 시 자동 처리
+- PR 리뷰: `/crew-review-pr {번호}`
+- PR 머지: `/crew-merge-pr {번호}`
 
 ### 커밋 메시지 규칙
 ```
@@ -575,7 +575,7 @@ CANDID-{번호}
 
 ### 스텝 분리 기준
 - 기본 제한: **500라인 미만** (스텝별 자동 조정: 50~1000)
-- skill-plan이 스텝 특성에 따라 prLineLimit을 자동 설정 (사용자 수동 설정 불필요)
+- crew-plan이 스텝 특성에 따라 prLineLimit을 자동 설정 (사용자 수동 설정 불필요)
 
 ### 라인 수 제한
 
