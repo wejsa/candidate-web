@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 65,
     "projectPrefix": "CANDID",
-    "version": 573,
+    "version": 574,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:42:28.029+00:00"
+    "updatedAt": "2026-06-07T13:47:45.864+00:00"
   },
   "summary": {
     "total": 65,
@@ -4590,22 +4590,38 @@
       "specFile": null,
       "assignee": "jaese@hoji-20260607134228.",
       "assignedAt": "2026-06-07T13:42:28.029+00:00",
-      "lockedFiles": [],
+      "lockedFiles": [
+        "app/page.tsx",
+        "tests/app/home-copy.test.ts"
+      ],
       "dependencies": [],
       "createdAt": "2026-06-07T13:41:01.515+00:00",
       "source": "사용자 요청 — 엔지니어만 채용하는 게 아니므로 \"인재\"로 포괄 전환.",
       "workflowState": {
-        "currentSkill": "crew-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-06-07T13:42:28.029+00:00"
+        "updatedAt": "2026-06-07T13:47:45.864+00:00"
       },
-      "steps": [],
-      "currentStep": 0,
+      "steps": [
+        {
+          "number": 1,
+          "title": "엔지니어→인재 카피 전환 + 회귀 가드",
+          "status": "pending",
+          "prLineLimit": 120,
+          "files": [
+            "app/page.tsx",
+            "tests/app/home-copy.test.ts"
+          ]
+        }
+      ],
+      "currentStep": 1,
       "completedAt": null,
-      "lockTTL": 1800
+      "lockTTL": 3600,
+      "lockedAt": "2026-06-07T13:47:45.864+00:00",
+      "lockedBy": "jaese@hoji-20260607134228."
     }
   }
 }
