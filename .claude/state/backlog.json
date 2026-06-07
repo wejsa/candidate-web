@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "lastTaskNumber": 53,
+    "lastTaskNumber": 54,
     "projectPrefix": "CANDID",
-    "version": 507,
+    "version": 508,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-06T06:10:00.000Z"
+    "updatedAt": "2026-06-07T00:00:00.000Z"
   },
   "summary": {
-    "total": 53,
+    "total": 54,
     "done": 51,
     "inProgress": 1,
     "review": 0,
-    "todo": 1
+    "todo": 2
   },
   "phases": {
     "1": {
@@ -4147,6 +4147,27 @@
       ],
       "currentStep": 13,
       "completedAt": "2026-06-06T06:10:00.000Z"
+    },
+    "CANDID-054": {
+      "id": "CANDID-054",
+      "title": "백오피스(어드민) UX 강화: 전체 너비 레이아웃 + 지원자 대시보드",
+      "description": "CANDID-053 백오피스 골격 완성 후속 UX 강화. 신규 도메인 로직·권한 변경 없이 레이아웃/정보 밀도 개선. (FR-001) 어드민 콘텐츠가 전역 main 760/880px 캡을 벗어나 1200px 컨테이너(--container) 전체 폭을 채움 — 셸(220px 사이드바 + 1fr)을 1200px 컨테이너에 담아 가운데 정렬, 320~1920px reflow 유지, ≤720px 단일 컬럼. (FR-002) 공고별 지원자 페이지를 대시보드화 — 상단 KPI(총 지원/전형 단계별 카운트 DOC_REVIEW·INTERVIEW_1·INTERVIEW_2·OFFER·HIRED·REJECTED/결과별 PASSED·FAILED·진행중) + 카운트 뱃지 칩 필터 + 테이블 밀도/페이지 크기 상향(50건). 집계는 단일 groupBy 쿼리(카운트만, PII 미접촉, basePrisma), idx_applications_posting_stage 재사용. (FR-003) /admin 홈에 전사 요약 위젯(공고 상태별 수/전체 지원/미처리 큐/최근 지원 N건). (FR-004) 공고 관리 목록 컬럼 보강(등록일·마감일). 보안 불변: requireOperatorPage 가드·maskName/maskEmail 마스킹·PII_VIEW 감사 유지, robots noindex. 마이그레이션·외부 API 변경 없음. [확정 2026-06-07] 너비=1200px 캡(fluid 아님), 범위=FR-001~FR-004 전체.",
+      "status": "todo",
+      "type": "feature",
+      "priority": "medium",
+      "phase": 4,
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
+      "dependencies": [
+        "CANDID-053"
+      ],
+      "createdAt": "2026-06-07T00:00:00.000Z",
+      "specFile": "docs/requirements/CANDID-054-spec.md",
+      "source": "사용자 요청('어드민 기능 강화, 공고관리 페이지 전체 너비 화면 맞춤, 지원자 목록을 대시보드처럼 한번에') — crew-feature 요구사항 정의 승인(2026-06-07). 너비 1200px 캡 + 전체 4 FR 확정.",
+      "workflowState": null,
+      "steps": [],
+      "currentStep": 0
     }
   }
 }
