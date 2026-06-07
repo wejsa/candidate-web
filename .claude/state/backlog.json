@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 566,
+    "version": 567,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:12:38.376+00:00"
+    "updatedAt": "2026-06-07T13:19:38.327+00:00"
   },
   "summary": {
     "total": 64,
@@ -4545,20 +4545,36 @@
     "CANDID-064": {
       "specFile": null,
       "assignee": "jaese@hoji-20260607131238.",
-      "assignedAt": "2026-06-07T13:12:38.376+00:00",
-      "lockedFiles": [],
+      "assignedAt": "2026-06-07T13:19:38.327+00:00",
+      "lockedFiles": [
+        "lib/env.ts",
+        "lib/prisma.ts",
+        ".env.example"
+      ],
       "dependencies": [],
       "createdAt": "2026-06-07T11:47:53.256+00:00",
       "workflowState": {
-        "currentSkill": "crew-plan",
-        "lastCompletedSkill": null,
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-plan",
         "prNumber": null,
         "fixLoopCount": 0,
         "autoChainArgs": null,
-        "updatedAt": "2026-06-07T13:12:38.376+00:00"
+        "updatedAt": "2026-06-07T13:19:38.327+00:00"
       },
-      "steps": [],
-      "currentStep": 0,
+      "steps": [
+        {
+          "number": 1,
+          "title": "PRISMA_LOG_QUERY env 정합화",
+          "status": "pending",
+          "prLineLimit": 150,
+          "files": [
+            "lib/env.ts",
+            "lib/prisma.ts",
+            ".env.example"
+          ]
+        }
+      ],
+      "currentStep": 1,
       "completedAt": null,
       "micro": false,
       "id": "CANDID-064",
@@ -4569,7 +4585,7 @@
       "priority": "low",
       "phase": 4,
       "source": "crew-health-check DS-04 + advisory",
-      "lockTTL": 1800
+      "lockTTL": 3600
     }
   }
 }
