@@ -221,6 +221,8 @@ describe('getApplicantDetailForOperator', () => {
           changedByUserId: 5,
         },
       ],
+      resumeFiles: [],
+      portfolioLinks: [],
     };
   }
 
@@ -274,5 +276,54 @@ describe('getApplicantDetailForOperator', () => {
     // ip/ua 미전달 → null 정규화.
     expect(recordAuditEvent.mock.calls[0]![0].ipAddress).toBeNull();
     expect(recordAuditEvent.mock.calls[0]![0].userAgent).toBeNull();
+  });
+
+  it('첨부 없음/링크 없음 → resumeFile null + portfolioLinks 빈 배열 (CANDID-066)', async () => {
+    basePrisma.application.findUnique.mockResolvedValue(appRow());
+    const detail = await getApplicantDetailForOperator({ actorUserId: 1, applicationId: 10 });
+    expect(detail.resumeFile).toBeNull();
+    expect(detail.portfolioLinks).toEqual([]);
+  });
+
+  it('첨부+포트폴리오 매핑 + storedPath 등 내부 메타 미노출 (CANDID-066)', async () => {
+    basePrisma.application.findUnique.mockResolvedValue({
+      ...appRow(),
+      resumeFiles: [
+        {
+          id: 88,
+          originalFilename: '이력서.pdf',
+          contentType: 'application/pdf',
+          fileSize: 1024n, // Prisma BigInt → number 변환 검증
+          virusScanStatus: 'PENDING',
+          uploadedAt: new Date('2026-06-01T01:00:00Z'),
+        },
+      ],
+      portfolioLinks: [
+        { id: 2, linkType: 'NOTION', url: 'https://notion.so/x', memo: '메모', sortOrder: 1 },
+        { id: 1, linkType: 'GITHUB', url: 'https://github.com/u', memo: null, sortOrder: 0 },
+      ],
+    });
+    const detail = await getApplicantDetailForOperator({ actorUserId: 1, applicationId: 10 });
+    // 첨부 메타 매핑 + BigInt → number.
+    expect(detail.resumeFile).toEqual({
+      id: 88,
+      originalFilename: '이력서.pdf',
+      contentType: 'application/pdf',
+      fileSize: 1024,
+      virusScanStatus: 'PENDING',
+      uploadedAt: new Date('2026-06-01T01:00:00Z'),
+    });
+    expect(typeof detail.resumeFile!.fileSize).toBe('number');
+    // 포트폴리오 매핑(서비스는 prisma orderBy 신뢰 — mock 순서 그대로 전달).
+    expect(detail.portfolioLinks).toHaveLength(2);
+    expect(detail.portfolioLinks[0]).toMatchObject({ linkType: 'NOTION', url: 'https://notion.so/x' });
+    // 내부 경로/체크섬은 select 자체에서 제외 → 결과에 노출 안 됨(경로 추측 차단).
+    expect(detail.resumeFile).not.toHaveProperty('storedPath');
+    expect(detail.resumeFile).not.toHaveProperty('checksumSha256');
+    expect(JSON.stringify(detail)).not.toMatch(/storedPath|checksum|stored_path/);
+    // select에 내부 필드 미요청 확인(SSOT).
+    const sel = basePrisma.application.findUnique.mock.calls.at(-1)![0].select.resumeFiles.select;
+    expect(sel.storedPath).toBeUndefined();
+    expect(sel.checksumSha256).toBeUndefined();
   });
 });
