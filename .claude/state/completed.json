@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 55,
+    "version": 56,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T15:30:00+09:00"
+    "updatedAt": "2026-06-07T15:55:00+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1632,6 +1632,24 @@
         "critical": 0
       },
       "note": "백오피스 UX 강화 3스텝(전체 너비 1200px + 지원자 대시보드 + 운영 홈/공고목록). 전 PR CRITICAL 0, MAJOR는 in-task 보강(L-019). DB/외부 API 무변경."
+    },
+    "CANDID-055": {
+      "id": "CANDID-055",
+      "title": "백오피스 딥링크 로그인 복귀 경로 보존(x-pathname)",
+      "phase": 4,
+      "priority": "medium",
+      "type": "bug",
+      "completedAt": "2026-06-07T15:55:00+09:00",
+      "assignee": null,
+      "prs": [
+        154
+      ],
+      "stepCount": 1,
+      "micro": true,
+      "reviewSummary": {
+        "critical": 0
+      },
+      "note": "백오피스 딥링크 로그인 복귀 경로 보존(middleware x-pathname + layout returnTo). T0 직접 리뷰 CRITICAL 0, 오픈리다이렉트 검토 통과(/admin 접두 제한)."
     }
   }
 }
