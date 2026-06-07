@@ -6,6 +6,23 @@
   grid-template-columns: 220px 1fr;
   gap: var(--space-6);
   align-items: start;
+  /* CANDID-054 FR-001 — 전역 main(760/880px) 캡 대신 운영 화면 전용 폭(1200px)으로 확장·중앙 정렬.
+     셸은 <main>이 아닌 <div>라 전역 main 규칙 미적용 → 여기서 외곽 거터·최대 폭을 직접 지정. */
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+/* CANDID-054 FR-001 — 셸 콘텐츠 컬럼의 페이지 <main>은 전역 `main { max-width; margin:0 auto }`에
+   걸려 880px로 좁아진다. 후손 선택자(specificity 0,1,1 > 전역 0,0,1)로 모든 /admin 페이지의
+   캡·중앙정렬·이중 패딩을 일괄 해제 — 콘텐츠가 1fr 컬럼 전체를 채운다(모듈별 .content 중복 불요).
+   비-admin 페이지의 전역 main 규칙은 그대로 유지된다. */
+.shell :global(main) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 
 @media (max-width: 720px) {
