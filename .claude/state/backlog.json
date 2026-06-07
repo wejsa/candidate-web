@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 65,
     "projectPrefix": "CANDID",
-    "version": 575,
+    "version": 576,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:50:07.929+00:00"
+    "updatedAt": "2026-06-07T13:51:00.990+00:00"
   },
   "summary": {
     "total": 65,
@@ -4598,12 +4598,13 @@
       "createdAt": "2026-06-07T13:41:01.515+00:00",
       "source": "사용자 요청 — 엔지니어만 채용하는 게 아니므로 \"인재\"로 포괄 전환.",
       "workflowState": {
-        "currentSkill": "crew-review-pr",
-        "lastCompletedSkill": "crew-impl",
+        "currentSkill": "crew-merge-pr",
+        "lastCompletedSkill": "crew-review-pr",
         "prNumber": 164,
         "fixLoopCount": 0,
-        "autoChainArgs": "164 --auto-fix",
-        "updatedAt": "2026-06-07T13:50:07.929+00:00"
+        "lastReviewDecision": "COMMENT",
+        "autoChainArgs": "164",
+        "updatedAt": "2026-06-07T13:51:00.990+00:00"
       },
       "steps": [
         {
