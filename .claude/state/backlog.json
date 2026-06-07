@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 58,
     "projectPrefix": "CANDID",
-    "version": 536,
+    "version": 537,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T17:56:00+09:00"
+    "updatedAt": "2026-06-07T17:58:00+09:00"
   },
   "summary": {
     "total": 58,
@@ -4333,7 +4333,7 @@
       "micro": true,
       "specFile": "docs/requirements/CANDID-058-spec.md",
       "assignee": "wejsa-u@hoji-20260607-175400",
-      "assignedAt": "2026-06-07T17:56:00+09:00",
+      "assignedAt": "2026-06-07T17:58:00+09:00",
       "lockedFiles": [
         "app/page.tsx",
         "app/layout.tsx",
@@ -4343,24 +4343,25 @@
       "createdAt": "2026-06-07T17:52:00+09:00",
       "source": "사용자 요청 — 무인 환전·결제 플랫폼 표현 제거, 포괄적 문구로 교체.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-plan",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 157,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-07T17:56:00+09:00"
+        "autoChainArgs": "157 --auto-fix",
+        "updatedAt": "2026-06-07T17:58:00+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "홈/메타 카피 교체 + 회귀 가드",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 120,
           "files": [
             "app/page.tsx",
             "app/layout.tsx",
             "tests/app/home-copy.test.ts"
-          ]
+          ],
+          "prNumber": 157
         }
       ],
       "currentStep": 1,
