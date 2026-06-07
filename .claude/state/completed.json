@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 57,
+    "version": 58,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T16:12:00+09:00"
+    "updatedAt": "2026-06-07T17:45:00+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1668,6 +1668,22 @@
         "critical": 0
       },
       "note": "약관/동의 체크박스 세로 중앙 정렬(.check/.consent flex-start→center). 프로젝트 전체 체크박스 4개소 점검, 2개소 수정."
+    },
+    "CANDID-057": {
+      "id": "CANDID-057",
+      "title": "지원자 대시보드에 채용 공고 제목 표시",
+      "phase": 4,
+      "priority": "low",
+      "type": "feature",
+      "completedAt": "2026-06-07T17:45:00+09:00",
+      "assignee": "wejsa-u@hoji-20260607-172500",
+      "prs": [
+        156
+      ],
+      "totalMergedLines": 46,
+      "stepCount": 1,
+      "reviewSummary": "T2 리뷰. MAJOR 1건(v1 API 응답 계약 누수) 발견 즉시 수정 + 회귀 테스트. 잔존 차단 이슈 없음(COMMENT).",
+      "carry": []
     }
   }
 }

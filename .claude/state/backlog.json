@@ -2,14 +2,14 @@
   "metadata": {
     "lastTaskNumber": 57,
     "projectPrefix": "CANDID",
-    "version": 532,
+    "version": 533,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T17:42:00+09:00"
+    "updatedAt": "2026-06-07T17:45:00+09:00"
   },
   "summary": {
     "total": 57,
-    "done": 56,
-    "inProgress": 1,
+    "done": 57,
+    "inProgress": 0,
     "review": 0,
     "todo": 0
   },
@@ -4286,19 +4286,14 @@
       "id": "CANDID-057",
       "title": "지원자 대시보드에 채용 공고 제목 표시",
       "description": "관리자 지원자 대시보드(/admin/job-postings/[id]/applicants) 헤더가 '지원자 대시보드'라는 고정 문구만 보여주고 어느 공고인지 알 수 없다. 어떤 공고의 지원자를 보고 있는지 식별할 수 있도록 공고 제목을 헤더에 노출한다.\n구현 메모: page.tsx(app/admin/job-postings/[id]/applicants/page.tsx)는 현재 listApplicantsByPosting/getApplicantStatsByPosting만 조회하고 공고 제목을 받지 않는다. 공고 제목을 함께 조회(기존 병렬 Promise.all에 추가 또는 listApplicantsByPosting 반환에 posting title 포함)하여 <h1> 또는 보조 라벨로 렌더링. JOB_NOT_FOUND 처리/마스킹/감사 로직은 그대로 유지(제목은 PII 아님).",
-      "status": "in_progress",
+      "status": "done",
       "type": "feature",
       "priority": "low",
       "phase": 4,
       "micro": true,
-      "assignee": "wejsa-u@hoji-20260607-172500",
-      "assignedAt": "2026-06-07T17:36:00+09:00",
-      "lockedFiles": [
-        "lib/admin/applicants.ts",
-        "app/admin/job-postings/[id]/applicants/page.tsx",
-        "app/admin/job-postings/job-postings.module.css",
-        "tests/lib/admin/applicants.test.ts"
-      ],
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T17:20:00+09:00",
       "source": "사용자 요청 — /admin/job-postings/19/applicants 화면에 채용 공고 제목이 보였으면 함.",
@@ -4307,20 +4302,12 @@
         "존재하지 않는 공고 id는 기존대로 notFound(404).",
         "제목 표시로 인한 추가 PII 노출/감사 영향 없음."
       ],
-      "workflowState": {
-        "currentSkill": "crew-merge-pr",
-        "lastCompletedSkill": "crew-review-pr",
-        "prNumber": 156,
-        "fixLoopCount": 0,
-        "lastReviewDecision": "COMMENT",
-        "autoChainArgs": "156",
-        "updatedAt": "2026-06-07T17:42:00+09:00"
-      },
+      "workflowState": null,
       "steps": [
         {
           "number": 1,
           "title": "지원자 대시보드 헤더에 공고 제목 노출",
-          "status": "pr_created",
+          "status": "merged",
           "prLineLimit": 150,
           "files": [
             "lib/admin/applicants.ts",
@@ -4328,11 +4315,12 @@
             "app/admin/job-postings/job-postings.module.css",
             "tests/lib/admin/applicants.test.ts"
           ],
-          "prNumber": 156
+          "prNumber": 156,
+          "mergedAt": "2026-06-07T17:45:00+09:00"
         }
       ],
       "currentStep": 1,
-      "lockTTL": 7200
+      "completedAt": "2026-06-07T17:45:00+09:00"
     }
   }
 }
