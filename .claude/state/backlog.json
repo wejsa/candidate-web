@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 66,
     "projectPrefix": "CANDID",
-    "version": 583,
+    "version": 584,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T14:19:04.516+00:00"
+    "updatedAt": "2026-06-07T14:28:43.872+00:00"
   },
   "summary": {
     "total": 66,
@@ -4628,7 +4628,7 @@
       "assignee": "jaese@hoji-20260607140726.",
       "assignedAt": "2026-06-07T14:07:26.137+00:00",
       "lockedBy": null,
-      "lockedAt": "2026-06-07T14:19:04.516+00:00",
+      "lockedAt": "2026-06-07T14:28:43.872+00:00",
       "lockedFiles": [
         "prisma/schema.prisma",
         "lib/errors/codes.ts",
@@ -4642,12 +4642,12 @@
       "createdAt": "2026-06-07T14:06:56.377+00:00",
       "source": "사용자 요청 — admin 상세에서 지원자 첨부 파일/포트폴리오 미표시 → 운영자 열람 기능 추가.",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-merge-pr",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 166,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-07T14:19:04.516+00:00"
+        "autoChainArgs": "166 --auto-fix",
+        "updatedAt": "2026-06-07T14:28:43.872+00:00"
       },
       "steps": [
         {
@@ -4665,14 +4665,15 @@
         {
           "number": 2,
           "title": "보안 다운로드 API (presign+가드+감사+virus 게이팅)",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 700,
           "files": [
             "prisma/schema.prisma",
             "lib/errors/codes.ts",
             "lib/files/storage.ts",
             "app/api/admin/v1/applications/[id]/resume/route.ts"
-          ]
+          ],
+          "prNumber": 166
         },
         {
           "number": 3,
