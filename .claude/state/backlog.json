@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 66,
     "projectPrefix": "CANDID",
-    "version": 578,
+    "version": 579,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T14:06:56.377+00:00"
+    "updatedAt": "2026-06-07T14:07:26.137+00:00"
   },
   "summary": {
     "total": 66,
     "done": 65,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 1
+    "todo": 0
   },
   "phases": {
     "1": {
@@ -4619,23 +4619,31 @@
       "id": "CANDID-066",
       "title": "백오피스 지원서 상세: 이력서 파일 + 포트폴리오 링크 열람",
       "description": "운영자가 /admin/applications/[id]에서 지원자 이력서 첨부 파일·포트폴리오 링크를 안전하게 열람. (1) getApplicantDetailForOperator에 resumeFile 메타+portfolioLinks 포함(storedPath 비노출), (2) 신규 GET /api/admin/v1/applications/[id]/resume — 운영자 가드+감사+바이러스 스캔 게이팅+presigned GET(TTL≤60s), (3) 상세 UI 섹션(다운로드 버튼+스캔 배지, 포트폴리오 noopener 링크). 이력서=PII 문서 → 감사(RESUME_DOWNLOAD 권장). 스토리지 운영 구성 전제.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "feature",
       "priority": "high",
       "phase": 4,
       "micro": false,
       "specFile": "docs/requirements/CANDID-066-spec.md",
-      "assignee": null,
-      "assignedAt": null,
-      "lockedBy": null,
-      "lockedAt": null,
+      "assignee": "jaese@hoji-20260607140726.",
+      "assignedAt": "2026-06-07T14:07:26.137+00:00",
+      "lockedBy": "jaese@hoji-20260607140726.",
+      "lockedAt": "2026-06-07T14:07:26.137+00:00",
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T14:06:56.377+00:00",
       "source": "사용자 요청 — admin 상세에서 지원자 첨부 파일/포트폴리오 미표시 → 운영자 열람 기능 추가.",
-      "workflowState": null,
+      "workflowState": {
+        "currentSkill": "crew-plan",
+        "lastCompletedSkill": "crew-feature",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-07T14:07:26.137+00:00"
+      },
       "steps": [],
-      "completedAt": null
+      "completedAt": null,
+      "lockTTL": 3600
     }
   }
 }
