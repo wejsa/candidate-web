@@ -147,7 +147,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             <h2 id="interview-title" className={styles.sectionTitle}>
               면접 일정 등록
             </h2>
-            <InterviewScheduleForm applicationId={detail.applicationId} />
+            {/* 종단(최종 합격/불합격) 지원자는 면접 일정 등록 불필요 → 폼 비활성화. */}
+            <InterviewScheduleForm
+              applicationId={detail.applicationId}
+              disabled={detail.result === 'PASSED' || detail.result === 'FAILED'}
+              disabledReason={
+                detail.result === 'PASSED' || detail.result === 'FAILED'
+                  ? `${resultLabel(detail.result)} 처리된 지원자는 면접 일정을 등록할 필요가 없습니다.`
+                  : null
+              }
+            />
           </section>
         </>
       )}

@@ -27,8 +27,13 @@ function messageForCode(httpStatus: number, code: unknown): string {
 
 export function InterviewScheduleForm({
   applicationId,
+  disabled = false,
+  disabledReason = null,
 }: {
   applicationId: number;
+  /** 종단 단계(최종 합격/불합격) 등 면접 등록이 불필요한 상태에서 폼 전체 비활성화. */
+  disabled?: boolean;
+  disabledReason?: string | null;
 }): React.JSX.Element {
   const router = useRouter();
   const [stage, setStage] = useState<StageType>(StageType.INTERVIEW_1);
@@ -37,6 +42,7 @@ export function InterviewScheduleForm({
   const [state, setState] = useState<SubmitState>({ status: 'idle', message: null });
 
   async function submit(): Promise<void> {
+    if (disabled) return; // 종단 단계 — 등록 불필요(서버도 별도 정책으로 차단 가능)
     if (scheduledAt === '' || locationOrUrl.trim() === '') {
       setState({ status: 'error', message: '일시와 장소/링크를 입력해 주세요.' });
       return;
@@ -73,6 +79,7 @@ export function InterviewScheduleForm({
   }
 
   const isPending = state.status === 'pending';
+  const controlsDisabled = disabled || isPending;
 
   return (
     <form
@@ -82,12 +89,17 @@ export function InterviewScheduleForm({
         void submit();
       }}
     >
+      {disabled && disabledReason !== null && (
+        <p role="status" className={styles.hint}>
+          {disabledReason}
+        </p>
+      )}
       <label className={styles.field}>
         면접 단계
         <select
           value={stage}
           onChange={(e) => setStage(e.target.value as StageType)}
-          disabled={isPending}
+          disabled={controlsDisabled}
         >
           {INTERVIEW_STAGES.map((s) => (
             <option key={s} value={s}>
@@ -103,7 +115,7 @@ export function InterviewScheduleForm({
           value={scheduledAt}
           onChange={(e) => setScheduledAt(e.target.value)}
           required
-          disabled={isPending}
+          disabled={controlsDisabled}
         />
       </label>
       <label className={styles.field}>
@@ -114,7 +126,7 @@ export function InterviewScheduleForm({
           onChange={(e) => setLocationOrUrl(e.target.value)}
           maxLength={500}
           required
-          disabled={isPending}
+          disabled={controlsDisabled}
         />
       </label>
       {state.status === 'error' && state.message !== null && (
@@ -122,7 +134,7 @@ export function InterviewScheduleForm({
           {state.message}
         </p>
       )}
-      <button type="submit" className={styles.primaryBtn} disabled={isPending}>
+      <button type="submit" className={styles.primaryBtn} disabled={controlsDisabled}>
         {isPending ? '저장 중…' : '면접 일정 저장'}
       </button>
     </form>
