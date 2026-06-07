@@ -1,15 +1,15 @@
 {
   "metadata": {
-    "lastTaskNumber": 59,
+    "lastTaskNumber": 60,
     "projectPrefix": "CANDID",
-    "version": 544,
+    "version": 545,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T18:25:00+09:00"
+    "updatedAt": "2026-06-07T18:28:00+09:00"
   },
   "summary": {
-    "total": 59,
+    "total": 60,
     "done": 59,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
     "todo": 0
   },
@@ -27,7 +27,7 @@
     "3": {
       "name": "부가 기능",
       "description": "비밀번호 재설정, 로그아웃, 회원 탈퇴/익명화(GDPR), 지원 철회, 프로필 수정, SEO/structured data",
-      "status": "done"
+      "status": "in_progress"
     },
     "4": {
       "name": "운영/품질",
@@ -4391,6 +4391,50 @@
       ],
       "currentStep": 1,
       "completedAt": "2026-06-07T18:25:00+09:00"
+    },
+    "CANDID-060": {
+      "id": "CANDID-060",
+      "title": "홈/메타 카피 \"일상을 편리하게\" 톤 전환",
+      "description": "홈/메타 카피를 \"세상을 움직인다\"(CANDID-059)에서 \"일상을 더 편리하게 만드는 솔루션\" 톤으로 전환. H1 \"함께 일상을 바꿀 엔지니어를 찾습니다\", \"일상을 더 편리하게 만드는 솔루션\", 가치카드 \"일상을 떠받치는 인프라\". 순수 카피 변경.",
+      "status": "in_progress",
+      "type": "chore",
+      "priority": "low",
+      "phase": 3,
+      "micro": true,
+      "specFile": null,
+      "assignee": "wejsa-u@hoji-20260607-182800",
+      "assignedAt": "2026-06-07T18:28:00+09:00",
+      "lockedFiles": [
+        "app/page.tsx",
+        "app/layout.tsx",
+        "tests/app/home-copy.test.ts"
+      ],
+      "lockTTL": 3600,
+      "dependencies": [],
+      "createdAt": "2026-06-07T18:28:00+09:00",
+      "source": "사용자 요청 — 금융 아니어도 됨, 살기 편한 세상·삶을 윤택하게 하는 솔루션 느낌. AskUserQuestion에서 '일상을 편리하게' 톤 선택.",
+      "workflowState": {
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-07T18:28:00+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "일상을 편리하게 톤 카피 전환 + 회귀 가드 갱신",
+          "status": "pending",
+          "prLineLimit": 120,
+          "files": [
+            "app/page.tsx",
+            "app/layout.tsx",
+            "tests/app/home-copy.test.ts"
+          ]
+        }
+      ],
+      "currentStep": 1
     }
   }
 }
