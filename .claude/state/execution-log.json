@@ -3680,5 +3680,14 @@
       "stepNumber": 1,
       "prNumber": 160
     }
+  },
+  {
+    "timestamp": "2026-06-07T12:32:23.746+00:00",
+    "action": "pr_created",
+    "details": {
+      "taskId": "CANDID-061",
+      "stepNumber": 2,
+      "prNumber": 161
+    }
   }
 ]

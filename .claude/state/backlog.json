@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 555,
+    "version": 556,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T12:20:12.359+00:00"
+    "updatedAt": "2026-06-07T12:32:23.746+00:00"
   },
   "summary": {
     "total": 64,
@@ -4438,7 +4438,7 @@
       "micro": false,
       "specFile": null,
       "assignee": "jaese@hoji-20260607120020.",
-      "assignedAt": "2026-06-07T12:20:12.359+00:00",
+      "assignedAt": "2026-06-07T12:32:23.746+00:00",
       "lockedFiles": [
         "tests/a11y/foundation.test.tsx",
         "tests/app/admin/admin-guard-wiring.test.tsx",
@@ -4451,12 +4451,12 @@
       "createdAt": "2026-06-07T11:03:41.765+00:00",
       "source": "crew-health-check 자동 등록 (DS-02 CRITICAL FAIL, 2026-06-07)",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-merge-pr",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 161,
         "fixLoopCount": 0,
-        "autoChainArgs": "--next",
-        "updatedAt": "2026-06-07T12:20:12.359+00:00"
+        "autoChainArgs": "161 --auto-fix",
+        "updatedAt": "2026-06-07T12:32:23.746+00:00"
       },
       "steps": [
         {
@@ -4474,7 +4474,7 @@
         {
           "number": 2,
           "title": "Stale 회귀가드 테스트 정합화 (6 테스트 파일)",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 350,
           "files": [
             "tests/a11y/foundation.test.tsx",
@@ -4483,7 +4483,8 @@
             "tests/app/admin/StatusControl.test.tsx",
             "tests/lib/auth/email-verification.test.ts",
             "tests/lib/email/transport.test.ts"
-          ]
+          ],
+          "prNumber": 161
         }
       ],
       "currentStep": 2,
