@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 58,
     "projectPrefix": "CANDID",
-    "version": 534,
+    "version": 535,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T17:52:00+09:00"
+    "updatedAt": "2026-06-07T17:54:00+09:00"
   },
   "summary": {
     "total": 58,
     "done": 57,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 1
+    "todo": 0
   },
   "phases": {
     "1": {
@@ -4326,21 +4326,22 @@
       "id": "CANDID-058",
       "title": "홈/메타 카피 포괄화: \"무인 환전·결제 플랫폼\" 문구 교체",
       "description": "홈 랜딩·사이트 메타(app/page.tsx, app/layout.tsx) 5곳의 \"무인 환전·결제 플랫폼/키오스크\" 표현을 제거하고 \"일상을 잇는 금융 플랫폼\" 톤으로 교체. 순수 카피 변경(로직/스키마/API 무관). SEO description·og 동기 갱신.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "chore",
       "priority": "low",
       "phase": 3,
       "micro": true,
       "specFile": "docs/requirements/CANDID-058-spec.md",
-      "assignee": null,
-      "assignedAt": null,
+      "assignee": "wejsa-u@hoji-20260607-175400",
+      "assignedAt": "2026-06-07T17:54:00+09:00",
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T17:52:00+09:00",
       "source": "사용자 요청 — 무인 환전·결제 플랫폼 표현 제거, 포괄적 문구로 교체.",
       "workflowState": null,
       "steps": [],
-      "currentStep": 0
+      "currentStep": 0,
+      "lockTTL": 1800
     }
   }
 }
