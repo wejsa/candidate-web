@@ -21,7 +21,13 @@ export const GET = withErrorHandler(
     await requireRole(request, UserRole.RECRUITER, UserRole.ADMIN);
     const { id } = ParamsSchema.parse(await ctx.params);
     const { page, stage } = parseApplicantListQuery(request.nextUrl.searchParams);
-    const result = await listApplicantsByPosting({ jobPostingId: id, page, stage });
-    return NextResponse.json(result, { status: 200 });
+    // posting(공고 제목)은 운영 대시보드 헤더 전용 필드 — v1 응답 계약 보존을 위해 제외.
+    // (perPage 상수 분리와 동일한 "v1 계약 누수 차단" 규율: lib/admin/applicants.ts 참조)
+    const { posting: _posting, ...listContract } = await listApplicantsByPosting({
+      jobPostingId: id,
+      page,
+      stage,
+    });
+    return NextResponse.json(listContract, { status: 200 });
   }),
 );

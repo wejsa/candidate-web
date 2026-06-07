@@ -54,7 +54,7 @@ describe('listApplicantsByPosting', () => {
   });
 
   it('지원자 식별 정보를 마스킹해 반환(평문 미노출)', async () => {
-    basePrisma.jobPosting.findUnique.mockResolvedValue({ id: 1 });
+    basePrisma.jobPosting.findUnique.mockResolvedValue({ id: 1, title: '백엔드 엔지니어' });
     basePrisma.application.count.mockResolvedValue(1);
     basePrisma.application.findMany.mockResolvedValue([
       {
@@ -68,6 +68,9 @@ describe('listApplicantsByPosting', () => {
     ]);
 
     const res = await listApplicantsByPosting({ jobPostingId: 1, page: 1 });
+    // 헤더 식별용 공고 제목을 반환(추가 쿼리 없이 존재검증 select에 포함).
+    expect(res.posting).toEqual({ id: 1, title: '백엔드 엔지니어' });
+    expect(basePrisma.jobPosting.findUnique.mock.calls[0]![0].select).toMatchObject({ title: true });
     expect(res.items).toHaveLength(1);
     const item = res.items[0]!;
     expect(item.applicantNameMasked).toBe(maskName('홍길동'));

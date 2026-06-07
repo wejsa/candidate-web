@@ -53,13 +53,16 @@ export default async function PostingApplicantsPage({ params, searchParams }: Pa
     }
     throw err;
   }
-  const { items, pagination } = data;
+  const { posting, items, pagination } = data;
   const base = `/admin/job-postings/${jobPostingId}/applicants`;
 
   return (
     <main id="main-content" className={jp.content}>
       <header className={jp.pageHead}>
-        <h1 className={jp.pageTitle}>지원자 대시보드</h1>
+        <div>
+          <p className={jp.pageEyebrow}>지원자 대시보드</p>
+          <h1 className={jp.pageTitle}>{posting.title}</h1>
+        </div>
         <Link href="/admin/job-postings" className={jp.link}>
           ← 공고 목록
         </Link>
