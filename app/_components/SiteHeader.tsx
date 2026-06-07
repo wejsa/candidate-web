@@ -5,6 +5,7 @@
 
 import Link from 'next/link';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
+import { getOperatorRole } from '@/lib/auth/require-role-page';
 import { LogoutButton } from '@/app/_components/LogoutButton';
 import { HojiLogo } from '@/app/_components/HojiLogo';
 import styles from '@/app/_components/SiteHeader.module.css';
@@ -14,6 +15,8 @@ export async function SiteHeader(): Promise<React.JSX.Element> {
   // UI 표시 전용 — 보호 리소스 접근 제어(인가)는 미들웨어/페이지 가드가 담당.
   // 이 값을 라우트 보호 판단에 재사용하지 말 것.
   const isAuthed = auth !== null;
+  // 운영자(RECRUITER/ADMIN)면 "관리자" 메뉴 노출. 표시 전용 — 실제 접근 제어는 백오피스 페이지 가드.
+  const operatorRole = auth !== null ? await getOperatorRole(auth.userId) : null;
 
   return (
     <header className={styles.header}>
@@ -25,6 +28,11 @@ export async function SiteHeader(): Promise<React.JSX.Element> {
           채용 공고
         </Link>
         <span className={styles.spacer} />
+        {operatorRole !== null && (
+          <Link href="/admin" className={styles.navLink}>
+            관리자
+          </Link>
+        )}
         {isAuthed ? (
           <>
             <Link href="/me" className={styles.navLink}>

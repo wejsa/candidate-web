@@ -47,3 +47,17 @@ export async function requireOperatorPage(returnTo = '/admin'): Promise<Operator
 
   return { userId: auth.userId, role: user.role };
 }
+
+/**
+ * UI 분기 전용 — 활성 운영자(RECRUITER/ADMIN)면 role, 아니면 null. throw/redirect 없음.
+ * 헤더 등에서 "관리자" 메뉴 노출 여부 판단용. 인가 SSOT는 동일하게 DB users.role 재조회.
+ * ⚠️ 표시 전용 — 실제 백오피스 접근 제어는 각 페이지의 requireOperatorPage가 담당한다.
+ */
+export async function getOperatorRole(userId: number): Promise<UserRole | null> {
+  const user = await basePrisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, status: true },
+  });
+  if (user === null || user.status !== UserStatus.ACTIVE) return null;
+  return OPERATOR_ROLES.includes(user.role) ? user.role : null;
+}
