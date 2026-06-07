@@ -16,6 +16,9 @@ const STATUS_LABEL: Record<JobStatus, string> = {
   CLOSED: '마감',
 };
 
+// CANDID-054 FR-004 — 넓어진 폭 활용: 마감일 컬럼. 상시 채용(closesAt null)은 '상시'로 표기.
+const dateFmt = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' });
+
 interface PageProps {
   searchParams?: { page?: string };
 }
@@ -43,6 +46,7 @@ export default async function AdminJobPostingsPage({ searchParams }: PageProps) 
               <th>제목</th>
               <th>직군</th>
               <th>형태/경력</th>
+              <th>마감일</th>
               <th>상태</th>
               <th>지원</th>
               <th>상태 전환</th>
@@ -57,6 +61,7 @@ export default async function AdminJobPostingsPage({ searchParams }: PageProps) 
                 <td>
                   {EMPLOYMENT_LABEL[p.employmentType]} · {CAREER_LABEL[p.careerLevel]}
                 </td>
+                <td>{p.closesAt ? dateFmt.format(p.closesAt) : '상시'}</td>
                 <td>
                   <span className={`${styles.badge} ${styles[`badge_${p.status}`]}`}>
                     {STATUS_LABEL[p.status]}
