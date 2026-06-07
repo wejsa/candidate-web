@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { requireOperatorPage } from '@/lib/auth/require-role-page';
 import styles from './admin.module.css';
@@ -21,7 +22,12 @@ const NAV_ITEMS = [
 ] as const;
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const { role } = await requireOperatorPage();
+  // CANDID-055 — 미들웨어가 주입한 현재 경로(x-pathname)를 로그인 복귀 경로로 사용한다.
+  //   레이아웃 가드가 페이지 가드보다 먼저 실행되므로, 여기서 실제 딥링크를 보존하지 않으면
+  //   비로그인 진입 시 항상 /admin으로만 복귀했다(딥링크 유실). 헤더 부재 시 기존 기본값(/admin) 유지.
+  const pathname = headers().get('x-pathname');
+  const returnTo = pathname && pathname.startsWith('/admin') ? pathname : '/admin';
+  const { role } = await requireOperatorPage(returnTo);
 
   return (
     <div className={styles.shell}>
