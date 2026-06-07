@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 57,
     "projectPrefix": "CANDID",
-    "version": 530,
+    "version": 531,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T17:28:00+09:00"
+    "updatedAt": "2026-06-07T17:36:00+09:00"
   },
   "summary": {
     "total": 57,
@@ -4292,7 +4292,7 @@
       "phase": 4,
       "micro": true,
       "assignee": "wejsa-u@hoji-20260607-172500",
-      "assignedAt": "2026-06-07T17:28:00+09:00",
+      "assignedAt": "2026-06-07T17:36:00+09:00",
       "lockedFiles": [
         "lib/admin/applicants.ts",
         "app/admin/job-postings/[id]/applicants/page.tsx",
@@ -4308,25 +4308,26 @@
         "제목 표시로 인한 추가 PII 노출/감사 영향 없음."
       ],
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-plan",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 156,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-07T17:28:00+09:00"
+        "autoChainArgs": "156 --auto-fix",
+        "updatedAt": "2026-06-07T17:36:00+09:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "지원자 대시보드 헤더에 공고 제목 노출",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 150,
           "files": [
             "lib/admin/applicants.ts",
             "app/admin/job-postings/[id]/applicants/page.tsx",
             "app/admin/job-postings/job-postings.module.css",
             "tests/lib/admin/applicants.test.ts"
-          ]
+          ],
+          "prNumber": 156
         }
       ],
       "currentStep": 1,
