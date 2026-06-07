@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 62,
+    "version": 63,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T12:35:10.325+00:00"
+    "updatedAt": "2026-06-07T12:44:40.206+00:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -666,7 +666,7 @@
     "CANDID-036": {
       "id": "CANDID-036",
       "title": "CANDID-010 FU1: 이메일 인증 보안 hardening (race + RL + 메일링크 + 회귀 가드)",
-      "type": "enhancement",
+      "type": "feature",
       "priority": "high",
       "phase": 2,
       "completedAt": "2026-05-24T00:37:44+09:00",
@@ -681,7 +681,7 @@
     "CANDID-037": {
       "id": "CANDID-037",
       "title": "CANDID-036 FU: RL wrapper 합성 + P2002 정밀 매핑 + 테스트 강화",
-      "type": "enhancement",
+      "type": "feature",
       "priority": "high",
       "phase": 2,
       "completedAt": "2026-05-24T11:28:00+09:00",
@@ -1133,7 +1133,7 @@
       "title": "RTL 인프라 도입 + ResumeUploadStep.test.tsx + use-auto-save 마이그",
       "phase": 4,
       "priority": "high",
-      "type": "test",
+      "type": "chore",
       "completedAt": "2026-05-29T20:19:04+09:00",
       "assignee": "wejsa-u@hoji-20260529-192652",
       "prs": [
@@ -1327,7 +1327,7 @@
       "title": "CANDID-016 Step 3 carry MAJOR/MINOR 보강",
       "phase": 4,
       "priority": "medium",
-      "type": "refactor",
+      "type": "chore",
       "completedAt": "2026-06-02T23:34:12+09:00",
       "assignee": "jaese@hoji-20260602-220417",
       "prs": [
@@ -1464,7 +1464,7 @@
       "title": "Playwright E2E 도입 + 핵심 사용자 여정 스모크",
       "phase": 4,
       "priority": "medium",
-      "type": "test",
+      "type": "chore",
       "completedAt": "2026-06-03T06:58:29Z",
       "assignee": "wejsa-u",
       "prs": [
@@ -1751,6 +1751,20 @@
       "carry": [
         "phase4가 done이었으나 헬스체크가 추가한 CANDID-062/063/064(todo)로 재오픈 상태 — 후속 정리 필요"
       ]
+    },
+    "CANDID-062": {
+      "id": "CANDID-062",
+      "title": "backlog task.type enum 정규화 (SI-04)",
+      "phase": 4,
+      "priority": "medium",
+      "type": "chore",
+      "completedAt": "2026-06-07T12:44:40.206+00:00",
+      "assignee": null,
+      "prs": [],
+      "totalMergedLines": 0,
+      "stepCount": 0,
+      "reviewSummary": "상태파일 메타데이터 정규화(SI-04). backlog/completed의 task.type enum 외 5건(036/037 enhancement→feature, 039/048/040 test·refactor→chore) 보정. 코드 변경 없음 — develop 직접 커밋(상태 SSOT 프로토콜).",
+      "carry": []
     }
   }
 }

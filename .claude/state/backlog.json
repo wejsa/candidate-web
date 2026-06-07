@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 558,
+    "version": 559,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T12:35:10.325+00:00"
+    "updatedAt": "2026-06-07T12:44:40.206+00:00"
   },
   "summary": {
     "total": 64,
-    "done": 61,
+    "done": 62,
     "inProgress": 0,
     "review": 0,
-    "todo": 3
+    "todo": 2
   },
   "phases": {
     "1": {
@@ -2972,7 +2972,7 @@
       "id": "CANDID-036",
       "title": "CANDID-010 FU1: 이메일 인증 보안 hardening (race + RL + 메일링크 + 회귀 가드)",
       "status": "done",
-      "type": "enhancement",
+      "type": "feature",
       "priority": "high",
       "phase": 2,
       "dependencies": [
@@ -3055,7 +3055,7 @@
       "id": "CANDID-037",
       "title": "CANDID-036 FU: RL wrapper 합성 + P2002 정밀 매핑 + 테스트 강화",
       "status": "done",
-      "type": "enhancement",
+      "type": "feature",
       "priority": "high",
       "phase": 2,
       "assignee": null,
@@ -3184,7 +3184,7 @@
       "title": "RTL 인프라 도입 + ResumeUploadStep.test.tsx + use-auto-save 마이그",
       "description": "React Testing Library 도입(@testing-library/react + @testing-library/jest-dom + @testing-library/user-event) + ResumeUploadStep.test.tsx 작성(파일 선택/검증/진행률/취소/재시도/교체/INFECTED 시나리오). 기존 CANDID-015 use-auto-save.test.ts 도 minimal renderer에서 RTL로 마이그 검토. vitest config에 .test.tsx jsdom 추가 + tests/app/jobs/apply/ 디렉토리 정착. 회귀 가드: CANDID-016 D-MAJOR-2 INFECTED UI 표시 + S-MAJOR-2 422 message 화이트리스트 + abort/retry 흐름.",
       "status": "done",
-      "type": "test",
+      "type": "chore",
       "priority": "high",
       "phase": 4,
       "assignee": null,
@@ -3243,7 +3243,7 @@
       "title": "CANDID-016 Step 3 carry MAJOR/MINOR 보강",
       "description": "CANDID-016 Step 1~3 review carry 9건 일괄 처리: (a) D-MAJOR-1 ApplicationFormShell의 draftId={jobId} 명명/의미 정합 — 서버 라우트가 application_drafts.id를 받도록 변경 또는 명명 통일 (b) D-MAJOR-3 ResumeUploadStep 동시 업로드 race — 이전 abortRef cleanup 추가 (c) A-MAJOR-2 upload-state.ts invalid 전이 dev warn 추가 (d) A-MAJOR-3 storage.ts HMR-safe globalThis 싱글톤 (e) S-MAJOR-1 client.ts presign uploadUrl HTTPS 강제 가드 (NODE_ENV=production) (f) S-MAJOR-3 orphan S3 객체 정리 — CANDID-029 야간 배치 의존 명시 + design note (g) T-MAJOR-2~4 lengthComputable=false, sha256 reject 경로, confirm 422/409 명시 케이스, partial UNIQUE 통합 테스트 (h) D-MINOR-1 STORED_PATH_RE 확장자 화이트리스트 SSOT (i) MINOR/INFO 다수.",
       "status": "done",
-      "type": "refactor",
+      "type": "chore",
       "priority": "medium",
       "phase": 4,
       "lockedFiles": [],
@@ -3625,7 +3625,7 @@
       "status": "done",
       "priority": "medium",
       "phase": 4,
-      "type": "test",
+      "type": "chore",
       "assignee": null,
       "assignedAt": null,
       "lockedFiles": [],
@@ -4488,12 +4488,12 @@
       "workflowState": null,
       "steps": [],
       "currentStep": 0,
-      "completedAt": null,
+      "completedAt": "2026-06-07T12:44:40.206+00:00",
       "micro": false,
       "id": "CANDID-062",
       "title": "backlog task.type enum 정규화 (SI-04)",
       "description": "crew-health-check SI-04 3회 연속 MAJOR FAIL. task.type이 스키마 허용 enum(feature|bug|chore|spike) 밖인 5건 정리: CANDID-036/037 enhancement→feature, CANDID-039/048 test→chore, CANDID-040 refactor→chore. 모두 done이라 기능 영향 없으나 매 검진 재발 — 1회 정리로 영구 해소.",
-      "status": "todo",
+      "status": "done",
       "type": "chore",
       "priority": "medium",
       "phase": 4,
