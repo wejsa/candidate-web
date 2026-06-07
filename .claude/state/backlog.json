@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 64,
     "projectPrefix": "CANDID",
-    "version": 561,
+    "version": 562,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T12:58:16.787+00:00"
+    "updatedAt": "2026-06-07T13:05:15.751+00:00"
   },
   "summary": {
     "total": 64,
@@ -4502,7 +4502,7 @@
     "CANDID-063": {
       "specFile": null,
       "assignee": "jaese@hoji-20260607125210.",
-      "assignedAt": "2026-06-07T12:58:16.787+00:00",
+      "assignedAt": "2026-06-07T13:05:15.751+00:00",
       "lockedFiles": [
         "docs/requirements/CANDID-010-spec.md",
         "docs/requirements/CANDID-011-spec.md",
@@ -4518,18 +4518,18 @@
       "dependencies": [],
       "createdAt": "2026-06-07T11:47:53.256+00:00",
       "workflowState": {
-        "currentSkill": "crew-impl",
-        "lastCompletedSkill": "crew-plan",
-        "prNumber": null,
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 162,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
-        "updatedAt": "2026-06-07T12:58:16.787+00:00"
+        "autoChainArgs": "162 --auto-fix",
+        "updatedAt": "2026-06-07T13:05:15.751+00:00"
       },
       "steps": [
         {
           "number": 1,
           "title": "핵심 도메인 spec 9건 + 인덱스",
-          "status": "pending",
+          "status": "pr_created",
           "prLineLimit": 600,
           "files": [
             "docs/requirements/CANDID-010-spec.md",
@@ -4542,7 +4542,8 @@
             "docs/requirements/CANDID-023-spec.md",
             "docs/requirements/CANDID-024-spec.md",
             "docs/requirements/README.md"
-          ]
+          ],
+          "prNumber": 162
         }
       ],
       "currentStep": 1,
