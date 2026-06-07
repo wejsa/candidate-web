@@ -62,7 +62,16 @@ export default async function AdminJobPostingsPage({ searchParams }: PageProps) 
                     {STATUS_LABEL[p.status]}
                   </span>
                 </td>
-                <td>{p.applicationCount}</td>
+                <td>
+                  {/* 지원 카운트를 지원자 목록 링크로 — 거기서 각 지원서 상세(/admin/applications/{id})로 진입. */}
+                  <Link
+                    href={`/admin/job-postings/${p.id}/applicants`}
+                    className={styles.link}
+                    aria-label={`지원자 ${p.applicationCount}명 보기`}
+                  >
+                    {p.applicationCount}
+                  </Link>
+                </td>
                 <td>
                   <StatusControl jobPostingId={p.id} current={p.status} />
                 </td>

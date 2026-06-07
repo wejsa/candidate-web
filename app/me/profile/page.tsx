@@ -5,6 +5,7 @@
 // 인증 페이지이므로 robots 색인 제외.
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getOptionalAuthFromCookies } from '@/lib/auth/server-cookies';
 import { getProfile } from '@/lib/users/profile-service';
@@ -62,6 +63,12 @@ export default async function ProfilePage() {
       />
       <PasswordChangeForm hasPassword={profile.hasPassword} />
       <SocialAccountsSection providers={profile.providers} />
+      {/* 회원 탈퇴 진입 — destructive 액션이라 하단에 muted로 배치(/me/withdraw). */}
+      <div className={styles.dangerZone}>
+        <Link href="/me/withdraw" className={styles.withdrawLink}>
+          회원 탈퇴
+        </Link>
+      </div>
     </main>
   );
 }

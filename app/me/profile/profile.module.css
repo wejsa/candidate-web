@@ -181,3 +181,21 @@
   align-items: center;
   gap: var(--space-3);
 }
+
+/* 회원 탈퇴 진입(고아 페이지였던 /me/withdraw 링크 연결). destructive라 muted로 배치. */
+.dangerZone {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  text-align: right;
+}
+
+.withdrawLink {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.withdrawLink:hover {
+  color: var(--color-error);
+}
