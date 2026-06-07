@@ -2,7 +2,7 @@
   "metadata": {
     "lastTaskNumber": 56,
     "projectPrefix": "CANDID",
-    "version": 525,
+    "version": 526,
     "createdAt": "2026-05-12T18:22:05+09:00",
     "updatedAt": "2026-06-07T16:05:00+09:00"
   },
@@ -4273,13 +4273,13 @@
       "createdAt": "2026-06-07T16:05:00+09:00",
       "source": "사용자 보고(회원가입 약관 체크박스가 글자보다 위에 위치) — 프로젝트 전체 점검 요청.",
       "workflowState": {
-        "currentSkill": "crew-review-pr",
-        "lastCompletedSkill": "crew-impl",
+        "currentSkill": "crew-merge-pr",
+        "lastCompletedSkill": "crew-review-pr",
         "prNumber": 155,
         "fixLoopCount": 0,
-        "autoChainArgs": "155 --auto-fix",
-        "lastReviewDecision": null,
-        "updatedAt": "2026-06-07T16:05:00+09:00"
+        "autoChainArgs": "155",
+        "lastReviewDecision": "COMMENT",
+        "updatedAt": "2026-06-07T16:10:00+09:00"
       },
       "steps": [
         {
