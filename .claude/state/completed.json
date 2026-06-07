@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 59,
+    "version": 60,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T18:02:00+09:00"
+    "updatedAt": "2026-06-07T18:25:00+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1699,6 +1699,22 @@
       "totalMergedLines": 26,
       "stepCount": 1,
       "reviewSummary": "T0 직접 리뷰(순수 카피 변경). 차단 이슈 0건. 회귀 가드 테스트 추가.",
+      "carry": []
+    },
+    "CANDID-059": {
+      "id": "CANDID-059",
+      "title": "홈/메타 카피 \"세상을 움직인다\" 테마 전환",
+      "phase": 3,
+      "priority": "low",
+      "type": "chore",
+      "completedAt": "2026-06-07T18:25:00+09:00",
+      "assignee": "wejsa-u@hoji-20260607-181800",
+      "prs": [
+        158
+      ],
+      "totalMergedLines": 17,
+      "stepCount": 1,
+      "reviewSummary": "T0 직접 리뷰(순수 카피). 차단 이슈 0건. 회귀 가드 갱신.",
       "carry": []
     }
   }

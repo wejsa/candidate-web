@@ -3592,5 +3592,16 @@
     "prNumber": 158,
     "tier": "T0",
     "at": "2026-06-07T18:23:00+09:00"
+  },
+  {
+    "action": "merged",
+    "taskId": "CANDID-059",
+    "prNumber": 158,
+    "at": "2026-06-07T18:25:00+09:00"
+  },
+  {
+    "action": "task_completed",
+    "taskId": "CANDID-059",
+    "at": "2026-06-07T18:25:00+09:00"
   }
 ]
