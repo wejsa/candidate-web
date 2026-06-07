@@ -1,15 +1,15 @@
 {
   "metadata": {
-    "lastTaskNumber": 55,
+    "lastTaskNumber": 56,
     "projectPrefix": "CANDID",
-    "version": 524,
+    "version": 525,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T15:55:00+09:00"
+    "updatedAt": "2026-06-07T16:05:00+09:00"
   },
   "summary": {
-    "total": 55,
+    "total": 56,
     "done": 55,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
     "todo": 0
   },
@@ -4253,6 +4253,43 @@
       ],
       "currentStep": 1,
       "completedAt": "2026-06-07T15:55:00+09:00"
+    },
+    "CANDID-056": {
+      "id": "CANDID-056",
+      "title": "체크박스+라벨 세로 중앙 정렬",
+      "description": "약관/동의 체크박스가 align-items: flex-start로 텍스트 상단에 붙는 문제. .check(auth.module.css)·.consent(apply.module.css)를 center로 변경. JobFilters는 이미 center.",
+      "status": "in_progress",
+      "type": "bug",
+      "priority": "low",
+      "phase": 4,
+      "micro": true,
+      "assignee": "jaese@hoji-20260607-160500",
+      "assignedAt": "2026-06-07T16:05:00+09:00",
+      "lockedFiles": [
+        "app/_components/auth.module.css",
+        "app/jobs/[id]/apply/apply.module.css"
+      ],
+      "dependencies": [],
+      "createdAt": "2026-06-07T16:05:00+09:00",
+      "source": "사용자 보고(회원가입 약관 체크박스가 글자보다 위에 위치) — 프로젝트 전체 점검 요청.",
+      "workflowState": {
+        "currentSkill": "crew-review-pr",
+        "lastCompletedSkill": "crew-impl",
+        "prNumber": 155,
+        "fixLoopCount": 0,
+        "autoChainArgs": "155 --auto-fix",
+        "lastReviewDecision": null,
+        "updatedAt": "2026-06-07T16:05:00+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "Micro 구현",
+          "status": "pr_created",
+          "prNumber": 155
+        }
+      ],
+      "currentStep": 1
     }
   }
 }
