@@ -4,6 +4,7 @@ import type { PortfolioLinkType, VirusScanStatus } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
 import { AppError } from '@/lib/errors';
 import { recordAuditEvent } from '@/lib/audit/record';
+import { presignResumeDownload } from '@/lib/files/storage';
 import { maskName, maskEmail } from '@/lib/pii/mask';
 import {
   computeDecryptedApplicantName,
@@ -330,4 +331,42 @@ export async function getApplicantDetailForOperator(
       sortOrder: l.sortOrder,
     })),
   };
+}
+
+export interface ResumeDownloadResult {
+  url: string;
+  filename: string;
+  expiresAt: Date;
+}
+
+/** CANDID-066 — 운영자 이력서 다운로드. 조회 → 바이러스 게이팅 → fail-closed 감사 → presigned GET.
+ *  - 게이팅 정책: INFECTED만 절대 차단(409). PENDING/FAILED는 ClamAV 골격(CANDID-029) 현실상
+ *    "스캔 미완" 경고와 함께 허용(차단 시 기능 무력화). 스캔 인프라 도입 후 강화.
+ *  - 감사(RESUME_DOWNLOAD)는 fail-closed: 감사 INSERT 실패 시 throw → presign 미발급(추적 없는 PII 문서 열람 차단). */
+export async function getResumeDownloadForOperator(
+  args: GetApplicantDetailArgs,
+): Promise<ResumeDownloadResult> {
+  const file = await basePrisma.resumeFile.findFirst({
+    where: { applicationId: args.applicationId },
+    select: { id: true, originalFilename: true, storedPath: true, virusScanStatus: true },
+  });
+  if (file === null) {
+    throw new AppError('FILE_NOT_FOUND');
+  }
+  if (file.virusScanStatus === 'INFECTED') {
+    throw new AppError('FILE_INFECTED');
+  }
+  // 명시 다운로드 = PII 문서 열람 → fail-closed 감사(getApplicantDetailForOperator의 PII_VIEW와 동일 정신).
+  await recordAuditEvent({
+    eventType: AuditEventType.RESUME_DOWNLOAD,
+    actorUserId: args.actorUserId,
+    resourceType: 'resume_file',
+    resourceId: String(file.id),
+    ipAddress: args.ipAddress ?? null,
+    userAgent: args.userAgent ?? null,
+    // PII-free metadata — 파일명/경로 미기록, 식별은 applicationId + 스캔 상태만.
+    metadata: { applicationId: args.applicationId, virusScanStatus: file.virusScanStatus },
+  });
+  const presigned = await presignResumeDownload(file.storedPath, file.originalFilename);
+  return { url: presigned.url, filename: file.originalFilename, expiresAt: presigned.expiresAt };
 }

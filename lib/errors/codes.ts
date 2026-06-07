@@ -181,6 +181,8 @@ export const ERROR_CATALOG = {
     message: '이미 첨부된 파일이 있습니다. 교체 후 다시 시도해 주세요.',
   },
   FILE_NOT_FOUND: { status: 404, message: '파일을 찾을 수 없습니다.' },
+  // CANDID-066: 바이러스 감염 확인 파일은 다운로드 차단(스캔 미완 PENDING/FAILED는 경고 후 허용).
+  FILE_INFECTED: { status: 409, message: '감염이 확인된 파일은 다운로드할 수 없습니다.' },
 
   // 시스템 — SYS_
   SYS_INTERNAL_ERROR: { status: 500, message: '서버 내부 오류가 발생했습니다.' },
