@@ -2,16 +2,16 @@
   "metadata": {
     "lastTaskNumber": 59,
     "projectPrefix": "CANDID",
-    "version": 540,
+    "version": 541,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T18:15:00+09:00"
+    "updatedAt": "2026-06-07T18:18:00+09:00"
   },
   "summary": {
     "total": 59,
     "done": 58,
-    "inProgress": 0,
+    "inProgress": 1,
     "review": 0,
-    "todo": 1
+    "todo": 0
   },
   "phases": {
     "1": {
@@ -4361,21 +4361,45 @@
       "id": "CANDID-059",
       "title": "홈/메타 카피 \"세상을 움직인다\" 테마 전환",
       "description": "홈 랜딩·사이트 메타(app/page.tsx, app/layout.tsx) 7곳의 \"금융\" 중심 카피를 \"세상을 움직인다\" 톤으로 전환. H1 \"함께 금융을 움직일\" → \"함께 세상을 움직일\", \"일상을 잇는 금융 플랫폼\"(CANDID-058) → \"세상을 움직이는 플랫폼\" 등. 순수 카피 변경. 제안 문구는 impl 진입 전 사용자 확정.",
-      "status": "todo",
+      "status": "in_progress",
       "type": "chore",
       "priority": "low",
       "phase": 3,
       "micro": true,
       "specFile": "docs/requirements/CANDID-059-spec.md",
-      "assignee": null,
-      "assignedAt": null,
-      "lockedFiles": [],
+      "assignee": "wejsa-u@hoji-20260607-181800",
+      "assignedAt": "2026-06-07T18:18:00+09:00",
+      "lockedFiles": [
+        "app/page.tsx",
+        "app/layout.tsx",
+        "tests/app/home-copy.test.ts"
+      ],
       "dependencies": [],
       "createdAt": "2026-06-07T18:15:00+09:00",
       "source": "사용자 요청 — \"금융을 움직일\"이 어색, \"세상을 움직일\"로. 전반적으로 세상을 움직인다는 느낌으로 워딩 변경.",
-      "workflowState": null,
-      "steps": [],
-      "currentStep": 0
+      "workflowState": {
+        "currentSkill": "crew-impl",
+        "lastCompletedSkill": "crew-plan",
+        "prNumber": null,
+        "fixLoopCount": 0,
+        "autoChainArgs": null,
+        "updatedAt": "2026-06-07T18:18:00+09:00"
+      },
+      "steps": [
+        {
+          "number": 1,
+          "title": "세상을 움직인다 테마 카피 전환 + 회귀 가드 갱신",
+          "status": "pending",
+          "prLineLimit": 120,
+          "files": [
+            "app/page.tsx",
+            "app/layout.tsx",
+            "tests/app/home-copy.test.ts"
+          ]
+        }
+      ],
+      "currentStep": 1,
+      "lockTTL": 3600
     }
   }
 }
