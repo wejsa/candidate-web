@@ -15,7 +15,7 @@ import styles from '../job-postings.module.css';
 
 const ACTION_LABEL: Record<JobStatus, string> = {
   OPEN: '공개',
-  DRAFT: '비공개로',
+  DRAFT: '비공개',
   CLOSED: '마감',
 };
 
