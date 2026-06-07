@@ -43,10 +43,8 @@ test-results/
 # Docker
 docker-compose.override.yml
 
-# Claude Code framework
+# Claude Code framework (ai-crew-kit 플러그인 — 런타임 산출물만 무시, state SSOT는 추적)
 .claude/temp/
-.claude/plans/
-.claude/skills/**/CLAUDE.md
 .claude/scheduled_tasks.lock
 .claude/state/hook-errors.log
 .claude/state/hook-disabled.flag
