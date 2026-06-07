@@ -52,6 +52,8 @@
 }
 
 .heroAction:hover {
+  /* 전역 a:hover(color: --color-link-hover)가 흰 글자를 덮어 배경과 동색이 되는 것 방지 */
+  color: #ffffff;
   background: var(--brand-hover);
 }
 

@@ -72,9 +72,6 @@ export default function HomePage() {
             <Link href="/jobs" className={styles.btnPrimary}>
               채용 공고 보기
             </Link>
-            <Link href="/jobs" className={styles.btnSecondary}>
-              지원 절차 안내
-            </Link>
           </div>
         </div>
       </section>

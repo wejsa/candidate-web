@@ -12,7 +12,7 @@ export function SiteFooter(): React.JSX.Element {
       <div className={styles.inner}>
         <div className={styles.brandCol}>
           <HojiLogo height={24} />
-          <p className={styles.tagline}>무인 환전·결제 플랫폼을 만드는 사람들.</p>
+          <p className={styles.tagline}>새로운 세상을 밝히는 사람들.</p>
         </div>
 
         <nav className={styles.cols} aria-label="푸터">
