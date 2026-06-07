@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { StageType } from '@prisma/client';
+import { StageType, ApplicationResult } from '@prisma/client';
 import { isAppError } from '@/lib/errors';
 import { requireOperatorPage } from '@/lib/auth/require-role-page';
-import { listApplicantsByPosting, getApplicantStatsByPosting } from '@/lib/admin/applicants';
+import {
+  listApplicantsByPosting,
+  getApplicantStatsByPosting,
+  OPERATOR_DASHBOARD_PER_PAGE,
+} from '@/lib/admin/applicants';
 import { resultLabel, stageLabel } from '@/lib/my-page/stage-labels';
 import jp from '../../job-postings.module.css';
 import styles from '../../applicants.module.css';
@@ -15,8 +19,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const STAGE_FILTERS = Object.values(StageType);
-// 결과 KPI 노출 순서(진행 → 종단). WITHDRAWN(철회) 포함 — 운영 추적 목적.
-const RESULT_ORDER = ['IN_PROGRESS', 'PASSED', 'FAILED', 'WITHDRAWN'] as const;
+// 결과 KPI는 enum에서 동적 생성(SSOT) — 신규 결과 값 추가 시 자동 반영. 선언 순서(진행 → 종단)가 곧 표시 순서.
+const RESULT_ORDER = Object.values(ApplicationResult);
 
 interface PageProps {
   params: { id: string };
@@ -40,7 +44,7 @@ export default async function PostingApplicantsPage({ params, searchParams }: Pa
   try {
     // 공고 존재 검증은 목록 조회가 담당(JOB_NOT_FOUND) → 집계와 병렬.
     [data, stats] = await Promise.all([
-      listApplicantsByPosting({ jobPostingId, page, stage }),
+      listApplicantsByPosting({ jobPostingId, page, stage, perPage: OPERATOR_DASHBOARD_PER_PAGE }),
       getApplicantStatsByPosting(jobPostingId),
     ]);
   } catch (err) {

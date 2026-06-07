@@ -21,8 +21,11 @@ import {
 //     평문 PII는 감사 metadata에 절대 기록하지 않는다(BR-PII-01, recordAuditEvent PII-free 가드).
 //   - 조회는 basePrisma(extension 우회) — User.phone/birthDate 자동 복호화를 트리거하지 않는다.
 
-// CANDID-054 FR-002 — 운영 대시보드는 한 화면에 더 많은 지원자를 노출(밀도↑). 공개 목록(20)과 분리된 운영 전용 페이지 크기.
-const PER_PAGE = 50;
+// CANDID-053 — 기본 페이지 크기. v1 API(/api/admin/v1/.../applications) 응답 계약 보존을 위해 변경 금지.
+const DEFAULT_PER_PAGE = 20;
+// CANDID-054 FR-002 — 운영 대시보드 전용 밀도(한 화면에 더 많이). 호출측(page.tsx)에서만 args.perPage로 주입.
+//   PER_PAGE 상수를 직접 올리면 동일 함수를 공유하는 v1 API 페이지 크기까지 바뀌므로(계약 누수) 인자로 분리.
+export const OPERATOR_DASHBOARD_PER_PAGE = 50;
 
 export interface ApplicantListItem {
   applicationId: number;
@@ -50,6 +53,8 @@ export interface ListApplicantsArgs {
   jobPostingId: number;
   page: number;
   stage?: StageType | null;
+  /** 페이지 크기. 미지정 시 DEFAULT_PER_PAGE(20) — v1 API 계약 보존. 운영 대시보드만 OPERATOR_DASHBOARD_PER_PAGE 전달. */
+  perPage?: number;
 }
 
 /** 공고별 지원자 목록 — 페이지네이션 + 마스킹. idx_applications_posting_stage 활용. */
@@ -57,6 +62,7 @@ export async function listApplicantsByPosting(
   args: ListApplicantsArgs,
 ): Promise<ApplicantListResult> {
   const { jobPostingId, page } = args;
+  const perPage = args.perPage ?? DEFAULT_PER_PAGE;
 
   // 공고 존재 검증 — 미존재 공고로 enumeration/오조회 차단.
   const posting = await basePrisma.jobPosting.findUnique({
@@ -77,8 +83,8 @@ export async function listApplicantsByPosting(
     basePrisma.application.findMany({
       where,
       orderBy: { submittedAt: 'desc' },
-      skip: (page - 1) * PER_PAGE,
-      take: PER_PAGE,
+      skip: (page - 1) * perPage,
+      take: perPage,
       // PII snapshot Bytes 컬럼 미선택 — 평문 User.name/email만(마스킹 대상).
       select: {
         id: true,
@@ -91,7 +97,7 @@ export async function listApplicantsByPosting(
     }),
   ]);
 
-  const totalPages = total === 0 ? 1 : Math.ceil(total / PER_PAGE);
+  const totalPages = total === 0 ? 1 : Math.ceil(total / perPage);
 
   return {
     items: rows.map((r) => ({
@@ -103,7 +109,7 @@ export async function listApplicantsByPosting(
       applicantNameMasked: maskName(r.user.name),
       applicantEmailMasked: maskEmail(r.user.email),
     })),
-    pagination: { page, perPage: PER_PAGE, total, totalPages, hasMore: page < totalPages },
+    pagination: { page, perPage, total, totalPages, hasMore: page < totalPages },
   };
 }
 
@@ -148,7 +154,8 @@ export async function getApplicantStatsByPosting(
   for (const g of resultGroups) {
     byResult[g.result] = g._count._all;
   }
-  // total은 단계 합으로 산출(=결과 합). 두 groupBy는 동일 모집단이므로 정합.
+  // total은 단계 합으로 산출. 두 groupBy는 동일 where(jobPostingId)를 쓰지만 비-트랜잭션 분리 실행이므로
+  // 동시 전이/제출 시 Σstage와 Σresult가 순간적으로 어긋날 수 있다(읽기 전용 KPI — 허용).
   const total = Object.values(byStage).reduce((sum, n) => sum + n, 0);
 
   return { total, byStage, byResult };

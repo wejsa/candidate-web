@@ -87,24 +87,36 @@ describe('listApplicantsByPosting', () => {
     expect(callArg.where).toMatchObject({ jobPostingId: 1, currentStage: 'INTERVIEW_1' });
   });
 
-  it('페이지네이션 계산 + skip/take (운영 PER_PAGE=50)', async () => {
+  it('페이지네이션 계산 + skip/take (기본 PER_PAGE=20, v1 API 계약 보존)', async () => {
     basePrisma.jobPosting.findUnique.mockResolvedValue({ id: 1 });
-    basePrisma.application.count.mockResolvedValue(120);
+    basePrisma.application.count.mockResolvedValue(45);
     basePrisma.application.findMany.mockResolvedValue([]);
+    // perPage 미지정 → 기본 20(v1 API 계약 보존).
     const res = await listApplicantsByPosting({ jobPostingId: 1, page: 2 });
     expect(res.pagination).toMatchObject({
       page: 2,
-      perPage: 50,
-      total: 120,
+      perPage: 20,
+      total: 45,
       totalPages: 3,
       hasMore: true,
     });
     const callArg = basePrisma.application.findMany.mock.calls[0]![0];
-    expect(callArg.skip).toBe(50);
-    expect(callArg.take).toBe(50);
+    expect(callArg.skip).toBe(20);
+    expect(callArg.take).toBe(20);
     // PII snapshot Bytes 컬럼을 select하지 않음(평문/암호문 노출 회피).
     expect(callArg.select.phoneSnapshot).toBeUndefined();
     expect(callArg.select.applicantNameSnapshot).toBeUndefined();
+  });
+
+  it('운영 대시보드 perPage(50) 주입 시 skip/take/perPage 반영', async () => {
+    basePrisma.jobPosting.findUnique.mockResolvedValue({ id: 1 });
+    basePrisma.application.count.mockResolvedValue(120);
+    basePrisma.application.findMany.mockResolvedValue([]);
+    const res = await listApplicantsByPosting({ jobPostingId: 1, page: 2, perPage: 50 });
+    expect(res.pagination).toMatchObject({ page: 2, perPage: 50, total: 120, totalPages: 3, hasMore: true });
+    const callArg = basePrisma.application.findMany.mock.calls[0]![0];
+    expect(callArg.skip).toBe(50);
+    expect(callArg.take).toBe(50);
   });
 
   it('빈 목록(total=0) → totalPages=1, hasMore=false', async () => {
@@ -162,6 +174,18 @@ describe('getApplicantStatsByPosting (CANDID-054 FR-002)', () => {
     expect(stats.total).toBe(0);
     expect(Object.values(stats.byStage).every((n) => n === 0)).toBe(true);
     expect(Object.values(stats.byResult).every((n) => n === 0)).toBe(true);
+  });
+
+  it('단계/결과 두 groupBy가 동일 where(모집단)로 조회됨', async () => {
+    // total(Σstage)이 결과 분포와 정합하려면 두 groupBy의 모집단(where)이 동일해야 한다.
+    // mock 대칭이 아닌 where 인자 자체를 검증해 한쪽 필터 누락 회귀를 탐지.
+    basePrisma.application.groupBy.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    await getApplicantStatsByPosting(7);
+    const stageCall = basePrisma.application.groupBy.mock.calls[0]![0];
+    const resultCall = basePrisma.application.groupBy.mock.calls[1]![0];
+    expect(resultCall.where).toEqual(stageCall.where);
+    expect(resultCall.where).toEqual({ jobPostingId: 7 });
+    expect(resultCall.by).toEqual(['result']);
   });
 });
 
