@@ -1,0 +1,98 @@
+/* CANDID-054 FR-002 — 지원자 대시보드(KPI 카드 + 카운트 칩 필터) 스타일. 전역 토큰 재사용.
+   테이블/페이저는 job-postings.module.css를 공유하며, 본 모듈은 대시보드 위젯만 담당한다. */
+
+/* ── KPI 카드 그리드 ───────────────────────────────── */
+.kpiSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.kpiGroupLabel {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+
+.kpiCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.kpiTotal {
+  border-color: var(--color-link);
+}
+
+.kpiValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.kpiLabel {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* ── 카운트 칩 필터 ────────────────────────────────── */
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-surface-2);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.chip:hover {
+  border-color: var(--color-link);
+}
+
+/* 활성 칩 — 색 외 단서(굵기 + 진한 테두리) 병행(WCAG 1.4.1 색 의존 회피). */
+.chipActive {
+  border-color: var(--color-text);
+  border-width: 2px;
+  font-weight: 700;
+  background: var(--color-accent-weak);
+}
+
+.chipCount {
+  min-width: 1.25rem;
+  padding: 0 var(--space-1);
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.chipActive .chipCount {
+  background: var(--color-text);
+  color: var(--color-surface);
+}
