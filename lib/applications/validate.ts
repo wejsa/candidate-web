@@ -12,6 +12,7 @@ import { JobStatus, type Prisma } from '@prisma/client';
 import { basePrisma } from '@/lib/prisma';
 import { AppError, type ErrorDetail } from '@/lib/errors';
 import type { DraftPayloadV1, PersonalInfoPayload } from '@/lib/drafts/types';
+import { CAREER_LEVELS } from '@/lib/drafts/schema';
 
 type PrismaLike = typeof basePrisma | Prisma.TransactionClient;
 
@@ -122,13 +123,15 @@ export function collectIncompleteReasons(
 
 /**
  * step1_personal 필수 필드 충족 검사 — 개인정보 최소수집(US 요청)으로 이름만 필수.
- * phone/birthDate/address/careerMonths/education은 선택. careerLevel은 폼이 기본값을 채운다.
+ * phone/birthDate/address/careerMonths/education은 선택. careerLevel은 폼이 기본값(NEW)을 채우나,
+ * 변조/구버전 draft로 enum 밖 값이 들어오면 미완료 처리한다(CAREER_LEVELS SSOT 기준 — CANDID-061).
  */
 function isCompletedPersonalInfo(
   personal: PersonalInfoPayload | undefined,
 ): personal is PersonalInfoPayload {
   if (personal === undefined) return false;
   if (!isNonEmptyString(personal.name)) return false;
+  if (!(CAREER_LEVELS as readonly string[]).includes(personal.careerLevel)) return false;
   return true;
 }
 
