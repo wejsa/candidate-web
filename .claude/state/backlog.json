@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "lastTaskNumber": 64,
+    "lastTaskNumber": 65,
     "projectPrefix": "CANDID",
-    "version": 571,
+    "version": 572,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T13:31:23.641+00:00"
+    "updatedAt": "2026-06-07T13:41:01.515+00:00"
   },
   "summary": {
-    "total": 64,
+    "total": 65,
     "done": 64,
     "inProgress": 0,
     "review": 0,
-    "todo": 0
+    "todo": 1
   },
   "phases": {
     "1": {
@@ -4577,6 +4577,27 @@
       "phase": 4,
       "source": "crew-health-check DS-04 + advisory",
       "lockTTL": 3600
+    },
+    "CANDID-065": {
+      "id": "CANDID-065",
+      "title": "홈/메타 카피 \"엔지니어\"→\"인재\" 포괄 전환",
+      "description": "엔지니어 외 직군도 채용하므로 홈/메타 카피의 \"엔지니어\"를 \"인재\"(포괄 표현)로 전환. 대상: app/page.tsx 5곳 — metadata.title(\"엔지니어 채용\"), metadata.description, openGraph.title(\"Hoji 엔지니어 채용\")/description, H1(\"함께 일상을 바꿀 엔지니어를 찾습니다\"→\"함께 일상을 바꿀 인재를 찾습니다\"). 회귀 가드 tests/app/home-copy.test.ts 동반 갱신. 주의: 다른 테스트의 \"백엔드 엔지니어\" 등은 실제 공고 직무명 샘플이므로 변경 제외(브랜드 카피만). 순수 카피 변경.",
+      "status": "todo",
+      "type": "chore",
+      "priority": "medium",
+      "phase": 3,
+      "micro": true,
+      "specFile": null,
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
+      "dependencies": [],
+      "createdAt": "2026-06-07T13:41:01.515+00:00",
+      "source": "사용자 요청 — 엔지니어만 채용하는 게 아니므로 \"인재\"로 포괄 전환.",
+      "workflowState": null,
+      "steps": [],
+      "currentStep": 0,
+      "completedAt": null
     }
   }
 }
