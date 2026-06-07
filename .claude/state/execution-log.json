@@ -3584,5 +3584,13 @@
     "stepNumber": 1,
     "prNumber": 158,
     "at": "2026-06-07T18:21:00+09:00"
+  },
+  {
+    "action": "reviewed",
+    "decision": "COMMENT",
+    "taskId": "CANDID-059",
+    "prNumber": 158,
+    "tier": "T0",
+    "at": "2026-06-07T18:23:00+09:00"
   }
 ]
