@@ -321,6 +321,99 @@
         "원격 stale 병합 브랜치 68개 미정리(feature/bugfix/CANDID-*)",
         "PRISMA_LOG_QUERY env 문서화 권장(.env.example/lib/env.ts)"
       ]
+    },
+    {
+      "timestamp": "2026-06-10T20:34:00+09:00",
+      "mode": "full",
+      "score": 88,
+      "grade": "NEEDS_ATTENTION",
+      "criticalCount": 0,
+      "majorCount": 1,
+      "minorCount": 1,
+      "note": "DS-02 해소(2294/2294 통과, CANDID-061 회귀 수정 확인)로 74→88 회복. SI-04는 py-jsonschema 전체 검증 도입으로 검출 범위 확대(type enum 5건 해소 → additionalProperties 중심 241건). CANDID-067 자동 등록. 주의: Node 18(시스템 기본)에서는 jsdom@29 ESM 체인(ERR_REQUIRE_ESM)으로 스위트 대량 실패 — .nvmrc=20 준수 필수.",
+      "categories": {
+        "doc-sync": {
+          "score": 83,
+          "pass": 5,
+          "fail": 1,
+          "skip": 1
+        },
+        "state-integrity": {
+          "score": 83,
+          "pass": 5,
+          "fail": 1,
+          "skip": 0
+        },
+        "security": {
+          "score": 100,
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        },
+        "agent-config": {
+          "score": null,
+          "skipped": true,
+          "note": "로컬 .claude/skills 부재 → AC-02 SKIP → 카테고리 제외(플러그인 제공)"
+        },
+        "hook-safety": {
+          "score": null,
+          "skipped": true,
+          "note": "settings.json hooks 필드·.claude/hooks 부재 → 카테고리 제외(플러그인 제공)"
+        }
+      },
+      "fails": [
+        {
+          "id": "SI-04",
+          "severity": "MAJOR",
+          "note": "전체 스키마 검증 241건 위반(58 Task): additionalProperties 170(branch/actualLines/step/dependsOn/mergedLines/reviewSummary 등 레거시 kit 필드), required 60(step 키 → number 누락), 타입/범위 11(specFile:null 6, currentStep null/0 3, prLineLimit 1300>1000). type enum 5건은 해소. 4회 연속 FAIL — severity 상향 검토. CANDID-067 등록."
+        },
+        {
+          "id": "DS-07",
+          "severity": "MINOR",
+          "note": "docs/requirements/ 스펙 16건 vs feature Task 38건 — 6→16건으로 개선됐으나 여전히 부족. 5회 연속 FAIL — severity 상향 검토."
+        }
+      ],
+      "skips": [
+        {
+          "id": "DS-05",
+          "note": "src/ 부재(app/·lib/ 구조) → 사전조건 미충족"
+        }
+      ],
+      "passNotes": [
+        {
+          "id": "DS-01",
+          "note": "typecheck(tsc --noEmit) exit 0 — CLAUDE.md 빌드 코드블록 부재로 build proxy"
+        },
+        {
+          "id": "DS-02",
+          "note": "vitest 2294/2294 통과(176파일, node 20.20.2). 직전 21건 실패(CANDID-061) 해소 확인"
+        },
+        {
+          "id": "SEC-01",
+          "note": "1건 매칭은 PII-safe 로그(emailDomain+summarizeError, 주석 명시) — false positive"
+        },
+        {
+          "id": "SEC-02",
+          "note": "$queryRaw 8건 모두 tagged template 파라미터화, $queryRawUnsafe 0건"
+        },
+        {
+          "id": "SEC-04",
+          "note": "admin 라우트는 requireRole 가드, 무가드 라우트는 공개 설계(health/ready/jobs/auth)"
+        },
+        {
+          "id": "SEC-06",
+          "note": ".gitignore .env/.env.*.local 등록 + tracked는 .env.example만 + 실시크릿 prefix 0건"
+        },
+        {
+          "id": "SI-06",
+          "note": "INFO: kitVersion 2.3.3 ≠ 플러그인 VERSION 4.6.0 — 메타데이터 드리프트(동작 게이트 아님), --fix로 갱신 가능"
+        }
+      ],
+      "advisories": [
+        "Node 18 셸에서 npm test 시 ERR_REQUIRE_ESM 대량 실패(jsdom@29→html-encoding-sniffer@6→@exodus/bytes ESM-only). package.json engines(node>=20.19) 명시 권장",
+        "원격 잔존 브랜치: feature 4건(CANDID-065/066 squash 머지 잔재) + worktree-* 3건 + chore/upgrade-v2.5.1 — 이전 68건에서 대폭 정리됨",
+        "hook-disabled.flag 해소 확인(state 디렉토리에 부재)"
+      ]
     }
   ]
 }

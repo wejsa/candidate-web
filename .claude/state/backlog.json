@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "lastTaskNumber": 66,
+    "lastTaskNumber": 67,
     "projectPrefix": "CANDID",
-    "version": 589,
+    "version": 590,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-07T14:41:28.662+00:00"
+    "updatedAt": "2026-06-10T20:34:00+09:00"
   },
   "summary": {
-    "total": 66,
+    "total": 67,
     "done": 66,
     "inProgress": 0,
     "review": 0,
-    "todo": 0
+    "todo": 1
   },
   "phases": {
     "1": {
@@ -4678,6 +4678,22 @@
       "completedAt": "2026-06-07T14:41:28.662+00:00",
       "lockTTL": 10800,
       "currentStep": 3
+    },
+    "CANDID-067": {
+      "id": "CANDID-067",
+      "title": "backlog.json 스키마 정합성 정리 — 전체 검증 위반 241건 (비표준 필드/required/타입)",
+      "description": "aick-health-check SI-04 전체 스키마 검증(backlog.schema.json, additionalProperties:false)에서 58개 Task에 241건 위반 검출. (1) 비표준 필드 170건: branch(104)/actualLines(67)/dependsOn(57)/step(57)/mergedLines(45)/reviewSummary(36)/note(28)/source(27)/planPath(20)/step-level dependencies(18)/fixLoop(13) 등 — 구버전 kit(2.x) 스킬이 기록한 레거시 필드. (2) required 60건: CANDID-009 이후 다수 step이 'number' 대신 'step' 키 사용. (3) 타입/범위 11건: specFile:null 6건, currentStep null/0 3건, CANDID-015 step prLineLimit 1300>max1000. 모두 done Task라 동작 영향 없음. 조치: 정규화 마이그레이션 스크립트(step→number 개명, 레거시 필드 제거 또는 보존 정책 결정) 또는 kit 스키마 확장 제안 중 택일.",
+      "status": "todo",
+      "type": "chore",
+      "priority": "high",
+      "phase": 4,
+      "assignee": null,
+      "assignedAt": null,
+      "lockedFiles": [],
+      "dependencies": [],
+      "workflowState": null,
+      "createdAt": "2026-06-10T20:34:00+09:00",
+      "updatedAt": "2026-06-10T20:34:00+09:00"
     }
   }
 }

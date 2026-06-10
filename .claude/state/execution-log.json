@@ -3946,5 +3946,23 @@
         167
       ]
     }
+  },
+  {
+    "timestamp": "2026-06-10T20:34:00+09:00",
+    "action": "health_check_started",
+    "details": {
+      "mode": "full"
+    }
+  },
+  {
+    "timestamp": "2026-06-10T20:34:00+09:00",
+    "action": "health_check_completed",
+    "details": {
+      "mode": "full",
+      "score": 88,
+      "grade": "NEEDS_ATTENTION",
+      "criticalCount": 0,
+      "fixCount": 0
+    }
   }
 ]
