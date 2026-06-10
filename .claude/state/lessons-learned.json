@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": 13,
-    "updatedAt": "2026-06-07T18:05:00+09:00",
+    "version": 14,
+    "updatedAt": "2026-06-10T21:42:37+09:00",
     "schemaVersion": "1.0.0"
   },
   "lessons": [
@@ -617,9 +617,9 @@
         "tooling",
         "meta-testing"
       ],
-      "appliedCount": 2,
+      "appliedCount": 3,
       "createdAt": "2026-05-25T18:31:21+09:00",
-      "updatedAt": "2026-05-25T23:33:08+09:00"
+      "updatedAt": "2026-06-10T21:42:37+09:00"
     },
     {
       "id": "L-035",
@@ -652,9 +652,9 @@
         "governance",
         "closed-loop"
       ],
-      "appliedCount": 3,
+      "appliedCount": 4,
       "createdAt": "2026-05-25T18:31:21+09:00",
-      "updatedAt": "2026-05-25T23:33:08+09:00"
+      "updatedAt": "2026-06-10T21:42:37+09:00"
     },
     {
       "id": "L-037",
@@ -755,9 +755,9 @@
         "rename-resilience",
         "fixture-isolation"
       ],
-      "appliedCount": 1,
+      "appliedCount": 2,
       "createdAt": "2026-05-25T23:33:08+09:00",
-      "updatedAt": "2026-05-25T23:33:08+09:00"
+      "updatedAt": "2026-06-10T21:42:37+09:00"
     },
     {
       "id": "L-043",
@@ -776,6 +776,24 @@
       "appliedCount": 1,
       "createdAt": "2026-06-07T18:05:00+09:00",
       "updatedAt": "2026-06-07T18:05:00+09:00"
+    },
+    {
+      "id": "L-044",
+      "taskId": "CANDID-067",
+      "category": "architecture",
+      "title": "vendoring 불가 스키마의 하드코딩 SSOT 사본은 --print-keys 노출 + 테스트 스냅샷 핀으로 드리프트 강제 탐지",
+      "description": "vendoring 불가한 외부 스키마(읽기 전용 플러그인 캐시)의 화이트리스트 SSOT 사본은 하드코딩이 불가피하다. 이때 드리프트 자동탐지는 (1) 스크립트가 --print-keys로 키셋을 JSON 노출 (2) 테스트가 EXPECTED_*_KEYS 스냅샷과 대조하는 핀으로 강제한다. 런타임 파생(스키마 직접 read)이 불가능한 환경에서 '하드코딩 + 핀'이 차선의 SSOT 보증. 주석으로 '테스트가 지킨다'고 선언하려면 그 핀을 같은 PR에 실제 구현해야 한다(미구현 주석은 거짓 신뢰). CANDID-067 재리뷰 신규 MAJOR in-PR fix — 스키마 신규 property 추가 시 하드코딩 화이트리스트가 유효 필드를 침묵 삭제하는 역위험을 핀이 차단.",
+      "impact": "medium",
+      "tags": [
+        "ssot",
+        "schema-drift",
+        "hardcoded-snapshot",
+        "meta-tooling",
+        "test-pin"
+      ],
+      "appliedCount": 1,
+      "createdAt": "2026-06-10T21:42:37+09:00",
+      "updatedAt": "2026-06-10T21:42:37+09:00"
     }
   ]
 }
