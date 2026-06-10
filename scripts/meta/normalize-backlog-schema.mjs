@@ -13,8 +13,10 @@
 // --check는 `npm run check:backlog-schema`로 배선되어 CI/회귀 가드로 동작한다.
 // 멱등성: 2회차 실행은 "변경 없음"을 출력하고 파일을 건드리지 않는다.
 //
-// 순수 함수(normalizeBacklog/normalizeTask/normalizeStep)는 export되어
-// tests/scripts/normalize-backlog-schema.test.ts에서 직접 검증한다(L-034).
+// 순수 함수(normalizeBacklog 등)는 deep-copy 경계 분리·재사용 목적으로 export한다.
+// 동작 검증은 tests/scripts/normalize-backlog-schema.test.ts의 spawn 기반 fixture 테스트로
+// 수행한다(allowJs:false라 .mjs 직접 import 불가, L-034). 화이트리스트 키셋은 --print-keys로
+// 노출되어 테스트의 EXPECTED_*_KEYS 핀과 대조된다(SSOT 드리프트 자동 탐지).
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -218,6 +220,15 @@ function formatReport(counts) {
 }
 
 function main() {
+  // --print-keys: 화이트리스트 키셋을 JSON으로 노출(테스트 SSOT 드리프트 핀 대조용).
+  // backlog 파일을 읽지 않고 키셋만 출력 — stdout 오염 방지 위해 최우선 처리.
+  if (process.argv.includes('--print-keys')) {
+    process.stdout.write(
+      JSON.stringify({ taskKeys: [...TASK_KEYS].sort(), stepKeys: [...STEP_KEYS].sort() }),
+    );
+    return 0;
+  }
+
   const checkOnly = process.argv.includes('--check');
   const raw = readFileSync(BACKLOG_PATH, 'utf8');
   const { result, counts, changed } = normalizeBacklog(JSON.parse(raw));

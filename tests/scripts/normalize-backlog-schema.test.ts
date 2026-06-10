@@ -176,6 +176,46 @@ describe('normalize-backlog-schema (CANDID-067)', () => {
       expect(getTask(path).steps?.[0]?.prLineLimit).toBe(1000);
     });
 
+    it('prLineLimit 경계(=1000)와 그 미만은 클램프하지 않는다(off-by-one 가드)', () => {
+      const path = writeFixture(
+        baseBacklog({
+          'CANDID-001': task({
+            steps: [
+              { number: 1, title: 'a', status: 'merged', prLineLimit: 1000 },
+              { number: 2, title: 'b', status: 'merged', prLineLimit: 450 },
+            ],
+          }),
+        }),
+      );
+      run(path);
+      const steps = getTask(path).steps ?? [];
+      expect(steps.map((s) => s.prLineLimit)).toEqual([1000, 450]);
+    });
+
+    it('workflowState:null인 task를 NPE 없이 보존한다', () => {
+      const path = writeFixture(baseBacklog({ 'CANDID-001': task({ workflowState: null }) }));
+      run(path);
+      expect(getTask(path).workflowState).toBeNull();
+    });
+
+    it('workflowState.autoChainArgs가 string이면 보존한다', () => {
+      const path = writeFixture(
+        baseBacklog({
+          'CANDID-001': task({
+            status: 'in_progress',
+            workflowState: {
+              currentSkill: 'aick-impl',
+              autoChainArgs: '168 --auto-fix',
+              updatedAt: '2026-01-01T00:00:00.000Z',
+            },
+          }),
+        }),
+      );
+      run(path);
+      const ws = getTask(path).workflowState as Record<string, unknown>;
+      expect(ws.autoChainArgs).toBe('168 --auto-fix');
+    });
+
     it('specFile:null을 제거한다', () => {
       const path = writeFixture(baseBacklog({ 'CANDID-001': task({ specFile: null }) }));
       run(path);
@@ -264,6 +304,57 @@ describe('normalize-backlog-schema (CANDID-067)', () => {
       expect(res.code).toBe(1);
       // --check는 파일을 건드리지 않는다(deep-copy 순수 검사)
       expect(readFileSync(path, 'utf8')).toBe(before);
+    });
+  });
+
+  describe('SSOT 드리프트 가드 (화이트리스트 키셋 핀)', () => {
+    // backlog.schema.json definitions.task/step의 properties 키 스냅샷.
+    // 스키마가 vendoring되지 않아 스크립트가 하드코딩하므로, 이 핀이 유일한 드리프트 탐지선.
+    // 스키마 확장 시 스크립트 TASK_KEYS/STEP_KEYS와 이 상수를 함께 갱신해야 테스트가 통과한다.
+    const EXPECTED_TASK_KEYS = [
+      'assignedAt',
+      'assignee',
+      'completedAt',
+      'createdAt',
+      'currentStep',
+      'dependencies',
+      'description',
+      'id',
+      'lockTTL',
+      'lockedAt',
+      'lockedBy',
+      'lockedFiles',
+      'micro',
+      'pauseReason',
+      'pausedAt',
+      'phase',
+      'priority',
+      'specFile',
+      'status',
+      'steps',
+      'title',
+      'type',
+      'updatedAt',
+      'workflowState',
+    ];
+    const EXPECTED_STEP_KEYS = [
+      'description',
+      'estimatedLines',
+      'files',
+      'mergedAt',
+      'number',
+      'prLineLimit',
+      'prNumber',
+      'status',
+      'title',
+    ];
+
+    it('--print-keys가 스크립트 화이트리스트를 스냅샷대로 노출한다', () => {
+      const path = writeFixture(baseBacklog({}));
+      const { stdout } = run(path, ['--print-keys']);
+      const keys = JSON.parse(stdout) as { taskKeys: string[]; stepKeys: string[] };
+      expect(keys.taskKeys).toEqual(EXPECTED_TASK_KEYS);
+      expect(keys.stepKeys).toEqual(EXPECTED_STEP_KEYS);
     });
   });
 });
