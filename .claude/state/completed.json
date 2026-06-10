@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": 67,
+    "version": 68,
     "projectPrefix": "CANDID",
     "createdAt": "2026-05-12T19:10:00+09:00",
-    "updatedAt": "2026-06-07T14:41:28.662+00:00"
+    "updatedAt": "2026-06-10T21:19:55+09:00"
   },
   "tasks": {
     "CANDID-022": {
@@ -1837,6 +1837,25 @@
       "carry": [
         "운영 전제: 실제 다운로드는 S3/MinIO 인프라 + prisma migrate deploy(RESUME_DOWNLOAD enum) 필요",
         "바이러스 스캔 게이팅 PENDING/FAILED 허용은 ClamAV 골격(CANDID-029) 현실 반영 — 스캔 인프라 도입 후 강화 여지"
+      ]
+    },
+    "CANDID-067": {
+      "id": "CANDID-067",
+      "title": "backlog.json 스키마 정합성 정리 — 전체 검증 위반 241건 (비표준 필드/required/타입)",
+      "phase": 4,
+      "priority": "high",
+      "type": "chore",
+      "completedAt": "2026-06-10T21:19:55+09:00",
+      "assignee": "jaese@hoji-20260610-204531",
+      "prs": [
+        168
+      ],
+      "totalMergedLines": 763,
+      "stepCount": 1,
+      "reviewSummary": "T3 3-agent 리뷰 → CRITICAL 0, MAJOR 4 in-task 해소(L-019/L-004): stepNumber 별칭 승계·--check deep-copy·가드 배선·단위테스트. 재리뷰(2-agent)서 신규 MAJOR(키셋 핀 미구현) 발견 → --print-keys + EXPECTED_*_KEYS 핀으로 SSOT 드리프트 자동탐지 실구현. jsonschema 241→0건, 멱등성 확인, test 2294→2311(+17).",
+      "carry": [
+        "재발 방지: check:backlog-schema는 npm script로만 배선됨 — CI/pre-commit 파이프라인에 연결 시 상시 가드화 가능(현재 수동 실행)",
+        "근본: kit 스킬(2.x 잔재)이 비표준 필드를 재기록하면 재발 — 화이트리스트 키셋은 --print-keys 핀으로 스키마 드리프트는 탐지하나, 신규 레거시 필드 유입은 check:backlog-schema 정기 실행으로 포착"
       ]
     }
   }

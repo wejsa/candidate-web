@@ -3983,5 +3983,24 @@
       "decision": "COMMENT",
       "tier": "T3"
     }
+  },
+  {
+    "timestamp": "2026-06-10T21:19:55+09:00",
+    "action": "merged",
+    "details": {
+      "taskId": "CANDID-067",
+      "stepNumber": 1,
+      "prNumber": 168
+    }
+  },
+  {
+    "timestamp": "2026-06-10T21:19:55+09:00",
+    "action": "task_completed",
+    "details": {
+      "taskId": "CANDID-067",
+      "prs": [
+        168
+      ]
+    }
   }
 ]
