@@ -2,9 +2,9 @@
   "metadata": {
     "lastTaskNumber": 67,
     "projectPrefix": "CANDID",
-    "version": 592,
+    "version": 593,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-10T20:49:47+09:00"
+    "updatedAt": "2026-06-10T11:55:46.287Z"
   },
   "summary": {
     "total": 67,
@@ -190,7 +190,6 @@
           "title": "공고 도메인 3 모델 + 첫 Prisma migration",
           "description": "schema.prisma에 4 enum(EmploymentType/CareerLevel/JobStatus/QuestionType) + 3 model(JobCategory/JobPosting/JobPostingQuestion) 추가. 첫 Prisma migration: CREATE TYPE × 4 → CREATE TABLE × 3 (job_categories → job_postings → job_posting_questions 순) → CREATE INDEX × 6 → ADD FK × 2 (category→posting RESTRICT, posting→question CASCADE). PRD §3.3.3 + ERD §3.2 + BR-JOB-01~04 준수. prisma format/validate/typecheck/lint/build 통과.",
           "status": "merged",
-          "branch": "feature/CANDID-004-step1",
           "prNumber": 10,
           "mergedAt": "2026-05-16T15:47:48+09:00",
           "files": [
@@ -198,7 +197,6 @@
             "prisma/migrations/20260516063500_candid_004_job_domain/migration.sql"
           ],
           "estimatedLines": 195,
-          "actualLines": 176,
           "prLineLimit": 220
         }
       ],
@@ -231,7 +229,6 @@
           "title": "핵심 지원서 + 6 enum + sequences (applications + drafts + application_number_sequences)",
           "description": "schema.prisma에 6 enum(ApplicationResult/StageType/InterviewScheduleStatus/PortfolioLinkType/VirusScanStatus/AuditEventType) 일괄 정의 + applications(PII snapshot Bytes NULLABLE 포함) + application_drafts(payload_json JSONB + version 낙관적 락) + application_number_sequences 보조 테이블. 인덱스 5개 (uk_applications_active 부분 UNIQUE + uk_applications_number + idx_applications_user_submitted + idx_applications_posting_result + uk_drafts_user_posting + idx_drafts_last_saved). FK 정책: applications.user_id/job_posting_id RESTRICT, drafts.user_id CASCADE, drafts.job_posting_id RESTRICT. PII extension wiring은 CANDID-005-FU1로 분리.",
           "status": "merged",
-          "branch": "feature/CANDID-005-step1",
           "prNumber": 11,
           "mergedAt": "2026-05-17T21:47:26+09:00",
           "files": [
@@ -239,7 +236,6 @@
             "prisma/migrations/20260517214005_candid_005_step1_core_applications/migration.sql"
           ],
           "estimatedLines": 205,
-          "actualLines": 224,
           "prLineLimit": 240
         },
         {
@@ -247,7 +243,6 @@
           "title": "첨부/응답 3 모델 + job_posting_questions.archived_at (L-015 R1 종결)",
           "description": "application_answers + resume_files + portfolio_links 추가. job_posting_questions에 archived_at NULLABLE 컬럼 추가 (L-015 R1 종결 — application_answers.question_id RESTRICT + question soft-archive). CHECK XOR(application_id, draft_id) on resume_files + portfolio_links. 인덱스 6개 (uk_answers_app_question UNIQUE + idx_resume_files_* 3 부분 + idx_portfolio_* 2 부분). FK 정책: answers.application_id CASCADE/question_id RESTRICT, resume_files.application_id SET NULL/draft_id SET NULL/owner RESTRICT, portfolio_links CASCADE × 2.",
           "status": "merged",
-          "branch": "feature/CANDID-005-step2",
           "prNumber": 12,
           "mergedAt": "2026-05-17T22:03:23+09:00",
           "files": [
@@ -255,16 +250,13 @@
             "prisma/migrations/20260517214800_candid_005_step2_attachments/migration.sql"
           ],
           "estimatedLines": 215,
-          "actualLines": 180,
-          "prLineLimit": 240,
-          "note": "fixLoop 1회 (C001 — resume_files XOR CHECK + SET NULL 충돌 해소, +6 LOC). L-015 R1 종결."
+          "prLineLimit": 240
         },
         {
           "number": 3,
           "title": "이력/면접/감사 3 모델 (audit_logs 골격)",
           "description": "application_status_history (append-only, visible_to_candidate 플래그) + interview_schedules (ics_uid UNIQUE 멱등성) + audit_logs (CANDID-026 골격, FK 미설정, BIGSERIAL). 인덱스 5개. audit_logs 파티셔닝은 CANDID-026 위임.",
           "status": "merged",
-          "branch": "feature/CANDID-005-step3",
           "prNumber": 13,
           "mergedAt": "2026-05-17T22:11:41+09:00",
           "files": [
@@ -272,7 +264,6 @@
             "prisma/migrations/20260517220600_candid_005_step3_history_audit/migration.sql"
           ],
           "estimatedLines": 165,
-          "actualLines": 149,
           "prLineLimit": 200
         }
       ],
@@ -304,7 +295,6 @@
           "title": "env required 격상 + RefreshToken model + migration + smoke",
           "description": "lib/env.ts에서 JWT_ACCESS_SECRET/JWT_REFRESH_SECRET을 required(min 32)로 격상 + JWT_ACCESS_TTL_SEC/JWT_REFRESH_TTL_SEC/JWT_REFRESH_TTL_SHORT_SEC env 추가. prisma/schema.prisma에 RefreshToken 모델 신설 + User 역참조 + 마이그레이션 SQL (CREATE TABLE + 3 인덱스 + FK). .env.example 격상 안내 + tests/setup.ts JWT secret 주입.",
           "status": "merged",
-          "branch": "feature/CANDID-006-step1",
           "prNumber": 21,
           "mergedAt": "2026-05-20T00:18:00+09:00",
           "files": [
@@ -317,16 +307,13 @@
             "tests/integration/helpers/prisma.ts"
           ],
           "estimatedLines": 140,
-          "actualLines": 100,
-          "prLineLimit": 200,
-          "note": "review CRITICAL 1 (C001 TRUNCATE_TARGETS) → skill-fix 회차 1로 해소 + H001/H003/H004 동시 보강. 재리뷰 CRITICAL 0 / MAJOR 0 / MINOR 0."
+          "prLineLimit": 200
         },
         {
           "number": 2,
           "title": "lib/auth/jwt.ts (jose HS512) + cookies.ts + 단위 테스트",
           "description": "jose 라이브러리 도입 (Edge 호환). issueAccessToken/issueRefreshToken/verifyAccessToken/verifyRefreshToken 4함수 HS512. cookies.ts에서 HttpOnly+Secure(prod)+SameSite=Lax+Path=/ 통일. 단위 테스트 12+/6+ 케이스.",
           "status": "merged",
-          "branch": "feature/CANDID-006-step2",
           "prNumber": 22,
           "mergedAt": "2026-05-20T22:34:00+09:00",
           "files": [
@@ -337,7 +324,6 @@
             "tests/lib/auth/cookies.test.ts"
           ],
           "estimatedLines": 400,
-          "actualLines": 497,
           "prLineLimit": 500
         },
         {
@@ -345,7 +331,6 @@
           "title": "lib/auth/session.ts (RefreshToken DB issue/verify/rotate/revoke) + 단위 테스트",
           "description": "issueRefreshSession + verifyRefreshSession (sha256 + DB SELECT + expires/revoked 검사) + rotateRefreshSession (구 revoke 'rotated' + 새 issue, familyId 승계) + revokeAllForUser(reason) (BR-AUTH-05). 단위 테스트 mock 기반 15+ 케이스. session.ts는 Node 전용 (Route Handler), Edge runtime 분리.",
           "status": "merged",
-          "branch": "feature/CANDID-006-step3",
           "prNumber": 23,
           "mergedAt": "2026-05-20T22:53:00+09:00",
           "files": [
@@ -353,16 +338,13 @@
             "tests/lib/auth/session.test.ts"
           ],
           "estimatedLines": 350,
-          "actualLines": 369,
-          "prLineLimit": 450,
-          "note": "review CRITICAL 1 (C001 rotation TOCTOU race condition) → skill-fix 회차 1로 해소 (조건부 updateMany + 콜백 트랜잭션). 재리뷰 CRITICAL 0 / MAJOR 5 / MINOR 4."
+          "prLineLimit": 450
         },
         {
           "number": 4,
           "title": "lib/auth/middleware.ts + /api/v1/auth/refresh route + 단위 테스트",
           "description": "requireAuth(request) / getOptionalAuth(request) — 401 분기 (AUTH_TOKEN_EXPIRED vs AUTH_TOKEN_INVALID). middleware는 Edge 호환 (jose verify만). /api/v1/auth/refresh POST Route Handler — Refresh Cookie 읽기 → rotateRefreshSession → 새 Access+Refresh Set-Cookie. 단위 테스트 8+/6+ 케이스.",
           "status": "merged",
-          "branch": "feature/CANDID-006-step4",
           "prNumber": 24,
           "mergedAt": "2026-05-20T23:03:00+09:00",
           "files": [
@@ -374,9 +356,7 @@
             "tests/lib/auth/session.test.ts"
           ],
           "estimatedLines": 350,
-          "actualLines": 305,
-          "prLineLimit": 450,
-          "note": "RefreshSession에 userId 추가 — refresh route Access 발급용, Step 3 통합 gap 보정 (L-019)."
+          "prLineLimit": 450
         }
       ],
       "currentStep": 4
@@ -407,7 +387,6 @@
           "title": "에러 코드 카탈로그 + AppError 클래스",
           "description": "lib/errors/codes.ts — ERROR_CATALOG 22종 SSOT(code → {status, message}) + ErrorCode 타입 + errorStatus() 헬퍼. lib/errors/app-error.ts — AppError extends Error(code→status 파생, message 기본값 catalog) + ErrorDetail 타입 + isAppError() 가드. 단위 테스트 2종(카탈로그 구조/status 범위 + AppError 생성·instanceof·가드).",
           "status": "merged",
-          "branch": "feature/CANDID-007-step1",
           "prNumber": 25,
           "mergedAt": "2026-05-20T23:35:16+09:00",
           "files": [
@@ -417,16 +396,13 @@
             "tests/lib/errors/app-error.test.ts"
           ],
           "estimatedLines": 290,
-          "actualLines": 234,
-          "prLineLimit": 400,
-          "note": "review CRITICAL 0 / MAJOR 3 (H001 PRD 코드 네이밍→Step 3, H002/H003 테스트 회귀 방어→Step 2 L-019) / MINOR 5 / INFO 6."
+          "prLineLimit": 400
         },
         {
           "number": 2,
           "title": "전역 핸들러 + 응답 빌더 + Route Handler 래퍼",
           "description": "lib/errors/response.ts — ErrorResponseBody 타입, errorResponse() 7필드 빌더(traceId 기본 randomUUID), handleApiError() 분기(AppError / ZodError→400 SYS_VALIDATION_FAILED / unknown→500 SYS_INTERNAL_ERROR + 운영 스택 비노출 + console.error), withErrorHandler() HOF(요청당 traceId 생성 → catch). lib/errors/index.ts barrel. 단위 테스트 1종(전 분기 + prod/dev + traceId + 래퍼).",
           "status": "merged",
-          "branch": "feature/CANDID-007-step2",
           "prNumber": 26,
           "mergedAt": "2026-05-20T23:48:48+09:00",
           "files": [
@@ -439,16 +415,13 @@
             "tests/lib/errors/app-error.test.ts"
           ],
           "estimatedLines": 360,
-          "actualLines": 385,
-          "prLineLimit": 500,
-          "note": "PR #25 리뷰 H002/H003/M002/M004/M005를 L-019 in-task self-correction으로 동반 보강. review CRITICAL 0 / MAJOR 5 (H001~H005 — response.ts/test 영역, retro follow-up 인계) / MINOR 6 / INFO 7."
+          "prLineLimit": 500
         },
         {
           "number": 3,
           "title": "CANDID-006 authErrorResponse 이관 + 통합",
           "description": "lib/auth/middleware.ts — authErrorResponse 제거, requireAuth가 실패 시 throw new AppError('AUTH_TOKEN_*'), 반환 타입 Promise<AuthContext>. app/api/v1/auth/refresh/route.ts — withErrorHandler 래핑 + throw AppError('AUTH_REFRESH_*'). 테스트 2종 throw 단정으로 전환. CLAUDE.md 에러 코드 표에 AUTH_TOKEN_*/AUTH_REFRESH_* 4종 + SSOT 1줄 추가.",
           "status": "merged",
-          "branch": "feature/CANDID-007-step3",
           "prNumber": 27,
           "mergedAt": "2026-05-21T00:00:31+09:00",
           "files": [
@@ -460,9 +433,7 @@
             ".claude/domains/_base/conventions/error-handling.md"
           ],
           "estimatedLines": 240,
-          "actualLines": 57,
-          "prLineLimit": 350,
-          "note": "authErrorResponse 제거 + requireAuth/refresh route를 AppError throw + withErrorHandler로 이관. CLAUDE.md 에러 코드 표/SSOT + error-handling.md 정합. review CRITICAL 0 / MAJOR 3 (H001~H003 retro follow-up 인계) / MINOR 2 / INFO 10 — 보안 결함 0건."
+          "prLineLimit": 350
         }
       ],
       "currentStep": 3
@@ -492,7 +463,6 @@
           "status": "merged",
           "prNumber": 4,
           "mergedAt": "2026-05-12T21:07:09+09:00",
-          "branch": "feature/CANDID-008-step1",
           "files": [
             "lib/crypto/aes-gcm.ts",
             "lib/pii/mask.ts",
@@ -505,8 +475,7 @@
             "tests/setup.ts",
             "tests/stubs/server-only.ts"
           ],
-          "estimatedLines": 270,
-          "actualLines": 328
+          "estimatedLines": 270
         },
         {
           "number": 2,
@@ -515,7 +484,6 @@
           "status": "merged",
           "prNumber": 5,
           "mergedAt": "2026-05-12T21:25:54+09:00",
-          "branch": "feature/CANDID-008-step2",
           "files": [
             "prisma/schema.prisma",
             "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",
@@ -528,8 +496,7 @@
             "tests/setup.ts",
             "README.md"
           ],
-          "estimatedLines": 230,
-          "actualLines": 395
+          "estimatedLines": 230
         }
       ],
       "currentStep": 2,
@@ -556,7 +523,6 @@
       "workflowState": null,
       "steps": [
         {
-          "step": 1,
           "title": "보안 헤더 + HTTPS 308 + CORS + middleware 골격",
           "status": "merged",
           "files": [
@@ -570,14 +536,11 @@
             "tests/middleware.test.ts"
           ],
           "estimatedLines": 450,
-          "dependsOn": [],
           "prNumber": 28,
-          "branch": "feature/CANDID-009-step1",
-          "mergedLines": 695,
-          "mergedAt": "2026-05-23T19:44:37+09:00"
+          "mergedAt": "2026-05-23T19:44:37+09:00",
+          "number": 1
         },
         {
-          "step": 2,
           "title": "CSRF Origin 검증 + Rate Limit 카탈로그/리미터 + 에러 코드",
           "status": "merged",
           "files": [
@@ -591,16 +554,11 @@
           ],
           "estimatedLines": 500,
           "prLineLimit": 600,
-          "dependsOn": [
-            1
-          ],
           "prNumber": 29,
-          "branch": "feature/CANDID-009-step2",
-          "mergedLines": 732,
-          "mergedAt": "2026-05-23T20:10:12+09:00"
+          "mergedAt": "2026-05-23T20:10:12+09:00",
+          "number": 2
         },
         {
-          "step": 3,
           "title": "XSS Sanitizer + 컨트롤 가이드 문서",
           "status": "merged",
           "files": [
@@ -610,17 +568,12 @@
             "tests/lib/security/sanitize.test.ts"
           ],
           "estimatedLines": 300,
-          "dependsOn": [
-            2
-          ],
           "prNumber": 30,
-          "branch": "feature/CANDID-009-step3",
-          "mergedLines": 781,
-          "mergedAt": "2026-05-23T20:29:25+09:00"
+          "mergedAt": "2026-05-23T20:29:25+09:00",
+          "number": 3
         }
       ],
       "currentStep": 3,
-      "planPath": ".claude/temp/CANDID-009-plan.md",
       "completedAt": "2026-05-23T20:29:25+09:00"
     },
     "CANDID-010": {
@@ -644,7 +597,6 @@
       "workflowState": null,
       "steps": [
         {
-          "step": 1,
           "title": "DB 마이그레이션 + 비밀번호 + 검증 스키마 + SMTP 인프라",
           "status": "merged",
           "files": [
@@ -667,14 +619,11 @@
           ],
           "estimatedLines": 500,
           "prLineLimit": 600,
-          "dependsOn": [],
           "prNumber": 31,
-          "branch": "feature/CANDID-010-step1",
-          "mergedLines": 854,
-          "mergedAt": "2026-05-23T21:04:14+09:00"
+          "mergedAt": "2026-05-23T21:04:14+09:00",
+          "number": 1
         },
         {
-          "step": 2,
           "title": "회원가입 API (POST /signup) — 핵심 비즈니스 + 자동 로그인 + 인증 메일 발송",
           "status": "merged",
           "files": [
@@ -685,16 +634,11 @@
           ],
           "estimatedLines": 550,
           "prLineLimit": 700,
-          "dependsOn": [
-            1
-          ],
           "prNumber": 32,
-          "branch": "feature/CANDID-010-step2",
-          "mergedLines": 566,
-          "mergedAt": "2026-05-23T21:17:27+09:00"
+          "mergedAt": "2026-05-23T21:17:27+09:00",
+          "number": 2
         },
         {
-          "step": 3,
           "title": "이메일 인증 토큰 검증 + 재발송 API + 신규 에러 코드",
           "status": "merged",
           "files": [
@@ -708,17 +652,12 @@
             "tests/app/api/v1/auth/resend-verification.test.ts"
           ],
           "estimatedLines": 450,
-          "dependsOn": [
-            2
-          ],
           "prNumber": 33,
-          "branch": "feature/CANDID-010-step3",
-          "mergedLines": 694,
-          "mergedAt": "2026-05-23T21:51:22+09:00"
+          "mergedAt": "2026-05-23T21:51:22+09:00",
+          "number": 3
         }
       ],
       "currentStep": 3,
-      "planPath": ".claude/temp/CANDID-010-plan.md",
       "completedAt": "2026-05-23T23:01:25+09:00"
     },
     "CANDID-011": {
@@ -735,14 +674,11 @@
       "lockedFiles": [],
       "workflowState": null,
       "completedAt": "2026-05-24T12:18:00+09:00",
-      "planPath": ".claude/temp/CANDID-011-plan.md",
       "currentStep": 2,
       "steps": [
         {
-          "step": 1,
           "title": "핵심 비즈니스 로직: lib/auth/login.ts (signin) + LoginInputSchema + 단위 테스트",
           "status": "merged",
-          "branch": "feature/CANDID-011-step1",
           "prNumber": 41,
           "mergedAt": "2026-05-24T12:05:00+09:00",
           "files": [
@@ -751,17 +687,12 @@
             "tests/lib/auth/login.test.ts"
           ],
           "estimatedLines": 450,
-          "actualLines": 548,
-          "mergedLines": 617,
           "prLineLimit": 500,
-          "dependsOn": [],
-          "reviewSummary": "CRITICAL 0 / MAJOR 3 → 2건 in-task fix (H001 brute-force 우회 + H002 SUSPENDED enumeration). H003 별도 task. MINOR 6. 보안 결함 0 (fix 후). L-019 적용."
+          "number": 1
         },
         {
-          "step": 2,
           "title": "라우터 + 통합 테스트 (POST /api/v1/auth/login)",
           "status": "merged",
-          "branch": "feature/CANDID-011-step2",
           "prNumber": 42,
           "mergedAt": "2026-05-24T12:18:00+09:00",
           "files": [
@@ -769,13 +700,8 @@
             "tests/app/api/v1/auth/login.test.ts"
           ],
           "estimatedLines": 300,
-          "actualLines": 282,
-          "mergedLines": 318,
           "prLineLimit": 400,
-          "dependsOn": [
-            1
-          ],
-          "reviewSummary": "CRITICAL 0 / MAJOR 2 (test 회귀 가드 in-task fix 완료) / MINOR 5 (모두 별도 task). 보안 결함 0. L-019 적용 + L-027 가설 부분 검증 (282 LOC ≈ 1.4×200)."
+          "number": 2
         }
       ],
       "dependencies": [
@@ -802,14 +728,11 @@
         "CANDID-006"
       ],
       "specFile": "docs/sample-requirement.md",
-      "planPath": ".claude/temp/CANDID-012-plan.md",
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "env refine + 4 에러 코드 + state 쿠키 헬퍼 + 단위 테스트",
           "status": "merged",
-          "branch": "feature/CANDID-012-step1",
           "prNumber": 43,
           "mergedAt": "2026-05-24T12:52:27+09:00",
           "files": [
@@ -821,17 +744,12 @@
             "tests/lib/errors/codes.test.ts"
           ],
           "estimatedLines": 350,
-          "actualLines": 565,
-          "mergedLines": 560,
           "prLineLimit": 450,
-          "dependsOn": [],
-          "reviewSummary": "CRITICAL 0 / MAJOR 13 (in-task fix 3건: D-MAJOR-2 TTL export, D-MAJOR-1 USER_DENIED 400→422, T-MAJOR-1 env.superRefine 4 케이스 테스트; carry 10건) / MINOR 12 / INFO 7. L-019 in-task self-correction 적용."
+          "number": 1
         },
         {
-          "step": 2,
           "title": "Provider 인터페이스 + Google + GitHub 구현 + 단위 테스트",
           "status": "merged",
-          "branch": "feature/CANDID-012-step2",
           "prNumber": 44,
           "mergedAt": "2026-05-24T13:17:49+09:00",
           "files": [
@@ -847,21 +765,12 @@
             "tests/lib/auth/oauth/index.test.ts"
           ],
           "estimatedLines": 500,
-          "actualLines": 1035,
-          "mergedLines": 1035,
           "prLineLimit": 750,
-          "originalPrLineLimit": 600,
-          "prLineLimitAdjustedReason": "http.ts SSRF helper(76) + GitHub 2-call 패턴(80) + 4 테스트 파일 + in-task fix(normalize.ts + index.test.ts + 보강) 124 추가 → 1035 LOC. 1.4×750=1050 > 1035.",
-          "dependsOn": [
-            1
-          ],
-          "reviewSummary": "CRITICAL 0 / MAJOR 10 (in-task fix 4건: T-MAJOR-1 index.test, D-MAJOR-2/1 normalizeOAuthName, D-MAJOR-3 safeHttpsUrl, T-MAJOR-2 redirect 회귀 + 보강 2건; carry 6건) / MINOR 12 / INFO 8. L-019 적용."
+          "number": 2
         },
         {
-          "step": 3,
           "title": "link 비즈니스 + start/callback 라우터 + 통합 테스트",
           "status": "merged",
-          "branch": "feature/CANDID-012-step3",
           "prNumber": 45,
           "mergedAt": "2026-05-24T13:44:03+09:00",
           "files": [
@@ -875,15 +784,8 @@
             "tests/app/api/v1/auth/oauth/callback.test.ts"
           ],
           "estimatedLines": 600,
-          "actualLines": 942,
-          "mergedLines": 1072,
           "prLineLimit": 750,
-          "dependsOn": [
-            1,
-            2
-          ],
-          "fixLoop": 1,
-          "reviewSummary": "회차 1: CRITICAL 1 (C001 callback open-redirect) + MAJOR 18. 회차 1 fix: C001 + S-MAJOR-4.1(sanitize tab 우회) + S-MAJOR-4.2(origin 재검증) + S-MAJOR-1.2(ageConfirmedAt) 해소. 재리뷰: CRITICAL 0, MAJOR 0 신규. Carry 13 MAJOR (회고 follow-up). L-019 + L-022 적용."
+          "number": 3
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
@@ -906,7 +808,6 @@
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "DB 마이그(4 partial index) + 서비스 + API + 테스트",
           "status": "merged",
           "prNumber": 47,
@@ -920,14 +821,10 @@
             "tests/app/api/v1/jobs/route.test.ts"
           ],
           "estimatedLines": 570,
-          "actualLines": 628,
-          "mergedLines": 668,
           "prLineLimit": 700,
-          "dependsOn": [],
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 12 / MINOR 6. in-task fix: S-1(category slug regex) + T-1(D-Day 경계 4 케이스) + T-2 부분. carry MAJOR 11(D-1~D-4, A-1~A-3, S-2, T-2/T-3 잔여) → 회고 follow-up. 테스트 752→770(+18)."
+          "number": 1
         },
         {
-          "step": 2,
           "title": "페이지 RSC + 메타데이터 + 카드 + 페이지네이션",
           "status": "merged",
           "prNumber": 48,
@@ -943,18 +840,11 @@
             "tests/lib/jobs/metadata.test.ts",
             "tests/lib/jobs/pagination-url.test.ts"
           ],
-          "actualLines": 520,
-          "mergedLines": 551,
-          "note": "plan과 차이: tests/app/jobs/* 대신 lib helper(metadata, pagination-url)로 분리하여 lib unit 테스트로 대체. React 테스트 인프라(jsdom + @testing-library) 부재 — F-5 follow-up.",
           "estimatedLines": 530,
           "prLineLimit": 700,
-          "dependsOn": [
-            1
-          ],
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 7 / MINOR 7. in-task fix: D-2(labels.ts SSOT) + T-fix(buildPageUrl 경계). carry 5 MAJOR: D-1(URL빌더중복) / D-3(React.cache total 공유) / D-4(zod 이중 호출) / T 3건(RSC 인프라 부재). 테스트 770→798(+28)."
+          "number": 2
         },
         {
-          "step": 3,
           "title": "필터 Client + 마감 섹션 + URL 동기화",
           "status": "merged",
           "prNumber": 49,
@@ -969,16 +859,9 @@
             "app/jobs/page.tsx",
             "tests/lib/jobs/filter-changes.test.ts"
           ],
-          "actualLines": 410,
-          "mergedLines": 372,
-          "note": "schema.ts 분리 추가 — JobFilters('use client')가 list.ts('server-only') chain 위반으로 빌드 실패 → 별도 schema 모듈로 추출. plan과 차이: tests/app/jobs/* 대신 lib/jobs/filter-changes unit 테스트로 대체 (F-5 carry).",
           "estimatedLines": 390,
           "prLineLimit": 500,
-          "dependsOn": [
-            1,
-            2
-          ],
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 7 / MINOR 7. in-task fix: T-fix(filter-changes undefined/string-boolean 3 케이스). carry 6 MAJOR: A-1 list.ts re-export 가드, T 3건(F-5 RSC 인프라), D minor + S minor. 테스트 798→812(+14)."
+          "number": 3
         }
       ],
       "dependencies": [
@@ -1003,15 +886,12 @@
       "dependencies": [
         "CANDID-013"
       ],
-      "planPath": ".claude/temp/CANDID-014-plan.md",
       "specFile": "docs/sample-requirement.md",
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "Service + API + 단위 테스트 (lib/jobs/detail.ts + GET /api/v1/job-postings/[id])",
           "status": "merged",
-          "branch": "feature/CANDID-014-step1",
           "prNumber": 50,
           "mergedAt": "2026-05-24T17:55:00+09:00",
           "files": [
@@ -1023,18 +903,12 @@
             "tests/app/api/v1/job-postings/[id]/route.test.ts"
           ],
           "estimatedLines": 565,
-          "actualLines": 539,
-          "mergedLines": 539,
           "prLineLimit": 650,
-          "dependsOn": [],
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 9 / MINOR 11 / INFO 8. self-PR COMMENT. L-022 임계 초과 — CANDID-014-FU1 분리 권장. 테스트 833→854(+21).",
-          "note": "next.config.mjs serverComponentsExternalPackages=['isomorphic-dompurify'] 추가 — collect-page-data 단계 jsdom ENOENT 우회."
+          "number": 1
         },
         {
-          "step": 2,
           "title": "페이지 RSC + 메타데이터 + 표시 컴포넌트 + 공유 버튼",
           "status": "merged",
-          "branch": "feature/CANDID-014-step2",
           "prNumber": 51,
           "mergedAt": "2026-05-24T18:25:00+09:00",
           "files": [
@@ -1051,20 +925,12 @@
             "tests/lib/jobs/detail-metadata.test.ts"
           ],
           "estimatedLines": 545,
-          "actualLines": 462,
-          "mergedLines": 462,
           "prLineLimit": 600,
-          "dependsOn": [
-            1
-          ],
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 8 / MINOR 10 / INFO 9. self-PR COMMENT. carry: Step 3 in-task 4건(D-MAJOR-3/5, S-MINOR-1, T-MAJOR-1) + CANDID-014-FU1 분리 4건(D-MAJOR-1/2/4/6, T-MAJOR-2). 테스트 833→848(+15).",
-          "note": "L-019 in-task self-correction: Step 1 D-MAJOR-2(computeDDay 추출)/D-MAJOR-1(cache 키 id 명시) 해소."
+          "number": 2
         },
         {
-          "step": 3,
           "title": "ApplyCta 5-state + RSC auth helper + page 통합 + Step 2 carry fix",
           "status": "merged",
-          "branch": "feature/CANDID-014-step3",
           "prNumber": 52,
           "mergedAt": "2026-05-24T18:55:00+09:00",
           "files": [
@@ -1080,15 +946,8 @@
             "tests/lib/jobs/detail.test.ts"
           ],
           "estimatedLines": 480,
-          "mergedLines": 478,
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 6 / MINOR 13 / INFO 15. self-PR COMMENT. L-019 Step 2 carry 4건(D-MAJOR-3/5, S-MINOR-1, T-MAJOR-1) 검증 완료. 본 PR carry 6건 + 누적 17건 → CANDID-014-FU1 통합 분리 (L-022 임계 초과). 테스트 848→868(+20).",
-          "actualLines": 478,
           "prLineLimit": 550,
-          "dependsOn": [
-            1,
-            2
-          ],
-          "note": "L-019 in-task self-correction: Step 2 carry 4건(D-MAJOR-3 list.ts 중복 import / D-MAJOR-5 ShareButton cleanup+URL strip+aria / S-MINOR-1 not-found 단서 / T-MAJOR-1 cache 키 회귀 가드) 해소. 나머지 carry 5건(D-MAJOR-1/2/4/6 + T-MAJOR-2)은 CANDID-014-FU1로 분리 예정."
+          "number": 3
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00"
@@ -1112,15 +971,12 @@
         "CANDID-008",
         "CANDID-014"
       ],
-      "planPath": ".claude/temp/CANDID-015-plan.md",
       "specFile": "docs/sample-requirement.md",
       "currentStep": 4,
       "steps": [
         {
-          "step": 1,
           "title": "Draft 서비스 + GET/PUT API + 만 14세 + 에러 코드",
           "status": "merged",
-          "branch": "feature/CANDID-015-step1",
           "prNumber": 53,
           "mergedAt": "2026-05-24T19:25:00+09:00",
           "files": [
@@ -1137,19 +993,12 @@
             "tests/app/api/v1/drafts/[jobPostingId]/route.test.ts"
           ],
           "estimatedLines": 700,
-          "actualLines": 1257,
-          "mergedLines": 1257,
-          "prLineLimit": 1300,
-          "originalPrLineLimit": 750,
-          "prLineLimitAdjustedReason": "plan 단계 zod superRefine 복잡도 + service 게이트 분기 케이스 수(공고 4종 × Draft 2종) + 낙관적 락 신규/업데이트 분기 과소 평가. 도메인 462 + 테스트 791 = 1257 LOC. 강력 경고 구간(1050) 초과로 in-task 격상.",
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 12 / MINOR 15 / INFO 12. self-PR COMMENT. carry: Step 2 in-task 4건(D-MAJOR-2 dead export, T-MAJOR-4 14세 라벨, S-MAJOR-1/2 정책 헤더) + CANDID-015-FU1 분리 8건(D-MAJOR-1 transaction, S-MAJOR-3/4 size/rate, T-MAJOR-1/2/3/5/6 race/IDOR/KST). 테스트 868→936(+68).",
-          "dependsOn": []
+          "prLineLimit": 1000,
+          "number": 1
         },
         {
-          "step": 2,
           "title": "User PII lazy prefill + 응답 마스킹 + Step 1 carry fix",
           "status": "merged",
-          "branch": "feature/CANDID-015-step2",
           "prNumber": 54,
           "mergedAt": "2026-05-24T19:45:00+09:00",
           "files": [
@@ -1162,20 +1011,12 @@
             "tests/app/api/v1/drafts/[jobPostingId]/route.test.ts"
           ],
           "estimatedLines": 370,
-          "actualLines": 244,
-          "mergedLines": 244,
           "prLineLimit": 450,
-          "dependsOn": [
-            1
-          ],
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 8 / MINOR 9 / INFO 9. L-019 Step 1 carry 4건 검증 완료. 본 PR carry: Step 3 in-task 3건(D-MAJOR-1 Promise.all, S-MAJOR-3 wire-up, T-MAJOR-2 wire-up 가드) + CANDID-015-FU1 5건. 테스트 936→947(+11).",
-          "note": "L-019 Step 1 carry 4건 fix 통합."
+          "number": 2
         },
         {
-          "step": 3,
           "title": "/jobs/[id]/apply RSC + 3-step shell + PersonalInfoStep 폼 + Step 2 carry fix",
           "status": "merged",
-          "branch": "feature/CANDID-015-step3",
           "prNumber": 55,
           "mergedAt": "2026-05-24T20:05:00+09:00",
           "files": [
@@ -1188,21 +1029,12 @@
             "tests/app/api/v1/drafts/[jobPostingId]/route.test.ts"
           ],
           "estimatedLines": 520,
-          "actualLines": 448,
-          "mergedLines": 448,
           "prLineLimit": 600,
-          "dependsOn": [
-            1,
-            2
-          ],
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 7 / MINOR 7 / INFO 9. self-PR COMMENT. L-019 Step 2 carry 3건(D-MAJOR-1, S-MAJOR-3, T-MAJOR-2) 검증 완료. 본 PR carry: Step 4 in-task 3건(D-MAJOR-1 onChange 비차단, D-MAJOR-2 completedSteps, T-MAJOR-2 순차 호출 가드) + CANDID-015-FU1 4건(RSC Cache-Control, sanitizeRedirect, RTL 인프라, 등). 테스트 947→949(+2).",
-          "note": "L-019 Step 2 carry 3건 fix 통합."
+          "number": 3
         },
         {
-          "step": 4,
           "title": "자동 저장 hook + beforeunload + 토스트 + jsdom 인프라 + Step 3 carry fix",
           "status": "merged",
-          "branch": "feature/CANDID-015-step4",
           "prNumber": 56,
           "mergedAt": "2026-05-24T20:30:00+09:00",
           "files": [
@@ -1215,16 +1047,8 @@
             "tests/app/api/v1/drafts/[jobPostingId]/route.test.ts"
           ],
           "estimatedLines": 440,
-          "actualLines": 540,
-          "mergedLines": 540,
           "prLineLimit": 550,
-          "dependsOn": [
-            1,
-            2,
-            3
-          ],
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 8 / MINOR 5 / INFO 7. self-PR COMMENT. L-019 Step 3 carry 3건 검증 완료. 본 PR carry 8건은 마지막 PR로 CANDID-015-FU1 일괄 분리. jsdom 인프라 1차 도입 성공. 테스트 949→960(+11).",
-          "note": "L-019 Step 3 carry 3건 fix + jsdom devDep 도입 (마지막 스텝)."
+          "number": 4
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00"
@@ -1248,11 +1072,9 @@
       "workflowState": null,
       "updatedAt": "2026-05-25T10:47:07+09:00",
       "specFile": "docs/sample-requirement.md",
-      "planPath": ".claude/temp/CANDID-016-plan.md",
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "인프라 — DB partial UNIQUE + S3 SDK + MinIO docker-compose + ENV",
           "status": "merged",
           "files": [
@@ -1269,15 +1091,11 @@
           ],
           "estimatedLines": 300,
           "prLineLimit": 500,
-          "dependsOn": [],
-          "branch": "feature/CANDID-016-step1",
           "prNumber": 57,
-          "actualLines": 500,
           "mergedAt": "2026-05-24T23:42:36+09:00",
-          "mergedLines": 500
+          "number": 1
         },
         {
-          "step": 2,
           "title": "presign + confirm API + 비즈니스 + 단위/통합 테스트 + 에러 코드",
           "status": "merged",
           "files": [
@@ -1296,18 +1114,11 @@
           ],
           "estimatedLines": 900,
           "prLineLimit": 900,
-          "dependsOn": [
-            1
-          ],
-          "note": "D-MAJOR-2 정책 결정: partial UNIQUE에 virus_scan_status 조건 추가 마이그레이션 포함 (INFECTED/FAILED row 잔존 허용 + 재업로드 가능)",
-          "branch": "feature/CANDID-016-step2",
           "prNumber": 58,
-          "actualLines": 1100,
           "mergedAt": "2026-05-25T10:14:02+09:00",
-          "mergedLines": 1208
+          "number": 2
         },
         {
-          "step": 3,
           "title": "UI — ResumeUploadStep + 클라이언트 업로드 + 진행률 + 상태머신 + RTL",
           "status": "merged",
           "files": [
@@ -1321,14 +1132,9 @@
           ],
           "estimatedLines": 700,
           "prLineLimit": 700,
-          "dependsOn": [
-            2
-          ],
-          "branch": "feature/CANDID-016-step3",
           "prNumber": 59,
-          "actualLines": 950,
           "mergedAt": "2026-05-25T10:47:07+09:00",
-          "mergedLines": 950
+          "number": 3
         }
       ],
       "completedAt": "2026-05-25T10:47:07+09:00"
@@ -1351,11 +1157,9 @@
       "lockedFiles": [],
       "workflowState": null,
       "updatedAt": "2026-05-26T23:39:16+09:00",
-      "planPath": ".claude/temp/CANDID-017-plan.md",
       "currentStep": 2,
       "steps": [
         {
-          "step": 1,
           "title": "ssrf-guard 추출 + lib/portfolios (schema/service/allowed-domains) + 단위 테스트",
           "status": "merged",
           "files": [
@@ -1373,18 +1177,11 @@
           ],
           "estimatedLines": 550,
           "prLineLimit": 700,
-          "dependsOn": [],
-          "branch": "feature/CANDID-017-step1",
           "prNumber": 65,
-          "actualLines": 694,
-          "reviewSummary": "fix loop 1: CRITICAL 1 (C001) + MAJOR 9 in-PR fix. 재리뷰: CRITICAL 0, 신규 MAJOR 2 (N001/N002) + MINOR 1 (N003) in-PR fix. INFO 6 carry. 자기 PR COMMENT 진행.",
-          "fixLoop": 1,
           "mergedAt": "2026-05-26T23:29:17+09:00",
-          "mergedLines": 1006,
-          "testsAfter": 1212
+          "number": 1
         },
         {
-          "step": 2,
           "title": "Route Handler GET/PUT + 통합 테스트",
           "status": "merged",
           "files": [
@@ -1393,19 +1190,11 @@
           ],
           "estimatedLines": 350,
           "prLineLimit": 500,
-          "dependsOn": [
-            1
-          ],
-          "branch": "feature/CANDID-017-step2",
           "prNumber": 66,
-          "actualLines": 290,
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 0 / MINOR 5 (Test 2건 in-PR fix afb7709, 나머지 carry) / INFO 14. self-PR COMMENT. fix loop 미진입.",
           "mergedAt": "2026-05-26T23:38:51+09:00",
-          "mergedLines": 291,
-          "testsAfter": 1226
+          "number": 2
         }
       ],
-      "note": "Step 3 (UI PortfolioStep) 분리 — CANDID-039 RTL 도입 후 follow-up task로 진행 (사용자 plan 승인 시 결정).",
       "completedAt": "2026-05-26T23:39:16+09:00"
     },
     "CANDID-018": {
@@ -1428,11 +1217,9 @@
       "lockedFiles": [],
       "workflowState": null,
       "updatedAt": "2026-05-27T21:27:30+09:00",
-      "planPath": ".claude/temp/CANDID-018-plan.md",
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "DB 마이그 (IdempotencyKey) + number-generator + idempotency store + 단위 테스트",
           "status": "merged",
           "files": [
@@ -1450,18 +1237,11 @@
           ],
           "estimatedLines": 500,
           "prLineLimit": 600,
-          "dependsOn": [],
-          "branch": "feature/CANDID-018-step1",
           "prNumber": 67,
-          "actualLines": 537,
-          "fixLoop": 1,
-          "reviewSummary": "fix loop 1: CRITICAL 1 (C001) + MAJOR 9 → 모두 해소. 재리뷰: CRITICAL 0 / MAJOR 0 / MINOR 6 (N002 in-PR fix 3fb859a; 5건 carry) / INFO 5. self-PR COMMENT 진행.",
           "mergedAt": "2026-05-27T00:12:04+09:00",
-          "mergedLines": 762,
-          "testsAfter": 1270
+          "number": 1
         },
         {
-          "step": 2,
           "title": "submit 비즈니스 + validate + 트랜잭션 + 단위 테스트",
           "status": "merged",
           "files": [
@@ -1474,20 +1254,11 @@
           ],
           "estimatedLines": 700,
           "prLineLimit": 800,
-          "dependsOn": [
-            1
-          ],
-          "branch": "feature/CANDID-018-step2",
           "prNumber": 68,
-          "actualLines": 1031,
-          "fixLoop": 1,
-          "reviewSummary": "fix loop 1: CRITICAL 2 (C001 PII 헬퍼 오용 / C002 D8 가드 우회) + MAJOR 6 in-PR fix. 재리뷰: CRITICAL 0 / MAJOR 1 (H001 validate.ts basePrisma default — follow-up) / MINOR 5 / INFO 6. self-PR COMMENT 진행.",
           "mergedAt": "2026-05-27T21:06:21+09:00",
-          "mergedLines": 1088,
-          "mergeCommit": "501875407e4c13f4a6a07ef41cc288d9c48afb45"
+          "number": 2
         },
         {
-          "step": 3,
           "title": "Route Handler POST + 통합 테스트 + 멱등성 미들웨어",
           "status": "merged",
           "files": [
@@ -1496,18 +1267,9 @@
           ],
           "estimatedLines": 500,
           "prLineLimit": 600,
-          "dependsOn": [
-            1,
-            2
-          ],
-          "branch": "feature/CANDID-018-step3",
           "prNumber": 69,
-          "actualLines": 499,
-          "fixLoop": 1,
           "mergedAt": "2026-05-27T21:27:10+09:00",
-          "mergedLines": 513,
-          "mergeCommit": "692cf8d72ad4283f4a7d603b8ad9524a5542d33a",
-          "reviewSummary": "fix loop 1: D-01 정책 주석 보강. A-01(rate limit) + Test MAJOR 5건 carry. self-PR COMMENT. CRITICAL 0 / MAJOR 6 / MINOR 9 / INFO 6."
+          "number": 3
         }
       ],
       "completedAt": "2026-05-27T21:27:30+09:00"
@@ -1530,11 +1292,9 @@
       "lockedFiles": [],
       "workflowState": null,
       "updatedAt": "2026-05-27T22:36:00+09:00",
-      "planPath": ".claude/temp/CANDID-019-plan.md",
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "리스트 서비스 + GET /api/v1/applications/me + 단위 테스트",
           "status": "merged",
           "files": [
@@ -1547,18 +1307,11 @@
           ],
           "estimatedLines": 550,
           "prLineLimit": 600,
-          "dependsOn": [],
-          "branch": "feature/CANDID-019-step1",
           "prNumber": 70,
-          "actualLines": 623,
-          "fixLoop": 0,
-          "reviewSummary": "CRITICAL 0 / MAJOR 5 (A-01 carry + Test 4 carry) / MINOR 8 / INFO 13. self-PR COMMENT. 회고 follow-up.",
           "mergedAt": "2026-05-27T22:10:53+09:00",
-          "mergedLines": 623,
-          "mergeCommit": "1cbf802e83422452139c6cdc8bea70ebb5befd62"
+          "number": 1
         },
         {
-          "step": 2,
           "title": "상세 서비스 + .ics 빌더 + 2 endpoints + 단위 테스트",
           "status": "merged",
           "files": [
@@ -1573,20 +1326,11 @@
           ],
           "estimatedLines": 750,
           "prLineLimit": 800,
-          "dependsOn": [
-            1
-          ],
-          "branch": "feature/CANDID-019-step2",
           "prNumber": 71,
-          "actualLines": 989,
-          "fixLoop": 1,
-          "reviewSummary": "fix loop 1: CRITICAL 1 (C1 FILE_NOT_FOUND → APP_INTERVIEW_NOT_FOUND) in-PR fix. MAJOR 5 carry (M1 1h 고정 / M2 DONE STATUS / M3 응집도 / M4 URL 하드코딩 / A-01 rate limit) / MINOR 4 / INFO 4. self-PR COMMENT.",
           "mergedAt": "2026-05-27T22:25:24+09:00",
-          "mergedLines": 1007,
-          "mergeCommit": "dde5c0da4ccbea738af182453343166aefca75ac"
+          "number": 2
         },
         {
-          "step": 3,
           "title": "UI RSC 페이지 + 컴포넌트 (마이페이지 + 상세)",
           "status": "merged",
           "files": [
@@ -1600,18 +1344,9 @@
           ],
           "estimatedLines": 550,
           "prLineLimit": 700,
-          "dependsOn": [
-            1,
-            2
-          ],
-          "branch": "feature/CANDID-019-step3",
           "prNumber": 72,
-          "actualLines": 342,
-          "fixLoop": 1,
-          "reviewSummary": "fix loop 1: MAJOR 1 (A-MAJOR-1 heading hierarchy a11y) in-PR fix (커밋 b795fe1). MINOR 4 carry / INFO 2. self-PR COMMENT.",
           "mergedAt": "2026-05-27T22:35:10+09:00",
-          "mergedLines": 348,
-          "mergeCommit": "2005822de80b677c5f58b9da3f68be186e7a80be"
+          "number": 3
         }
       ],
       "completedAt": "2026-05-27T22:36:00+09:00"
@@ -1729,12 +1464,10 @@
       "lockTTL": 7200,
       "lockedFiles": [],
       "updatedAt": "2026-05-31T21:30:19+09:00",
-      "planPath": ".claude/temp/CANDID-021-plan.md",
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
-          "step": 1,
           "title": "로그아웃 코어 (엔드포인트 + 단일 세션 revoke)",
           "status": "merged",
           "files": [
@@ -1745,13 +1478,11 @@
           ],
           "estimatedLines": 300,
           "prLineLimit": 450,
-          "dependsOn": [],
           "prNumber": 92,
-          "branch": "feature/CANDID-021-step1",
-          "mergedAt": "2026-05-31T21:12:49+09:00"
+          "mergedAt": "2026-05-31T21:12:49+09:00",
+          "number": 1
         },
         {
-          "step": 2,
           "title": "재사용 탐지(reuse detection) + 만료 토큰 정리 헬퍼",
           "status": "merged",
           "files": [
@@ -1760,12 +1491,9 @@
           ],
           "estimatedLines": 280,
           "prLineLimit": 400,
-          "dependsOn": [
-            1
-          ],
           "prNumber": 94,
-          "branch": "feature/CANDID-021-step2",
-          "mergedAt": "2026-05-31T21:30:19+09:00"
+          "mergedAt": "2026-05-31T21:30:19+09:00",
+          "number": 2
         }
       ],
       "workflowState": null,
@@ -1808,11 +1536,9 @@
         "CANDID-018"
       ],
       "specFile": "docs/sample-requirement.md",
-      "planPath": ".claude/temp/CANDID-022-plan.md",
       "currentStep": 4,
       "steps": [
         {
-          "step": 1,
           "title": "Foundation: 마이그(anonymizedAt + audit enum 2종 + 인덱스) + 에러 코드 3종",
           "status": "merged",
           "files": [
@@ -1822,18 +1548,12 @@
             "tests/lib/errors/codes.test.ts"
           ],
           "estimatedLines": 130,
-          "actualLines": 55,
-          "mergedLines": 55,
           "prLineLimit": 200,
-          "dependsOn": [],
-          "branch": "feature/CANDID-022-step1",
           "prNumber": 76,
           "mergedAt": "2026-05-28T15:23:43Z",
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 1 (H001 마이그 회귀 가드, Step 2 또는 FU 위임) / MINOR 7 (M001 partial index, M002 USER_REAUTH 메시지 정합, M003 ALTER TYPE 적용 순서, M004 USER_ALREADY_WITHDRAWN USAGE 주석, M005 USER_REAUTH 식별 단서, M006 Prisma client 노출 단정, M007 테스트 네이밍 — 모두 carry) / INFO 6. self-PR COMMENT. 보안 결함 0건. Pre-Review Guard(check:guard-wiring + check:migrations) 통과.",
-          "fixLoop": 0
+          "number": 1
         },
         {
-          "step": 2,
           "title": "비즈니스 코어: anonymize/hardDelete/withdraw dispatcher + 단위 테스트",
           "status": "merged",
           "files": [
@@ -1844,21 +1564,12 @@
             "lib/auth/session.ts"
           ],
           "estimatedLines": 600,
-          "actualLines": 711,
           "prLineLimit": 700,
-          "dependsOn": [
-            1
-          ],
-          "branch": "feature/CANDID-022-step2",
           "prNumber": 77,
-          "fixLoop": 0,
           "mergedAt": "2026-05-28T15:46:38Z",
-          "mergedLines": 711,
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 5 (in-PR fix 2건: H001 revoke 실패 console.error PII-free + H002 anonymize updateMany atomic race 가드 USER_ALREADY_WITHDRAWN; carry 3건: H003 Saga 보상 FU outbox 패턴, H004 USER_REAUTH 식별 oracle Step 3, M001 revokedCount audit FU) / MINOR 7 (in-PR fix 3건: H005 metadata 키 화이트리스트 ALLOWED_KEYS + M005 보존 컬럼 5종 negative + M007 application.count 인자 단정; carry 4건) / INFO 5. self-PR COMMENT. L-019 적용. 711 LOC = 강력 경고 구간 101.6% × 700 (1.4× = 980 차단선 미접근). 테스트 1408→1412(+4).",
-          "note": "lib/auth/session.ts +5 LOC (RevokeReason 'user_withdrawn' 추가) — plan files에 미포함이었으나 비즈니스 요구로 추가. 611 → 711 LOC (in-PR fix 5건 +100 LOC)."
+          "number": 2
         },
         {
-          "step": 3,
           "title": "Route Handler POST + USER_POLICIES.WITHDRAW + clearAuthCookies + 통합 테스트",
           "status": "merged",
           "files": [
@@ -1868,22 +1579,12 @@
             "tests/app/api/v1/users/me/withdraw.test.ts"
           ],
           "estimatedLines": 450,
-          "actualLines": 317,
-          "mergedLines": 317,
           "prLineLimit": 600,
-          "dependsOn": [
-            1,
-            2
-          ],
-          "branch": "feature/CANDID-022-step3",
           "prNumber": 78,
-          "fixLoop": 0,
           "mergedAt": "2026-05-28T15:59:24Z",
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 2 (in-PR fix 2건: H001 reason 500자 경계 회귀 가드 + H002 IP-bucket 테스트 명확화) / MINOR 6 (carry — M1/M2 전역 백로그 invalid JSON 매핑 + Content-Type 검증, M3 PII regex 강화 Step 4 또는 FU, M4 content-type 누락 케이스, M5 empty body 분기 FU, M6 ipAddress=null CANDID-026) / INFO 6. Step 1/2 carry H004 USER_REAUTH_REQUIRED 식별 oracle 정책 결정 명시로 종결. self-PR COMMENT. 보안 결함 0. deep-defense 7-layer 완전. 테스트 1426→1428(+2).",
-          "note": "lib/auth/cookies.ts: clearAuthCookies가 이미 CANDID-006 Step 2에서 export됨 — 본 Step에선 import만 사용 (변경 0). in-PR fix 2건 +25 LOC → 292 → 317."
+          "number": 3
         },
         {
-          "step": 4,
           "title": "UI 슬라이스: /me/withdraw RSC + 폼 + 확인 모달 + 라벨 SSOT",
           "status": "merged",
           "files": [
@@ -1894,20 +1595,10 @@
             "tests/lib/users/labels.test.ts"
           ],
           "estimatedLines": 300,
-          "actualLines": 347,
-          "mergedLines": 347,
           "prLineLimit": 400,
-          "dependsOn": [
-            1,
-            2,
-            3
-          ],
-          "branch": "feature/CANDID-022-step4",
           "prNumber": 79,
-          "fixLoop": 0,
           "mergedAt": "2026-05-28T16:11:20Z",
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 4 + 1 무효 (in-PR fix 2건: H001 fetch reject try/catch state 고착 방지 + H002 409 → router.replace('/me') 멱등 일관성; carry: H_arch1 RSC prisma 직접 호출 → repository 분리 별도 task, H_test4 fetch payload 가드 + H_test5 RSC 3-분기 → CANDID-039 RTL 인프라 후) / MINOR 7 (in-PR fix 1: M_test satisfies Record 컴파일 가드; carry 6건) / INFO 12. H_dom1 ANONYMIZED enum 환각 무효 처리. self-PR COMMENT. 보안 결함 0건. 본 PR 머지로 CANDID-022 Task 완료.",
-          "note": "마지막 스텝. RSC/Client 컴포넌트 RTL 테스트는 CANDID-039 인프라 도입 후 별도 보강 (carry). in-PR fix 3건 +24 LOC → 323 → 347."
+          "number": 4
         }
       ],
       "createdAt": "2026-05-12T18:22:05+09:00",
@@ -1943,7 +1634,6 @@
           "prLineLimit": 150,
           "estimatedLines": 80,
           "prNumber": 103,
-          "branch": "feature/CANDID-023-step1",
           "mergedAt": "2026-06-02T22:25:08+09:00"
         },
         {
@@ -1959,7 +1649,6 @@
           "prLineLimit": 600,
           "estimatedLines": 450,
           "prNumber": 105,
-          "branch": "feature/CANDID-023-step2",
           "mergedAt": "2026-06-02T22:55:28+09:00"
         },
         {
@@ -1974,7 +1663,6 @@
           "prLineLimit": 400,
           "estimatedLines": 300,
           "prNumber": 106,
-          "branch": "feature/CANDID-023-step3",
           "mergedAt": "2026-06-02T23:12:01+09:00"
         },
         {
@@ -1992,7 +1680,6 @@
           "prLineLimit": 600,
           "estimatedLines": 500,
           "prNumber": 108,
-          "branch": "feature/CANDID-023-step4",
           "mergedAt": "2026-06-02T23:30:09+09:00"
         }
       ],
@@ -2018,14 +1705,11 @@
       "createdAt": "2026-05-12T18:22:05+09:00",
       "updatedAt": "2026-05-31T22:56:50+09:00",
       "completedAt": "2026-05-31T22:56:50+09:00",
-      "planPath": ".claude/temp/CANDID-024-plan.md",
       "currentStep": 5,
       "steps": [
         {
-          "step": 1,
           "title": "프로필 조회 — GET /api/v1/users/me + 프로필 페이지(RSC)",
           "status": "merged",
-          "branch": "feature/CANDID-024-step1",
           "prNumber": 93,
           "mergedAt": "2026-05-31T21:22:39+09:00",
           "files": [
@@ -2038,16 +1722,12 @@
             "tests/app/api/v1/users/me/route.test.ts"
           ],
           "estimatedLines": 480,
-          "actualLines": 450,
           "prLineLimit": 600,
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 1 / MINOR 6. in-task fix: AUTH_TOKEN_EXPIRED 테스트(H/test) + RSC USER_NOT_FOUND redirect(M/domain) + null 직렬화 가드(M/test). carry: provider fall-through 가드, PII 조회 감사로그(PHASE-4/CANDID-026), 컴포넌트 테스트. 자기 PR → COMMENT 승인 갈음.",
-          "dependsOn": []
+          "number": 1
         },
         {
-          "step": 2,
           "title": "이름/연락처 수정 — PATCH /api/v1/users/me + 수정 폼",
           "status": "merged",
-          "branch": "feature/CANDID-024-step2",
           "prNumber": 95,
           "mergedAt": "2026-05-31T21:45:14+09:00",
           "files": [
@@ -2064,19 +1744,12 @@
             "tests/app/api/v1/users/me/route.test.ts"
           ],
           "estimatedLines": 560,
-          "actualLines": 546,
           "prLineLimit": 700,
-          "note": "validation.ts→schema.ts (기존 users 스키마 컨벤션). updateProfile updateMany+status가드+encryptUserPiiInput 부분갱신.",
-          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 2 / MINOR 4. QA(M1~M3,m1) 4/4 + 리뷰 MAJOR 2(phone=null route, ratelimit 헤더값) + MINOR 2(401 PATCH, 429 code) in-task fix. carry: phone=null UI 미노출, rate-limit-before-parse(의도), PII 감사로그(PHASE-4), 컴포넌트 테스트. 자기 PR → COMMENT.",
-          "dependsOn": [
-            1
-          ]
+          "number": 2
         },
         {
-          "step": 3,
           "title": "비밀번호 변경 — POST /api/v1/users/me/password + 폼",
           "status": "merged",
-          "branch": "feature/CANDID-024-step3",
           "prNumber": 97,
           "mergedAt": "2026-05-31T22:05:34+09:00",
           "files": [
@@ -2093,19 +1766,12 @@
             "tests/lib/users/profile-form.test.ts"
           ],
           "estimatedLines": 560,
-          "actualLines": 698,
           "prLineLimit": 700,
-          "note": "session.ts 미변경(RevokeReason에 password_change 기존재 → tx 내 인라인 revoke). validation.ts→schema.ts.",
-          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 4 / MINOR 4. QA(M1~M3,m2,m3) + 리뷰 test MAJOR 2(audit실패 reject, 에러응답 평문가드) + domain MAJOR(revoke SSOT 주석) in-task. carry: 감사 IP(CANDID-026 통일), 소셜 set 재인증, tx 진짜 원자성(통합), revokeAllForUser tx-injectable 리팩터, 컴포넌트 테스트. 자기 PR → COMMENT.",
-          "dependsOn": [
-            1
-          ]
+          "number": 3
         },
         {
-          "step": 4,
           "title": "소셜 계정 해제 + 관리 UI (4a)",
           "status": "merged",
-          "branch": "feature/CANDID-024-step4",
           "prNumber": 99,
           "mergedAt": "2026-05-31T22:29:18+09:00",
           "files": [
@@ -2122,19 +1788,12 @@
             "tests/lib/users/profile-form.test.ts"
           ],
           "estimatedLines": 780,
-          "actualLines": 542,
           "prLineLimit": 800,
-          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 3 / MINOR 3. QA(M1~M3,m1) + 리뷰 test MAJOR 2(SocialAccountsSection 컴포넌트 테스트, last-auth 경계) in-task. carry: unlink 감사로그(CANDID-026+Step5 enum), ipAddress(CANDID-026), tx 진짜 원자성(통합). 자기 PR → COMMENT.",
-          "dependsOn": [
-            1
-          ],
-          "note": "plan §5 contingency로 4a/4b 분할 — 본 스텝은 해제+관리 UI. 연결추가는 Step 5. 감사 이벤트(OAUTH enum+migration)도 Step 5/CANDID-026 위임."
+          "number": 4
         },
         {
-          "step": 5,
           "title": "소셜 계정 연결 추가 (4b — authenticated link-add)",
           "status": "merged",
-          "branch": "feature/CANDID-024-step5",
           "prNumber": 100,
           "mergedAt": "2026-05-31T22:56:18+09:00",
           "files": [
@@ -2151,13 +1810,8 @@
             "tests/lib/errors/codes.test.ts"
           ],
           "estimatedLines": 450,
-          "actualLines": 466,
           "prLineLimit": 600,
-          "reviewSummary": "리뷰 full(3 agent). CRITICAL 0 / MAJOR 6 / MINOR 3. QA(M1/M3/m3) + 리뷰 보안 MAJOR(callback 세션 바인딩 재확인) in-PR 코드+테스트 + test MAJOR(USER_NOT_FOUND 분기, P2002 provider_pid). carry: link-add 감사로그(CANDID-026 enum), start→callback 실서명 통합테스트, redirect 쿼리 노출(경미). 자기 PR → COMMENT.",
-          "dependsOn": [
-            4
-          ],
-          "note": "로그인 사용자 OAuth 링크: state-intent(userId) + start 인증 분기 + callback attach(현재 user에 AuthProvider 연결, UNIQUE 위반 → USER_PROVIDER_ALREADY_LINKED). 감사 이벤트 enum+migration 동반."
+          "number": 5
         }
       ]
     },
@@ -2178,12 +1832,10 @@
       "lockTTL": 7200,
       "lockedFiles": [],
       "updatedAt": "2026-05-31T22:19:09+09:00",
-      "planPath": ".claude/temp/CANDID-025-plan.md",
       "currentStep": 2,
       "specFile": "docs/sample-requirement.md",
       "steps": [
         {
-          "step": 1,
           "title": "JobPosting JSON-LD structured data + 메타 하드닝(metadataBase/OG)",
           "status": "merged",
           "files": [
@@ -2194,13 +1846,11 @@
           ],
           "estimatedLines": 400,
           "prLineLimit": 500,
-          "dependsOn": [],
           "prNumber": 96,
-          "branch": "feature/CANDID-025-step1",
-          "mergedAt": "2026-05-31T22:00:17+09:00"
+          "mergedAt": "2026-05-31T22:00:17+09:00",
+          "number": 1
         },
         {
-          "step": 2,
           "title": "동적 sitemap.xml + robots.txt",
           "status": "merged",
           "files": [
@@ -2211,12 +1861,9 @@
           ],
           "estimatedLines": 250,
           "prLineLimit": 350,
-          "dependsOn": [
-            1
-          ],
           "prNumber": 98,
-          "branch": "feature/CANDID-025-step2",
-          "mergedAt": "2026-05-31T22:19:09+09:00"
+          "mergedAt": "2026-05-31T22:19:09+09:00",
+          "number": 2
         }
       ],
       "workflowState": null,
@@ -2398,9 +2045,6 @@
       "lockTTL": 10800,
       "lockedFiles": [],
       "updatedAt": "2026-06-03T11:30:15+09:00",
-      "metadata": {
-        "version": 10
-      },
       "steps": [
         {
           "number": 1,
@@ -2417,9 +2061,7 @@
           "prLineLimit": 500,
           "status": "merged",
           "prNumber": 110,
-          "branch": "feature/CANDID-028-step1",
-          "mergedAt": "2026-06-03T10:25:27+09:00",
-          "actualLines": 352
+          "mergedAt": "2026-06-03T10:25:27+09:00"
         },
         {
           "number": 2,
@@ -2436,13 +2078,8 @@
           "estimatedLines": 380,
           "prLineLimit": 500,
           "status": "merged",
-          "dependsOn": [
-            1
-          ],
           "prNumber": 112,
-          "branch": "feature/CANDID-028-step2",
-          "mergedAt": "2026-06-03T10:49:04+09:00",
-          "actualLines": 396
+          "mergedAt": "2026-06-03T10:49:04+09:00"
         },
         {
           "number": 3,
@@ -2461,13 +2098,8 @@
           "estimatedLines": 460,
           "prLineLimit": 600,
           "status": "merged",
-          "dependsOn": [
-            1
-          ],
           "prNumber": 113,
-          "branch": "feature/CANDID-028-step3",
-          "mergedAt": "2026-06-03T11:09:58+09:00",
-          "actualLines": 224
+          "mergedAt": "2026-06-03T11:09:58+09:00"
         },
         {
           "number": 4,
@@ -2483,19 +2115,11 @@
           "estimatedLines": 420,
           "prLineLimit": 600,
           "status": "merged",
-          "dependsOn": [
-            1,
-            2,
-            3
-          ],
           "prNumber": 115,
-          "branch": "feature/CANDID-028-step4",
-          "mergedAt": "2026-06-03T11:30:15+09:00",
-          "actualLines": 154
+          "mergedAt": "2026-06-03T11:30:15+09:00"
         }
       ],
       "currentStep": 4,
-      "planPath": ".claude/temp/CANDID-028-plan.md",
       "workflowState": null,
       "completedAt": "2026-06-03T11:30:15+09:00"
     },
@@ -2536,7 +2160,6 @@
           "prLineLimit": 500,
           "status": "merged",
           "prNumber": 122,
-          "branch": "feature/CANDID-029-step1",
           "mergedAt": "2026-06-03T14:58:06+09:00"
         },
         {
@@ -2553,7 +2176,6 @@
           "prLineLimit": 500,
           "status": "merged",
           "prNumber": 124,
-          "branch": "feature/CANDID-029-step2",
           "mergedAt": "2026-06-03T15:15:24+09:00"
         },
         {
@@ -2573,7 +2195,6 @@
           "prLineLimit": 500,
           "status": "merged",
           "prNumber": 126,
-          "branch": "feature/CANDID-029-step3",
           "mergedAt": "2026-06-03T15:30:33+09:00"
         }
       ],
@@ -2608,7 +2229,6 @@
           "status": "merged",
           "prNumber": 6,
           "mergedAt": "2026-05-12T23:26:56+09:00",
-          "branch": "feature/CANDID-030-step1",
           "files": [
             "prisma/migrations/20260512210900_candid_008_pii_encryption/migration.sql",
             "lib/env.ts",
@@ -2620,8 +2240,7 @@
             "tests/lib/prisma/extends.test.ts",
             "README.md"
           ],
-          "estimatedLines": 250,
-          "actualLines": 277
+          "estimatedLines": 250
         }
       ],
       "currentStep": 1
@@ -2654,13 +2273,11 @@
           "status": "merged",
           "prNumber": 7,
           "mergedAt": "2026-05-13T14:30:52+09:00",
-          "branch": "feature/CANDID-031-step1",
           "files": [
             ".eslintrc.json",
             "CLAUDE.md"
           ],
           "estimatedLines": 50,
-          "actualLines": 30,
           "prLineLimit": 150
         },
         {
@@ -2670,13 +2287,11 @@
           "status": "merged",
           "prNumber": 8,
           "mergedAt": "2026-05-13T14:45:26+09:00",
-          "branch": "feature/CANDID-031-step2",
           "files": [
             "lib/pii/serializer.ts",
             "tests/lib/pii/serializer.test.ts"
           ],
-          "estimatedLines": 305,
-          "actualLines": 264
+          "estimatedLines": 305
         },
         {
           "number": 3,
@@ -2685,13 +2300,11 @@
           "status": "merged",
           "prNumber": 9,
           "mergedAt": "2026-05-13T14:54:34+09:00",
-          "branch": "feature/CANDID-031-step3",
           "files": [
             "lib/prisma/extends.ts",
             "tests/lib/prisma/extends.test.ts"
           ],
           "estimatedLines": 175,
-          "actualLines": 171,
           "prLineLimit": 300
         }
       ],
@@ -2716,7 +2329,6 @@
       "lockedFiles": [],
       "steps": [
         {
-          "stepNumber": 1,
           "title": "User PII round-trip + write guard 매트릭스",
           "files": [
             "tests/integration/prisma-extends-user-roundtrip.test.ts",
@@ -2726,10 +2338,10 @@
           "prLineLimit": 700,
           "status": "merged",
           "prNumber": 73,
-          "mergedAt": "2026-05-28T23:17:50+09:00"
+          "mergedAt": "2026-05-28T23:17:50+09:00",
+          "number": 1
         },
         {
-          "stepNumber": 2,
           "title": "Raw query 우회 + 운영 singleton wiring smoke (L-005)",
           "files": [
             "tests/integration/prisma-extends-user-raw-bypass.test.ts",
@@ -2740,10 +2352,11 @@
           "prLineLimit": 500,
           "status": "merged",
           "prNumber": 74,
-          "mergedAt": "2026-05-28T23:32:11+09:00"
+          "mergedAt": "2026-05-28T23:32:11+09:00",
+          "number": 2
         }
       ],
-      "currentStep": null,
+      "currentStep": 2,
       "workflowState": null,
       "updatedAt": "2026-05-28T23:30:55+09:00",
       "completedAt": "2026-05-28T23:32:11+09:00"
@@ -2767,7 +2380,6 @@
       "lockedFiles": [],
       "steps": [
         {
-          "stepNumber": 1,
           "title": "pii-encryption.md SSOT 작성 + README 링크",
           "files": [
             "docs/security/pii-encryption.md",
@@ -2777,10 +2389,11 @@
           "prLineLimit": 1000,
           "status": "merged",
           "prNumber": 75,
-          "mergedAt": "2026-05-28T23:56:16+09:00"
+          "mergedAt": "2026-05-28T23:56:16+09:00",
+          "number": 1
         }
       ],
-      "currentStep": null,
+      "currentStep": 1,
       "workflowState": null,
       "updatedAt": "2026-05-28T23:55:12+09:00",
       "completedAt": "2026-05-28T23:56:16+09:00"
@@ -2811,7 +2424,6 @@
           "title": "schema rename (key_version 컬럼명 일관화)",
           "description": "applicant_name/email_key_version 컬럼명을 `_snapshot_` 토큰 포함으로 통일. schema.prisma 2줄 @map 수정 + 필드명 Snapshot 접미 통일 + migration.sql (ALTER TABLE RENAME COLUMN × 2) + L-001 destructive guard (COUNT(*) > 0 RAISE EXCEPTION). dev 환경 applications 비어있음 가정.",
           "status": "merged",
-          "branch": "feature/CANDID-034-step1",
           "prNumber": 14,
           "mergedAt": "2026-05-17T23:07:11+09:00",
           "files": [
@@ -2819,7 +2431,6 @@
             "prisma/migrations/20260517223000_candid_034_step1_keyver_rename/migration.sql"
           ],
           "estimatedLines": 40,
-          "actualLines": 49,
           "prLineLimit": 100
         },
         {
@@ -2827,7 +2438,6 @@
           "title": "PII SSOT 신설 + Application encrypt 헬퍼 + 단위 테스트",
           "description": "lib/pii/fields.ts 신설(USER_PII_FIELDS + APPLICATION_PII_SNAPSHOT_FIELDS SSOT). lib/prisma/extends.ts에 normalizeName/Email/Address + ApplicationPiiSnapshotPlaintextInput/EncryptedInput 타입 + encryptApplicationPiiSnapshotInput + assertApplicationPiiInputShape + decryptApplicationPiiSnapshotField 추가. tests/lib/prisma/extends.test.ts에 단위 테스트(각 normalize happy/throw, encrypt partial/null, assert string/setWrapper 차단).",
           "status": "merged",
-          "branch": "feature/CANDID-034-step2",
           "prNumber": 15,
           "mergedAt": "2026-05-17T23:19:44+09:00",
           "files": [
@@ -2836,7 +2446,6 @@
             "tests/lib/prisma/extends.test.ts"
           ],
           "estimatedLines": 380,
-          "actualLines": 511,
           "prLineLimit": 450
         },
         {
@@ -2844,7 +2453,6 @@
           "title": "piiExtension wiring 확장 (result.application + query.application) + 단위 테스트",
           "description": "lib/prisma/extends.ts의 piiExtension에 result.application(5 compute 함수, 명시 export L-003) + query.application(create/update/upsert/updateMany/createMany hook, assertApplicationPiiInputShape 호출 L-007) 추가. 단위 테스트: computeDecryptedX 5개 직접 호출 round-trip, null/Buffer 처리, keyVersion needs 시그니처.",
           "status": "merged",
-          "branch": "feature/CANDID-034-step3",
           "prNumber": 16,
           "mergedAt": "2026-05-17T23:29:29+09:00",
           "files": [
@@ -2852,7 +2460,6 @@
             "tests/lib/prisma/extends.test.ts"
           ],
           "estimatedLines": 220,
-          "actualLines": 291,
           "prLineLimit": 280
         },
         {
@@ -2860,7 +2467,6 @@
           "title": "mask 3건 + applicationPublic serializer + 단위 테스트",
           "description": "lib/pii/mask.ts에 maskName/maskEmail/maskAddress 신규 (maskPhone/maskBirthDate 재사용). lib/pii/serializer.ts에 applicationPublicInputSchema(.strip) + applicationPublicSchema(.transform mask 5건 + Date→ISO) + toApplicationPublic(ZodError 안전망). 단위 테스트: mask 3건 happy/null/edge, toApplicationPublic 마스킹 + key_version 5건 strip 회귀, ZodError path 노출.",
           "status": "merged",
-          "branch": "feature/CANDID-034-step4",
           "prNumber": 17,
           "mergedAt": "2026-05-17T23:39:17+09:00",
           "files": [
@@ -2870,7 +2476,6 @@
             "tests/lib/pii/serializer.test.ts"
           ],
           "estimatedLines": 480,
-          "actualLines": 431,
           "prLineLimit": 550
         }
       ],
@@ -2904,7 +2509,6 @@
           "title": "통합 테스트 인프라 셋업 + smoke",
           "description": "vitest.config.integration.ts 분리 runner + tests/integration/{setup,global-setup,helpers/{prisma,raw}}.ts 인프라 + prisma-smoke.test.ts 1건. docker-compose db 재사용 + `?schema=test_integration` 분리. globalSetup에서 `prisma migrate deploy` 1회. TEST_DATABASE_URL + 고정 PII_ENCRYPTION_KEY 주입. pnpm scripts(test:integration) 추가. README 통합 테스트 가이드. ※ helpers/seed.ts는 line-limit 차단 회피 위해 Step 2로 위임.",
           "status": "merged",
-          "branch": "feature/CANDID-035-step1",
           "prNumber": 18,
           "mergedAt": "2026-05-19T22:58:00+09:00",
           "files": [
@@ -2920,16 +2524,13 @@
             "README.md"
           ],
           "estimatedLines": 180,
-          "actualLines": 276,
-          "prLineLimit": 250,
-          "note": "review CRITICAL 0 / MAJOR 8 (개선 권고) / MINOR 9 / INFO 2. H005(URL 마스킹) + H006(piiExtension smoke) + H007(spawn error) + H008(afterEach) 4건은 Step 2 진입 첫 동작으로 보강 권장 (in-task self-correction L-019)."
+          "prLineLimit": 250
         },
         {
           "number": 2,
           "title": "5 query.application op throw + 5쌍 round-trip + needs satisfies + helpers/seed",
           "description": "V1 (5경로 string 평문 throw + 정상 Buffer happy → BYTEA octet_length ≥ 29 단정) + V2 (5쌍 round-trip findUnique 평문 string + null 입력) + V4 (5 compute needs `satisfies Record<...>` 컴파일타임 + runtime expect.toEqual 이중 단정) + helpers/seed.ts (Step 1에서 위임됨, User+JobCategory+JobPosting 최소 fixture + encryptApplicationSnapshotForPrisma 회귀 우회 SSOT). Step 1 review H005-H008 4건 동시 보강.",
           "status": "merged",
-          "branch": "feature/CANDID-035-step2",
           "prNumber": 19,
           "mergedAt": "2026-05-19T23:15:00+09:00",
           "files": [
@@ -2940,16 +2541,13 @@
             "tests/integration/prisma-smoke.test.ts"
           ],
           "estimatedLines": 360,
-          "actualLines": 509,
-          "prLineLimit": 420,
-          "note": "review CRITICAL 0 / MAJOR 13 / MINOR 9 / INFO 7. H001(truncateAll schema fail-fast, 위험도 최상) + H009(wrapper 분기) + H010(keyVersion 단정) + H011(부분 NULL 혼합) + H012(createMany 롤백) + H013(빈 문자열 edge)는 Step 3 진입 첫 작업으로 보강 권고 (in-task self-correction L-019)."
+          "prLineLimit": 420
         },
         {
           "number": 3,
           "title": "L-007 nested write 회귀 + migration 컬럼 검증 + 컨벤션 + Step 2 review 보강",
           "description": "V3 (L-007 nested write 한계 SSOT 증거) + V5 (information_schema 컬럼명 5쌍 BYTEA + 5쌍 SMALLINT 단정) + _base/conventions/database.md L-007 우회 방지 절 + README 통합 테스트 범주 표 + Step 2 review H001(truncateAll fail-fast)/H009(wrapper)/H010(keyVersion 단정)/H012(createMany 롤백) 동시 보강.",
           "status": "merged",
-          "branch": "feature/CANDID-035-step3",
           "prNumber": 20,
           "mergedAt": "2026-05-19T23:30:00+09:00",
           "files": [
@@ -2961,9 +2559,7 @@
             "README.md"
           ],
           "estimatedLines": 150,
-          "actualLines": 181,
-          "prLineLimit": 220,
-          "note": "review CRITICAL 0 / MAJOR 2 (V5 SSOT derive + H010 PII_KEY_VERSION 상수 — 별도 micro 위임) / MINOR 8 / INFO 7."
+          "prLineLimit": 220
         }
       ],
       "currentStep": 3
@@ -2985,11 +2581,9 @@
       "lockTTL": null,
       "lockedFiles": [],
       "workflowState": null,
-      "planPath": ".claude/temp/CANDID-036-plan.md",
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "Foundation: 부분 UNIQUE 마이그레이션 + pii-safe 헬퍼 + Rate Limit 정책",
           "status": "merged",
           "files": [
@@ -3001,14 +2595,11 @@
           ],
           "estimatedLines": 500,
           "prLineLimit": 600,
-          "dependsOn": null,
           "prNumber": 35,
-          "branch": "feature/CANDID-036-step1",
-          "mergedLines": 461,
-          "mergedAt": "2026-05-24T00:15:08+09:00"
+          "mergedAt": "2026-05-24T00:15:08+09:00",
+          "number": 1
         },
         {
-          "step": 2,
           "title": "Race fix: consumeVerificationToken updateMany + resend P2002 매핑 + 트랜잭션/동시 클릭 테스트",
           "status": "merged",
           "files": [
@@ -3017,16 +2608,11 @@
           ],
           "estimatedLines": 450,
           "prLineLimit": 500,
-          "dependsOn": [
-            1
-          ],
           "prNumber": 36,
-          "branch": "feature/CANDID-036-step2",
-          "mergedLines": 259,
-          "mergedAt": "2026-05-24T00:26:06+09:00"
+          "mergedAt": "2026-05-24T00:26:06+09:00",
+          "number": 2
         },
         {
-          "step": 3,
           "title": "라우터 적용: pii-safe 일괄 + RL 부착 + 회귀 가드 테스트 일괄",
           "status": "merged",
           "files": [
@@ -3039,14 +2625,9 @@
           ],
           "estimatedLines": 550,
           "prLineLimit": 700,
-          "dependsOn": [
-            1,
-            2
-          ],
           "prNumber": 37,
-          "branch": "feature/CANDID-036-step3",
-          "mergedLines": 212,
-          "mergedAt": "2026-05-24T00:37:44+09:00"
+          "mergedAt": "2026-05-24T00:37:44+09:00",
+          "number": 3
         }
       ],
       "completedAt": "2026-05-24T00:37:44+09:00"
@@ -3064,14 +2645,11 @@
       "lockedFiles": [],
       "workflowState": null,
       "completedAt": "2026-05-24T11:28:00+09:00",
-      "planPath": ".claude/temp/CANDID-037-plan.md",
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "Cross-cutting: lib/prisma/errors.ts 신설 + RL wrapper 헤더 가드 + enforceUserRateLimit",
           "status": "merged",
-          "branch": "feature/CANDID-037-step1",
           "prNumber": 38,
           "mergedAt": "2026-05-24T10:55:00+09:00",
           "files": [
@@ -3081,17 +2659,12 @@
             "tests/lib/security/rate-limit.test.ts"
           ],
           "estimatedLines": 360,
-          "actualLines": 463,
-          "mergedLines": 463,
           "prLineLimit": 500,
-          "dependsOn": [],
-          "reviewSummary": "CRITICAL 0 / MAJOR 0 / MINOR 4 / INFO 12 (full mode 3-agent). 자기 PR COMMENT. L-023/L-025 회귀 가드 명시."
+          "number": 1
         },
         {
-          "step": 2,
           "title": "email-verification 정밀화: P2002 meta.target 화이트리스트 + emailVerifiedAt 가드 + 격리 주석",
           "status": "merged",
-          "branch": "feature/CANDID-037-step2",
           "prNumber": 39,
           "mergedAt": "2026-05-24T11:12:00+09:00",
           "files": [
@@ -3101,19 +2674,12 @@
             "tests/lib/errors/codes.test.ts"
           ],
           "estimatedLines": 370,
-          "actualLines": 232,
-          "mergedLines": 232,
           "prLineLimit": 500,
-          "dependsOn": [
-            1
-          ],
-          "reviewSummary": "CRITICAL 0 / MAJOR 3 (Step 3 합류) / MINOR 5 / INFO 8 (full mode 3-agent). 보안 결함 0. 자기 PR COMMENT."
+          "number": 2
         },
         {
-          "step": 3,
           "title": "라우터 일관화 (enforceUserRateLimit 적용) + 회귀 어설션 강화 + 매직 넘버 제거",
           "status": "merged",
-          "branch": "feature/CANDID-037-step3",
           "prNumber": 40,
           "mergedAt": "2026-05-24T11:28:00+09:00",
           "files": [
@@ -3123,14 +2689,8 @@
             "tests/app/api/v1/auth/signup.test.ts"
           ],
           "estimatedLines": 85,
-          "actualLines": 258,
-          "mergedLines": 258,
           "prLineLimit": 300,
-          "dependsOn": [
-            1,
-            2
-          ],
-          "reviewSummary": "CRITICAL 0 / MAJOR 1 (별도 task) / MINOR 6 / INFO 7 (full mode 3-agent). 보안 결함 0. 자기 PR COMMENT."
+          "number": 3
         }
       ],
       "dependencies": [
@@ -3152,7 +2712,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-05-25T11:00:00+09:00",
-      "source": "CANDID-016 retro Action Item HIGH-1",
       "lockTTL": 7200,
       "updatedAt": "2026-05-25T17:23:50+09:00",
       "workflowState": null,
@@ -3172,8 +2731,7 @@
           "estimatedLines": 100,
           "prLineLimit": 200,
           "prNumber": 60,
-          "mergedAt": "2026-05-25T17:23:50+09:00",
-          "branch": "feature/CANDID-038-step1"
+          "mergedAt": "2026-05-25T17:23:50+09:00"
         }
       ],
       "currentStep": 1,
@@ -3194,13 +2752,11 @@
         "CANDID-016"
       ],
       "createdAt": "2026-05-25T11:00:00+09:00",
-      "source": "CANDID-016 retro Action Item HIGH-2",
       "lockTTL": 7200,
       "workflowState": null,
       "currentStep": 3,
       "steps": [
         {
-          "step": 1,
           "title": "RTL 인프라 도입 + jsdom 매핑 + smoke",
           "status": "merged",
           "prLineLimit": 200,
@@ -3211,10 +2767,10 @@
             "vitest.config.ts"
           ],
           "prNumber": 80,
-          "mergedAt": "2026-05-29T11:00:48Z"
+          "mergedAt": "2026-05-29T11:00:48Z",
+          "number": 1
         },
         {
-          "step": 2,
           "title": "ResumeUploadStep.test.tsx (10 시나리오)",
           "status": "merged",
           "prLineLimit": 500,
@@ -3222,10 +2778,10 @@
             "tests/app/jobs/[id]/apply/ResumeUploadStep.test.tsx"
           ],
           "prNumber": 82,
-          "mergedAt": "2026-05-29T11:12:34Z"
+          "mergedAt": "2026-05-29T11:12:34Z",
+          "number": 2
         },
         {
-          "step": 3,
           "title": "use-auto-save RTL 마이그 (검토/폴백)",
           "status": "merged",
           "prLineLimit": 400,
@@ -3233,7 +2789,8 @@
             "tests/lib/drafts/use-auto-save.test.ts"
           ],
           "prNumber": 83,
-          "mergedAt": "2026-05-29T11:18:06Z"
+          "mergedAt": "2026-05-29T11:18:06Z",
+          "number": 3
         }
       ],
       "completedAt": "2026-05-29T20:19:04+09:00"
@@ -3251,7 +2808,6 @@
         "CANDID-016"
       ],
       "createdAt": "2026-05-25T11:00:00+09:00",
-      "source": "CANDID-016 retro Action Item HIGH-3",
       "lockTTL": 10800,
       "workflowState": null,
       "steps": [
@@ -3271,7 +2827,6 @@
           "prLineLimit": 500,
           "status": "merged",
           "prNumber": 104,
-          "branch": "feature/CANDID-040-step1",
           "mergedAt": "2026-06-02T22:36:24+09:00"
         },
         {
@@ -3289,7 +2844,6 @@
           "prLineLimit": 500,
           "status": "merged",
           "prNumber": 107,
-          "branch": "feature/CANDID-040-step2",
           "mergedAt": "2026-06-02T23:14:50+09:00"
         },
         {
@@ -3306,7 +2860,6 @@
           "prLineLimit": 800,
           "status": "merged",
           "prNumber": 109,
-          "branch": "feature/CANDID-040-step3",
           "mergedAt": "2026-06-02T23:34:12+09:00"
         }
       ],
@@ -3328,7 +2881,6 @@
         "CANDID-038"
       ],
       "createdAt": "2026-05-25T18:33:14+09:00",
-      "source": "CANDID-038 retro Action Item HIGH-A1 (L-034)",
       "lockTTL": 3600,
       "updatedAt": "2026-05-25T19:48:39+09:00",
       "workflowState": null,
@@ -3344,8 +2896,7 @@
           "estimatedLines": 150,
           "prLineLimit": 250,
           "prNumber": 61,
-          "mergedAt": "2026-05-25T19:48:39+09:00",
-          "branch": "feature/CANDID-041-step1"
+          "mergedAt": "2026-05-25T19:48:39+09:00"
         }
       ],
       "currentStep": 1,
@@ -3366,7 +2917,6 @@
         "CANDID-038"
       ],
       "createdAt": "2026-05-25T18:33:14+09:00",
-      "source": "CANDID-038 retro Action Item HIGH-A2 (L-036)",
       "lockTTL": 3600,
       "updatedAt": "2026-05-25T21:06:42+09:00",
       "workflowState": null,
@@ -3384,8 +2934,7 @@
           "estimatedLines": 80,
           "prLineLimit": 200,
           "prNumber": 62,
-          "mergedAt": "2026-05-25T21:06:42+09:00",
-          "branch": "feature/CANDID-042-step1"
+          "mergedAt": "2026-05-25T21:06:42+09:00"
         }
       ],
       "currentStep": 1,
@@ -3408,7 +2957,6 @@
         "CANDID-042"
       ],
       "createdAt": "2026-05-25T21:34:03+09:00",
-      "source": "CANDID-042 retro Action Item HIGH-A1 (D-MAJOR-4 + T-MAJOR-2/3)",
       "lockTTL": 7200,
       "updatedAt": "2026-05-25T23:09:03+09:00",
       "workflowState": null,
@@ -3427,8 +2975,7 @@
           "estimatedLines": 305,
           "prLineLimit": 350,
           "prNumber": 63,
-          "mergedAt": "2026-05-25T23:09:03+09:00",
-          "branch": "feature/CANDID-043-step1"
+          "mergedAt": "2026-05-25T23:09:03+09:00"
         }
       ],
       "currentStep": 1,
@@ -3449,15 +2996,12 @@
         "CANDID-042"
       ],
       "createdAt": "2026-05-25T21:34:03+09:00",
-      "source": "CANDID-042 retro Action Item HIGH-A2 (D-MAJOR-2 + S-MAJOR-2)",
       "lockTTL": 3600,
       "workflowState": null,
       "updatedAt": "2026-05-26T22:37:20+09:00",
-      "planPath": ".claude/temp/CANDID-044-plan.md",
       "currentStep": 1,
       "steps": [
         {
-          "step": 1,
           "title": "partial-security 정책 도입 (매핑 표 컬럼 + 가드 fail 분기 + 코멘트 포맷 + 실행 로그)",
           "status": "merged",
           "files": [
@@ -3465,14 +3009,9 @@
           ],
           "estimatedLines": 48,
           "prLineLimit": 100,
-          "dependsOn": [],
-          "branch": "feature/CANDID-044-step1",
           "prNumber": 64,
-          "actualLines": 74,
-          "reviewSummary": "리뷰 모드 full(3 agent). CRITICAL 0 / MAJOR 5 (3 in-PR fix: H001 domain 전달 + H002 --auto-fix 무관 + H004 self-PR fallback; carry 2: H003 enum meta-guard → CANDID-045, H005 dryrun → A3) / MINOR 8 (4 in-PR 통합) / INFO 6. 자기 PR이므로 COMMENT. 보안 결함 0. L-019 적용.",
-          "fixLoop": 0,
           "mergedAt": "2026-05-26T22:36:33+09:00",
-          "mergedLines": 74
+          "number": 1
         }
       ],
       "completedAt": "2026-05-26T22:37:20+09:00"
@@ -3492,15 +3031,12 @@
         "CANDID-043"
       ],
       "createdAt": "2026-05-25T23:34:34+09:00",
-      "source": "CANDID-043 retro Action Item A1 (10 carry items 통합)",
       "lockTTL": 7200,
       "workflowState": null,
       "updatedAt": "2026-05-30T01:48:00+09:00",
-      "planPath": ".claude/temp/CANDID-045-plan.md",
       "currentStep": 2,
       "steps": [
         {
-          "step": 1,
           "title": "메타가드 디렉토리 분리(D-5) + 검증 룰 강화(D-1/D-3/D-4/D-6) + lifecycle-hook 보안(M-SEC)",
           "status": "merged",
           "files": [
@@ -3512,15 +3048,11 @@
           ],
           "estimatedLines": 110,
           "prLineLimit": 250,
-          "dependsOn": [],
           "prNumber": 89,
-          "branch": "feature/CANDID-045-step1",
-          "note": "PR #88 상태-푸시 실수로 리뷰 없이 자동 머지 → revert(bebc101) 후 #89로 정식 재진행. 변경 동일.",
           "mergedAt": "2026-05-30T01:34:39+09:00",
-          "mergedLines": 333
+          "number": 1
         },
         {
-          "step": 2,
           "title": "테스트 강화: DRY spawn-guard helper 추출(M-DRY) + fixtures(T-1/T-3/T-4)",
           "status": "merged",
           "files": [
@@ -3531,13 +3063,9 @@
           ],
           "estimatedLines": 150,
           "prLineLimit": 300,
-          "dependsOn": [
-            1
-          ],
           "prNumber": 91,
-          "branch": "feature/CANDID-045-step2",
           "mergedAt": "2026-05-30T01:46:30+09:00",
-          "mergedLines": 142
+          "number": 2
         }
       ],
       "completedAt": "2026-05-30T01:48:00+09:00"
@@ -3555,7 +3083,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-05-29T19:53:15+09:00",
-      "source": "CANDID-039 구현 중 발견 (test flakiness)",
       "updatedAt": "2026-05-30T01:34:12+09:00",
       "lockTTL": null,
       "workflowState": null,
@@ -3577,7 +3104,6 @@
           "estimatedLines": 180,
           "prLineLimit": 250,
           "prNumber": 90,
-          "branch": "worktree-purring-sparking-key",
           "mergedAt": "2026-05-30T01:34:12+09:00"
         }
       ],
@@ -3595,7 +3121,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-05-29T20:11:38+09:00",
-      "source": "CANDID-039 Step 2 리뷰 (QA P1)",
       "currentStep": 1,
       "steps": [
         {
@@ -3611,7 +3136,6 @@
           ],
           "prLineLimit": 150,
           "prNumber": 101,
-          "branch": "feature/CANDID-047-step1",
           "mergedAt": "2026-06-02T21:51:07+09:00"
         }
       ],
@@ -3716,7 +3240,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "specFile": "docs/requirements/CANDID-050-spec.md",
-      "source": "사용자 요청 (/skill-feature) — jobs UI 재구성 + 로그인/지원 동선 복구. CANDID-048 E2E 데모 중 발견.",
       "steps": [
         {
           "number": 1,
@@ -3732,7 +3255,6 @@
           "prLineLimit": 250,
           "estimatedLines": 180,
           "prNumber": 128,
-          "branch": "feature/CANDID-050-step1",
           "mergedAt": "2026-06-03T08:37:03Z"
         },
         {
@@ -3754,7 +3276,6 @@
           "prLineLimit": 900,
           "estimatedLines": 750,
           "prNumber": 129,
-          "branch": "feature/CANDID-050-step2",
           "mergedAt": "2026-06-03T09:28:52Z"
         },
         {
@@ -3776,7 +3297,6 @@
           "prLineLimit": 700,
           "estimatedLines": 550,
           "prNumber": 130,
-          "branch": "feature/CANDID-050-step3",
           "mergedAt": "2026-06-03T09:54:09Z"
         },
         {
@@ -3795,7 +3315,6 @@
           "prLineLimit": 600,
           "estimatedLines": 450,
           "prNumber": 131,
-          "branch": "feature/CANDID-050-step4",
           "mergedAt": "2026-06-03T10:15:25Z"
         }
       ],
@@ -3822,7 +3341,6 @@
       ],
       "createdAt": "2026-06-03T14:34:38Z",
       "specFile": "docs/requirements/CANDID-051-spec.md",
-      "source": "전체 기능 Playwright QA 패스 (사용자 요청). 미확정(dev 관측) — prod 빌드 검증 선행 필요.",
       "workflowState": null,
       "steps": [
         {
@@ -3838,9 +3356,7 @@
             "e2e/prod/soft-404.spec.ts",
             "package.json"
           ],
-          "dependencies": [],
           "prNumber": 139,
-          "branch": "feature/CANDID-051-step1",
           "mergedAt": "2026-06-04T13:23:54Z"
         },
         {
@@ -3855,11 +3371,7 @@
             "app/jobs/[id]/apply/page.tsx",
             "docs/requirements/CANDID-051-spec.md"
           ],
-          "dependencies": [
-            1
-          ],
           "prNumber": 140,
-          "branch": "feature/CANDID-051-step2",
           "mergedAt": "2026-06-04T14:29:27Z"
         }
       ],
@@ -3883,8 +3395,6 @@
         "CANDID-019"
       ],
       "createdAt": "2026-06-03T14:34:38Z",
-      "specFile": null,
-      "source": "전체 기능 Playwright QA 패스 (사용자 요청). 재현 확실 — 기존 journeys.spec 실행 시 항상 실패. | 수정 완료: journeys.spec.ts:40 단언을 \"내 지원 현황\"으로 갱신, headed 재실행 6/6 통과.",
       "workflowState": null,
       "steps": [],
       "completedAt": "2026-06-03T14:46:11Z"
@@ -3903,7 +3413,6 @@
       "dependencies": [],
       "createdAt": "2026-06-03T14:54:51Z",
       "specFile": "docs/requirements/CANDID-053-spec.md",
-      "source": "사용자 질문('관리자 계정은 어떻게 만들고 관리하나') 중 발견 — 관리자/리크루터 역할·권한·백오피스 전면 부재 확인. | A안(내부 RBAC) 확정 — skill-feature 요구사항 정의 승인(2026-06-04).",
       "workflowState": null,
       "steps": [
         {
@@ -3916,7 +3425,6 @@
             "prisma/schema.prisma",
             "prisma/migrations/*"
           ],
-          "dependencies": [],
           "prNumber": 135,
           "mergedAt": "2026-06-04T11:46:34Z"
         },
@@ -3930,9 +3438,6 @@
             "lib/auth/middleware.ts",
             "scripts/admin/grant-role.ts",
             "tests/lib/auth/*"
-          ],
-          "dependencies": [
-            1
           ],
           "description": "requireRole + AuthContext.role + 부트스트랩 CLI + 단위테스트 | [리뷰 M001] requireRole은 enum ordinal 비교 금지 — 명시적 allow-list(allowed.includes(role)) 방식.",
           "prNumber": 136,
@@ -3950,9 +3455,6 @@
             "lib/errors/codes.ts",
             "tests/*"
           ],
-          "dependencies": [
-            2
-          ],
           "prNumber": 137,
           "mergedAt": "2026-06-04T12:15:33Z"
         },
@@ -3966,9 +3468,6 @@
             "app/api/admin/v1/job-postings/**",
             "lib/admin/job-postings.ts",
             "tests/*"
-          ],
-          "dependencies": [
-            2
           ],
           "prNumber": 138,
           "mergedAt": "2026-06-04T12:31:53Z"
@@ -3985,11 +3484,7 @@
             "prisma/migrations/*",
             "tests/*"
           ],
-          "dependencies": [
-            2
-          ],
           "prNumber": 141,
-          "branch": "feature/CANDID-053-step5",
           "mergedAt": "2026-06-06T03:57:59Z"
         },
         {
@@ -4003,12 +3498,7 @@
             "lib/admin/stage-transition.ts",
             "tests/*"
           ],
-          "dependencies": [
-            2,
-            5
-          ],
           "prNumber": 142,
-          "branch": "feature/CANDID-053-step6",
           "mergedAt": "2026-06-06T04:16:34Z"
         },
         {
@@ -4022,12 +3512,7 @@
             "lib/admin/interviews.ts",
             "tests/*"
           ],
-          "dependencies": [
-            2,
-            6
-          ],
           "prNumber": 143,
-          "branch": "feature/CANDID-053-step7",
           "mergedAt": "2026-06-06T04:33:13Z"
         },
         {
@@ -4041,14 +3526,6 @@
             "app/admin/page.tsx",
             "app/admin/admin.module.css",
             "lib/auth/require-role-page.ts"
-          ],
-          "dependencies": [
-            2,
-            3,
-            4,
-            5,
-            6,
-            7
           ],
           "prNumber": 144,
           "mergedAt": "2026-06-06T04:56:42Z"
@@ -4064,10 +3541,6 @@
             "app/admin/job-postings/_components/StatusControl.tsx",
             "lib/admin/job-postings-list.ts"
           ],
-          "dependencies": [
-            4,
-            8
-          ],
           "prNumber": 145,
           "mergedAt": "2026-06-06T05:18:04Z"
         },
@@ -4082,10 +3555,6 @@
             "app/admin/job-postings/[id]/edit",
             "app/admin/job-postings/_components/JobPostingForm.tsx"
           ],
-          "dependencies": [
-            4,
-            9
-          ],
           "prNumber": 146,
           "mergedAt": "2026-06-06T05:28:39Z"
         },
@@ -4098,11 +3567,6 @@
           "files": [
             "app/admin/job-postings/[id]/applicants",
             "app/admin/applications/[id]/page.tsx"
-          ],
-          "dependencies": [
-            5,
-            8,
-            9
           ],
           "prNumber": 147,
           "mergedAt": "2026-06-06T05:43:04Z"
@@ -4117,11 +3581,6 @@
             "app/admin/applications/_components",
             "lib/admin/stage-transitions-graph.ts"
           ],
-          "dependencies": [
-            6,
-            7,
-            11
-          ],
           "prNumber": 148,
           "mergedAt": "2026-06-06T05:57:46Z"
         },
@@ -4133,13 +3592,6 @@
           "estimatedLines": 260,
           "files": [
             "e2e/admin.spec.ts"
-          ],
-          "dependencies": [
-            8,
-            9,
-            10,
-            11,
-            12
           ],
           "prNumber": 149,
           "mergedAt": "2026-06-06T06:09:44Z"
@@ -4165,8 +3617,6 @@
       ],
       "createdAt": "2026-06-07T00:00:00.000Z",
       "specFile": "docs/requirements/CANDID-054-spec.md",
-      "planPath": ".claude/temp/CANDID-054-plan.md",
-      "source": "사용자 요청('어드민 기능 강화, 공고관리 페이지 전체 너비 화면 맞춤, 지원자 목록을 대시보드처럼 한번에') — crew-feature 요구사항 정의 승인(2026-06-07). 너비 1200px 캡 + 전체 4 FR 확정.",
       "workflowState": null,
       "steps": [
         {
@@ -4179,8 +3629,7 @@
           "estimatedLines": 70,
           "files": [
             "app/admin/admin.module.css"
-          ],
-          "dependencies": []
+          ]
         },
         {
           "number": 2,
@@ -4195,9 +3644,6 @@
             "app/admin/job-postings/[id]/applicants/page.tsx",
             "app/admin/job-postings/applicants.module.css",
             "tests/lib/admin/applicants.test.ts"
-          ],
-          "dependencies": [
-            1
           ]
         },
         {
@@ -4213,9 +3659,6 @@
             "app/admin/job-postings/page.tsx",
             "app/admin/job-postings/job-postings.module.css",
             "tests/lib/admin/dashboard.test.ts"
-          ],
-          "dependencies": [
-            1
           ],
           "prNumber": 153,
           "mergedAt": "2026-06-07T06:01:01Z"
@@ -4240,7 +3683,6 @@
         "CANDID-053"
       ],
       "createdAt": "2026-06-07T15:45:00+09:00",
-      "source": "사용자 보고('/admin/job-postings/19/applicants 바로 못 들어감') — dev 진단 중 발견. 페이지는 정상, 레이아웃 가드 returnTo 누락이 원인.",
       "workflowState": null,
       "steps": [
         {
@@ -4268,7 +3710,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T16:05:00+09:00",
-      "source": "사용자 보고(회원가입 약관 체크박스가 글자보다 위에 위치) — 프로젝트 전체 점검 요청.",
       "workflowState": null,
       "steps": [
         {
@@ -4296,12 +3737,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T17:20:00+09:00",
-      "source": "사용자 요청 — /admin/job-postings/19/applicants 화면에 채용 공고 제목이 보였으면 함.",
-      "acceptanceCriteria": [
-        "지원자 대시보드 헤더에 해당 공고의 제목이 표시된다.",
-        "존재하지 않는 공고 id는 기존대로 notFound(404).",
-        "제목 표시로 인한 추가 PII 노출/감사 영향 없음."
-      ],
       "workflowState": null,
       "steps": [
         {
@@ -4337,7 +3772,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T17:52:00+09:00",
-      "source": "사용자 요청 — 무인 환전·결제 플랫폼 표현 제거, 포괄적 문구로 교체.",
       "workflowState": null,
       "steps": [
         {
@@ -4372,7 +3806,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T18:15:00+09:00",
-      "source": "사용자 요청 — \"금융을 움직일\"이 어색, \"세상을 움직일\"로. 전반적으로 세상을 움직인다는 느낌으로 워딩 변경.",
       "workflowState": null,
       "steps": [
         {
@@ -4401,13 +3834,11 @@
       "priority": "low",
       "phase": 3,
       "micro": true,
-      "specFile": null,
       "assignee": null,
       "assignedAt": null,
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T18:28:00+09:00",
-      "source": "사용자 요청 — 금융 아니어도 됨, 살기 편한 세상·삶을 윤택하게 하는 솔루션 느낌. AskUserQuestion에서 '일상을 편리하게' 톤 선택.",
       "workflowState": null,
       "steps": [
         {
@@ -4436,13 +3867,11 @@
       "priority": "critical",
       "phase": 4,
       "micro": false,
-      "specFile": null,
       "assignee": null,
       "assignedAt": null,
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T11:03:41.765+00:00",
-      "source": "crew-health-check 자동 등록 (DS-02 CRITICAL FAIL, 2026-06-07)",
       "workflowState": null,
       "steps": [
         {
@@ -4479,7 +3908,6 @@
       "lockTTL": 7200
     },
     "CANDID-062": {
-      "specFile": null,
       "assignee": null,
       "assignedAt": null,
       "lockedFiles": [],
@@ -4487,7 +3915,6 @@
       "createdAt": "2026-06-07T11:47:53.256+00:00",
       "workflowState": null,
       "steps": [],
-      "currentStep": 0,
       "completedAt": "2026-06-07T12:44:40.206+00:00",
       "micro": false,
       "id": "CANDID-062",
@@ -4496,11 +3923,9 @@
       "status": "done",
       "type": "chore",
       "priority": "medium",
-      "phase": 4,
-      "source": "crew-health-check SI-04 (MAJOR, 3회 연속)"
+      "phase": 4
     },
     "CANDID-063": {
-      "specFile": null,
       "assignee": null,
       "assignedAt": null,
       "lockedFiles": [],
@@ -4539,11 +3964,9 @@
       "type": "chore",
       "priority": "low",
       "phase": 4,
-      "source": "crew-health-check DS-07 (MINOR, 3회 연속)",
       "lockTTL": 10800
     },
     "CANDID-064": {
-      "specFile": null,
       "assignee": null,
       "assignedAt": null,
       "lockedFiles": [],
@@ -4575,7 +3998,6 @@
       "type": "chore",
       "priority": "low",
       "phase": 4,
-      "source": "crew-health-check DS-04 + advisory",
       "lockTTL": 3600
     },
     "CANDID-065": {
@@ -4587,13 +4009,11 @@
       "priority": "medium",
       "phase": 3,
       "micro": true,
-      "specFile": null,
       "assignee": null,
       "assignedAt": null,
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T13:41:01.515+00:00",
-      "source": "사용자 요청 — 엔지니어만 채용하는 게 아니므로 \"인재\"로 포괄 전환.",
       "workflowState": null,
       "steps": [
         {
@@ -4632,7 +4052,6 @@
       "lockedFiles": [],
       "dependencies": [],
       "createdAt": "2026-06-07T14:06:56.377+00:00",
-      "source": "사용자 요청 — admin 상세에서 지원자 첨부 파일/포트폴리오 미표시 → 운영자 열람 기능 추가.",
       "workflowState": null,
       "steps": [
         {
@@ -4699,7 +4118,6 @@
         "lastCompletedSkill": "aick-plan",
         "prNumber": null,
         "fixLoopCount": 0,
-        "autoChainArgs": null,
         "updatedAt": "2026-06-10T20:49:47+09:00"
       },
       "createdAt": "2026-06-10T20:34:00+09:00",
