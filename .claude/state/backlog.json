@@ -2,15 +2,15 @@
   "metadata": {
     "lastTaskNumber": 67,
     "projectPrefix": "CANDID",
-    "version": 593,
+    "version": 594,
     "createdAt": "2026-05-12T18:22:05+09:00",
-    "updatedAt": "2026-06-10T11:55:46.287Z"
+    "updatedAt": "2026-06-10T20:58:00+09:00"
   },
   "summary": {
     "total": 67,
     "done": 66,
-    "inProgress": 1,
-    "review": 0,
+    "inProgress": 0,
+    "review": 1,
     "todo": 0
   },
   "phases": {
@@ -4114,29 +4114,30 @@
       ],
       "dependencies": [],
       "workflowState": {
-        "currentSkill": "aick-impl",
-        "lastCompletedSkill": "aick-plan",
-        "prNumber": null,
+        "currentSkill": "aick-review-pr",
+        "lastCompletedSkill": "aick-impl",
+        "prNumber": 168,
         "fixLoopCount": 0,
-        "updatedAt": "2026-06-10T20:49:47+09:00"
+        "updatedAt": "2026-06-10T20:58:00+09:00"
       },
       "createdAt": "2026-06-10T20:34:00+09:00",
-      "updatedAt": "2026-06-10T20:49:47+09:00",
+      "updatedAt": "2026-06-10T20:58:00+09:00",
       "lockedBy": "jaese@hoji-20260610-204531",
-      "lockedAt": "2026-06-10T20:49:47+09:00",
+      "lockedAt": "2026-06-10T20:58:00+09:00",
       "lockTTL": 3600,
       "steps": [
         {
           "number": 1,
           "title": "정규화 스크립트 + backlog.json 정규화 적용",
           "description": "scripts/meta/normalize-backlog-schema.mjs(의존성 0, 멱등·결정적): 스키마 화이트리스트 외 필드 제거 + step→number 개명 + specFile:null 제거 + currentStep null/0 보정 + prLineLimit>1000 클램프. 적용 후 jsonschema 0건 + 멱등성(no changes) 검증.",
-          "status": "pending",
+          "status": "pr_created",
           "files": [
             "scripts/meta/normalize-backlog-schema.mjs",
             ".claude/state/backlog.json"
           ],
           "estimatedLines": 850,
-          "prLineLimit": 1000
+          "prLineLimit": 1000,
+          "prNumber": 168
         }
       ],
       "currentStep": 1
