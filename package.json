@@ -37,6 +37,7 @@
     "db:studio": "prisma studio",
     "check:migrations": "node scripts/check-migrations-no-concurrently.mjs",
     "check:guard-wiring": "node scripts/meta/check-guard-wiring-consistency.mjs",
+    "check:backlog-schema": "node scripts/meta/normalize-backlog-schema.mjs --check",
     "postinstall": "prisma generate"
   },
   "prisma": {
